@@ -170,14 +170,23 @@ class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObse
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: SingleChildScrollView(
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _buildMenuButton('УРОВНИ', Icons.play_arrow_rounded, Colors.orange, () {}),
-                          _buildMenuButton('ДОСТИЖЕНИЯ', Icons.emoji_events_rounded, Colors.amber, () {}),
-                          _buildMenuButton('ДОПОЛНИТЕЛЬНО', Icons.extension_rounded, Colors.purple, () {}),
-                          _buildMenuButton('НАСТРОЙКИ', Icons.settings_rounded, Colors.grey, _openSettings),
-                        ],
-                      ),
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                      // Кнопка УРОВНИ теперь открывает новый экран уровней
+                       _buildMenuButton('УРОВНИ', Icons.play_arrow_rounded, Colors.orange, () {
+                        Navigator.push(
+                         context,
+                        MaterialPageRoute(builder: (context) => const LevelsScreen()),
+                            );
+                          }),
+                      const SizedBox(height: 16), // Вернули пробел 16
+                      _buildMenuButton('ДОСТИЖЕНИЯ', Icons.emoji_events_rounded, Colors.amber, () {}),
+                      const SizedBox(height: 16), // Вернули пробел 16
+                      _buildMenuButton('ДОПОЛНИТЕЛЬНО', Icons.extension_rounded, Colors.purple, () {}),
+                      const SizedBox(height: 16), // Вернули пробел 16
+                      _buildMenuButton('НАСТРОЙКИ', Icons.settings_rounded, Colors.grey, _openSettings),
+                      ],
+                     )
                     ),
                   ),
                 ),
@@ -302,6 +311,188 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+// ЭКРАН ВЫБОРА УРОВНЕЙ
+class LevelsScreen extends StatelessWidget {
+  const LevelsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: [
+          // 1. Мультяшный задний фон (Небо)
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFF4FC3F7), Color(0xFFE1F5FE)],
+              ),
+            ),
+          ),
+
+          // 2. Декорации: Мультяшные круглые облака на небе
+          Positioned(
+            top: 20,
+            left: 50,
+            child: Icon(Icons.cloud_rounded, size: 80, color: Colors.white.withValues(alpha: 0.6)),
+          ),
+          Positioned(
+            top: 40,
+            right: 80,
+            child: Icon(Icons.cloud_rounded, size: 100, color: Colors.white.withValues(alpha: 0.5)),
+          ),
+
+          // 3. Декорации: Мультяшные зеленые холмы и трава внизу экрана
+          Positioned(
+            bottom: -30,
+            left: -50,
+            right: -50,
+            child: Container(
+              height: 120,
+              decoration: BoxDecoration(
+                color: const Color(0xFF81C784), // Светло-зеленый холм
+                borderRadius: const BorderRadius.all(Radius.elliptical(500, 100)),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -50,
+            left: -20,
+            right: -20,
+            child: Container(
+              height: 100,
+              decoration: BoxDecoration(
+                color: const Color(0xFF4CAF50), // Насыщенная зеленая трава ближе к нам
+                borderRadius: const BorderRadius.all(Radius.elliptical(600, 100)),
+              ),
+            ),
+          ),
+
+          // 4. Основной игровой интерфейс поверх декораций
+          SafeArea(
+            child: Center(
+              child: Column(
+                children: [
+                  const SizedBox(height: 15),
+                  
+                  // Верхняя плашка с мультяшной надписью
+                  const Text(
+                    'УРОВНИ 1-3',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFFF57C00), // Сочный оранжевый
+                      letterSpacing: 2,
+                      shadows: [
+                        Shadow(offset: Offset(2.0, 2.0), blurRadius: 2.0, color: Colors.black26),
+                      ],
+                    ),
+                  ),
+                  
+                  const Spacer(),
+
+                  // Ряд с большими мультяшными кнопками уровней
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildLevelCard(context, '1'),
+                      const SizedBox(width: 30), // Пробел между квадратами уровней
+                      _buildLevelCard(context, '2'),
+                      const SizedBox(width: 30),
+                      _buildLevelCard(context, '3'),
+                    ],
+                  ),
+
+                  const Spacer(),
+
+                  // Мультяшная круглая кнопка Назад в левом нижнем углу
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 3)),
+                          ],
+                        ),
+                        child: IconButton(
+                          icon: const Icon(Icons.arrow_back_rounded, size: 36, color: Colors.white),
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.redAccent,
+                            padding: const EdgeInsets.all(12),
+                          ),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Вспомогательный метод для создания большой карточки уровня со звездами
+  Widget _buildLevelCard(BuildContext context, String levelNumber) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Большой скругленный квадрат уровня
+        Container(
+          width: 85,
+          height: 85,
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFCC80), // Приятный мультяшный желто-оранжевый цвет
+            borderRadius: BorderRadius.circular(22), // Сильное скругление для мультяшности
+            border: Border.all(color: const Color(0xFFE65100), width: 4), // Толстая темная обводка
+            boxShadow: const [
+              BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 5)), // Объемная тень под кубиком
+            ],
+          ),
+          child: ElevatedButton(
+            onPressed: () {
+              debugPrint('Запуск уровня $levelNumber');
+              // Тут в будущем будет запуск Flame игры для конкретного уровня
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              shadowColor: Colors.transparent,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            ),
+            child: Text(
+              levelNumber,
+              style: const TextStyle(
+                fontSize: 36,
+                fontWeight: FontWeight.w900,
+                color: Color(0xFFE65100), // Цвет цифры совпадает с обводкой
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        
+        // Три небольшие серые мультяшные звезды под квадратом
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(Icons.star_rounded, size: 22, color: Colors.grey),
+            SizedBox(width: 2),
+            Icon(Icons.star_rounded, size: 26, color: Colors.grey), // Центральная чуть больше для красоты
+            SizedBox(width: 2),
+            Icon(Icons.star_rounded, size: 22, color: Colors.grey),
+          ],
+        ),
+      ],
     );
   }
 }
