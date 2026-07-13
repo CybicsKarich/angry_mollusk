@@ -1,8 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Пакет для управления экраном и системными панелями
 import 'package:audioplayers/audioplayers.dart';
 
-void main() {
+void main() async {
+  // Гарантируем инициализацию внутренних сервисов Flutter
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // 1. Фиксируем экран только в горизонтальном режиме (альбомная ориентация)
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]);
+
+  // 2. Включаем режим ImmersiveStick. Он прячет панели навигации и уведомлений.
+  // Они откроются, только если пользователь проведет пальцем от края экрана, и закроются сами.
+  await SystemChrome.setEnabledSystemU someMode(SystemUiMode.immersiveSticky);
+
   runApp(const MyApp());
 }
 
@@ -63,66 +76,77 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFF0288D1), // Глубокий синий (водный стиль для Моллюска)
+              Color(0xFF0288D1), // Глубокий синий верх
               Color(0xFFB3E5FC), // Светло-голубой низ
             ],
           ),
         ),
         child: SafeArea(
           child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+            // В горизонтальном режиме лучше использовать Row (строку), 
+            // чтобы слева было красивое название, а справа сочные кнопки!
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                const Spacer(flex: 2),
-
-                const Text(
-                  'ANGRY MOLLUSK',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 46,
-                    fontWeight: FontWeight.w900,
-                    color: Color(0xFFD32F2F),
-                    letterSpacing: 2,
-                    shadows: [
-                      Shadow(
-                        offset: Offset(3.0, 3.0),
-                        blurRadius: 3.0,
-                        color: Color(0xFF000000),
+                // Левая часть: Логотип и Подзаголовок
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'ANGRY MOLLUSK',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 42,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFFD32F2F),
+                          letterSpacing: 2,
+                          shadows: [
+                            Shadow(
+                              offset: Offset(3.0, 3.0),
+                              blurRadius: 3.0,
+                              color: Color(0xFF000000),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Баннихоп против Максима Рыбалкина',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blueGrey,
+                          letterSpacing: 1.2,
+                        ),
                       ),
                     ],
                   ),
                 ),
 
-                const SizedBox(height: 10),
-
-                const Text(
-                  'Bunnyhop против Моллюска Максима',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blueGrey,
-                    letterSpacing: 1.2,
+                // Правая часть: Наш переставленный список кнопок
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _buildMenuButton('УРОВНИ', Icons.play_arrow_rounded, Colors.orange),
+                          const SizedBox(height: 12),
+                          _buildMenuButton('ДОСТИЖЕНИЯ', Icons.emoji_events_rounded, Colors.amber),
+                          const SizedBox(height: 12),
+                          // Переставили: теперь третья кнопка — Дополнительно
+                          _buildMenuButton('ДОПОЛНИТЕЛЬНО', Icons.extension_rounded, Colors.purple),
+                          const SizedBox(height: 12),
+                          // Переставили: теперь четвертая кнопка — Настройки
+                          _buildMenuButton('НАСТРОЙКИ', Icons.settings_rounded, Colors.grey),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-
-                const Spacer(flex: 2),
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40),
-                  child: Column(
-                    children: [
-                      _buildMenuButton('УРОВНИ', Icons.play_arrow_rounded, Colors.orange),
-                      const SizedBox(height: 16),
-                      _buildMenuButton('ДОСТИЖЕНИЯ', Icons.emoji_events_rounded, Colors.amber),
-                      const SizedBox(height: 16),
-                      _buildMenuButton('НАСТРОЙКИ', Icons.settings_rounded, Colors.grey),
-                      const SizedBox(height: 16),
-                      _buildMenuButton('ДОПОЛНИТЕЛЬНО', Icons.extension_rounded, Colors.purple),
-                    ],
-                  ),
-                ),
-
-                const Spacer(flex: 3),
               ],
             ),
           ),
@@ -134,8 +158,8 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
   Widget _buildMenuButton(String text, IconData icon, Color color) {
     return Container(
       width: double.infinity,
-      constraints: const BoxConstraints(maxWidth: 320),
-      height: 60,
+      constraints: const BoxConstraints(maxWidth: 280),
+      height: 52, // Чуть уменьшили высоту для лучшей посадки в горизонтальном режиме
       decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(
@@ -150,11 +174,11 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
         onPressed: () {
           debugPrint('Нажата кнопка: $text');
         },
-        icon: Icon(icon, size: 28, color: Colors.white),
+        icon: Icon(icon, size: 24, color: Colors.white),
         label: Text(
           text,
           style: const TextStyle(
-            fontSize: 20,
+            fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Colors.white,
             letterSpacing: 1.2,
