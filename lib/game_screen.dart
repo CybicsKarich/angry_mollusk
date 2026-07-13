@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flame/events.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
@@ -13,8 +12,75 @@ class GameScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          GameWidget(game: AngryMolluskGame()),
-          // Кнопка Назад в меню уровней в верхнем левом углу
+          // Наш обновленный GameWidget с оверлеем меню победы
+          GameWidget(
+            game: AngryMolluskGame(),
+            overlayBuilderMap: {
+              'VictoryMenu': (BuildContext context, AngryMolluskGame game) {
+                return Center(
+                  child: Container(
+                    width: 340,
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.85), // Чёрный мультяшный фон
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.orange, width: 4), // Сочная оранжевая обводка
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black54,
+                          blurRadius: 10,
+                          offset: Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min, // Сжимаем окошко под контент
+                      children: [
+                        const Text(
+                          'ТЫ ПОБЕДИЛ, КРАСАВЧИК!',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              // Закрываем черное окно и выходим обратно в меню уровней
+                              game.overlays.remove('VictoryMenu');
+                              Navigator.pop(context);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.orange,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text(
+                              'К УРОВНЯМ',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            },
+          ),
+          
+          // Кнопка Назад в меню уровней в верхнем левом углу (осталась на месте!)
           Positioned(
             top: 16,
             left: 16,
@@ -28,7 +94,7 @@ class GameScreen extends StatelessWidget {
       ),
     );
   }
-}
+
 
 // Движок игры
 class AngryMolluskGame extends Forge2DGame with DragCallbacks {
