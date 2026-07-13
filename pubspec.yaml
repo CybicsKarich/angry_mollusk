@@ -1,0 +1,22 @@
+name: angry_mollusk
+description: "Angry Birds parody game featuring Bunnyhop and Maksim the Mollusk."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  audioplayers: ^6.0.0
+  shared_preferences: ^2.2.0
+  flame: ^1.11.0
+  flame_forge2d: ^0.15.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/audio/
+    - assets/music/
