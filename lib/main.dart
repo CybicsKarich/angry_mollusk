@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/services.dart'; // Пакет для управления экраном и системными панелями
 import 'package:audioplayers/audioplayers.dart';
 
@@ -43,30 +44,58 @@ class MainMenuScreen extends StatefulWidget {
   State<MainMenuScreen> createState() => _MainMenuScreenState();
 }
 
-class _MainMenuScreenState extends State<MainMenuScreen> {
+// ЗАМЕНИ СТАРУЮ СТРОКУ ОБЪЯВЛЕНИЯ КЛАССА НА ЭТУ:
+class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObserver {
   late AudioPlayer _audioPlayer;
+  double _currentVolume = 0.5; // Громкость по умолчанию 50%
 
   @override
   void initState() {
     super.initState();
+    // Включаем слежку за тем, свернули ли игру
+    WidgetsBinding.instance.addObserver(this);
+    
     _audioPlayer = AudioPlayer();
+    _audioPlayer.setVolume(_currentVolume); // Задаем громкость
     _playBackgroundMusic();
   }
 
-  Future<void> _playBackgroundMusic() async {
-    try {
-      await _audioPlayer.setReleaseMode(ReleaseMode.loop);
-      await _audioPlayer.play(AssetSource('music/bg_music.mp3'));
-    } catch (e) {
-      debugPrint("Музыка пока не загружена в ассеты: $e");
+  // Этот метод ставит музыку на паузу, если игру свернули
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused) {
+      _audioPlayer.pause(); // Игра свернута — пауза
+    } else if (state == AppLifecycleState.resumed) {
+      _audioPlayer.resume(); // Игра развернута — продолжаем
     }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this); // Выключаем слежку
     _audioPlayer.dispose();
     super.dispose();
   }
+
+  // Метод для открытия экрана настроек
+  void _openSettings() async {
+    final updatedVolume = await Navigator.push<double>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SettingsScreen(
+          initialVolume: _currentVolume,
+          audioPlayer: _audioPlayer,
+        ),
+      ),
+    );
+    if (updatedVolume != null) {
+      setState(() {
+        _currentVolume = updatedVolume; // Сохраняем новую громкость
+      });
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -134,15 +163,10 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          _buildMenuButton('УРОВНИ', Icons.play_arrow_rounded, Colors.orange),
-                          const SizedBox(height: 12),
-                          _buildMenuButton('ДОСТИЖЕНИЯ', Icons.emoji_events_rounded, Colors.amber),
-                          const SizedBox(height: 12),
-                          // Переставили: теперь третья кнопка — Дополнительно
-                          _buildMenuButton('ДОПОЛНИТЕЛЬНО', Icons.extension_rounded, Colors.purple),
-                          const SizedBox(height: 12),
-                          // Переставили: теперь четвертая кнопка — Настройки
-                          _buildMenuButton('НАСТРОЙКИ', Icons.settings_rounded, Colors.grey),
+                          _buildMenuButton('УРОВНИ', Icons.play_arrow_rounded, Colors.orange, () {}),
+                          _buildMenuButton('ДОСТИЖЕНИЯ', Icons.emoji_events_rounded, Colors.amber, () {}),
+                          _buildMenuButton('ДОПОЛНИТЕЛЬНО', Icons.extension_rounded, Colors.purple, () {}),
+                          _buildMenuButton('НАСТРОЙКИ', Icons.settings_rounded, Colors.grey, _openSettings),
                         ],
                       ),
                     ),
@@ -156,9 +180,9 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
     );
   }
 
-  Widget _buildMenuButton(String text, IconData icon, Color color) {
-    return Container(
-      width: double.infinity,
+  Widget _buildMenuButton(String text, IconData icon, Color color, VoidCallback onTap) { // <-- Добавили в конец
+  return Container(
+    width: double.infinity,
       constraints: const BoxConstraints(maxWidth: 280),
       height: 52, // Чуть уменьшили высоту для лучшей посадки в горизонтальном режиме
       decoration: BoxDecoration(
@@ -172,9 +196,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
         ],
       ),
       child: ElevatedButton.icon(
-        onPressed: () {
-          debugPrint('Нажата кнопка: $text');
-        },
+        onPressed: onTap,
         icon: Icon(icon, size: 24, color: Colors.white),
         label: Text(
           text,
@@ -190,6 +212,84 @@ class _MainMenuScreenState extends State<MainMenuScreen> {
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class SettingsScreen extends StatefulWidget {
+  final double initialVolume;
+  final AudioPlayer audioPlayer;
+
+  const SettingsScreen({
+    super.key,
+    required this.initialVolume,
+    required this.audioPlayer,
+  });
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  late double _volume;
+
+  @override
+  void initState() {
+    super.initState();
+    _volume = widget.initialVolume;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF0288D1), Color(0xFFB3E5FC)],
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              constraints: const BoxConstraints(maxWidth: 400),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.9),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'ГРОМКОСТЬ ЗВУКА',
+                    style: TextStyle(fontSize: 18,劇FontWeight: FontWeight.bold, color: Colors.blueGrey),
+                  ),
+                  const SizedBox(height: 10),
+                  Slider(
+                    value: _volume,
+                    min: 0.0,
+                    max: 1.0,
+                    activeColor: Colors.orange,
+                    onChanged: (newValue) {
+                      setState(() => _volume = newValue);
+                      widget.audioPlayer.setVolume(_volume); // Меняем звук на лету
+                    },
+                  ),
+                  Text('${(_volume * 100).toStringAsFixed(0)}%', style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(context, _volume), // Кнопка назад
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
+                    child: const Text('НАЗАД', style: TextStyle(color: Colors.white)),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
