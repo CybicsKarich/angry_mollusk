@@ -4,6 +4,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart' hide Wallet;
 
+
 // Главный экран игры с поддержкой оверлеев: Победа, Пауза, Проигрыш
 class GameScreen extends StatelessWidget {
   const GameScreen({super.key});
@@ -409,243 +410,7 @@ class IslandBoundary extends Component with HasGameRef<AngryMolluskGame> {
   }
 }
 
-// Высокая деревянная рогатка
-class Slingshot extends Component with HasGameRef<AngryMolluskGame> {
-  final Vector2 worldPos;
-  Slingshot(this.worldPos);
 
-  @override
-  void render(Canvas canvas) {
-    final center = gameRef.worldToScreen(worldPos);
-    final thickness = gameRef.canvasSize.x * 0.012; 
-
-    final paintFork = Paint()..color = const Color(0xFF4E342E)..strokeWidth = thickness;
-    final paintHighlight = Paint()..color = const Color(0xFF8D6E63)..strokeWidth = thickness * 0.3;
-    
-    canvas.drawLine(Offset(center.x, center.y - 20), Offset(center.x, center.y + gameRef.canvasSize.y * 0.15), paintFork);
-    canvas.drawLine(Offset(center.x, center.y - 20), Offset(center.x, center.y + gameRef.canvasSize.y * 0.15), paintHighlight);
-
-    final leftHorn = Offset(center.x - gameRef.canvasSize.x * 0.024, center.y - gameRef.canvasSize.y * 0.09);
-    final rightHorn = Offset(center.x + gameRef.canvasSize.x * 0.024, center.y - gameRef.canvasSize.y * 0.09);
-
-    canvas.drawLine(Offset(center.x, center.y - 18), leftHorn, paintFork);
-    canvas.drawLine(Offset(center.x, center.y - 18), rightHorn, paintFork);
-  }
-}
-
-// Класс Баннихопа
-class Bunnyhop extends Component with HasGameRef<AngryMolluskGame> {
-  Vector2 position;
-  final Vector2 startPos;
-  bool isReadyForLaunch;
-  bool isLaunched = false;
-  Vector2? dragPosition;
-  Sprite? birdSprite;
-
-  Vector2 velocity = Vector2.zero();
-  static const double gravity = 14.0;
-
-  Bunnyhop(this.startPos, this.isReadyForLaunch) : position = Vector2.copy(startPos);
-
-  @override
-  Future<void> onLoad() async {
-    await super.onLoad();
-    birdSprite = await gameRef.loadSprite('images/bunnyhop.png');
-  }
-
-  void jumpToSlingshot(Vector2 target) {
-    position = Vector2.copy(target);
-    isReadyForLaunch = true;
-  }
-
-  void dragTo(Vector2 target) {
-    final slingCenter = gameRef.slingshot.worldPos - Vector2(0, 2.5);
-    var dir = target - slingCenter;
-    if (dir.length > 2.8) {
-      dir = dir.normalized() * 2.8;
-    }
-    dragPosition = slingCenter + dir;
-    position = dragPosition!;
-  }
-
-  void launch() {
-    isLaunched = true;
-    final slingCenter = gameRef.slingshot.worldPos - Vector2(0, 2.5);
-    velocity = (slingCenter - position) * 7.5;
-    dragPosition = null;
-
-    Future.delayed(const Duration(seconds: 3), () {
-      if (gameRef.isMounted) {
-        gameRef.loadNextBird();
-        removeFromParent(); 
-      }
-    });
-  }
-
-    @override
-  void update(double dt) {
-    super.update(dt);
-    if (!spawnCompleted) return;
-    
-    // Считаем свиней строго внутри контейнера world
-    final pigCount = world.children.whereType<MolluskMaksim>().length;
-    if (pigCount == 0 && !levelCleared && !levelFailed) {
-      levelCleared = true;
-      overlays.add('VictoryMenu');
-    }
-  }
-
-  Vector2 worldToScreen(Vector2 worldPos) {
-    return Vector2(
-      (worldPos.x / worldWidth) * canvasSize.x,
-      (worldPos.y / worldHeight) * canvasSize.y,
-    );
-  }
-}
-
-// Контроллер жестов
-class DragController extends Component with DragCallbacks, HasGameRef<AngryMolluskGame> {
-  @override
-  void onDragUpdate(DragUpdateEvent event) {
-    final currentBird = gameRef.currentBird;
-    if (currentBird != null && currentBird.isReadyForLaunch && !currentBird.isLaunched) {
-      final worldX = (event.localEndPosition.x / gameRef.canvasSize.x) * AngryMolluskGame.worldWidth;
-      final worldY = (event.localEndPosition.y / gameRef.canvasSize.y) * AngryMolluskGame.worldHeight;
-      currentBird.dragTo(Vector2(worldX, worldY));
-    }
-  }
-
-  @override
-  void onDragEnd(DragEndEvent event) {
-    final currentBird = gameRef.currentBird;
-    if (currentBird != null && currentBird.isReadyForLaunch && !currentBird.isLaunched) {
-      currentBird.launch();
-    }
-  }
-}
-
-// АНИМАЦИЯ: Солнце крутится, облака плывут
-class BackgroundDecoration extends Component with HasGameRef<AngryMolluskGame> {
-  double sunRotation = 0.0;
-  double cloudOffset1 = 0.0;
-  double cloudOffset2 = 0.0;
-
-  @override
-  void update(double dt) {
-    super.update(dt);
-    sunRotation += 0.4 * dt; 
-    cloudOffset1 += 12.0 * dt; 
-    cloudOffset2 += 6.0 * dt;  
-  }
-
-  @override
-  void render(Canvas canvas) {
-    final size = gameRef.canvasSize;
-    
-    // Небо (Градиент)
-    final skyPaint = Paint()..shader = const LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [Color(0xFF29B6F6), Color(0xFFE1F5FE)],
-    ).createShader(Offset.zero & size.toSize());
-    canvas.drawRect(Offset.zero & size.toSize(), skyPaint);
-
-    // НАСТОЯЩЕЕ СОЛНЦЕ С КРАСИВЫМИ ТРЕУГОЛЬНЫМИ ЛУЧАМИ СЛЕВА
-    final sunCenter = Offset(size.x * 0.15, size.y * 0.2);
-    final sunRadius = size.y * 0.09;
-    
-    canvas.save();
-    canvas.translate(sunCenter.dx, sunCenter.dy); 
-    canvas.rotate(sunRotation);
-    
-    final rayPaint = Paint()..color = const Color(0xFFFFF59D).withValues(alpha: 0.4)..style = PaintingStyle.fill;
-    final rayPath = Path();
-    int rayCount = 8;
-    for (int i = 0; i < rayCount; i++) {
-      double angle = (i * 2 * pi) / rayCount;
-      double nextAngle = angle + (pi / rayCount);
-      rayPath.moveTo(0, 0);
-      rayPath.lineTo(cos(angle) * sunRadius * 2.2, sin(angle) * sunRadius * 2.2);
-      rayPath.lineTo(cos(nextAngle) * sunRadius * 1.5, sin(nextAngle) * sunRadius * 1.5);
-      rayPath.close();
-    }
-    canvas.drawPath(rayPath, rayPaint);
-    canvas.restore();
-    
-    canvas.drawCircle(sunCenter, sunRadius, Paint()..color = const Color(0xFFFBC02D)); 
-
-    final cloudPaint = Paint()..color = Colors.white.withValues(alpha: 0.85);
-    
-    double c1X = (size.x * 0.3 + cloudOffset1) % (size.x + 200) - 100;
-    canvas.drawCircle(Offset(c1X, size.y * 0.15), 30, cloudPaint);
-    canvas.drawCircle(Offset(c1X + 30, size.y * 0.13), 40, cloudPaint);
-    canvas.drawCircle(Offset(c1X + 70, size.y * 0.15), 35, cloudPaint);
-
-    double c2X = (size.x * 0.7 + cloudOffset2) % (size.x + 200) - 100;
-    canvas.drawCircle(Offset(c2X, size.y * 0.22), 25, cloudPaint);
-    canvas.drawCircle(Offset(c2X + 30, size.y * 0.2), 35, cloudPaint);
-
-    canvas.drawRect(Rect.fromLTWH(0, size.y * 0.73, size.x, size.y * 0.02), Paint()..color = const Color(0xFF29B6F6));
-    canvas.drawRect(Rect.fromLTWH(0, size.y * 0.75, size.x, size.y * 0.25), Paint()..color = const Color(0xFF0288D1));
-  }
-}
-
-// Скалы с травой
-class IslandBoundary extends Component with HasGameRef<AngryMolluskGame> {
-  final Vector2 start;
-  final Vector2 end;
-
-  IslandBoundary(this.start, this.end);
-
-  @override
-  void render(Canvas canvas) {
-    final pStart = gameRef.worldToScreen(start);
-    final pEnd = gameRef.worldToScreen(end);
-
-    canvas.drawRect(Rect.fromLTRB(pStart.x, pStart.y, pEnd.x, pEnd.y), Paint()..color = const Color(0xFF6D4C41));
-
-    final layerPaint = Paint()..color = const Color(0xFF4E342E)..strokeWidth = 3;
-    canvas.drawLine(Offset(pStart.x, pStart.y + 40), Offset(pEnd.x, pStart.y + 45), layerPaint);
-    canvas.drawLine(Offset(pStart.x, pStart.y + 90), Offset(pEnd.x, pStart.y + 85), layerPaint);
-
-    final paintGrass = Paint()..color = const Color(0xFF4CAF50);
-    canvas.drawRect(Rect.fromLTWH(pStart.x, pStart.y, pEnd.x - pStart.x, 15), paintGrass);
-    
-    final grassPath = Path();
-    for (double x = pStart.x; x < pEnd.x; x += 12) {
-      grassPath.moveTo(x, pStart.y + 14);
-      grassPath.lineTo(x + 6, pStart.y + 24);
-      grassPath.lineTo(x + 12, pStart.y + 14);
-    }
-    canvas.drawPath(grassPath, paintGrass);
-  }
-}
-
-// Высокая деревянная рогатка
-class Slingshot extends Component with HasGameRef<AngryMolluskGame> {
-  final Vector2 worldPos;
-  Slingshot(this.worldPos);
-
-  @override
-  void render(Canvas canvas) {
-    final center = gameRef.worldToScreen(worldPos);
-    final thickness = gameRef.canvasSize.x * 0.012; 
-
-    final paintFork = Paint()..color = const Color(0xFF4E342E)..strokeWidth = thickness;
-    final paintHighlight = Paint()..color = const Color(0xFF8D6E63)..strokeWidth = thickness * 0.3;
-    
-    canvas.drawLine(Offset(center.x, center.y - 20), Offset(center.x, center.y + gameRef.canvasSize.y * 0.15), paintFork);
-    canvas.drawLine(Offset(center.x, center.y - 20), Offset(center.x, center.y + gameRef.canvasSize.y * 0.15), paintHighlight);
-
-    final leftHorn = Offset(center.x - gameRef.canvasSize.x * 0.024, center.y - gameRef.canvasSize.y * 0.09);
-    final rightHorn = Offset(center.x + gameRef.canvasSize.x * 0.024, center.y - gameRef.canvasSize.y * 0.09);
-
-    canvas.drawLine(Offset(center.x, center.y - 18), leftHorn, paintFork);
-    canvas.drawLine(Offset(center.x, center.y - 18), rightHorn, paintFork);
-  }
-}
-
-// Класс Баннихопа
 class Bunnyhop extends Component with HasGameRef<AngryMolluskGame> {
   Vector2 position;
   final Vector2 startPos;
@@ -754,6 +519,32 @@ class Bunnyhop extends Component with HasGameRef<AngryMolluskGame> {
     }
   }
 }
+
+
+// Высокая деревянная рогатка
+class Slingshot extends Component with HasGameRef<AngryMolluskGame> {
+  final Vector2 worldPos;
+  Slingshot(this.worldPos);
+
+  @override
+  void render(Canvas canvas) {
+    final center = gameRef.worldToScreen(worldPos);
+    final thickness = gameRef.canvasSize.x * 0.012; 
+
+    final paintFork = Paint()..color = const Color(0xFF4E342E)..strokeWidth = thickness;
+    final paintHighlight = Paint()..color = const Color(0xFF8D6E63)..strokeWidth = thickness * 0.3;
+    
+    canvas.drawLine(Offset(center.x, center.y - 20), Offset(center.x, center.y + gameRef.canvasSize.y * 0.15), paintFork);
+    canvas.drawLine(Offset(center.x, center.y - 20), Offset(center.x, center.y + gameRef.canvasSize.y * 0.15), paintHighlight);
+
+    final leftHorn = Offset(center.x - gameRef.canvasSize.x * 0.024, center.y - gameRef.canvasSize.y * 0.09);
+    final rightHorn = Offset(center.x + gameRef.canvasSize.x * 0.024, center.y - gameRef.canvasSize.y * 0.09);
+
+    canvas.drawLine(Offset(center.x, center.y - 18), leftHorn, paintFork);
+    canvas.drawLine(Offset(center.x, center.y - 18), rightHorn, paintFork);
+  }
+}
+
 
 class MolluskMaksim extends Component with HasGameRef<AngryMolluskGame> {
   Vector2 position;
