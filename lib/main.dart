@@ -71,6 +71,15 @@ class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObse
     }
   }
 
+    Future<void> _playBackgroundMusic() async {
+    try {
+      await _audioPlayer.setReleaseMode(ReleaseMode.loop);
+      await _audioPlayer.play(AssetSource('music/bg_music.mp3'));
+    } catch (e) {
+      debugPrint("Музыка пока не загружена в ассеты: $e");
+    }
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this); // Выключаем слежку
@@ -267,7 +276,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   const Text(
                     'ГРОМКОСТЬ ЗВУКА',
-                    style: TextStyle(fontSize: 18,劇FontWeight: FontWeight.bold, color: Colors.blueGrey),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blueGrey),
                   ),
                   const SizedBox(height: 10),
                   Slider(
