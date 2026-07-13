@@ -294,7 +294,7 @@ class BackgroundDecoration extends Component with HasGameRef<AngryMolluskGame> {
     final sunRadius = size.y * 0.09;
     
     canvas.save();
-    canvas.translate(sunCenter.dx, sunCenter.y);
+    canvas.translate(sunCenter.dx, sunCenter.dy);
     canvas.rotate(sunRotation);
     // Лучи солнца в виде мультяшного скругленного креста
     final rayPaint = Paint()..color = const Color(0xFFFFF59D).withValues(alpha: 0.4);
