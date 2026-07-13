@@ -1,0 +1,48 @@
+name: Build Flutter APK
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Устанавливаем Java для сборки под Android
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      # Устанавливаем официальный Flutter SDK
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      # Генерируем базовую структуру Android-приложения вокруг нашего кода
+      # Используем организацию com.mollusk.game
+      - name: Create Flutter Android Skeleton
+        run: flutter create . --platforms=android --org com.mollusk.game
+
+      # Загружаем указанные плагины
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Компилируем проект в APK-файл
+      - name: Build APK
+        run: flutter build apk --debug
+
+      # Сохраняем готовый файл в архив для скачивания
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: angry-mollusk-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
