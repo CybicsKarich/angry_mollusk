@@ -1,9 +1,8 @@
 import 'dart:math';
 import 'package:flame/game.dart';
-import 'package:flame/components.dart';
+import 'package:flame/components.dart' as flame_comp;
 import 'package:flame/events.dart';
-// Импортируем Forge2D под префиксом forge2d, чтобы напрочь убрать конфликты с Vector2
-import 'package:flame_forge2d/flame_forge2d.dart' as forge2d hide LinearGradient;
+import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flutter/material.dart' hide Wallet;
 
 // Главный экран-виджет, который запускает игру и содержит оверлей победы
@@ -98,8 +97,8 @@ class GameScreen extends StatelessWidget {
 }
 
 // Движок игры
-class AngryMolluskGame extends forge2d.Forge2DGame {
-  AngryMolluskGame() : super(gravity: forge2d.Vector2(0, 15.0));
+class AngryMolluskGame extends Forge2DGame {
+  AngryMolluskGame() : super(gravity: Vector2(0, 15.0));
 
   late Slingshot slingshot;
   List<Bunnyhop> birdsQueue = [];
@@ -114,21 +113,21 @@ class AngryMolluskGame extends forge2d.Forge2DGame {
     add(BackgroundDecoration());
     
     // Острова (Левый под рогатку, Правый под замок)
-    add(IslandBoundary(forge2d.Vector2(0, 11), forge2d.Vector2(12, 16)));
-    add(IslandBoundary(forge2d.Vector2(22, 11), forge2d.Vector2(50, 16)));
+    add(IslandBoundary(Vector2(0, 11), Vector2(12, 16)));
+    add(IslandBoundary(Vector2(22, 11), Vector2(50, 16)));
 
     // Коричневая рогатка
-    slingshot = Slingshot(forge2d.Vector2(7, 11));
+    slingshot = Slingshot(Vector2(7, 11));
     add(slingshot);
 
-    // Подключаем контроллер жестов тача
+    // Подключаем стабильный контроллер жестов тача
     add(DragController());
 
     // Создаем 3 птиц Баннихопов в очередь
     for (int i = 0; i < 3; i++) {
       final startX = 5.0 - (i * 1.8);
       final startY = i == 0 ? 10.0 : 10.5;
-      final bird = Bunnyhop(forge2d.Vector2(startX, startY), i == 0);
+      final bird = Bunnyhop(Vector2(startX, startY), i == 0);
       birdsQueue.add(bird);
       add(bird);
     }
@@ -141,7 +140,7 @@ class AngryMolluskGame extends forge2d.Forge2DGame {
       birdsQueue.removeAt(0);
       if (birdsQueue.isNotEmpty) {
         currentBird = birdsQueue.first;
-        currentBird!.jumpToSlingshot(forge2d.Vector2(7, 10));
+        currentBird!.jumpToSlingshot(Vector2(7, 10));
       } else {
         currentBird = null;
       }
@@ -167,42 +166,44 @@ class AngryMolluskGame extends forge2d.Forge2DGame {
 
   void _buildLevelStructures() {
     // Нижние каменные опоры
-    add(GameBlock(forge2d.Vector2(28, 10.0), forge2d.Vector2(1, 2), true));
-    add(GameBlock(forge2d.Vector2(31, 10.0), forge2d.Vector2(1, 2), true));
-    add(GameBlock(forge2d.Vector2(34, 10.0), forge2d.Vector2(1, 2), true));
-    add(GameBlock(forge2d.Vector2(37, 10.0), forge2d.Vector2(1, 2), true));
+    add(GameBlock(Vector2(28, 10.0), Vector2(1, 2), true));
+    add(GameBlock(Vector2(31, 10.0), Vector2(1, 2), true));
+    add(GameBlock(Vector2(34, 10.0), Vector2(1, 2), true));
+    add(GameBlock(Vector2(37, 10.0), Vector2(1, 2), true));
     
     // Каменные перекрытия
-    add(GameBlock(forge2d.Vector2(31, 8.5), forge2d.Vector2(5, 1), true));
-    add(GameBlock(forge2d.Vector2(35.5, 8.5), forge2d.Vector2(4, 1), true));
+    add(GameBlock(Vector2(31, 8.5), Vector2(5, 1), true));
+    add(GameBlock(Vector2(35.5, 8.5), Vector2(4, 1), true));
 
     // Деревянные стены первого этажа
-    add(GameBlock(forge2d.Vector2(29.5, 6.5), forge2d.Vector2(0.8, 3), false));
-    add(GameBlock(forge2d.Vector2(33.5, 6.5), forge2d.Vector2(0.8, 3), false));
-    add(GameBlock(forge2d.Vector2(36.5, 6.5), forge2d.Vector2(0.8, 3), false));
+    add(GameBlock(Vector2(29.5, 6.5), Vector2(0.8, 3), false));
+    add(GameBlock(Vector2(33.5, 6.5), Vector2(0.8, 3), false));
+    add(GameBlock(Vector2(36.5, 6.5), Vector2(0.8, 3), false));
 
     // Деревянный потолок
-    add(GameBlock(forge2d.Vector2(33, 4.5), forge2d.Vector2(9, 1), false));
+    add(GameBlock(Vector2(33, 4.5), Vector2(9, 1), false));
 
     // Верхняя деревянная будка
-    add(GameBlock(forge2d.Vector2(31.5, 3.0), forge2d.Vector2(0.6, 2), false));
-    add(GameBlock(forge2d.Vector2(34.5, 3.0), forge2d.Vector2(0.6, 2), false));
-    add(GameBlock(forge2d.Vector2(33, 1.5), forge2d.Vector2(4, 1), false));
+    add(GameBlock(Vector2(31.5, 3.0), Vector2(0.6, 2), false));
+    add(GameBlock(Vector2(34.5, 3.0), Vector2(0.6, 2), false));
+    add(GameBlock(Vector2(33, 1.5), Vector2(4, 1), false));
 
     // Расстановка свиней Максимов Рыбалкиных
-    add(MolluskMaksim(forge2d.Vector2(31.5, 7.0)));
-    add(MolluskMaksim(forge2d.Vector2(35.0, 7.0)));
-    add(MolluskMaksim(forge2d.Vector2(33.0, 3.0)));
+    add(MolluskMaksim(Vector2(31.5, 7.0)));
+    add(MolluskMaksim(Vector2(35.0, 7.0)));
+    add(MolluskMaksim(Vector2(33.0, 3.0)));
   }
 }
 
-// Контроллер для тач-событий (оттягивание птицы)
+// Контроллер жестов, использующий корректные localEndPosition координаты для Flame 1.x
 class DragController extends Component with DragCallbacks, HasGameRef<AngryMolluskGame> {
   @override
   void onDragUpdate(DragUpdateEvent event) {
     final currentBird = gameRef.currentBird;
     if (currentBird != null && currentBird.isReadyForLaunch && !currentBird.isLaunched) {
-      currentBird.dragTo(gameRef.screenToWorld(event.canvasPosition));
+      // Преобразуем координаты экрана во внутриигровые метры физического мира
+      final worldPos = gameRef.screenToWorld(event.localEndPosition);
+      currentBird.dragTo(worldPos);
     }
   }
 
@@ -215,7 +216,7 @@ class DragController extends Component with DragCallbacks, HasGameRef<AngryMollu
   }
 }
 
-// Кастомный задний план уровня
+// Задний план
 class BackgroundDecoration extends Component with HasGameRef<AngryMolluskGame> {
   @override
   void render(Canvas canvas) {
@@ -238,27 +239,27 @@ class BackgroundDecoration extends Component with HasGameRef<AngryMolluskGame> {
   }
 }
 
-// Физические твердые острова
-class IslandBoundary extends forge2d.BodyComponent {
-  final forge2d.Vector2 start;
-  final forge2d.Vector2 end;
+// Физические острова
+class IslandBoundary extends BodyComponent {
+  final Vector2 start;
+  final Vector2 end;
 
   IslandBoundary(this.start, this.end);
 
   @override
-  forge2d.Body createBody() {
-    final bodyDef = forge2d.BodyDef(type: forge2d.BodyType.static);
+  Body createBody() {
+    final bodyDef = BodyDef(type: BodyType.static);
     final body = world.createBody(bodyDef);
     
-    final shape = forge2d.PolygonShape();
+    final shape = PolygonShape();
     final vertices = [
       start,
-      forge2d.Vector2(end.x, start.y),
+      Vector2(end.x, start.y),
       end,
-      forge2d.Vector2(start.x, end.y),
+      Vector2(start.x, end.y),
     ];
     shape.set(vertices);
-    body.createFixture(forge2d.FixtureDef(shape, friction: 0.7));
+    body.createFixture(FixtureDef(shape, friction: 0.7));
     return body;
   }
 
@@ -274,8 +275,8 @@ class IslandBoundary extends forge2d.BodyComponent {
 }
 
 // Столбик рогатки
-class Slingshot extends PositionComponent {
-  final forge2d.Vector2 initialPosition;
+class Slingshot extends flame_comp.PositionComponent {
+  final Vector2 initialPosition;
   Slingshot(this.initialPosition) {
     position = initialPosition;
   }
@@ -291,20 +292,20 @@ class Slingshot extends PositionComponent {
 }
 
 // Разрушаемые строительные блоки (Камень / Дерево)
-class GameBlock extends forge2d.BodyComponent {
-  final forge2d.Vector2 size;
-  final forge2d.Vector2 spawnPos;
+class GameBlock extends BodyComponent {
+  final Vector2 size;
+  final Vector2 spawnPos;
   final bool isStone;
 
   GameBlock(this.spawnPos, this.size, this.isStone);
 
   @override
-  forge2d.Body createBody() {
-    final bodyDef = forge2d.BodyDef(type: forge2d.BodyType.dynamic, position: spawnPos);
+  Body createBody() {
+    final bodyDef = BodyDef(type: BodyType.dynamic, position: spawnPos);
     final body = world.createBody(bodyDef);
-    final shape = forge2d.PolygonShape()..setAsBox(size.x / 2, size.y / 2, forge2d.Vector2.zero(), 0);
+    final shape = PolygonShape()..setAsBox(size.x / 2, size.y / 2, Vector2.zero(), 0);
     
-    body.createFixture(forge2d.FixtureDef(
+    body.createFixture(FixtureDef(
       shape,
       density: isStone ? 2.5 : 0.8,
       friction: 0.5,
@@ -331,13 +332,13 @@ class GameBlock extends forge2d.BodyComponent {
   }
 }
 
-// Физический класс птицы Баннихопа
-class Bunnyhop extends forge2d.BodyComponent<AngryMolluskGame> {
-  final forge2d.Vector2 startPos;
+// Класс Баннихопа
+class Bunnyhop extends BodyComponent<AngryMolluskGame> {
+  final Vector2 startPos;
   bool isReadyForLaunch = false;
   bool isLaunched = false;
-  forge2d.Vector2? dragPosition;
-  Sprite? birdSprite;
+  Vector2? dragPosition;
+  flame_comp.Sprite? birdSprite;
 
   Bunnyhop(this.startPos, this.isReadyForLaunch);
 
@@ -352,37 +353,40 @@ class Bunnyhop extends forge2d.BodyComponent<AngryMolluskGame> {
   }
 
   @override
-  forge2d.Body createBody() {
-    final bodyDef = forge2d.BodyDef(
-      type: isReadyForLaunch ? forge2d.BodyType.kinematic : forge2d.BodyType.static,
+  Body createBody() {
+    final bodyDef = BodyDef(
+      type: isReadyForLaunch ? BodyType.kinematic : BodyType.static,
       position: startPos,
     );
     final body = world.createBody(bodyDef);
-    final shape = forge2d.CircleShape()..radius = 0.9;
-    body.createFixture(forge2d.FixtureDef(shape, density: 1.2, restitution: 0.25));
+    final shape = CircleShape()..radius = 0.9;
+    body.createFixture(FixtureDef(shape, density: 1.2, restitution: 0.25));
     return body;
   }
 
-  void jumpToSlingshot(forge2d.Vector2 targetPos) {
-    body.setType(forge2d.BodyType.kinematic);
+  void jumpToSlingshot(Vector2 targetPos) {
+    body.setType(BodyType.kinematic);
     body.setTransform(targetPos, 0);
     isReadyForLaunch = true;
   }
 
-  void dragTo(forge2d.Vector2 target) {
-    final slingCenter = game.slingshot.position - forge2d.Vector2(0, 0.5);
+  void dragTo(Vector2 target) {
+    final slingCenter = game.slingshot.position - Vector2(0, 0.5);
     var dir = target - slingCenter;
+    
+    // Ограничиваем максимальное натяжение без использования scaleTo
     if (dir.length > 2.5) {
-      dir.scaleTo(2.5);
+      dir = dir.normalized() * 2.5;
     }
+    
     dragPosition = slingCenter + dir;
     body.setTransform(dragPosition!, 0);
   }
 
   void launch() {
     isLaunched = true;
-    body.setType(forge2d.BodyType.dynamic);
-    final slingCenter = game.slingshot.position - forge2d.Vector2(0, 0.5);
+    body.setType(BodyType.dynamic);
+    final slingCenter = game.slingshot.position - Vector2(0, 0.5);
     final launchVector = slingCenter - body.position;
     body.applyLinearImpulse(launchVector * 18.0);
     dragPosition = null;
@@ -399,8 +403,8 @@ class Bunnyhop extends forge2d.BodyComponent<AngryMolluskGame> {
   void render(Canvas canvas) {
     // 1. Отрисовка КРАСНОЙ РЕЗИНКИ рогатки при натяжении
     if (dragPosition != null && isReadyForLaunch && !isLaunched) {
-      final slingLeft = game.slingshot.position + forge2d.Vector2(-0.5, -1.0) - body.position;
-      final slingRight = game.slingshot.position + forge2d.Vector2(0.5, -1.0) - body.position;
+      final slingLeft = game.slingshot.position + Vector2(-0.5, -1.0) - body.position;
+      final slingRight = game.slingshot.position + Vector2(0.5, -1.0) - body.position;
       final paintRubber = Paint()..color = Colors.red..strokeWidth = 0.15;
       
       canvas.drawLine(Offset(slingLeft.x, slingLeft.y), Offset.zero, paintRubber);
@@ -424,7 +428,7 @@ class Bunnyhop extends forge2d.BodyComponent<AngryMolluskGame> {
 
     // 4. Отрисовка траектории белыми точками
     if (dragPosition != null && isReadyForLaunch && !isLaunched) {
-      final slingCenter = game.slingshot.position - forge2d.Vector2(0, 0.5);
+      final slingCenter = game.slingshot.position - Vector2(0, 0.5);
       final velocity = (slingCenter - body.position) * 18.0;
       final dotsPaint = Paint()..color = Colors.white;
 
@@ -439,9 +443,9 @@ class Bunnyhop extends forge2d.BodyComponent<AngryMolluskGame> {
 }
 
 // Физический класс Максима
-class MolluskMaksim extends forge2d.BodyComponent<AngryMolluskGame> with forge2d.ContactCallbacks {
-  final forge2d.Vector2 spawnPos;
-  Sprite? pigSprite;
+class MolluskMaksim extends BodyComponent<AngryMolluskGame> with ContactCallbacks {
+  final Vector2 spawnPos;
+  flame_comp.Sprite? pigSprite;
 
   MolluskMaksim(this.spawnPos);
 
@@ -456,16 +460,16 @@ class MolluskMaksim extends forge2d.BodyComponent<AngryMolluskGame> with forge2d
   }
 
   @override
-  forge2d.Body createBody() {
-    final bodyDef = forge2d.BodyDef(type: forge2d.BodyType.dynamic, position: spawnPos);
+  Body createBody() {
+    final bodyDef = BodyDef(type: BodyType.dynamic, position: spawnPos);
     final body = world.createBody(bodyDef);
-    final shape = forge2d.CircleShape()..radius = 1.0;
-    body.createFixture(forge2d.FixtureDef(shape, density: 0.6, restitution: 0.1, friction: 0.5));
+    final shape = CircleShape()..radius = 1.0;
+    body.createFixture(FixtureDef(shape, density: 0.6, restitution: 0.1, friction: 0.5));
     return body;
   }
 
   @override
-  void beginContact(Object other, forge2d.Contact contact) {
+  void beginContact(Object other, Contact contact) {
     super.beginContact(other, contact);
     final velocity = body.linearVelocity.length;
     // Уничтожается от хорошего удара птицы или от падения Каменного блока
@@ -492,4 +496,5 @@ class MolluskMaksim extends forge2d.BodyComponent<AngryMolluskGame> with forge2d
     }
   }
 }
+
 
