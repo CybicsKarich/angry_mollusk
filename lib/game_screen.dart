@@ -133,7 +133,7 @@ class GameScreen extends StatelessWidget {
 }
 
 class AngryMolluskGame extends FlameGame with DragCallbacks {
-  AngryMolluskGame() : super(gravity: Vector2(0, 15.0));
+  AngryMolluskGame() : super();
 
   late Slingshot slingshot;
   List<Bunnyhop> birdsQueue = [];
