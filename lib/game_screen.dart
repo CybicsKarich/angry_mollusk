@@ -1,6 +1,5 @@
 import 'dart:math';
-import 'package:flame/events.dart';
-import 'package:flame/extensions.dart';
+import 'package:flame/game.dart'; // Исправлено: Добавили импорт для GameWidget
 import 'package:flame/components.dart';
 import 'package:flame_forge2d/flame_forge2d.dart';
 import 'package:flutter/material.dart' hide Wallet;
@@ -219,7 +218,7 @@ class BackgroundDecoration extends Component with HasGameRef<AngryMolluskGame> {
   void render(Canvas canvas) {
     final size = gameRef.canvasSize;
     
-    // Небо (Гradiент)
+    // Небо (Градиент)
     final skyPaint = Paint()..shader = const LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
@@ -306,7 +305,7 @@ class GameBlock extends BodyComponent {
       shape,
       density: isStone ? 2.5 : 0.8,
       friction: 0.5,
-      restitution: 0.05, // Чтобы блоки реалистично оседали, а не прыгали
+      restitution: 0.05, // Чтобы блоки реалистично оседали, а не прыгали как резиновые
     ));
     return body;
   }
@@ -330,7 +329,7 @@ class GameBlock extends BodyComponent {
 }
 
 // КЛАСС ПТИЦЫ БАННИХОПА (С цветной подложкой, траекторией, натяжением и фотографией)
-class Bunnyhop extends BodyComponent with HasGameRef<AngryMolluskGame> {
+class Bunnyhop extends BodyComponent<AngryMolluskGame> {
   final Vector2 startPos;
   bool isReadyForLaunch = false;
   bool isLaunched = false;
@@ -370,7 +369,7 @@ class Bunnyhop extends BodyComponent with HasGameRef<AngryMolluskGame> {
   }
 
   void dragTo(Vector2 target) {
-    final slingCenter = gameRef.slingshot.position - Vector2(0, 0.5);
+    final slingCenter = game.slingshot.position - Vector2(0, 0.5);
     var dir = target - slingCenter;
     // Ограничиваем длину натяжения резинки до 2.5 метров
     if (dir.length > 2.5) {
@@ -383,7 +382,7 @@ class Bunnyhop extends BodyComponent with HasGameRef<AngryMolluskGame> {
   void launch() {
     isLaunched = true;
     body.setType(BodyType.dynamic);
-    final slingCenter = gameRef.slingshot.position - Vector2(0, 0.5);
+    final slingCenter = game.slingshot.position - Vector2(0, 0.5);
     final launchVector = slingCenter - body.position;
     // Импульс полета зависит от силы натяжения
     body.applyLinearImpulse(launchVector * 18.0);
@@ -391,8 +390,8 @@ class Bunnyhop extends BodyComponent with HasGameRef<AngryMolluskGame> {
 
     // Ровно через 3 секунды после запуска подкатываем следующую птицу
     Future.delayed(const Duration(seconds: 3), () {
-      if (gameRef.isMounted) {
-        gameRef.loadNextBird();
+      if (game.isMounted) {
+        game.loadNextBird();
       }
     });
   }
@@ -401,8 +400,8 @@ class Bunnyhop extends BodyComponent with HasGameRef<AngryMolluskGame> {
   void render(Canvas canvas) {
     // 1. Отрисовка КРАСНОЙ РЕЗИНКИ рогатки при натяжении (сзади птицы)
     if (dragPosition != null && isReadyForLaunch && !isLaunched) {
-      final slingLeft = gameRef.slingshot.position + Vector2(-0.5, -1.0) - body.position;
-      final slingRight = gameRef.slingshot.position + Vector2(0.5, -1.0) - body.position;
+      final slingLeft = game.slingshot.position + Vector2(-0.5, -1.0) - body.position;
+      final slingRight = game.slingshot.position + Vector2(0.5, -1.0) - body.position;
       final paintRubber = Paint()..color = Colors.red..strokeWidth = 0.15;
       
       canvas.drawLine(Offset(slingLeft.x, slingLeft.y), Offset.zero, paintRubber);
@@ -426,7 +425,7 @@ class Bunnyhop extends BodyComponent with HasGameRef<AngryMolluskGame> {
 
     // 4. Отрисовка траектории полета маленькими белыми точками
     if (dragPosition != null && isReadyForLaunch && !isLaunched) {
-      final slingCenter = gameRef.slingshot.position - Vector2(0, 0.5);
+      final slingCenter = game.slingshot.position - Vector2(0, 0.5);
       final velocity = (slingCenter - body.position) * 18.0;
       final dotsPaint = Paint()..color = Colors.white;
 
@@ -441,7 +440,7 @@ class Bunnyhop extends BodyComponent with HasGameRef<AngryMolluskGame> {
 }
 
 // КЛАСС СВИНЬИ МАКСИМА (С подложкой, фотографией и уничтожением от ударов)
-class MolluskMaksim extends BodyComponent with ContactCallbacks, HasGameRef<AngryMolluskGame> {
+class MolluskMaksim extends BodyComponent<AngryMolluskGame> with ContactCallbacks {
   final Vector2 spawnPos;
   Sprite? pigSprite;
 
