@@ -14,7 +14,8 @@ void main() async {
 
   // 2. Включаем режим ImmersiveStick. Он прячет панели навигации и уведомлений.
   // Они откроются, только если пользователь проведет пальцем от края экрана, и закроются сами.
-  await SystemChrome.setEnabledSystemU someMode(SystemUiMode.immersiveSticky);
+  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
 
   runApp(const MyApp());
 }
