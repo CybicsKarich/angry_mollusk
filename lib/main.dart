@@ -1,3 +1,4 @@
+import 'game_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/services.dart'; // Пакет для управления экраном и системными панелями
@@ -461,9 +462,14 @@ class LevelsScreen extends StatelessWidget {
           ),
           child: ElevatedButton(
             onPressed: () {
-              debugPrint('Запуск уровня $levelNumber');
-              // Тут в будущем будет запуск Flame игры для конкретного уровня
-            },
+  // Если игрок нажимает на Уровень 1 — запускаем экран нашей игры
+  if (levelNumber == '1') {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const GameScreen()),
+    );
+  }
+},
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.transparent,
               shadowColor: Colors.transparent,
