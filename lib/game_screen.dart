@@ -293,15 +293,16 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       }
     }
 
-    // Обновление падающих блоков и цепных реакций
-    for (var block in blocks) {
-      block.update(dt, blocks, pigs, groundY);
-    }
+      // Обновление падающих блоков и цепных реакций (передаём _safetyTimer)
+  for (var block in blocks) {
+    block.update(dt, blocks, pigs, groundY, _safetyTimer);
+  }
 
-    // Обновление падающих свиней
-    for (var pig in pigs) {
-      pig.update(dt, blocks, groundY);
-    }
+  // Обновление падающих свиней (передаём _safetyTimer)
+  for (var pig in pigs) {
+    pig.update(dt, blocks, groundY, _safetyTimer);
+  }
+
 
     // Удаляем уничтоженные объекты
     blocks.removeWhere((b) => b.shouldRemove);
@@ -544,7 +545,7 @@ class Bunnyhop {
     if (isReadyForLaunch && !isLaunched && position.dx != 0.15) {
       final dotsPaint = Paint()..color = Colors.white;
       final slingX = 0.15;
-      final slingY = gameRef.groundY - 0.04;
+      final slingY = 0.73 - 0.04;
       final simVelocity = Offset((slingX - position.dx) * 9.0, (slingY - position.dy) * 9.0);
 
       for (int i = 1; i < 14; i++) {
@@ -572,13 +573,12 @@ class MolluskMaksim {
     isFalling = true;
   }
 
-  void update(double dt, List<GameBlock> blocks, double groundY) {
-        // Свиньи не падают и не умирают сами на старте уровня
-    if (gameRef._safetyTimer < 1.5) {
-      isFalling = false;
-      vx = 0;
-      vy = 0;
-      return;
+    void update(double dt, List<GameBlock> blocks, double groundY, double safetyTimer) {
+    if (safetyTimer < 1.5) {
+    isFalling = false;
+    vx = 0;
+    vy = 0;
+    return;
     }
     if (isFalling) {
       vy += 1.8 * dt; // Гравитация свиньи
@@ -647,15 +647,13 @@ class GameBlock {
     isFalling = true;
   }
 
-  void update(double dt, List<GameBlock> allBlocks, List<MolluskMaksim> allPigs, double groundY) {
-       // ЖЕЛЕЗНЫЙ ФИКС: Замок стоит намертво первые 1.5 секунды и не рушится сам!
-    if (gameRef._safetyTimer < 1.5) {
-      isFalling = false;
-      vx = 0;
-      vy = 0;
-      return;
+  void update(double dt, List<GameBlock> allBlocks, List<MolluskMaksim> allPigs, double groundY, double safetyTimer) {
+    if (safetyTimer < 1.5) {
+    isFalling = false;
+    vx = 0;
+    vy = 0;
+    return;
     }
-
     // ПОЧИНЕНО: Блоки больше не падают сами по себе на старте уровня!
     if (!isFalling && y < groundY - h) {
       bool hasFloor = false;
