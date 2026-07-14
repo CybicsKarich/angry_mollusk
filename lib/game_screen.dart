@@ -526,8 +526,8 @@ class Bunnyhop extends Component with HasGameRef<AngryMolluskGame> {
 
     // КРАСНАЯ РЕЗИНКА РОГАТКИ
     if (dragPosition != null && isReadyForLaunch && !isLaunched) {
-      final leftHorn = gameRef.slingshot.worldPos + const Vector2(-0.8, -1.8) - position;
-      final rightHorn = gameRef.slingshot.worldPos + const Vector2(0.8, -1.8) - position;
+      final leftHorn = gameRef.slingshot.worldPos + Vector2(-0.8, -1.8) - position;
+      final rightHorn = gameRef.slingshot.worldPos + Vector2(0.8, -1.8) - position;
       final paintRubber = Paint()..color = const Color(0xFFD32F2F)..strokeWidth = 0.15;
       
       canvas.drawLine(Offset(leftHorn.x, leftHorn.y), Offset.zero, paintRubber);
