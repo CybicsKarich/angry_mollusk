@@ -191,6 +191,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   // Контейнеры для управления объектами безForge2D
   List<GameBlock> blocks = [];
   List<MolluskMaksim> pigs = [];
+  bool isCastleActivated = false; // Включается только после того, как птица полетит к замку
 
   // Переменные под текстуры
   Sprite? bunnySprite;
@@ -203,17 +204,21 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   // Координаты рогатки на экране (вычисляются в процентах от размера экрана)
   Offset get slingshotCenter => Offset(canvasSize.x * 0.2, canvasSize.y * 0.7);
 
-  @override
+    @override
   Future<void> onLoad() async {
     await super.onLoad();
 
     // Загружаем текстуры для ручного рендеринга
     bunnySprite = await loadSprite('bunnyhop.png');
     maksimSprite = await loadSprite('maksim.png');
+    
     // Задний фон (облака, солнце)
     add(BackgroundDecoration());
 
-        // Создаем 3 птиц Баннихопов в очередь с правильными аргументами Offset
+    // Устанавливаем высоту земли ДО создания птиц, чтобы не было ошибок инициализации
+    groundY = 0.73;
+
+    // Создаем 3 птиц Баннихопов в очередь с правильными аргументами Offset
     for (int i = 0; i < 3; i++) {
       final startX = 0.15 - (i * 0.04);
       final startY = i == 0 ? groundY - 0.04 : groundY - 0.02; 
@@ -222,38 +227,49 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     }
     currentBird = birdsQueue.first;
 
-    // СТРОИМ ЗАМОК (Координаты привязаны к процентам от экрана смартфона)
-    double baseGridX = 0.65; // Начало замка на правом острове
-    groundY = 0.73;
-
-    // Каменные вертикальные опоры (серые)
-    blocks.add(GameBlock(baseGridX, groundY - 0.1, 0.02, 0.1, true));
-    blocks.add(GameBlock(baseGridX + 0.06, groundY - 0.1, 0.02, 0.1, true));
-    blocks.add(GameBlock(baseGridX + 0.12, groundY - 0.1, 0.02, 0.1, true));
-    blocks.add(GameBlock(baseGridX + 0.18, groundY - 0.1, 0.02, 0.1, true));
-    
-        // Каменные плиты перекрытия сверху опор
-    blocks.add(GameBlock(baseGridX + 0.03, groundY - 0.155, 0.1, 0.015, true));
-    blocks.add(GameBlock(baseGridX + 0.15, groundY - 0.155, 0.08, 0.015, true));
-
-    // Деревянные стены первого этажа (коричневые)
-    blocks.add(GameBlock(baseGridX + 0.02, groundY - 0.205, 0.015, 0.085, false));
-    blocks.add(GameBlock(baseGridX + 0.09, groundY - 0.205, 0.015, 0.085, false));
-    blocks.add(GameBlock(baseGridX + 0.15, groundY - 0.205, 0.015, 0.085, false));
-
-    // Деревянный потолок первого этажа
-    blocks.add(GameBlock(baseGridX + 0.085, groundY - 0.252, 0.16, 0.015, false));
-
-    // Верхняя деревянная башня
-    blocks.add(GameBlock(baseGridX + 0.05, groundY - 0.292, 0.015, 0.065, false));
-    blocks.add(GameBlock(baseGridX + 0.12, groundY - 0.292, 0.015, 0.065, false));
-    blocks.add(GameBlock(baseGridX + 0.085, groundY - 0.33, 0.10, 0.015, false));
-
-    // РАССТАНОВКА СВИНЕЙ МАКСИМОВ
-    pigs.add(MolluskMaksim(baseGridX + 0.055, groundY - 0.185)); // Левый нижний
-    pigs.add(MolluskMaksim(baseGridX + 0.12, groundY - 0.185));  // Правый нижний
-    pigs.add(MolluskMaksim(baseGridX + 0.085, groundY - 0.285)); // Верхний в башне
+    // Вызываем выравнивание и постройку замка
+    buildLevelStructures();
   }
+
+  // НОВЫЙ ИДЕАЛЬНО РОВНЫЙ МЕТОД ПОСТРОЙКИ ЗАМКА
+  void buildLevelStructures() {
+    blocks.clear();
+    pigs.clear();
+
+    // Базовая точка начала замка на правом острове
+    final double bx = 0.62; 
+
+    // ЭТАЖ 1: Четыре массивные каменные колонны (спавнятся идеально встык с землёй)
+    blocks.add(GameBlock(bx + 0.00, groundY - 0.07, 0.02, 0.14, true));
+    blocks.add(GameBlock(bx + 0.07, groundY - 0.07, 0.02, 0.14, true));
+    blocks.add(GameBlock(bx + 0.14, groundY - 0.07, 0.02, 0.14, true));
+    blocks.add(GameBlock(bx + 0.21, groundY - 0.07, 0.02, 0.14, true));
+    
+    // Каменные прочные перекрытия (плиты ложатся ровно поверх колонн)
+    blocks.add(GameBlock(bx - 0.01, groundY - 0.15, 0.11, 0.02, true));
+    blocks.add(GameBlock(bx + 0.13, groundY - 0.15, 0.11, 0.02, true));
+
+    // ЭТАЖ 2: Три ровные деревянные стены (стоят строго по осям перекрытий)
+    blocks.add(GameBlock(bx + 0.01, groundY - 0.21, 0.015, 0.10, false));
+    blocks.add(GameBlock(bx + 0.10, groundY - 0.21, 0.015, 0.10, false));
+    blocks.add(GameBlock(bx + 0.20, groundY - 0.21, 0.015, 0.10, false));
+
+    // Деревянный гладкий потолок второго этажа
+    blocks.add(GameBlock(bx + 0.00, groundY - 0.27, 0.23, 0.02, false));
+
+    // ЭТАЖ 3: Верхняя симметричная смотровая башенка
+    blocks.add(GameBlock(bx + 0.05, groundY - 0.32, 0.015, 0.08, false));
+    blocks.add(GameBlock(bx + 0.16, groundY - 0.32, 0.015, 0.08, false));
+    blocks.add(GameBlock(bx + 0.03, groundY - 0.37, 0.17, 0.02, false));
+
+    // МАКСИМЫ СИДЯТ СТРОГО ПО ЦЕНТРУ СВОИХ КОМНАТ
+    pigs.add(MolluskMaksim(bx + 0.035, groundY - 0.04)); // Левая нижняя комната
+    pigs.add(MolluskMaksim(bx + 0.175, groundY - 0.04)); // Правая нижняя комната
+    pigs.add(MolluskMaksim(bx + 0.105, groundY - 0.19)); // Верхний Максим на втором этаже
+    
+    spawnCompleted = true;
+  }
+
 
   void loadNextBird() {
     if (birdsQueue.isNotEmpty) {
@@ -285,23 +301,30 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     cloudOffset1 += 0.015 * dt;
     cloudOffset2 += 0.008 * dt;
 
-    // Обновление летящей птицы
+        // Обновление летящей птицы
     if (currentBird != null && currentBird!.isLaunched) {
       currentBird!.update(dt, blocks, pigs, groundY);
+      
+      // Если птица пересекла середину экрана и летит к замку — активируем физику!
+      if (currentBird!.position.dx > 0.35) {
+        isCastleActivated = true;
+      }
+      
       if (currentBird!.shouldRemove) {
         loadNextBird();
       }
     }
 
-      // Обновление падающих блоков и цепных реакций (передаём _safetyTimer)
-  for (var block in blocks) {
-    block.update(dt, blocks, pigs, groundY, _safetyTimer);
-  }
+        // Обновление падающих блоков (передаём флаг активации)
+    for (var block in blocks) {
+      block.update(dt, blocks, pigs, groundY, isCastleActivated);
+    }
 
-  // Обновление падающих свиней (передаём _safetyTimer)
-  for (var pig in pigs) {
-    pig.update(dt, blocks, groundY, _safetyTimer);
-  }
+    // Обновление падающих свиней (передаём флаг активации)
+    for (var pig in pigs) {
+      pig.update(dt, blocks, groundY, isCastleActivated);
+    }
+
 
 
     // Удаляем уничтоженные объекты
@@ -573,12 +596,13 @@ class MolluskMaksim {
     isFalling = true;
   }
 
-    void update(double dt, List<GameBlock> blocks, double groundY, double safetyTimer) {
-    if (safetyTimer < 1.5) {
-    isFalling = false;
-    vx = 0;
-    vy = 0;
-    return;
+      void update(double dt, List<GameBlock> blocks, double groundY, bool isCastleActivated) {
+    // Свинья сидит неподвижно и ждёт удара
+    if (!isCastleActivated) {
+      isFalling = false;
+      vx = 0;
+      vy = 0;
+      return;
     }
     if (isFalling) {
       vy += 1.8 * dt; // Гравитация свиньи
@@ -647,12 +671,13 @@ class GameBlock {
     isFalling = true;
   }
 
-  void update(double dt, List<GameBlock> allBlocks, List<MolluskMaksim> allPigs, double groundY, double safetyTimer) {
-    if (safetyTimer < 1.5) {
-    isFalling = false;
-    vx = 0;
-    vy = 0;
-    return;
+    void update(double dt, List<GameBlock> allBlocks, List<MolluskMaksim> allPigs, double groundY, bool isCastleActivated) {
+    // ЖЕЛЕЗНЫЙ ФИКС: Блок намертво застыл в воздухе, пока птица не запущена!
+    if (!isCastleActivated) {
+      isFalling = false;
+      vx = 0;
+      vy = 0;
+      return;
     }
     // ПОЧИНЕНО: Блоки больше не падают сами по себе на старте уровня!
     if (!isFalling && y < groundY - h) {
