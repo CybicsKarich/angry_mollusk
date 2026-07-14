@@ -208,8 +208,8 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     await super.onLoad();
 
     // Загружаем текстуры для ручного рендеринга
-    bunnySprite = await loadSprite('images/bunnyhop.png');
-    maksimSprite = await loadSprite('images/maksim.png');
+    bunnySprite = await loadSprite('bunnyhop.png');
+    maksimSprite = await loadSprite('maksim.png');
     // Задний фон (облака, солнце)
     add(BackgroundDecoration());
 
