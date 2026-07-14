@@ -390,14 +390,14 @@ class BackgroundDecoration extends Component with HasGameRef<AngryMolluskGame> {
   }
 }
 
-// Скалы с травой
+// Острова
 class IslandBoundary extends Component with HasGameRef<AngryMolluskGame> {
   final Vector2 start;
   final Vector2 end;
 
   IslandBoundary(this.start, this.end);
 
-    @override
+  @override
   void render(Canvas canvas) {
     // Рисуем скалу (коричневая база) прямо в координатах мира (в метрах)
     canvas.drawRect(Rect.fromLTRB(start.x, start.y, end.x, end.y), Paint()..color = const Color(0xFF6D4C41));
@@ -420,9 +420,34 @@ class IslandBoundary extends Component with HasGameRef<AngryMolluskGame> {
     }
     canvas.drawPath(grassPath, paintGrass);
   }
+} // СКОБКА ЗАКРЫТА! Теперь синтаксис не ломает остальные классы
 
+// Высокая деревянная рогатка
+class Slingshot extends Component with HasGameRef<AngryMolluskGame> {
+  final Vector2 worldPos;
+  Slingshot(this.worldPos);
 
+  @override
+  void render(Canvas canvas) {
+    // Рисуем в метрах мира
+    const thickness = 0.3; 
 
+    final paintFork = Paint()..color = const Color(0xFF4E342E)..strokeWidth = thickness;
+    final paintHighlight = Paint()..color = const Color(0xFF8D6E63)..strokeWidth = thickness * 0.3;
+    
+    // Стойка и рожки рогатки (рисуются локально от её worldPos, так как Flame сам сдвинет матрицу)
+    canvas.drawLine(const Offset(0, -0.1), const Offset(0, 3.0), paintFork);
+    canvas.drawLine(const Offset(0, -0.1), const Offset(0, 3.0), paintHighlight);
+
+    final leftHorn = const Offset(-0.8, -1.8);
+    final rightHorn = const Offset(0.8, -1.8);
+
+    canvas.drawLine(const Offset(0, -0.2), leftHorn, paintFork);
+    canvas.drawLine(const Offset(0, -0.2), rightHorn, paintFork);
+  }
+}
+
+// Класс Баннихопа
 class Bunnyhop extends Component with HasGameRef<AngryMolluskGame> {
   Vector2 position;
   final Vector2 startPos;
@@ -495,9 +520,9 @@ class Bunnyhop extends Component with HasGameRef<AngryMolluskGame> {
     }
   }
 
-    @override
+  @override
   void render(Canvas canvas) {
-    const radius = 0.9; // Физический радиус птицы в метрах
+    const radius = 0.9; 
 
     // КРАСНАЯ РЕЗИНКА РОГАТКИ
     if (dragPosition != null && isReadyForLaunch && !isLaunched) {
@@ -509,15 +534,12 @@ class Bunnyhop extends Component with HasGameRef<AngryMolluskGame> {
       canvas.drawLine(Offset(rightHorn.x, rightHorn.y), Offset.zero, paintRubber);
     }
 
-    // Круглая сочная подложка под фото
     canvas.drawCircle(Offset.zero, radius, Paint()..color = const Color(0xFFE53935));
 
-    // Лицо Баннихопа из ассетов
     if (birdSprite != null) {
       birdSprite!.render(canvas, position: Vector2(-radius, -radius), size: Vector2(radius * 2, radius * 2));
     }
 
-    // Точки траектории полета
     if (dragPosition != null && isReadyForLaunch && !isLaunched) {
       final slingCenter = gameRef.slingshot.worldPos - Vector2(0, 2.5);
       final simVelocity = (slingCenter - position) * 7.5;
@@ -533,33 +555,7 @@ class Bunnyhop extends Component with HasGameRef<AngryMolluskGame> {
   }
 }
 
-
-// Высокая деревянная рогатка
-class Slingshot extends Component with HasGameRef<AngryMolluskGame> {
-  final Vector2 worldPos;
-  Slingshot(this.worldPos);
-
-    @override
-  void render(Canvas canvas) {
-    // В метрах мира
-    const thickness = 0.3; 
-
-    final paintFork = Paint()..color = const Color(0xFF4E342E)..strokeWidth = thickness;
-    final paintHighlight = Paint()..color = const Color(0xFF8D6E63)..strokeWidth = thickness * 0.3;
-    
-    // Рисуем основную стойку рогатки (от высоты травы 22 и вниз)
-    canvas.drawLine(const Offset(0, -0.1), const Offset(0, 3.0), paintFork);
-    canvas.drawLine(const Offset(0, -0.1), const Offset(0, 3.0), paintHighlight);
-
-    final leftHorn = const Offset(-0.8, -1.8);
-    final rightHorn = const Offset(0.8, -1.8);
-
-    canvas.drawLine(const Offset(0, -0.2), leftHorn, paintFork);
-    canvas.drawLine(const Offset(0, -0.2), rightHorn, paintFork);
-  }
-
-
-
+// Класс Свиньи Максима
 class MolluskMaksim extends Component with HasGameRef<AngryMolluskGame> {
   Vector2 position;
   Vector2 velocity = Vector2.zero();
@@ -605,9 +601,9 @@ class MolluskMaksim extends Component with HasGameRef<AngryMolluskGame> {
     }
   }
 
-    @override
+  @override
   void render(Canvas canvas) {
-    const radius = 1.0; // Радиус свиньи в метрах
+    const radius = 1.0; 
 
     canvas.drawCircle(Offset.zero, radius, Paint()..color = const Color(0xFF4CAF50));
 
@@ -617,7 +613,7 @@ class MolluskMaksim extends Component with HasGameRef<AngryMolluskGame> {
   }
 }
 
-// Класс строительного блока с цепным падением
+// Класс строительного блока
 class GameBlock extends Component with HasGameRef<AngryMolluskGame> {
   Vector2 position;
   Vector2 size;
@@ -654,7 +650,6 @@ class GameBlock extends Component with HasGameRef<AngryMolluskGame> {
       velocity.y += 14.0 * dt; 
       position += velocity * dt;
 
-      // Цепная реакция блоков друг на друга при падении
       for (final otherBlock in gameRef.world.children.whereType<GameBlock>()) {
         if (otherBlock != this && !otherBlock.isFalling) {
           if ((position.x - otherBlock.position.x).abs() < (size.x + otherBlock.size.x) / 2 &&
@@ -682,10 +677,10 @@ class GameBlock extends Component with HasGameRef<AngryMolluskGame> {
     }
   }
 
-    @override
+  @override
   void render(Canvas canvas) {
     final paint = Paint()
-      ..color = isStone ? const Color(0xFFB0BEC5) : const Color(0xFFFFB74D) 
+            ..color = isStone ? const Color(0xFFB0BEC5) : const Color(0xFFFFB74D) 
       ..style = PaintingStyle.fill;
     
     final borderPaint = Paint()
@@ -708,6 +703,4 @@ class GameBlock extends Component with HasGameRef<AngryMolluskGame> {
     }
   }
 }
-
-
 
