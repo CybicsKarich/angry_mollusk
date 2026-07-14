@@ -477,7 +477,8 @@ class Bunnyhop {
   void launch(double slingX, double slingY) {
     isLaunched = true;
     // Направление полета противоположно оттягиванию пальца
-    velocity = Offset((slingX - position.dx) * 4.5, (slingY - position.dy) * 4.5);
+    // Мощнейший толчок рогатки
+    velocity = Offset((slingX - position.dx) * 9.0, (slingY - position.dy) * 9.0);
     trajectoryDots.clear();
   }
 
@@ -489,7 +490,8 @@ class Bunnyhop {
     }
 
         // Влияние гравитации на вектор скорости снаряда
-    velocity = Offset(velocity.dx, velocity.dy + 0.8 * dt);
+        // Слабая гравитация для затяжного красивого полёта
+    velocity = Offset(velocity.dx, velocity.dy + 0.35 * dt);
     position = Offset(position.dx + velocity.dx * dt, position.dy + velocity.dy * dt);
 
     // Столкновение с кубиками замка Максима
@@ -511,45 +513,46 @@ class Bunnyhop {
     }
   }
 
+    @override
   void render(Canvas canvas, Size size, Sprite? sprite) {
     final screenPos = Offset(size.width * position.dx, size.height * position.dy);
     final radius = size.width * 0.016;
 
-    // Заливаем подложку сочным цветом
+    // 1. ГАРАНТИРОВАННЫЙ КРАСНЫЙ ЦВЕТ ДЛЯ ВСЕХ ТРЕХ ПТИЦ В ОЧЕРЕДИ
     canvas.drawCircle(screenPos, radius, Paint()..color = const Color(0xFFE53935));
 
-        // ДЕТАЛИЗАЦИЯ ПТИЦЫ: Маленькие перья (хохолок) на голове Баннихопа
+    // 2. КРАСИВЫЕ ПЕРЬЯ (ХОХОЛОК) НА ГОЛОВЕ ДЛЯ ВСЕХ ТРЕХ ПТИЦ СРАЗУ
     final featherPaint = Paint()..color = const Color(0xFFD32F2F)..style = PaintingStyle.fill;
     final featherPath = Path();
     // Левое пёрышко
-    featherPath.moveTo(-radius * 0.3, -radius);
-    featherPath.lineTo(-radius * 0.5, -radius * 1.4);
-    featherPath.lineTo(0, -radius * 0.9);
+    featherPath.moveTo(screenPos.dx - radius * 0.3, screenPos.dy - radius);
+    featherPath.lineTo(screenPos.dx - radius * 0.5, screenPos.dy - radius * 1.4);
+    featherPath.lineTo(screenPos.dx, screenPos.dy - radius * 0.9);
     // Правое пёрышко
-    featherPath.moveTo(0, -radius * 0.9);
-    featherPath.lineTo(radius * 0.2, -radius * 1.5);
-    featherPath.lineTo(radius * 0.3, -radius);
+    featherPath.moveTo(screenPos.dx, screenPos.dy - radius * 0.9);
+    featherPath.lineTo(screenPos.dx + radius * 0.2, screenPos.dy - radius * 1.5);
+    featherPath.lineTo(screenPos.dx + radius * 0.3, screenPos.dy - radius);
     featherPath.close();
     canvas.drawPath(featherPath, featherPaint);
 
-    // Отрисовываем лицо Баннихопа из текстуры
+    // 3. ОТРИСОВКА ЛИЦА МУЖИКА ИЗ АССЕТОВ ДЛЯ ВСЕХ ПТИЦ
     if (sprite != null) {
       sprite.render(canvas, position: Vector2(screenPos.dx - radius, screenPos.dy - radius), size: Vector2(radius * 2, radius * 2));
     }
 
-    // Отрисовка параболы полета точками при прицеливании
-    if (isReadyForLaunch && !isLaunched) {
+    // 4. Траектория полёта белыми точками (только для той птицы, которую натягиваем)
+    if (isReadyForLaunch && !isLaunched && dragPosition != null) {
       final dotsPaint = Paint()..color = Colors.white;
       final slingX = 0.15;
-      final slingY = 0.73 - 0.04;
-      final simVelocity = Offset((slingX - position.dx) * 4.5, (slingY - position.dy) * 4.5);
+      final slingY = gameRef.groundY - 0.04;
+      final simVelocity = Offset((slingX - position.dx) * 9.0, (slingY - position.dy) * 9.0);
 
-      for (int i = 1; i < 10; i++) {
-      double t = i * 0.12;
-      double x = position.dx + simVelocity.dx * t;
-      double y = position.dy + simVelocity.dy * t + 0.5 * 0.8 * t * t; // Изменено на 0.8
-      canvas.drawCircle(Offset(size.width * x, size.height * y), size.width * 0.003, dotsPaint);
-     }
+      for (int i = 1; i < 14; i++) {
+        double t = i * 0.10;
+        double x = position.dx + simVelocity.dx * t;
+        double y = position.dy + simVelocity.dy * t + 0.5 * 0.35 * t * t;
+        canvas.drawCircle(Offset(size.width * x, size.height * y), size.width * 0.003, dotsPaint);
+      }
     }
   }
 }
@@ -570,6 +573,13 @@ class MolluskMaksim {
   }
 
   void update(double dt, List<GameBlock> blocks, double groundY) {
+        // Свиньи не падают и не умирают сами на старте уровня
+    if (gameRef._safetyTimer < 1.5) {
+      isFalling = false;
+      vx = 0;
+      vy = 0;
+      return;
+    }
     if (isFalling) {
       vy += 1.8 * dt; // Гравитация свиньи
       x += vx * dt;
@@ -637,7 +647,15 @@ class GameBlock {
   }
 
   void update(double dt, List<GameBlock> allBlocks, List<MolluskMaksim> allPigs, double groundY) {
-   // ПОЧИНЕНО: Блоки больше не падают сами по себе на старте уровня!
+       // ЖЕЛЕЗНЫЙ ФИКС: Замок стоит намертво первые 1.5 секунды и не рушится сам!
+    if (gameRef._safetyTimer < 1.5) {
+      isFalling = false;
+      vx = 0;
+      vy = 0;
+      return;
+    }
+
+    // ПОЧИНЕНО: Блоки больше не падают сами по себе на старте уровня!
     if (!isFalling && y < groundY - h) {
       bool hasFloor = false;
       // Если блок стоит прямо на земле острова — опора железно есть
