@@ -397,29 +397,30 @@ class IslandBoundary extends Component with HasGameRef<AngryMolluskGame> {
 
   IslandBoundary(this.start, this.end);
 
-  @override
+    @override
   void render(Canvas canvas) {
-    final pStart = gameRef.worldToScreen(start);
-    final pEnd = gameRef.worldToScreen(end);
+    // Рисуем скалу (коричневая база) прямо в координатах мира (в метрах)
+    canvas.drawRect(Rect.fromLTRB(start.x, start.y, end.x, end.y), Paint()..color = const Color(0xFF6D4C41));
 
-    canvas.drawRect(Rect.fromLTRB(pStart.x, pStart.y, pEnd.x, pEnd.y), Paint()..color = const Color(0xFF6D4C41));
+    // ТЕКСТУРИРОВАНИЕ СКАЛЫ: Добавляем темные прослойки земли для детализации
+    final layerPaint = Paint()..color = const Color(0xFF4E342E)..strokeWidth = 0.1; // толщина в метрах
+    canvas.drawLine(Offset(start.x, start.y + 1.0), Offset(end.x, start.y + 1.2), layerPaint);
+    canvas.drawLine(Offset(start.x, start.y + 3.0), Offset(end.x, start.y + 2.8), layerPaint);
 
-    final layerPaint = Paint()..color = const Color(0xFF4E342E)..strokeWidth = 3;
-    canvas.drawLine(Offset(pStart.x, pStart.y + 40), Offset(pEnd.x, pStart.y + 45), layerPaint);
-    canvas.drawLine(Offset(pStart.x, pStart.y + 90), Offset(pEnd.x, pStart.y + 85), layerPaint);
-
+    // МУЛЬТЯШНАЯ ЗУБЧАТАЯ ТРАВА СВЕРХУ
     final paintGrass = Paint()..color = const Color(0xFF4CAF50);
-    canvas.drawRect(Rect.fromLTWH(pStart.x, pStart.y, pEnd.x - pStart.x, 15), paintGrass);
+    canvas.drawRect(Rect.fromLTWH(start.x, start.y, end.x - start.x, 0.4), paintGrass);
     
+    // Рисуем маленькие треугольные зубчики травы
     final grassPath = Path();
-    for (double x = pStart.x; x < pEnd.x; x += 12) {
-      grassPath.moveTo(x, pStart.y + 14);
-      grassPath.lineTo(x + 6, pStart.y + 24);
-      grassPath.lineTo(x + 12, pStart.y + 14);
+    for (double x = start.x; x < end.x; x += 0.3) {
+      grassPath.moveTo(x, start.y + 0.35);
+      grassPath.lineTo(x + 0.15, start.y + 0.6);
+      grassPath.lineTo(x + 0.3, start.y + 0.35);
     }
     canvas.drawPath(grassPath, paintGrass);
   }
-}
+
 
 
 class Bunnyhop extends Component with HasGameRef<AngryMolluskGame> {
@@ -494,27 +495,29 @@ class Bunnyhop extends Component with HasGameRef<AngryMolluskGame> {
     }
   }
 
-  @override
+    @override
   void render(Canvas canvas) {
-    final screenPos = gameRef.worldToScreen(position);
-    final radius = gameRef.canvasSize.x * 0.022;
+    const radius = 0.9; // Физический радиус птицы в метрах
 
-    final center = gameRef.worldToScreen(gameRef.slingshot.worldPos);
-    final leftHorn = Offset(center.x - gameRef.canvasSize.x * 0.024, center.y - gameRef.canvasSize.y * 0.09);
-    final rightHorn = Offset(center.x + gameRef.canvasSize.x * 0.024, center.y - gameRef.canvasSize.y * 0.09);
-    final paintRubber = Paint()..color = const Color(0xFFD32F2F)..strokeWidth = gameRef.canvasSize.x * 0.007;
-    
-    if (isReadyForLaunch && !isLaunched) {
-      canvas.drawLine(leftHorn, Offset(screenPos.x, screenPos.y), paintRubber);
-      canvas.drawLine(rightHorn, Offset(screenPos.x, screenPos.y), paintRubber);
+    // КРАСНАЯ РЕЗИНКА РОГАТКИ
+    if (dragPosition != null && isReadyForLaunch && !isLaunched) {
+      final leftHorn = gameRef.slingshot.worldPos + const Vector2(-0.8, -1.8) - position;
+      final rightHorn = gameRef.slingshot.worldPos + const Vector2(0.8, -1.8) - position;
+      final paintRubber = Paint()..color = const Color(0xFFD32F2F)..strokeWidth = 0.15;
+      
+      canvas.drawLine(Offset(leftHorn.x, leftHorn.y), Offset.zero, paintRubber);
+      canvas.drawLine(Offset(rightHorn.x, rightHorn.y), Offset.zero, paintRubber);
     }
 
-    canvas.drawCircle(Offset(screenPos.x, screenPos.y), radius, Paint()..color = const Color(0xFFE53935));
+    // Круглая сочная подложка под фото
+    canvas.drawCircle(Offset.zero, radius, Paint()..color = const Color(0xFFE53935));
 
+    // Лицо Баннихопа из ассетов
     if (birdSprite != null) {
-      birdSprite!.render(canvas, position: Vector2(screenPos.x - radius, screenPos.y - radius), size: Vector2(radius * 2, radius * 2));
+      birdSprite!.render(canvas, position: Vector2(-radius, -radius), size: Vector2(radius * 2, radius * 2));
     }
 
+    // Точки траектории полета
     if (dragPosition != null && isReadyForLaunch && !isLaunched) {
       final slingCenter = gameRef.slingshot.worldPos - Vector2(0, 2.5);
       final simVelocity = (slingCenter - position) * 7.5;
@@ -522,10 +525,9 @@ class Bunnyhop extends Component with HasGameRef<AngryMolluskGame> {
 
       for (int i = 1; i < 12; i++) {
         double t = i * 0.12;
-        double x = position.x + simVelocity.x * t;
-        double y = position.y + simVelocity.y * t + 0.5 * gravity * t * t;
-        final dotScreen = gameRef.worldToScreen(Vector2(x, y));
-        canvas.drawCircle(Offset(dotScreen.x, dotScreen.y), gameRef.canvasSize.x * 0.004, dotsPaint);
+        double x = simVelocity.x * t;
+        double y = simVelocity.y * t + 0.5 * gravity * t * t;
+        canvas.drawCircle(Offset(x, y), 0.1, dotsPaint);
       }
     }
   }
@@ -537,24 +539,25 @@ class Slingshot extends Component with HasGameRef<AngryMolluskGame> {
   final Vector2 worldPos;
   Slingshot(this.worldPos);
 
-  @override
+    @override
   void render(Canvas canvas) {
-    final center = gameRef.worldToScreen(worldPos);
-    final thickness = gameRef.canvasSize.x * 0.012; 
+    // В метрах мира
+    const thickness = 0.3; 
 
     final paintFork = Paint()..color = const Color(0xFF4E342E)..strokeWidth = thickness;
     final paintHighlight = Paint()..color = const Color(0xFF8D6E63)..strokeWidth = thickness * 0.3;
     
-    canvas.drawLine(Offset(center.x, center.y - 20), Offset(center.x, center.y + gameRef.canvasSize.y * 0.15), paintFork);
-    canvas.drawLine(Offset(center.x, center.y - 20), Offset(center.x, center.y + gameRef.canvasSize.y * 0.15), paintHighlight);
+    // Рисуем основную стойку рогатки (от высоты травы 22 и вниз)
+    canvas.drawLine(const Offset(0, -0.1), const Offset(0, 3.0), paintFork);
+    canvas.drawLine(const Offset(0, -0.1), const Offset(0, 3.0), paintHighlight);
 
-    final leftHorn = Offset(center.x - gameRef.canvasSize.x * 0.024, center.y - gameRef.canvasSize.y * 0.09);
-    final rightHorn = Offset(center.x + gameRef.canvasSize.x * 0.024, center.y - gameRef.canvasSize.y * 0.09);
+    final leftHorn = const Offset(-0.8, -1.8);
+    final rightHorn = const Offset(0.8, -1.8);
 
-    canvas.drawLine(Offset(center.x, center.y - 18), leftHorn, paintFork);
-    canvas.drawLine(Offset(center.x, center.y - 18), rightHorn, paintFork);
+    canvas.drawLine(const Offset(0, -0.2), leftHorn, paintFork);
+    canvas.drawLine(const Offset(0, -0.2), rightHorn, paintFork);
   }
-}
+
 
 
 class MolluskMaksim extends Component with HasGameRef<AngryMolluskGame> {
@@ -602,15 +605,14 @@ class MolluskMaksim extends Component with HasGameRef<AngryMolluskGame> {
     }
   }
 
-  @override
+    @override
   void render(Canvas canvas) {
-    final screenPos = gameRef.worldToScreen(position);
-    final radius = gameRef.canvasSize.x * 0.025;
+    const radius = 1.0; // Радиус свиньи в метрах
 
-    canvas.drawCircle(Offset(screenPos.x, screenPos.y), radius, Paint()..color = const Color(0xFF4CAF50));
+    canvas.drawCircle(Offset.zero, radius, Paint()..color = const Color(0xFF4CAF50));
 
     if (pigSprite != null) {
-      pigSprite!.render(canvas, position: Vector2(screenPos.x - radius, screenPos.y - radius), size: Vector2(radius * 2, radius * 2));
+      pigSprite!.render(canvas, position: Vector2(-radius, -radius), size: Vector2(radius * 2, radius * 2));
     }
   }
 }
@@ -680,14 +682,8 @@ class GameBlock extends Component with HasGameRef<AngryMolluskGame> {
     }
   }
 
-  @override
+    @override
   void render(Canvas canvas) {
-    final center = gameRef.worldToScreen(position);
-    final sSize = Vector2(
-      (size.x / AngryMolluskGame.worldWidth) * gameRef.canvasSize.x,
-      (size.y / AngryMolluskGame.worldHeight) * gameRef.canvasSize.y,
-    );
-
     final paint = Paint()
       ..color = isStone ? const Color(0xFFB0BEC5) : const Color(0xFFFFB74D) 
       ..style = PaintingStyle.fill;
@@ -695,20 +691,20 @@ class GameBlock extends Component with HasGameRef<AngryMolluskGame> {
     final borderPaint = Paint()
       ..color = isStone ? const Color(0xFF455A64) : const Color(0xFFD84315)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = gameRef.canvasSize.x * 0.003;
+      ..strokeWidth = 0.06;
 
-    final rect = Rect.fromCenter(center: Offset(center.x, center.y), width: sSize.x, height: sSize.y);
+    final rect = Rect.fromCenter(center: Offset.zero, width: size.x, height: size.y);
     canvas.drawRect(rect, paint);
     canvas.drawRect(rect, borderPaint);
 
     if (!isStone) {
-      final woodPaint = Paint()..color = const Color(0xFFE65100)..strokeWidth = 1.5;
-      canvas.drawLine(Offset(rect.left + 5, rect.top + sSize.y * 0.3), Offset(rect.right - 5, rect.top + sSize.y * 0.3), woodPaint);
-      canvas.drawLine(Offset(rect.left + 5, rect.top + sSize.y * 0.7), Offset(rect.right - 5, rect.top + sSize.y * 0.7), woodPaint);
+      final woodPaint = Paint()..color = const Color(0xFFE65100)..strokeWidth = 0.03;
+      canvas.drawLine(Offset(rect.left + 0.1, rect.top + size.y * 0.3), Offset(rect.right - 0.1, rect.top + size.y * 0.3), woodPaint);
+      canvas.drawLine(Offset(rect.left + 0.1, rect.top + size.y * 0.7), Offset(rect.right - 0.1, rect.top + size.y * 0.7), woodPaint);
     } else {
-      final stonePaint = Paint()..color = const Color(0xFF37474F)..strokeWidth = 2;
-      canvas.drawLine(Offset(rect.left + sSize.x * 0.3, rect.top), Offset(rect.left + sSize.x * 0.3, rect.bottom), stonePaint);
-      canvas.drawLine(Offset(rect.left + sSize.x * 0.7, rect.top), Offset(rect.left + sSize.x * 0.7, rect.bottom), stonePaint);
+      final stonePaint = Paint()..color = const Color(0xFF37474F)..strokeWidth = 0.04;
+      canvas.drawLine(Offset(rect.left + size.x * 0.3, rect.top), Offset(rect.left + size.x * 0.3, rect.bottom), stonePaint);
+      canvas.drawLine(Offset(rect.left + size.x * 0.7, rect.top), Offset(rect.left + size.x * 0.7, rect.bottom), stonePaint);
     }
   }
 }
