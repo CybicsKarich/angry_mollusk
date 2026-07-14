@@ -539,7 +539,7 @@ class Bunnyhop extends Component with HasGameRef<AngryMolluskGame> {
 
     // Накладываем спрайт лица Баннихопа по центру
     if (birdSprite != null) {
-      birdSprite!.render(canvas, position: const Offset(-radius, -radius), size: Vector2(radius * 2, radius * 2));
+      birdSprite!.render(canvas, position: Vector2(-radius, -radius), size: Vector2(radius * 2, radius * 2));
     }
 
     // Траектория полёта маленькими точками
@@ -613,7 +613,7 @@ class MolluskMaksim extends Component with HasGameRef<AngryMolluskGame> {
 
     // Накладываем спрайт лица Максима Рыбалкина по центру
     if (pigSprite != null) {
-      pigSprite!.render(canvas, position: const Offset(-radius, -radius), size: Vector2(radius * 2, radius * 2));
+      pigSprite!.render(canvas, position: Vector2(-radius, -radius), size: Vector2(radius * 2, radius * 2));
     }
   }
 }
