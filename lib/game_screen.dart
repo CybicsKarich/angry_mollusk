@@ -180,8 +180,22 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
 
   List<Bunnyhop> birdsQueue = [];
   Bunnyhop? currentBird;
-  List<MolluskMaksim> pigs = [];
+  // Объявляем переменные, которых не хватало компилятору
+  double groundY = 0.73; // Уровень земли (73% от высоты экрана)
+  double sunRotation = 0.0;
+  double cloudOffset1 = 0.0;
+  double cloudOffset2 = 0.0;
+  double _safetyTimer = 0.0;
+  bool isPaused = false;
+
+  // Контейнеры для управления объектами безForge2D
   List<GameBlock> blocks = [];
+  List<MolluskMaksim> pigs = [];
+
+  // Переменные под текстуры
+  Sprite? bunnySprite;
+  Sprite? maksimSprite;
+
   
   bool levelCleared = false;
   bool levelFailed = false;
@@ -193,14 +207,18 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   Future<void> onLoad() async {
     await super.onLoad();
 
+    // Загружаем текстуры для ручного рендеринга
+    bunnySprite = await loadSprite('images/bunnyhop.png');
+    maksimSprite = await loadSprite('images/maksim.png');
     // Задний фон (облака, солнце)
     add(BackgroundDecoration());
 
-    // Создаем 3 Баннихопов в очередь
+        // Создаем 3 птиц Баннихопов в очередь с правильными аргументами Offset
     for (int i = 0; i < 3; i++) {
-      final bird = Bunnyhop(i);
+      final startX = 0.15 - (i * 0.04);
+      final startY = i == 0 ? groundY - 0.04 : groundY - 0.02; 
+      final bird = Bunnyhop(Offset(startX, startY), i == 0);
       birdsQueue.add(bird);
-      add(bird);
     }
     currentBird = birdsQueue.first;
 
@@ -301,7 +319,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
 
   @override
   void render(Canvas canvas) {
-    final size = canvasSize;
+    final size = canvasSize.toSize(); // Это исправит все ошибки с size.width и size.height!
 
     // 1. ОТРИСОВКА НЕБА (ГРАДИЕНТ)
     final skyPaint = Paint()
@@ -414,12 +432,12 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   @override
   void onDragUpdate(DragUpdateEvent event) {
     if (currentBird != null && currentBird!.isReadyForLaunch && !currentBird!.isLaunched) {
-      final size = canvasSize;
+      final size = canvasSize.toSize();
       final touchX = event.localEndPosition.x / size.width;
       final touchY = event.localEndPosition.y / size.y;
 
       final slingX = 0.15;
-      final slingY = groundY - 0.04;
+      final slingY = gameRef.groundY - 0.04;
 
       double dx = touchX - slingX;
       double dy = touchY - slingY;
@@ -509,7 +527,7 @@ class Bunnyhop {
     if (isReadyForLaunch && !isLaunched) {
       final dotsPaint = Paint()..color = Colors.white;
       final slingX = 0.15;
-      final slingY = groundY - 0.04;
+      final slingY = gameRef.groundY - 0.04;
       final simVelocity = Offset((slingX - position.dx) * 1.8, (slingY - position.dy) * 1.8);
 
       for (int i = 1; i < 10; i++) {
