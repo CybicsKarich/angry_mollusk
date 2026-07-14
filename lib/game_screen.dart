@@ -448,8 +448,8 @@ class Slingshot extends Component with HasGameRef<AngryMolluskGame> {
 }
 
 // Класс Баннихопа
-class Bunnyhop extends Component with HasGameRef<AngryMolluskGame> {
-  Vector2 position;
+class Bunnyhop extends PositionComponent with HasGameRef<AngryMolluskGame> {
+  // Переменную position удаляем отсюда, так как она теперь встроена в PositionComponent!
   final Vector2 startPos;
   bool isReadyForLaunch;
   bool isLaunched = false;
@@ -459,7 +459,12 @@ class Bunnyhop extends Component with HasGameRef<AngryMolluskGame> {
   Vector2 velocity = Vector2.zero();
   static const double gravity = 14.0;
 
-  Bunnyhop(this.startPos, this.isReadyForLaunch) : position = Vector2.copy(startPos);
+  // ОБНОВЛЕННЫЙ КОНСТРУКТОР: Задаем позицию, размер (1.8 на 1.8 метра) и центрируем птицу
+  Bunnyhop(this.startPos, this.isReadyForLaunch) {
+    this.position = Vector2.copy(startPos);
+    this.size = Vector2(1.8, 1.8);
+    this.anchor = Anchor.center;
+  }
 
   @override
   Future<void> onLoad() async {
@@ -522,7 +527,7 @@ class Bunnyhop extends Component with HasGameRef<AngryMolluskGame> {
 
     @override
   void render(Canvas canvas) {
-    const radius = 0.9; // Мультяшный радиус птицы в метрах
+    final radius = size.x / 2;
 
     // КРАСНАЯ РЕЗИНКА РОГАТКИ БЕЗ СДВИГОВ И КОНСТАНТ
     if (dragPosition != null && isReadyForLaunch && !isLaunched) {
@@ -558,14 +563,18 @@ class Bunnyhop extends Component with HasGameRef<AngryMolluskGame> {
   }
 }
 
-// Класс Свиньи Максима
-class MolluskMaksim extends Component with HasGameRef<AngryMolluskGame> {
-  Vector2 position;
+class MolluskMaksim extends PositionComponent with HasGameRef<AngryMolluskGame> {
+  // Переменную position удаляем отсюда, она теперь системная!
   Vector2 velocity = Vector2.zero();
   Sprite? pigSprite;
   bool isFalling = false; 
 
-  MolluskMaksim(this.position);
+  // ОБНОВЛЕННЫЙ КОНСТРУКТОР: Задаем позицию, размер свиньи в метрах и центрируем её
+  MolluskMaksim(Vector2 startPos) {
+    this.position = Vector2.copy(startPos);
+    this.size = Vector2(2.0, 2.0);
+    this.anchor = Anchor.center;
+  }
 
   @override
   Future<void> onLoad() async {
@@ -606,7 +615,7 @@ class MolluskMaksim extends Component with HasGameRef<AngryMolluskGame> {
 
     @override
   void render(Canvas canvas) {
-    const radius = 1.0; // Радиус Максима в метрах
+    final radius = size.x / 2;
 
     // Зелёный круг-подложка
     canvas.drawCircle(Offset.zero, radius, Paint()..color = const Color(0xFF4CAF50));
@@ -618,15 +627,18 @@ class MolluskMaksim extends Component with HasGameRef<AngryMolluskGame> {
   }
 }
 
-// Класс строительного блока
-class GameBlock extends Component with HasGameRef<AngryMolluskGame> {
-  Vector2 position;
-  Vector2 size;
+class GameBlock extends PositionComponent with HasGameRef<AngryMolluskGame> {
+  // Переменные position и size удаляем, они теперь наследуются из PositionComponent!
   Vector2 velocity = Vector2.zero();
   final bool isStone;
   bool isFalling = false;
 
-  GameBlock(this.position, this.size, this.isStone);
+  // ОБНОВЛЕННЫЙ КОНСТРУКТОР: Заполняем системные position, size и центрируем блок замка
+  GameBlock(Vector2 spawnPos, Vector2 blockSize, this.isStone) {
+    this.position = Vector2.copy(spawnPos);
+    this.size = Vector2.copy(blockSize);
+    this.anchor = Anchor.center;
+  }
 
   void hit(Vector2 birdVelocity) {
     velocity = birdVelocity * 0.5;
