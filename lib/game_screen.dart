@@ -4,7 +4,6 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart' hide Wallet;
 
-
 // Главный экран игры с поддержкой оверлеев: Победа, Пауза, Проигрыш
 class GameScreen extends StatelessWidget {
   const GameScreen({super.key});
@@ -142,7 +141,6 @@ class GameScreen extends StatelessWidget {
                           child: ElevatedButton(
                             onPressed: () {
                               game.overlays.remove('GameOverMenu');
-                              // Перезапускаем уровень, просто заново открывая GameScreen
                               Navigator.replace(context, oldRoute: ModalRoute.of(context)!, newRoute: MaterialPageRoute(builder: (context) => const GameScreen()));
                             },
                             style: ElevatedButton.styleFrom(backgroundColor: Colors.red, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
@@ -157,7 +155,7 @@ class GameScreen extends StatelessWidget {
             },
           ),
           
-          // Рабочая кнопка паузы
+          // Кнопка Паузы во Flutter-слое
           Positioned(
             top: 16,
             left: 16,
@@ -176,7 +174,7 @@ class GameScreen extends StatelessWidget {
   }
 }
 
-// Главный движок игры
+// Главный движок игры на чистом Flame
 class AngryMolluskGame extends FlameGame with DragCallbacks {
   AngryMolluskGame() : super();
 
@@ -187,51 +185,42 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   bool levelFailed = false;
   bool spawnCompleted = false;
 
+  // Размеры виртуального мира в метрах
   static const double worldWidth = 60.0;
   static const double worldHeight = 30.0;
 
-    @override
+  @override
   Future<void> onLoad() async {
     await super.onLoad();
 
-    // ЖЕЛЕЗНОЕ ИСПРАВЛЕНИЕ: Добавляем мир и камеру Flame на сцену, чтобы объекты появились на экране!
-    add(world);
-    add(camera);
-    // НАСТРОЙКА КАМЕРЫ: Наводим объектив на центр нашего игрового мира (30, 15)
-    camera.viewfinder.position = Vector2(30, 15);
-    // Настраиваем зум, чтобы весь мир шириной 60 метров чётко вписался в экран смартфона
-    camera.viewfinder.anchor = Anchor.center;
-    camera.viewfinder.zoom = canvasSize.x / worldWidth;
-
-
-    // Задний фон крепим к корню
+    // Задний фон (небо, облака, солнце, вода)
     add(BackgroundDecoration());
     
-    // Все физические объекты теперь правильно прописываем в world
-    world.add(IslandBoundary(Vector2(0, 22), Vector2(14, 30)));   
-    world.add(IslandBoundary(Vector2(34, 22), Vector2(60, 30)));  
+    // Острова на высоте Y: 22 (земля опущена ниже, чтобы здания влезли)
+    add(IslandBoundary(Vector2(0, 22), Vector2(14, 30)));   
+    add(IslandBoundary(Vector2(34, 22), Vector2(60, 30)));  
 
+    // Рогатка (стоит ровно поверх травы левого острова)
     slingshot = Slingshot(Vector2(8, 22));
-    world.add(slingshot);
+    add(slingshot);
 
     add(DragController());
 
-    // Создаем 3 птиц Баннихопов в очередь внутри world
+    // Создаем 3 птиц Баннихопов в очередь
     for (int i = 0; i < 3; i++) {
       final startX = 5.0 - (i * 2.0);
-      final startY = i == 0 ? 20.0 : 21.2; 
+      final startY = i == 0 ? 20.2 : 21.2; 
       final bird = Bunnyhop(Vector2(startX, startY), i == 0);
       birdsQueue.add(bird);
-      world.add(bird);
+      add(bird);
     }
     currentBird = birdsQueue.first;
 
     _buildLevelStructures();
   }
 
-
     void _buildLevelStructures() {
-    // Каменные опоры (серые)
+    // Каменные опоры (серые) — спавним внутри world
     world.add(GameBlock(Vector2(38, 20.5), Vector2(1.2, 3.0), true));
     world.add(GameBlock(Vector2(42, 20.5), Vector2(1.2, 3.0), true));
     world.add(GameBlock(Vector2(46, 20.5), Vector2(1.2, 3.0), true));
@@ -241,20 +230,20 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     world.add(GameBlock(Vector2(42, 18.5), Vector2(6.8, 1.0), true));
     world.add(GameBlock(Vector2(48, 18.5), Vector2(5.5, 1.0), true));
 
-    // Деревянные стены первого этажа
+    // Деревянные стены первого этажа (коричневые)
     world.add(GameBlock(Vector2(40, 15.5), Vector2(1.0, 5.0), false));
     world.add(GameBlock(Vector2(45, 15.5), Vector2(1.0, 5.0), false));
     world.add(GameBlock(Vector2(49, 15.5), Vector2(1.0, 5.0), false));
 
-    // Деревянный потолок
+    // Деревянный потолок первого этажа
     world.add(GameBlock(Vector2(44.5, 12.5), Vector2(11.0, 1.2), false));
 
-    // Верхняя башня
+    // Верхняя деревянная башня
     world.add(GameBlock(Vector2(42.5, 10.0), Vector2(0.8, 3.8), false));
     world.add(GameBlock(Vector2(46.5, 10.0), Vector2(0.8, 3.8), false));
     world.add(GameBlock(Vector2(44.5, 7.5), Vector2(5.0, 1.2), false));
 
-    // Свиньи Максимы
+    // Расставляем свиней Максимов Рыбалкиных
     world.add(MolluskMaksim(Vector2(42.5, 16.5)));   
     world.add(MolluskMaksim(Vector2(47.0, 16.5)));   
     world.add(MolluskMaksim(Vector2(44.5, 10.0)));  
@@ -270,7 +259,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
         currentBird!.jumpToSlingshot(Vector2(8, 20.0));
       } else {
         currentBird = null; 
-        // Если птицы кончились, а свиньи ещё живы — запускаем триггер проигрыша через 2 секунды проверки
+        // Если птицы кончились, а свиньи живы — оверлей проигрыша через 2 секунды
         Future.delayed(const Duration(seconds: 2), () {
           final pigsLeft = world.children.whereType<MolluskMaksim>().length;
           if (pigsLeft > 0 && !levelCleared && !levelFailed) {
@@ -282,18 +271,12 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     }
   }
 
-  double _timeElapsed = 0.0; // Счётчик времени со старта уровня
-
   @override
   void update(double dt) {
     super.update(dt);
     if (!spawnCompleted) return;
-
-    // Считаем время, прошедшее с запуска уровня
-    _timeElapsed += dt;
-    // Твой совет: Если прошло меньше 5 секунд, проверку на победу даже не начинаем!
-    if (_timeElapsed < 5.0) return;
     
+    // Считаем свиней строго внутри контейнера world
     final pigCount = world.children.whereType<MolluskMaksim>().length;
     if (pigCount == 0 && !levelCleared && !levelFailed) {
       levelCleared = true;
@@ -302,12 +285,13 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   }
 }
 
-// Контроллер жестов
+// Контроллер жестов перевода пикселей тача в метры мира
 class DragController extends Component with DragCallbacks, HasGameRef<AngryMolluskGame> {
   @override
   void onDragUpdate(DragUpdateEvent event) {
     final currentBird = gameRef.currentBird;
     if (currentBird != null && currentBird.isReadyForLaunch && !currentBird.isLaunched) {
+      // Переводим локальные пиксели экрана в метры игровой сцены
       final worldX = (event.localEndPosition.x / gameRef.canvasSize.x) * AngryMolluskGame.worldWidth;
       final worldY = (event.localEndPosition.y / gameRef.canvasSize.y) * AngryMolluskGame.worldHeight;
       currentBird.dragTo(Vector2(worldX, worldY));
@@ -323,7 +307,7 @@ class DragController extends Component with DragCallbacks, HasGameRef<AngryMollu
   }
 }
 
-// АНИМАЦИЯ: Солнце крутится, облака плывут
+// Детализированный задний фон: крутящееся солнце, плывущие облака, вода
 class BackgroundDecoration extends Component with HasGameRef<AngryMolluskGame> {
   double sunRotation = 0.0;
   double cloudOffset1 = 0.0;
@@ -349,7 +333,7 @@ class BackgroundDecoration extends Component with HasGameRef<AngryMolluskGame> {
     ).createShader(Offset.zero & size.toSize());
     canvas.drawRect(Offset.zero & size.toSize(), skyPaint);
 
-    // НАСТОЯЩЕЕ СОЛНЦЕ С КРАСИВЫМИ ТРЕУГОЛЬНЫМИ ЛУЧАМИ СЛЕВА
+    // СОЛНЦЕ СЛЕВА С КРАСИВЫМИ ВЕКТОРНЫМИ ТРЕУГОЛЬНЫМИ ЛУЧАМИ
     final sunCenter = Offset(size.x * 0.15, size.y * 0.2);
     final sunRadius = size.y * 0.09;
     
@@ -373,6 +357,7 @@ class BackgroundDecoration extends Component with HasGameRef<AngryMolluskGame> {
     
     canvas.drawCircle(sunCenter, sunRadius, Paint()..color = const Color(0xFFFBC02D)); 
 
+    // ОБЛАКА ПЛЫВУТ
     final cloudPaint = Paint()..color = Colors.white.withValues(alpha: 0.85);
     
     double c1X = (size.x * 0.3 + cloudOffset1) % (size.x + 200) - 100;
@@ -384,72 +369,73 @@ class BackgroundDecoration extends Component with HasGameRef<AngryMolluskGame> {
     canvas.drawCircle(Offset(c2X, size.y * 0.22), 25, cloudPaint);
     canvas.drawCircle(Offset(c2X + 30, size.y * 0.2), 35, cloudPaint);
 
-        // Опустили уровень воды пониже (теперь она занимает последние 15% экрана снизу)
+    // Низкий уровень воды (занимает нижние 15% экрана)
     canvas.drawRect(Rect.fromLTWH(0, size.y * 0.83, size.x, size.y * 0.02), Paint()..color = const Color(0xFF29B6F6));
     canvas.drawRect(Rect.fromLTWH(0, size.y * 0.85, size.x, size.y * 0.15), Paint()..color = const Color(0xFF0288D1));
   }
 }
 
-// Острова
-class IslandBoundary extends Component with HasGameRef<AngryMolluskGame> {
-  final Vector2 start;
-  final Vector2 end;
-
-  IslandBoundary(this.start, this.end);
+// Острова (рисуются в метрах внутри world)
+class IslandBoundary extends PositionComponent {
+  IslandBoundary(Vector2 start, Vector2 end) {
+    this.position = start;
+    this.size = end - start;
+    this.anchor = Anchor.topLeft;
+  }
 
   @override
   void render(Canvas canvas) {
-    // Рисуем скалу (коричневая база) прямо в координатах мира (в метрах)
-    canvas.drawRect(Rect.fromLTRB(start.x, start.y, end.x, end.y), Paint()..color = const Color(0xFF6D4C41));
+    // Отрисовка скалы (коричневая база локально от 0,0 до size)
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.x, size.y), Paint()..color = const Color(0xFF6D4C41));
 
-    // ТЕКСТУРИРОВАНИЕ СКАЛЫ: Добавляем темные прослойки земли для детализации
-    final layerPaint = Paint()..color = const Color(0xFF4E342E)..strokeWidth = 0.1; // толщина в метрах
-    canvas.drawLine(Offset(start.x, start.y + 1.0), Offset(end.x, start.y + 1.2), layerPaint);
-    canvas.drawLine(Offset(start.x, start.y + 3.0), Offset(end.x, start.y + 2.8), layerPaint);
+    // Текстурные слои земли скалы
+    final layerPaint = Paint()..color = const Color(0xFF4E342E)..strokeWidth = 0.1;
+    canvas.drawLine(Offset(0, 1.0), Offset(size.x, 1.2), layerPaint);
+    canvas.drawLine(Offset(0, 3.0), Offset(size.x, 2.8), layerPaint);
 
-    // МУЛЬТЯШНАЯ ЗУБЧАТАЯ ТРАВА СВЕРХУ
+    // Зеленая трава с мультяшными зубчиками
     final paintGrass = Paint()..color = const Color(0xFF4CAF50);
-    canvas.drawRect(Rect.fromLTWH(start.x, start.y, end.x - start.x, 0.4), paintGrass);
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.x, 0.4), paintGrass);
     
-    // Рисуем маленькие треугольные зубчики травы
     final grassPath = Path();
-    for (double x = start.x; x < end.x; x += 0.3) {
-      grassPath.moveTo(x, start.y + 0.35);
-      grassPath.lineTo(x + 0.15, start.y + 0.6);
-      grassPath.lineTo(x + 0.3, start.y + 0.35);
+    for (double x = 0; x < size.x; x += 0.3) {
+      grassPath.moveTo(x, 0.35);
+      grassPath.lineTo(x + 0.15, 0.6);
+      grassPath.lineTo(x + 0.3, 0.35);
     }
     canvas.drawPath(grassPath, paintGrass);
   }
-} // СКОБКА ЗАКРЫТА! Теперь синтаксис не ломает остальные классы
+}
 
-// Высокая деревянная рогатка
-class Slingshot extends Component with HasGameRef<AngryMolluskGame> {
-  final Vector2 worldPos;
-  Slingshot(this.worldPos);
+// Высокая деревянная рогатка на траве
+class Slingshot extends PositionComponent {
+  Slingshot(Vector2 worldPos) {
+    this.position = worldPos;
+    this.size = Vector2(2.5, 4.5); // Масштаб увеличен в 1.5 раза
+    this.anchor = Anchor.bottomCenter;
+  }
 
   @override
   void render(Canvas canvas) {
-    // Рисуем в метрах мира
     const thickness = 0.3; 
-
     final paintFork = Paint()..color = const Color(0xFF4E342E)..strokeWidth = thickness;
     final paintHighlight = Paint()..color = const Color(0xFF8D6E63)..strokeWidth = thickness * 0.3;
     
-    // Стойка и рожки рогатки (рисуются локально от её worldPos, так как Flame сам сдвинет матрицу)
-    canvas.drawLine(const Offset(0, -0.1), const Offset(0, 3.0), paintFork);
-    canvas.drawLine(const Offset(0, -0.1), const Offset(0, 3.0), paintHighlight);
+    // Рисуем основание локально вверх от нижней точки привязки
+    canvas.drawLine(Offset(0, size.y), Offset(0, size.y - 2.5), paintFork);
+    canvas.drawLine(Offset(0, size.y), Offset(0, size.y - 2.5), paintHighlight);
 
-    final leftHorn = const Offset(-0.8, -1.8);
-    final rightHorn = const Offset(0.8, -1.8);
+    // Левый и правый рожки рогатки
+    final leftHorn = Offset(-1.0, size.y - 4.2);
+    final rightHorn = Offset(1.0, size.y - 4.2);
 
-    canvas.drawLine(const Offset(0, -0.2), leftHorn, paintFork);
-    canvas.drawLine(const Offset(0, -0.2), rightHorn, paintFork);
+    canvas.drawLine(Offset(0, size.y - 2.4), leftHorn, paintFork);
+    canvas.drawLine(Offset(0, size.y - 2.4), rightHorn, paintFork);
   }
 }
 
 // Класс Баннихопа
 class Bunnyhop extends PositionComponent with HasGameRef<AngryMolluskGame> {
-  // Переменную position удаляем отсюда, так как она теперь встроена в PositionComponent!
   final Vector2 startPos;
   bool isReadyForLaunch;
   bool isLaunched = false;
@@ -459,7 +445,6 @@ class Bunnyhop extends PositionComponent with HasGameRef<AngryMolluskGame> {
   Vector2 velocity = Vector2.zero();
   static const double gravity = 14.0;
 
-  // ОБНОВЛЕННЫЙ КОНСТРУКТОР: Задаем позицию, размер (1.8 на 1.8 метра) и центрируем птицу
   Bunnyhop(this.startPos, this.isReadyForLaunch) {
     this.position = Vector2.copy(startPos);
     this.size = Vector2(1.8, 1.8);
@@ -478,7 +463,8 @@ class Bunnyhop extends PositionComponent with HasGameRef<AngryMolluskGame> {
   }
 
   void dragTo(Vector2 target) {
-    final slingCenter = gameRef.slingshot.worldPos - Vector2(0, 2.5);
+    // Точка центра между рожками рогатки
+    final slingCenter = gameRef.slingshot.position - Vector2(0, 3.2);
     var dir = target - slingCenter;
     if (dir.length > 2.8) {
       dir = dir.normalized() * 2.8;
@@ -489,7 +475,7 @@ class Bunnyhop extends PositionComponent with HasGameRef<AngryMolluskGame> {
 
   void launch() {
     isLaunched = true;
-    final slingCenter = gameRef.slingshot.worldPos - Vector2(0, 2.5);
+    final slingCenter = gameRef.slingshot.position - Vector2(0, 3.2);
     velocity = (slingCenter - position) * 7.5;
     dragPosition = null;
 
@@ -506,14 +492,16 @@ class Bunnyhop extends PositionComponent with HasGameRef<AngryMolluskGame> {
     super.update(dt);
     if (isLaunched) {
       velocity.y += gravity * dt;
-      position += velocity * dt;
+            position += velocity * dt;
 
+      // Проверяем столкновения со свиньями
       for (final pig in gameRef.world.children.whereType<MolluskMaksim>()) {
         if ((position - pig.position).length < 2.0) {
           pig.hit(velocity); 
         }
       }
 
+      // Проверяем столкновения со строительными блоками
       for (final block in gameRef.world.children.whereType<GameBlock>()) {
         if (position.x >= block.position.x - block.size.x / 2 &&
             position.x <= block.position.x + block.size.x / 2 &&
@@ -525,31 +513,31 @@ class Bunnyhop extends PositionComponent with HasGameRef<AngryMolluskGame> {
     }
   }
 
-    @override
+  @override
   void render(Canvas canvas) {
     final radius = size.x / 2;
 
-    // КРАСНАЯ РЕЗИНКА РОГАТКИ БЕЗ СДВИГОВ И КОНСТАНТ
-    if (dragPosition != null && isReadyForLaunch && !isLaunched) {
-      final leftHorn = gameRef.slingshot.worldPos + Vector2(-0.8, -1.8) - position;
-      final rightHorn = gameRef.slingshot.worldPos + Vector2(0.8, -1.8) - position;
-      final paintRubber = Paint()..color = const Color(0xFFD32F2F)..strokeWidth = 0.15; // Толщина резинки в метрах
+    // Всегда натянутая красная резинка рогатки от рожка к рожку через центр птицы
+    if (isReadyForLaunch && !isLaunched) {
+      final leftHorn = gameRef.slingshot.position + Vector2(-1.0, -4.2) - position;
+      final rightHorn = gameRef.slingshot.position + Vector2(1.0, -4.2) - position;
+      final paintRubber = Paint()..color = const Color(0xFFD32F2F)..strokeWidth = 0.15;
       
       canvas.drawLine(Offset(leftHorn.x, leftHorn.y), Offset.zero, paintRubber);
       canvas.drawLine(Offset(rightHorn.x, rightHorn.y), Offset.zero, paintRubber);
     }
 
-    // Сочный красный круг-подложка
+    // Сочный красный круг-подложка под фотку
     canvas.drawCircle(Offset.zero, radius, Paint()..color = const Color(0xFFE53935));
 
-    // Накладываем спрайт лица Баннихопа по центру
+    // Отрисовка круглого лица друга Баннихопа
     if (birdSprite != null) {
       birdSprite!.render(canvas, position: Vector2(-radius, -radius), size: Vector2(radius * 2, radius * 2));
     }
 
-    // Траектория полёта маленькими точками
+    // Траектория белыми точками при натяжении рогатки
     if (dragPosition != null && isReadyForLaunch && !isLaunched) {
-      final slingCenter = gameRef.slingshot.worldPos - Vector2(0, 2.5);
+      final slingCenter = gameRef.slingshot.position - Vector2(0, 3.2);
       final simVelocity = (slingCenter - position) * 7.5;
       final dotsPaint = Paint()..color = Colors.white;
 
@@ -557,19 +545,18 @@ class Bunnyhop extends PositionComponent with HasGameRef<AngryMolluskGame> {
         double t = i * 0.12;
         double x = simVelocity.x * t;
         double y = simVelocity.y * t + 0.5 * gravity * t * t;
-        canvas.drawCircle(Offset(x, y), 0.08, dotsPaint); // Точки размером 8 сантиметров в мире игры
+        canvas.drawCircle(Offset(x, y), 0.08, dotsPaint);
       }
     }
   }
 }
 
+// Класс Свиньи Максима
 class MolluskMaksim extends PositionComponent with HasGameRef<AngryMolluskGame> {
-  // Переменную position удаляем отсюда, она теперь системная!
   Vector2 velocity = Vector2.zero();
   Sprite? pigSprite;
   bool isFalling = false; 
 
-  // ОБНОВЛЕННЫЙ КОНСТРУКТОР: Задаем позицию, размер свиньи в метрах и центрируем её
   MolluskMaksim(Vector2 startPos) {
     this.position = Vector2.copy(startPos);
     this.size = Vector2(2.0, 2.0);
@@ -596,9 +583,10 @@ class MolluskMaksim extends PositionComponent with HasGameRef<AngryMolluskGame> 
       position += velocity * dt;
 
       if (position.y >= 22.0) {
-        removeFromParent(); 
+        removeFromParent(); // Свинья разлетелась об землю острова
       }
     } else {
+      // Если под Максимом пропали опоры блоков замка — он падает по закону физики
       bool standOnBlock = false;
       for (final block in gameRef.world.children.whereType<GameBlock>()) {
         if ((position.x - block.position.x).abs() < block.size.x / 2 &&
@@ -613,27 +601,25 @@ class MolluskMaksim extends PositionComponent with HasGameRef<AngryMolluskGame> 
     }
   }
 
-    @override
+  @override
   void render(Canvas canvas) {
     final radius = size.x / 2;
-
-    // Зелёный круг-подложка
+    // Зеленый мультяшный круг-подложка
     canvas.drawCircle(Offset.zero, radius, Paint()..color = const Color(0xFF4CAF50));
 
-    // Накладываем спрайт лица Максима Рыбалкина по центру
+    // Отрисовка круглого лица Максима Рыбалкина
     if (pigSprite != null) {
       pigSprite!.render(canvas, position: Vector2(-radius, -radius), size: Vector2(radius * 2, radius * 2));
     }
   }
 }
 
+// Разрушаемые строительные блоки замка (Камень / Дерево)
 class GameBlock extends PositionComponent with HasGameRef<AngryMolluskGame> {
-  // Переменные position и size удаляем, они теперь наследуются из PositionComponent!
   Vector2 velocity = Vector2.zero();
   final bool isStone;
   bool isFalling = false;
 
-  // ОБНОВЛЕННЫЙ КОНСТРУКТОР: Заполняем системные position, size и центрируем блок замка
   GameBlock(Vector2 spawnPos, Vector2 blockSize, this.isStone) {
     this.position = Vector2.copy(spawnPos);
     this.size = Vector2.copy(blockSize);
@@ -667,6 +653,7 @@ class GameBlock extends PositionComponent with HasGameRef<AngryMolluskGame> {
       velocity.y += 14.0 * dt; 
       position += velocity * dt;
 
+      // ЛАВИНА И ЦЕПНЫЕ РАЗРУШЕНИЯ: падающий блок сталкивается с нижними и толкает их
       for (final otherBlock in gameRef.world.children.whereType<GameBlock>()) {
         if (otherBlock != this && !otherBlock.isFalling) {
           if ((position.x - otherBlock.position.x).abs() < (size.x + otherBlock.size.x) / 2 &&
@@ -676,27 +663,29 @@ class GameBlock extends PositionComponent with HasGameRef<AngryMolluskGame> {
         }
       }
 
+      // Падающие блоки давят свиней Максимов под собой
       for (final pig in gameRef.world.children.whereType<MolluskMaksim>()) {
         if ((position - pig.position).length < (size.x + size.y) / 3) {
           pig.hit(velocity); 
         }
       }
 
+      // Остановка при падении на твердый остров
       if (position.y >= 22.0 - size.y / 2) {
         position.y = 22.0 - size.y / 2;
         velocity = Vector2.zero();
         isFalling = false;
       }
       
+      // Улетел со скалы в воду
       if (position.x < 34.0 && position.y >= 22.0) {
         removeFromParent(); 
       }
     }
   }
 
-    @override
+  @override
   void render(Canvas canvas) {
-    // Настраиваем цвета материалов
     final paint = Paint()
       ..color = isStone ? const Color(0xFFB0BEC5) : const Color(0xFFFFB74D) 
       ..style = PaintingStyle.fill;
@@ -704,14 +693,13 @@ class GameBlock extends PositionComponent with HasGameRef<AngryMolluskGame> {
     final borderPaint = Paint()
       ..color = isStone ? const Color(0xFF455A64) : const Color(0xFFD84315)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.08; // Толщина обводки блока в метрах
+      ..strokeWidth = 0.06;
 
-    // Строим прямоугольник от центра локальных координат
     final rect = Rect.fromCenter(center: Offset.zero, width: size.x, height: size.y);
     canvas.drawRect(rect, paint);
     canvas.drawRect(rect, borderPaint);
 
-    // Добавляем текстурные мультяшные линии детализации
+    // Детализация текстуры материалов: волокна дерева или швы кирпича
     if (!isStone) {
       final woodPaint = Paint()..color = const Color(0xFFE65100)..strokeWidth = 0.03;
       canvas.drawLine(Offset(rect.left + 0.1, rect.top + size.y * 0.3), Offset(rect.right - 0.1, rect.top + size.y * 0.3), woodPaint);
@@ -723,4 +711,5 @@ class GameBlock extends PositionComponent with HasGameRef<AngryMolluskGame> {
     }
   }
 }
+
 
