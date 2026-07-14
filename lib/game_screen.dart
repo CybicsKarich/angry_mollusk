@@ -192,6 +192,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   List<GameBlock> blocks = [];
   List<MolluskMaksim> pigs = [];
   bool isCastleActivated = false; // Включается только после того, как птица полетит к замку
+  bool spawnCompleted = false; // Добавляем объявление флага спавна
 
   // Переменные под текстуры
   Sprite? bunnySprite;
