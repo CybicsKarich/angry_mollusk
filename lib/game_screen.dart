@@ -520,26 +520,29 @@ class Bunnyhop extends Component with HasGameRef<AngryMolluskGame> {
     }
   }
 
-  @override
+    @override
   void render(Canvas canvas) {
-    const radius = 0.9; 
+    const radius = 0.9; // Мультяшный радиус птицы в метрах
 
-    // КРАСНАЯ РЕЗИНКА РОГАТКИ
+    // КРАСНАЯ РЕЗИНКА РОГАТКИ БЕЗ СДВИГОВ И КОНСТАНТ
     if (dragPosition != null && isReadyForLaunch && !isLaunched) {
       final leftHorn = gameRef.slingshot.worldPos + Vector2(-0.8, -1.8) - position;
       final rightHorn = gameRef.slingshot.worldPos + Vector2(0.8, -1.8) - position;
-      final paintRubber = Paint()..color = const Color(0xFFD32F2F)..strokeWidth = 0.15;
+      final paintRubber = Paint()..color = const Color(0xFFD32F2F)..strokeWidth = 0.15; // Толщина резинки в метрах
       
       canvas.drawLine(Offset(leftHorn.x, leftHorn.y), Offset.zero, paintRubber);
       canvas.drawLine(Offset(rightHorn.x, rightHorn.y), Offset.zero, paintRubber);
     }
 
+    // Сочный красный круг-подложка
     canvas.drawCircle(Offset.zero, radius, Paint()..color = const Color(0xFFE53935));
 
+    // Накладываем спрайт лица Баннихопа по центру
     if (birdSprite != null) {
-      birdSprite!.render(canvas, position: Vector2(-radius, -radius), size: Vector2(radius * 2, radius * 2));
+      birdSprite!.render(canvas, position: const Offset(-radius, -radius), size: Vector2(radius * 2, radius * 2));
     }
 
+    // Траектория полёта маленькими точками
     if (dragPosition != null && isReadyForLaunch && !isLaunched) {
       final slingCenter = gameRef.slingshot.worldPos - Vector2(0, 2.5);
       final simVelocity = (slingCenter - position) * 7.5;
@@ -549,7 +552,7 @@ class Bunnyhop extends Component with HasGameRef<AngryMolluskGame> {
         double t = i * 0.12;
         double x = simVelocity.x * t;
         double y = simVelocity.y * t + 0.5 * gravity * t * t;
-        canvas.drawCircle(Offset(x, y), 0.1, dotsPaint);
+        canvas.drawCircle(Offset(x, y), 0.08, dotsPaint); // Точки размером 8 сантиметров в мире игры
       }
     }
   }
@@ -601,14 +604,16 @@ class MolluskMaksim extends Component with HasGameRef<AngryMolluskGame> {
     }
   }
 
-  @override
+    @override
   void render(Canvas canvas) {
-    const radius = 1.0; 
+    const radius = 1.0; // Радиус Максима в метрах
 
+    // Зелёный круг-подложка
     canvas.drawCircle(Offset.zero, radius, Paint()..color = const Color(0xFF4CAF50));
 
+    // Накладываем спрайт лица Максима Рыбалкина по центру
     if (pigSprite != null) {
-      pigSprite!.render(canvas, position: Vector2(-radius, -radius), size: Vector2(radius * 2, radius * 2));
+      pigSprite!.render(canvas, position: const Offset(-radius, -radius), size: Vector2(radius * 2, radius * 2));
     }
   }
 }
@@ -677,29 +682,32 @@ class GameBlock extends Component with HasGameRef<AngryMolluskGame> {
     }
   }
 
-  @override
+    @override
   void render(Canvas canvas) {
+    // Настраиваем цвета материалов
     final paint = Paint()
-            ..color = isStone ? const Color(0xFFB0BEC5) : const Color(0xFFFFB74D) 
+      ..color = isStone ? const Color(0xFFB0BEC5) : const Color(0xFFFFB74D) 
       ..style = PaintingStyle.fill;
     
     final borderPaint = Paint()
       ..color = isStone ? const Color(0xFF455A64) : const Color(0xFFD84315)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.06;
+      ..strokeWidth = 0.08; // Толщина обводки блока в метрах
 
+    // Строим прямоугольник от центра локальных координат
     final rect = Rect.fromCenter(center: Offset.zero, width: size.x, height: size.y);
     canvas.drawRect(rect, paint);
     canvas.drawRect(rect, borderPaint);
 
+    // Добавляем текстурные мультяшные линии детализации
     if (!isStone) {
       final woodPaint = Paint()..color = const Color(0xFFE65100)..strokeWidth = 0.03;
       canvas.drawLine(Offset(rect.left + 0.1, rect.top + size.y * 0.3), Offset(rect.right - 0.1, rect.top + size.y * 0.3), woodPaint);
       canvas.drawLine(Offset(rect.left + 0.1, rect.top + size.y * 0.7), Offset(rect.right - 0.1, rect.top + size.y * 0.7), woodPaint);
     } else {
-      final stonePaint = Paint()..color = const Color(0xFF37474F)..strokeWidth = 0.04;
-      canvas.drawLine(Offset(rect.left + size.x * 0.3, rect.top), Offset(rect.left + size.x * 0.3, rect.bottom), stonePaint);
-      canvas.drawLine(Offset(rect.left + size.x * 0.7, rect.top), Offset(rect.left + size.x * 0.7, rect.bottom), stonePaint);
+      final stonePaint = Paint()..color = const Color(0xFF37474F)..strokeWidth = 0.03;
+      canvas.drawLine(Offset(rect.left + size.x * 0.3, rect.top + 0.1), Offset(rect.left + size.x * 0.3, rect.bottom - 0.1), stonePaint);
+      canvas.drawLine(Offset(rect.left + size.x * 0.7, rect.top + 0.1), Offset(rect.left + size.x * 0.7, rect.bottom - 0.1), stonePaint);
     }
   }
 }
