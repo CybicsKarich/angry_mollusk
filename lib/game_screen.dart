@@ -190,23 +190,27 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   static const double worldWidth = 60.0;
   static const double worldHeight = 30.0;
 
-  @override
+    @override
   Future<void> onLoad() async {
     await super.onLoad();
 
+    // ЖЕЛЕЗНОЕ ИСПРАВЛЕНИЕ: Добавляем мир и камеру Flame на сцену, чтобы объекты появились на экране!
+    add(world);
+    add(camera);
+
+    // Задний фон крепим к корню
     add(BackgroundDecoration());
     
-    // Масштабирование островов
+    // Все физические объекты теперь правильно прописываем в world
     world.add(IslandBoundary(Vector2(0, 22), Vector2(14, 30)));   
     world.add(IslandBoundary(Vector2(34, 22), Vector2(60, 30)));  
 
-    // Крупная и высокая рогатка
     slingshot = Slingshot(Vector2(8, 22));
     world.add(slingshot);
 
     add(DragController());
 
-    // Спавн очереди птиц
+    // Создаем 3 птиц Баннихопов в очередь внутри world
     for (int i = 0; i < 3; i++) {
       final startX = 5.0 - (i * 2.0);
       final startY = i == 0 ? 20.0 : 21.2; 
@@ -218,6 +222,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
 
     _buildLevelStructures();
   }
+
 
     void _buildLevelStructures() {
     // Каменные опоры (серые)
@@ -271,18 +276,25 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     }
   }
 
+  double _timeElapsed = 0.0; // Счётчик времени со старта уровня
+
   @override
   void update(double dt) {
     super.update(dt);
     if (!spawnCompleted) return;
+
+    // Считаем время, прошедшее с запуска уровня
+    _timeElapsed += dt;
+    // Твой совет: Если прошло меньше 5 секунд, проверку на победу даже не начинаем!
+    if (_timeElapsed < 5.0) return;
     
-    // Считаем свиней строго внутри контейнера world
     final pigCount = world.children.whereType<MolluskMaksim>().length;
     if (pigCount == 0 && !levelCleared && !levelFailed) {
       levelCleared = true;
       overlays.add('VictoryMenu');
     }
   }
+
 
   Vector2 worldToScreen(Vector2 worldPos) {
     return Vector2(
@@ -374,8 +386,9 @@ class BackgroundDecoration extends Component with HasGameRef<AngryMolluskGame> {
     canvas.drawCircle(Offset(c2X, size.y * 0.22), 25, cloudPaint);
     canvas.drawCircle(Offset(c2X + 30, size.y * 0.2), 35, cloudPaint);
 
-    canvas.drawRect(Rect.fromLTWH(0, size.y * 0.73, size.x, size.y * 0.02), Paint()..color = const Color(0xFF29B6F6));
-    canvas.drawRect(Rect.fromLTWH(0, size.y * 0.75, size.x, size.y * 0.25), Paint()..color = const Color(0xFF0288D1));
+        // Опустили уровень воды пониже (теперь она занимает последние 15% экрана снизу)
+    canvas.drawRect(Rect.fromLTWH(0, size.y * 0.83, size.x, size.y * 0.02), Paint()..color = const Color(0xFF29B6F6));
+    canvas.drawRect(Rect.fromLTWH(0, size.y * 0.85, size.x, size.y * 0.15), Paint()..color = const Color(0xFF0288D1));
   }
 }
 
