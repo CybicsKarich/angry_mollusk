@@ -513,34 +513,34 @@ class Bunnyhop {
     }
   }
 
-    @override
+      @override
   void render(Canvas canvas, Size size, Sprite? sprite) {
     final screenPos = Offset(size.width * position.dx, size.height * position.dy);
     final radius = size.width * 0.016;
 
-    // 1. ГАРАНТИРОВАННЫЙ КРАСНЫЙ ЦВЕТ ДЛЯ ВСЕХ ТРЕХ ПТИЦ В ОЧЕРЕДИ
+    // 1. Сначала рисуем базовый красный круг-подложку
     canvas.drawCircle(screenPos, radius, Paint()..color = const Color(0xFFE53935));
 
-    // 2. КРАСИВЫЕ ПЕРЬЯ (ХОХОЛОК) НА ГОЛОВЕ ДЛЯ ВСЕХ ТРЕХ ПТИЦ СРАЗУ
+    // 2. Затем накладываем лицо Баннихопа из ассетов
+    if (sprite != null) {
+      sprite.render(canvas, position: Vector2(screenPos.dx - radius, screenPos.dy - radius), size: Vector2(radius * 2, radius * 2));
+    }
+
+    // 3. ТЕПЕРЬ ПЕРЫШКИ РИСУЮТСЯ ПОВЕРХ СПРАЙТА! Они точно не исчезнут
     final featherPaint = Paint()..color = const Color(0xFFD32F2F)..style = PaintingStyle.fill;
     final featherPath = Path();
     // Левое пёрышко
     featherPath.moveTo(screenPos.dx - radius * 0.3, screenPos.dy - radius);
     featherPath.lineTo(screenPos.dx - radius * 0.5, screenPos.dy - radius * 1.4);
-    featherPath.lineTo(screenPos.dx, screenPos.dy - radius * 0.9);
+    featherPath.lineTo(screenPos.dx, screenPos.dy - radius * 0.8);
     // Правое пёрышко
-    featherPath.moveTo(screenPos.dx, screenPos.dy - radius * 0.9);
+    featherPath.moveTo(screenPos.dx, screenPos.dy - radius * 0.8);
     featherPath.lineTo(screenPos.dx + radius * 0.2, screenPos.dy - radius * 1.5);
     featherPath.lineTo(screenPos.dx + radius * 0.3, screenPos.dy - radius);
     featherPath.close();
     canvas.drawPath(featherPath, featherPaint);
 
-    // 3. ОТРИСОВКА ЛИЦА МУЖИКА ИЗ АССЕТОВ ДЛЯ ВСЕХ ПТИЦ
-    if (sprite != null) {
-      sprite.render(canvas, position: Vector2(screenPos.dx - radius, screenPos.dy - radius), size: Vector2(radius * 2, radius * 2));
-    }
-
-    // 4. Траектория полёта белыми точками (только для той птицы, которую натягиваем)
+    // 4. Траектория полёта белыми точками
     if (isReadyForLaunch && !isLaunched && position.dx != 0.15) {
       final dotsPaint = Paint()..color = Colors.white;
       final slingX = 0.15;
@@ -604,29 +604,30 @@ class MolluskMaksim {
     }
   }
 
+    @override
   void render(Canvas canvas, Size size, Sprite? sprite) {
     final screenPos = Offset(size.width * x, size.height * y);
     final radius = size.width * 0.019;
 
-    // Зеленая круглая подложка
+    // 1. Базовый зеленый круг
     canvas.drawCircle(screenPos, radius, Paint()..color = const Color(0xFF4CAF50));
 
-        // ДЕТАЛИЗАЦИЯ СВИНЬИ: Зелёные уши для Максима Рыбалкина
-    final earPaint = Paint()..color = const Color(0xFF4CAF50)..style = PaintingStyle.fill;
-    final earBorderPaint = Paint()..color = const Color(0xFF2E7D32)..style = PaintingStyle.stroke..strokeWidth = 0.02;
-    
-    // Левое ушко (овал)
-    canvas.drawOval(Rect.fromCenter(center: Offset(-radius * 0.8, -radius * 0.6), width: radius * 0.5, height: radius * 0.7), earPaint);
-    canvas.drawOval(Rect.fromCenter(center: Offset(-radius * 0.8, -radius * 0.6), width: radius * 0.5, height: radius * 0.7), earBorderPaint);
-    
-    // Правое ушко (овал)
-    canvas.drawOval(Rect.fromCenter(center: Offset(radius * 0.8, -radius * 0.6), width: radius * 0.5, height: radius * 0.7), earPaint);
-    canvas.drawOval(Rect.fromCenter(center: Offset(radius * 0.8, -radius * 0.6), width: radius * 0.5, height: radius * 0.7), earBorderPaint);
-
-    // Отрисовка лица Максима Рыбалкина
+    // 2. Накладываем лицо Максима Рыбалкина
     if (sprite != null) {
       sprite.render(canvas, position: Vector2(screenPos.dx - radius, screenPos.dy - radius), size: Vector2(radius * 2, radius * 2));
     }
+
+    // 3. ТЕПЕРЬ ЗЕЛЕНЫЕ УШИ РИСУЮТСЯ ПОВЕРХ ЛИЦА!
+    final earPaint = Paint()..color = const Color(0xFF4CAF50)..style = PaintingStyle.fill;
+    final earBorderPaint = Paint()..color = const Color(0xFF2E7D32)..style = PaintingStyle.stroke..strokeWidth = 1.5;
+    
+    // Левое ушко (смещено влево и чуть вверх относительно центра screenPos)
+    canvas.drawOval(Rect.fromCenter(center: Offset(screenPos.dx - radius * 0.8, screenPos.dy - radius * 0.6), width: radius * 0.6, height: radius * 0.8), earPaint);
+    canvas.drawOval(Rect.fromCenter(center: Offset(screenPos.dx - radius * 0.8, screenPos.dy - radius * 0.6), width: radius * 0.6, height: radius * 0.8), earBorderPaint);
+    
+    // Правое ушко (смещено вправо и чуть вверх)
+    canvas.drawOval(Rect.fromCenter(center: Offset(screenPos.dx + radius * 0.8, screenPos.dy - radius * 0.6), width: radius * 0.6, height: radius * 0.8), earPaint);
+    canvas.drawOval(Rect.fromCenter(center: Offset(screenPos.dx + radius * 0.8, screenPos.dy - radius * 0.6), width: radius * 0.6, height: radius * 0.8), earBorderPaint);
   }
 }
 
