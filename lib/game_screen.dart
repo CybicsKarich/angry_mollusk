@@ -319,7 +319,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
 
   @override
   void render(Canvas canvas) {
-    final size = canvasSize.(); // Это исправит все ошибки с size.width и size.height!
+    final size = canvasSize.toSize(); // Это исправит все ошибки с size.width и size.height!
 
     // 1. ОТРИСОВКА НЕБА (ГРАДИЕНТ)
     final skyPaint = Paint()
@@ -327,8 +327,8 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [Color(0xFF29B6F6), Color(0xFFE1F5FE)],
-      ).createShader(Offset.zero & size.());
-    canvas.drawRect(Offset.zero & size.(), skyPaint);
+        ).createShader(Offset.zero & size);
+        canvas.drawRect(Offset.zero & size, skyPaint);
 
     // 2. ДЕТАЛИЗИРОВАННОЕ ВРАЩАЮЩЕЕСЯ СОЛНЦЕ С КРАСИВЫМИ ЛУЧАМИ СЛЕВА
     final sunCenter = Offset(size.width * 0.15, size.height * 0.2);
@@ -432,7 +432,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   @override
   void onDragUpdate(DragUpdateEvent event) {
     if (currentBird != null && currentBird!.isReadyForLaunch && !currentBird!.isLaunched) {
-      final size = canvasSize.();
+      final size = canvasSize.toSize();
       final touchX = event.localEndPosition.x / size.width;
       final touchY = event.localEndPosition.y / size.height;
 
