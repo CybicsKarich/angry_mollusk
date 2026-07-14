@@ -477,7 +477,7 @@ class Bunnyhop {
   void launch(double slingX, double slingY) {
     isLaunched = true;
     // Направление полета противоположно оттягиванию пальца
-    velocity = Offset((slingX - position.dx) * 1.8, (slingY - position.dy) * 1.8);
+    velocity = Offset((slingX - position.dx) * 4.5, (slingY - position.dy) * 4.5);
     trajectoryDots.clear();
   }
 
@@ -489,7 +489,7 @@ class Bunnyhop {
     }
 
         // Влияние гравитации на вектор скорости снаряда
-    velocity = Offset(velocity.dx, velocity.dy + 1.6 * dt);
+    velocity = Offset(velocity.dx, velocity.dy + 0.8 * dt);
     position = Offset(position.dx + velocity.dx * dt, position.dy + velocity.dy * dt);
 
     // Столкновение с кубиками замка Максима
@@ -518,6 +518,20 @@ class Bunnyhop {
     // Заливаем подложку сочным цветом
     canvas.drawCircle(screenPos, radius, Paint()..color = const Color(0xFFE53935));
 
+        // ДЕТАЛИЗАЦИЯ ПТИЦЫ: Маленькие перья (хохолок) на голове Баннихопа
+    final featherPaint = Paint()..color = const Color(0xFFD32F2F)..style = PaintingStyle.fill;
+    final featherPath = Path();
+    // Левое пёрышко
+    featherPath.moveTo(-radius * 0.3, -radius);
+    featherPath.lineTo(-radius * 0.5, -radius * 1.4);
+    featherPath.lineTo(0, -radius * 0.9);
+    // Правое пёрышко
+    featherPath.moveTo(0, -radius * 0.9);
+    featherPath.lineTo(radius * 0.2, -radius * 1.5);
+    featherPath.lineTo(radius * 0.3, -radius);
+    featherPath.close();
+    canvas.drawPath(featherPath, featherPaint);
+
     // Отрисовываем лицо Баннихопа из текстуры
     if (sprite != null) {
       sprite.render(canvas, position: Vector2(screenPos.dx - radius, screenPos.dy - radius), size: Vector2(radius * 2, radius * 2));
@@ -528,14 +542,14 @@ class Bunnyhop {
       final dotsPaint = Paint()..color = Colors.white;
       final slingX = 0.15;
       final slingY = 0.73 - 0.04;
-      final simVelocity = Offset((slingX - position.dx) * 1.8, (slingY - position.dy) * 1.8);
+      final simVelocity = Offset((slingX - position.dx) * 4.5, (slingY - position.dy) * 4.5);
 
       for (int i = 1; i < 10; i++) {
-        double t = i * 0.12;
-        double x = position.dx + simVelocity.dx * t;
-        double y = position.dy + simVelocity.dy * t + 0.5 * 1.6 * t * t;
-        canvas.drawCircle(Offset(size.width * x, size.height * y), size.width * 0.003, dotsPaint);
-      }
+      double t = i * 0.12;
+      double x = position.dx + simVelocity.dx * t;
+      double y = position.dy + simVelocity.dy * t + 0.5 * 0.8 * t * t; // Изменено на 0.8
+      canvas.drawCircle(Offset(size.width * x, size.height * y), size.width * 0.003, dotsPaint);
+     }
     }
   }
 }
@@ -587,6 +601,18 @@ class MolluskMaksim {
     // Зеленая круглая подложка
     canvas.drawCircle(screenPos, radius, Paint()..color = const Color(0xFF4CAF50));
 
+        // ДЕТАЛИЗАЦИЯ СВИНЬИ: Зелёные уши для Максима Рыбалкина
+    final earPaint = Paint()..color = const Color(0xFF4CAF50)..style = PaintingStyle.fill;
+    final earBorderPaint = Paint()..color = const Color(0xFF2E7D32)..style = PaintingStyle.stroke..strokeWidth = 0.02;
+    
+    // Левое ушко (овал)
+    canvas.drawOval(Rect.fromCenter(center: Offset(-radius * 0.8, -radius * 0.6), width: radius * 0.5, height: radius * 0.7), earPaint);
+    canvas.drawOval(Rect.fromCenter(center: Offset(-radius * 0.8, -radius * 0.6), width: radius * 0.5, height: radius * 0.7), earBorderPaint);
+    
+    // Правое ушко (овал)
+    canvas.drawOval(Rect.fromCenter(center: Offset(radius * 0.8, -radius * 0.6), width: radius * 0.5, height: radius * 0.7), earPaint);
+    canvas.drawOval(Rect.fromCenter(center: Offset(radius * 0.8, -radius * 0.6), width: radius * 0.5, height: radius * 0.7), earBorderPaint);
+
     // Отрисовка лица Максима Рыбалкина
     if (sprite != null) {
       sprite.render(canvas, position: Vector2(screenPos.dx - radius, screenPos.dy - radius), size: Vector2(radius * 2, radius * 2));
@@ -611,14 +637,22 @@ class GameBlock {
   }
 
   void update(double dt, List<GameBlock> allBlocks, List<MolluskMaksim> allPigs, double groundY) {
+   // ПОЧИНЕНО: Блоки больше не падают сами по себе на старте уровня!
     if (!isFalling && y < groundY - h) {
       bool hasFloor = false;
-      for (var other in allBlocks) {
-        if (other != this &&
-            (other.x - x).abs() < (w + other.w) / 2.1 &&
-            other.y > y && (other.y - (y + h)).abs() < 0.01) {
-          hasFloor = true;
-          break;
+      // Если блок стоит прямо на земле острова — опора железно есть
+      if ((y + h - groundY).abs() < 0.005) {
+        hasFloor = true;
+      } else {
+        // Проверяем, стоит ли блок на другом блоке с хорошим зазором
+        for (var other in allBlocks) {
+          if (other != this &&
+              (other.x - x).abs() < (w + other.w) * 0.48 && // Четкое совпадение по ширине
+              other.y > y && 
+              (other.y - (y + h)).abs() < 0.02) { // Увеличенный зазор для стабильности
+            hasFloor = true;
+            break;
+          }
         }
       }
       if (!hasFloor) isFalling = true;
