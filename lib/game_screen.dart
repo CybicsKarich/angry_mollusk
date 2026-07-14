@@ -541,7 +541,7 @@ class Bunnyhop {
     }
 
     // 4. Траектория полёта белыми точками (только для той птицы, которую натягиваем)
-    if (isReadyForLaunch && !isLaunched && dragPosition != null) {
+    if (isReadyForLaunch && !isLaunched && position.dx != 0.15) {
       final dotsPaint = Paint()..color = Colors.white;
       final slingX = 0.15;
       final slingY = gameRef.groundY - 0.04;
