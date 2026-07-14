@@ -176,12 +176,12 @@ class GameScreen extends StatelessWidget {
 
 // Главный движок игры
 class AngryMolluskGame extends FlameGame with DragCallbacks {
+  double groundY = 0.73; // Уровень земли (73% от высоты экрана)
   AngryMolluskGame() : super();
 
   List<Bunnyhop> birdsQueue = [];
   Bunnyhop? currentBird;
   // Объявляем переменные, которых не хватало компилятору
-  double groundY = 0.73; // Уровень земли (73% от высоты экрана)
   double sunRotation = 0.0;
   double cloudOffset1 = 0.0;
   double cloudOffset2 = 0.0;
@@ -224,7 +224,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
 
     // СТРОИМ ЗАМОК (Координаты привязаны к процентам от экрана смартфона)
     double baseGridX = 0.65; // Начало замка на правом острове
-    double groundY = 0.73;  // Поверхность травы правого острова
+    groundY = 0.73;
 
     // Каменные вертикальные опоры (серые)
     blocks.add(GameBlock(baseGridX, groundY - 0.1, 0.02, 0.1, true));
@@ -319,7 +319,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
 
   @override
   void render(Canvas canvas) {
-    final size = canvasSize.toSize(); // Это исправит все ошибки с size.width и size.height!
+    final size = canvasSize.(); // Это исправит все ошибки с size.width и size.height!
 
     // 1. ОТРИСОВКА НЕБА (ГРАДИЕНТ)
     final skyPaint = Paint()
@@ -327,8 +327,8 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [Color(0xFF29B6F6), Color(0xFFE1F5FE)],
-      ).createShader(Offset.zero & size.toSize());
-    canvas.drawRect(Offset.zero & size.toSize(), skyPaint);
+      ).createShader(Offset.zero & size.());
+    canvas.drawRect(Offset.zero & size.(), skyPaint);
 
     // 2. ДЕТАЛИЗИРОВАННОЕ ВРАЩАЮЩЕЕСЯ СОЛНЦЕ С КРАСИВЫМИ ЛУЧАМИ СЛЕВА
     final sunCenter = Offset(size.width * 0.15, size.height * 0.2);
@@ -358,8 +358,8 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     canvas.drawCircle(Offset(c1X + 75, size.height * 0.15), 32, cloudPaint);
 
     double c2X = (size.width * 0.65 + cloudOffset2 * size.width) % (size.width + 200) - 100;
-    canvas.drawCircle(Offset(c2X, size.y * 0.23), 25, cloudPaint);
-    canvas.drawCircle(Offset(c2X + 30, size.y * 0.2), 35, cloudPaint);
+    canvas.drawCircle(Offset(c2X, size.height * 0.23), 25, cloudPaint);
+    canvas.drawCircle(Offset(c2X + 30, size.height * 0.2), 35, cloudPaint);
 
     // 4. ГЛУБОКАЯ ВОДА (ОПУЩЕНА В САМЫЙ НИЗ)
     canvas.drawRect(Rect.fromLTWH(0, size.height * 0.83, size.width, size.height * 0.02), Paint()..color = const Color(0xFF29B6F6));
@@ -432,12 +432,12 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   @override
   void onDragUpdate(DragUpdateEvent event) {
     if (currentBird != null && currentBird!.isReadyForLaunch && !currentBird!.isLaunched) {
-      final size = canvasSize.toSize();
+      final size = canvasSize.();
       final touchX = event.localEndPosition.x / size.width;
-      final touchY = event.localEndPosition.y / size.y;
+      final touchY = event.localEndPosition.y / size.height;
 
       final slingX = 0.15;
-      final slingY = gameRef.groundY - 0.04;
+      final slingY = groundY - 0.04;
 
       double dx = touchX - slingX;
       double dy = touchY - slingY;
@@ -527,7 +527,7 @@ class Bunnyhop {
     if (isReadyForLaunch && !isLaunched) {
       final dotsPaint = Paint()..color = Colors.white;
       final slingX = 0.15;
-      final slingY = gameRef.groundY - 0.04;
+      final slingY = 0.73 - 0.04;
       final simVelocity = Offset((slingX - position.dx) * 1.8, (slingY - position.dy) * 1.8);
 
       for (int i = 1; i < 10; i++) {
@@ -690,4 +690,9 @@ class GameBlock {
   }
 }
 
-       
+// Класс заднего фона: рисует градиент неба, вращающееся солнце и движущиеся облака
+class BackgroundDecoration extends Component with HasGameRef<AngryMolluskGame> {
+  @override
+  void render(Canvas canvas) {
+  }
+}       
