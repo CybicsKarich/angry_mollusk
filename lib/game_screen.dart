@@ -197,6 +197,12 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     // ЖЕЛЕЗНОЕ ИСПРАВЛЕНИЕ: Добавляем мир и камеру Flame на сцену, чтобы объекты появились на экране!
     add(world);
     add(camera);
+    // НАСТРОЙКА КАМЕРЫ: Наводим объектив на центр нашего игрового мира (30, 15)
+    camera.viewfinder.position = Vector2(30, 15);
+    // Настраиваем зум, чтобы весь мир шириной 60 метров чётко вписался в экран смартфона
+    camera.viewfinder.anchor = Anchor.center;
+    camera.viewfinder.zoom = canvasSize.x / worldWidth;
+
 
     // Задний фон крепим к корню
     add(BackgroundDecoration());
@@ -293,14 +299,6 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       levelCleared = true;
       overlays.add('VictoryMenu');
     }
-  }
-
-
-  Vector2 worldToScreen(Vector2 worldPos) {
-    return Vector2(
-      (worldPos.x / worldWidth) * canvasSize.x,
-      (worldPos.y / worldHeight) * canvasSize.y,
-    );
   }
 }
 
