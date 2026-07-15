@@ -191,7 +191,6 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   // Контейнеры для управления объектами безForge2D
   List<GameBlock> blocks = [];
   List<MolluskMaksim> pigs = [];
-  bool isCastleActivated = false; // Включается только после того, как птица полетит к замку
   bool spawnCompleted = false; // Добавляем объявление флага спавна
 
   // Переменные под текстуры
@@ -233,43 +232,51 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   }
 
   // НОВЫЙ ИДЕАЛЬНО РОВНЫЙ МЕТОД ПОСТРОЙКИ ЗАМКА
-  void buildLevelStructures() {
+    void buildLevelStructures() {
     blocks.clear();
     pigs.clear();
 
-    // Базовая точка начала замка на правом острове
     final double bx = 0.62; 
 
-    // ЭТАЖ 1: Четыре массивные каменные колонны (спавнятся идеально встык с землёй)
-    blocks.add(GameBlock(bx + 0.00, groundY - 0.07, 0.02, 0.14, true));
-    blocks.add(GameBlock(bx + 0.07, groundY - 0.07, 0.02, 0.14, true));
-    blocks.add(GameBlock(bx + 0.14, groundY - 0.07, 0.02, 0.14, true));
-    blocks.add(GameBlock(bx + 0.21, groundY - 0.07, 0.02, 0.14, true));
+    // ЭТАЖ 1: Четыре каменные колонны (высота 0.14)
+    // Координата Y: groundY (0.73) - высота (0.14) = 0.59
+    blocks.add(GameBlock(bx + 0.00, 0.59, 0.02, 0.14, true));
+    blocks.add(GameBlock(bx + 0.07, 0.59, 0.02, 0.14, true));
+    blocks.add(GameBlock(bx + 0.14, 0.59, 0.02, 0.14, true));
+    blocks.add(GameBlock(bx + 0.21, 0.59, 0.02, 0.14, true));
     
-    // Каменные прочные перекрытия (плиты ложатся ровно поверх колонн)
-    blocks.add(GameBlock(bx - 0.01, groundY - 0.15, 0.11, 0.02, true));
-    blocks.add(GameBlock(bx + 0.13, groundY - 0.15, 0.11, 0.02, true));
+    // Каменные перекрытия (высота 0.02) ложатся строго на Y = 0.59. 
+    // Значит их Y: 0.59 - 0.02 = 0.57
+    blocks.add(GameBlock(bx - 0.01, 0.57, 0.11, 0.02, true));
+    blocks.add(GameBlock(bx + 0.13, 0.57, 0.11, 0.02, true));
 
-    // ЭТАЖ 2: Три ровные деревянные стены (стоят строго по осям перекрытий)
-    blocks.add(GameBlock(bx + 0.01, groundY - 0.21, 0.015, 0.10, false));
-    blocks.add(GameBlock(bx + 0.10, groundY - 0.21, 0.015, 0.10, false));
-    blocks.add(GameBlock(bx + 0.20, groundY - 0.21, 0.015, 0.10, false));
+    // ЭТАЖ 2: Три деревянные стены (высота 0.10) ложатся на перекрытия (на Y = 0.57)
+    // Значит их Y: 0.57 - 0.10 = 0.47
+    blocks.add(GameBlock(bx + 0.01, 0.47, 0.015, 0.10, false));
+    blocks.add(GameBlock(bx + 0.10, 0.47, 0.015, 0.10, false));
+    blocks.add(GameBlock(bx + 0.20, 0.47, 0.015, 0.10, false));
 
-    // Деревянный гладкий потолок второго этажа
-    blocks.add(GameBlock(bx + 0.00, groundY - 0.27, 0.23, 0.02, false));
+    // Деревянный потолок (высота 0.02) ложится на стены (на Y = 0.47)
+    // Значит его Y: 0.47 - 0.02 = 0.45
+    blocks.add(GameBlock(bx + 0.00, 0.45, 0.23, 0.02, false));
 
-    // ЭТАЖ 3: Верхняя симметричная смотровая башенка
-    blocks.add(GameBlock(bx + 0.05, groundY - 0.32, 0.015, 0.08, false));
-    blocks.add(GameBlock(bx + 0.16, groundY - 0.32, 0.015, 0.08, false));
-    blocks.add(GameBlock(bx + 0.03, groundY - 0.37, 0.17, 0.02, false));
+    // ЭТАЖ 3: Башенка (высота 0.08) ложится на потолок (на Y = 0.45)
+    // Значит Y стен башни: 0.45 - 0.08 = 0.37
+    blocks.add(GameBlock(bx + 0.05, 0.37, 0.015, 0.08, false));
+    blocks.add(GameBlock(bx + 0.16, 0.37, 0.015, 0.08, false));
+    
+    // Крыша башни (высота 0.02) ложится сверху на Y = 0.37
+    // Значит её Y: 0.37 - 0.02 = 0.35
+    blocks.add(GameBlock(bx + 0.03, 0.35, 0.17, 0.02, false));
 
-    // МАКСИМЫ СИДЯТ СТРОГО ПО ЦЕНТРУ СВОИХ КОМНАТ
-    pigs.add(MolluskMaksim(bx + 0.035, groundY - 0.04)); // Левая нижняя комната
-    pigs.add(MolluskMaksim(bx + 0.175, groundY - 0.04)); // Правая нижняя комната
-    pigs.add(MolluskMaksim(bx + 0.105, groundY - 0.19)); // Верхний Максим на втором этаже
+    // Свиньи сидят строго на своих этажах без зависания
+    pigs.add(MolluskMaksim(bx + 0.035, 0.57 - 0.019)); // На первом перекрытии
+    pigs.add(MolluskMaksim(bx + 0.175, 0.57 - 0.019)); // На втором перекрытии
+    pigs.add(MolluskMaksim(bx + 0.105, 0.45 - 0.019)); // На деревянном потолке
     
     spawnCompleted = true;
   }
+
 
 
   void loadNextBird() {
@@ -305,26 +312,21 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
         // Обновление летящей птицы
     if (currentBird != null && currentBird!.isLaunched) {
       currentBird!.update(dt, blocks, pigs, groundY);
-      
-      // Если птица пересекла середину экрана и летит к замку — активируем физику!
-      if (currentBird!.position.dx > 0.35) {
-        isCastleActivated = true;
-      }
-      
       if (currentBird!.shouldRemove) {
         loadNextBird();
       }
     }
 
-        // Обновление падающих блоков (передаём флаг активации)
+        // Обновление падающих блоков и цепных реакций
     for (var block in blocks) {
-      block.update(dt, blocks, pigs, groundY, isCastleActivated);
+      block.update(dt, blocks, pigs, groundY);
     }
 
-    // Обновление падающих свиней (передаём флаг активации)
+    // Обновление падающих свиней
     for (var pig in pigs) {
-      pig.update(dt, blocks, groundY, isCastleActivated);
+      pig.update(dt, blocks, groundY);
     }
+
 
 
 
@@ -663,59 +665,52 @@ class GameBlock {
   double vx = 0.0, vy = 0.0;
   bool isFalling = false;
   bool shouldRemove = false;
+  bool isBroken = false; // Разрушен ли блок напополам
+  double fragmentOffset = 0.0; // Смещение половинок при разлете
+  double fragmentAlpha = 1.0;  // Плавное исчезновение (прозрачность)
 
+  
   GameBlock(this.x, this.y, this.w, this.h, this.isStone);
 
   void hit(Offset impactVelocity) {
+    double speed = sqrt(impactVelocity.dx * impactVelocity.dx + impactVelocity.dy * impactVelocity.dy);
+    
+    // Если удар критический (скорость птицы высокая) — ломаем блок напополам!
+    if (speed > 1.2) {
+      isBroken = true;
+    }
+    
     vx = impactVelocity.dx * 0.45;
     vy = impactVelocity.dy * 0.45;
-    isFalling = true;
+    isFalling = true; // Блок "просыпается" только от прямого удара!
   }
 
-    void update(double dt, List<GameBlock> allBlocks, List<MolluskMaksim> allPigs, double groundY, bool isCastleActivated) {
-    // ЖЕЛЕЗНЫЙ ФИКС: Блок намертво застыл в воздухе, пока птица не запущена!
-    if (!isCastleActivated) {
-      isFalling = false;
-      vx = 0;
-      vy = 0;
-      return;
-    }
-    // ПОЧИНЕНО: Блоки больше не падают сами по себе на старте уровня!
-    if (!isFalling && y < groundY - h) {
-      bool hasFloor = false;
-      // Если блок стоит прямо на земле острова — опора железно есть
-      if ((y + h - groundY).abs() < 0.005) {
-        hasFloor = true;
-      } else {
-        // Проверяем, стоит ли блок на другом блоке с хорошим зазором
-        for (var other in allBlocks) {
-          if (other != this &&
-              (other.x - x).abs() < (w + other.w) * 0.48 && // Четкое совпадение по ширине
-              other.y > y && 
-              (other.y - (y + h)).abs() < 0.02) { // Увеличенный зазор для стабильности
-            hasFloor = true;
-            break;
-          }
-        }
+   void update(double dt, List<GameBlock> allBlocks, List<MolluskMaksim> allPigs, double groundY) {
+    // Если блок расколот, анимируем разлет половинок и исчезновение
+    if (isBroken) {
+      fragmentOffset += 0.1 * dt; // Половинки разлетаются
+      fragmentAlpha -= 1.5 * dt;  // За секунду блок растает
+      if (fragmentAlpha <= 0) {
+        shouldRemove = true;
+        return;
       }
-      if (!hasFloor) isFalling = true;
     }
 
     if (isFalling) {
-      vy += 1.8 * dt; // Гравитация блока
+      vy += 1.8 * dt; // Гравитация работает только для проснувшихся блоков
       x += vx * dt;
       y += vy * dt;
 
-      // ЛАВИНА И СТОЛКНОВЕНИЯ: Толкаем соседние блоки
+      // Лавина: передаем импульс и будим соседние блоки при столкновении
       for (var other in allBlocks) {
-        if (other != this && !other.isFalling) {
+        if (other != this) {
           if ((x - other.x).abs() < (w + other.w) / 2 && (y - other.y).abs() < (h + other.h) / 2) {
             other.hit(Offset(vx * 0.75, vy * 0.75));
           }
         }
       }
 
-      // Падающие блоки давят свиней Максимов под собой
+      // Падающие блоки давят свиней
       for (var pig in allPigs) {
         if (!pig.isFalling) {
           if (pig.x >= x && pig.x <= x + w && (pig.y - y).abs() < (h / 2 + 0.02)) {
@@ -732,7 +727,7 @@ class GameBlock {
         isFalling = false;
       }
 
-      // Падение в океан между скалами
+      // Падение в океан
       if (x < 0.55 && y >= groundY - h / 2 && x > 0.25) {
         shouldRemove = true;
       }
@@ -740,33 +735,53 @@ class GameBlock {
   }
 
   void render(Canvas canvas, Size size) {
-    final rect = Rect.fromLTWH(size.width * x, size.height * y, size.width * w, size.height * h);
+    if (fragmentAlpha <= 0) return;
 
     final blockPaint = Paint()
-      ..color = isStone ? const Color(0xFFB0BEC5) : const Color(0xFFFFB74D)
+      ..color = (isStone ? const Color(0xFFB0BEC5) : const Color(0xFFFFB74D)).withValues(alpha: fragmentAlpha)
       ..style = PaintingStyle.fill;
 
     final borderPaint = Paint()
-      ..color = isStone ? const Color(0xFF455A64) : const Color(0xFFD84315)
+      ..color = (isStone ? const Color(0xFF455A64) : const Color(0xFFD84315)).withValues(alpha: fragmentAlpha)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 
-    canvas.drawRect(rect, blockPaint);
-    canvas.drawRect(rect, borderPaint);
+    final screenX = size.width * x;
+    final screenY = size.height * y;
+    final screenW = size.width * w;
+    final screenH = size.height * h;
 
-    // ДЕТАЛИЗАЦИЯ: Узоры волокон дерева или швов кирпича
-    if (!isStone) {
-      final woodPaint = Paint()..color = const Color(0xFFE65100)..strokeWidth = 1.2;
-      canvas.drawLine(Offset(rect.left + 3, rect.top + rect.height * 0.35), Offset(rect.right - 3, rect.top + rect.height * 0.35), woodPaint);
-      canvas.drawLine(Offset(rect.left + 3, rect.top + rect.height * 0.7), Offset(rect.right - 3, rect.top + rect.height * 0.7), woodPaint);
+    if (isBroken) {
+      // КРАСИВЫЙ РАЗЛЕТ НАДВОЕ: рисуем левую и правую половинки отдельно
+      final pOffset = fragmentOffset * size.width;
+      
+      // Левая половинка отлетает влево
+      final leftRect = Rect.fromLTWH(screenX - pOffset, screenY, screenW / 2, screenH);
+      canvas.drawRect(leftRect, blockPaint);
+      canvas.drawRect(leftRect, borderPaint);
+
+      // Правая половинка отлетает вправо
+      final rightRect = Rect.fromLTWH(screenX + screenW / 2 + pOffset, screenY, screenW / 2, screenH);
+      canvas.drawRect(rightRect, blockPaint);
+      canvas.drawRect(rightRect, borderPaint);
     } else {
-      final stonePaint = Paint()..color = const Color(0xFF37474F)..strokeWidth = 1.5;
-      canvas.drawLine(Offset(rect.left + rect.width * 0.3, rect.top + 2), Offset(rect.left + rect.width * 0.3, rect.bottom - 2), stonePaint);
-      canvas.drawLine(Offset(rect.left + rect.width * 0.7, rect.top + 2), Offset(rect.left + rect.width * 0.7, rect.bottom - 2), stonePaint);
+      // Обычный целый блок
+      final rect = Rect.fromLTWH(screenX, screenY, screenW, screenH);
+      canvas.drawRect(rect, blockPaint);
+      canvas.drawRect(rect, borderPaint);
+
+      // Узоры волокон дерева или швов кирпича
+      if (!isStone) {
+        final woodPaint = Paint()..color = const Color(0xFFE65100)..strokeWidth = 1.2;
+        canvas.drawLine(Offset(rect.left + 3, rect.top + rect.height * 0.35), Offset(rect.right - 3, rect.top + rect.height * 0.35), woodPaint);
+        canvas.drawLine(Offset(rect.left + 3, rect.top + rect.height * 0.7), Offset(rect.right - 3, rect.top + rect.height * 0.7), woodPaint);
+      } else {
+        final stonePaint = Paint()..color = const Color(0xFF37474F)..strokeWidth = 1.5;
+        canvas.drawLine(Offset(rect.left + rect.width * 0.3, rect.top + 2), Offset(rect.left + rect.width * 0.3, rect.bottom - 2), stonePaint);
+        canvas.drawLine(Offset(rect.left + rect.width * 0.7, rect.top + 2), Offset(rect.left + rect.width * 0.7, rect.bottom - 2), stonePaint);
+      }
     }
   }
-}
-
 // Класс заднего фона: рисует градиент неба, вращающееся солнце и движущиеся облака
 class BackgroundDecoration extends Component with HasGameRef<AngryMolluskGame> {
   @override
