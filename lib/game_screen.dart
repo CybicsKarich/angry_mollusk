@@ -422,11 +422,14 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     for (var block in blocks) {
       block.render(canvas, size);
     }
-    for (var pig in pigs) {
-      pig.render(canvas, size, maksimSprite);
+        // Обновление падающих блоков и цепных реакций (передаем флаг активации)
+    for (var block in blocks) {
+      block.update(dt, blocks, pigs, groundY, isCastleActivated);
     }
-    if (currentBird != null && (!currentBird!.isLaunched || !currentBird!.shouldRemove)) {
-      currentBird!.render(canvas, size, bunnySprite);
+
+    // Обновление падающих свиней (передаем флаг активации)
+    for (var pig in pigs) {
+      pig.update(dt, blocks, groundY, isCastleActivated);
     }
   }
 
@@ -599,9 +602,8 @@ class MolluskMaksim {
     isFalling = true;
   }
 
-      void update(double dt, List<GameBlock> blocks, double groundY, bool isCastleActivated) {
-    // Свинья сидит неподвижно и ждёт удара
-    if (!isCastleActivated) {
+     void update(double dt, List<GameBlock> blocks, double groundY, bool isCastleActivated) {
+        if (!isCastleActivated) {
       isFalling = false;
       vx = 0;
       vy = 0;
@@ -782,6 +784,7 @@ class GameBlock {
       }
     }
   }
+} 
 // Класс заднего фона: рисует градиент неба, вращающееся солнце и движущиеся облака
 class BackgroundDecoration extends Component with HasGameRef<AngryMolluskGame> {
   @override
