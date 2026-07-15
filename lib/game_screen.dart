@@ -317,17 +317,16 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       }
     }
 
-        // Обновление падающих блоков и цепных реакций
+    // Настоящее и правильное обновление блоков внутри метода update
     for (var block in blocks) {
       block.update(dt, blocks, pigs, groundY);
     }
 
-    // Обновление падающих свиней
+    // Настоящее и правильное обновление свиней (передаем птицу как триггер активации)
+    bool birdFlew = currentBird != null && currentBird!.isLaunched && currentBird!.position.dx > 0.35;
     for (var pig in pigs) {
-      pig.update(dt, blocks, groundY);
+      pig.update(dt, blocks, groundY, birdFlew);
     }
-
-
 
 
     // Удаляем уничтоженные объекты
@@ -421,15 +420,6 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     // 8. ОТРИСОВКА ВСЕХ ОБЪЕКТОВ УРОВНЯ
     for (var block in blocks) {
       block.render(canvas, size);
-    }
-        // Обновление падающих блоков и цепных реакций (передаем флаг активации)
-    for (var block in blocks) {
-      block.update(dt, blocks, pigs, groundY, isCastleActivated);
-    }
-
-    // Обновление падающих свиней (передаем флаг активации)
-    for (var pig in pigs) {
-      pig.update(dt, blocks, groundY, isCastleActivated);
     }
   }
 
