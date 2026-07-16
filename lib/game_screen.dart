@@ -3,6 +3,7 @@ import 'package:flame/game.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart' hide Wallet;
+import 'package:angry_mollusk/audio_manager.dart'; // Подключаем наш звуковой движок
 
 // Главный экран игры с поддержкой оверлеев: Победа, Пауза, Проигрыш
 class GameScreen extends StatelessWidget {
@@ -186,8 +187,9 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   double cloudOffset1 = 0.0;
   double cloudOffset2 = 0.0;
   double _safetyTimer = 0.0;
+  double _pigSoundTimer = 0.0;
   bool isPaused = false;
-
+  
   // Контейнеры для управления объектами безForge2D
   List<GameBlock> blocks = [];
   List<MolluskMaksim> pigs = [];
@@ -204,9 +206,10 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   // Координаты рогатки на экране (вычисляются в процентах от размера экрана)
   Offset get slingshotCenter => Offset(canvasSize.x * 0.2, canvasSize.y * 0.7);
 
-    @override
+  @override
   Future<void> onLoad() async {
     await super.onLoad();
+    await AudioManager.init();
 
     // Загружаем текстуры для ручного рендеринга
     bunnySprite = await loadSprite('bunnyhop.png');
@@ -292,6 +295,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
         Future.delayed(const Duration(seconds: 3), () {
           if (pigs.isNotEmpty && !levelCleared && !levelFailed) {
             levelFailed = true;
+            AudioManager.playGameOver();
             overlays.add('GameOverMenu');
           }
         });
@@ -337,7 +341,20 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
 
     if (pigs.isEmpty && !levelCleared && !levelFailed) {
       levelCleared = true;
+      AudioManager.playVictory();
       overlays.add('VictoryMenu');
+    }
+      // ЖИВАЯ АТМОСФЕРА: Свиньи случайно сопят или хрюкают раз в 9 секунд, если они еще живы
+    if (pigs.isNotEmpty && !levelCleared && !levelFailed) {
+      _pigSoundTimer += dt;
+      if (_pigSoundTimer >= 9.0) {
+        _pigSoundTimer = 0.0; // Сбрасываем таймер
+        
+        // Подбрасываем монетку: 50% что Максим запетит/засопит
+        if (Random().nextBool()) {
+          AudioManager.playPigSnort(); // Включает pig_snort.mp3
+        }
+      }
     }
   }
 
@@ -460,6 +477,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   @override
   void onDragUpdate(DragUpdateEvent event) {
     if (currentBird != null && currentBird!.isReadyForLaunch && !currentBird!.isLaunched) {
+      AudioManager.playStretch();
       final size = canvasSize.toSize();
       final touchX = event.localEndPosition.x / size.width;
       final touchY = event.localEndPosition.y / size.height;
@@ -481,9 +499,11 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     }
   }
 
-  @override
+    @override
   void onDragEnd(DragEndEvent event) {
     if (currentBird != null && currentBird!.isReadyForLaunch && !currentBird!.isLaunched) {
+      AudioManager.stopStretch(); // Глушим звук натяжения рогатки
+      AudioManager.playLaunch();  // Стреляем со случайной угарной фразой запуска!
       currentBird!.launch(0.15, groundY - 0.04);
     }
   }
@@ -526,6 +546,7 @@ class Bunnyhop {
       if (position.dx <= 0.25 || position.dx >= 0.55) {
         position = Offset(position.dx, groundY);
         velocity = Offset.zero;
+        AudioManager.playMiss();
         shouldRemove = true; // Останавливается и передает ход следующей птице
         return;
       }
@@ -533,6 +554,7 @@ class Bunnyhop {
 
     // Пролёт сквозь воду (если упала в промежуток между 0.25 и 0.55, летит вниз до дна экрана)
     if (position.dx > 0.25 && position.dx < 0.55 && position.dy >= 0.95) {
+      AudioManager.playMiss();
       shouldRemove = true;
       return;
     }
@@ -607,11 +629,13 @@ class MolluskMaksim {
 
   MolluskMaksim(this.x, this.y);
 
-  void hit(Offset birdVelocity) {
+    void hit(Offset birdVelocity) {
+    AudioManager.playPigHit(); // Выбирает случайный крик pig_hit 1, 2 или 3!
     vx = birdVelocity.dx * 0.5;
     vy = birdVelocity.dy * 0.5;
     isFalling = true;
   }
+
 
        // ИСПРАВЛЕНО: Теперь метод принимает ровно 3 аргумента, и ошибка компиляции исчезнет!
   void update(double dt, List<GameBlock> blocks, double groundY) {
@@ -684,9 +708,10 @@ class GameBlock {
 
   void hit(Offset impactVelocity) {
     if (isBroken) return;
-    
-    // Пробуждаем блок от удара
     isSleeping = false;
+
+    // Включаем хруст дерева или грохот камня в зависимости от материала кубика
+    AudioManager.playBlockBreak(isStone); 
 
     double speed = sqrt(impactVelocity.dx * impactVelocity.dx + impactVelocity.dy * impactVelocity.dy);
     if (speed > 1.2) {
