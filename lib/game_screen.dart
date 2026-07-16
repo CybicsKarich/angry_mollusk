@@ -539,7 +539,8 @@ class Bunnyhop {
     final radius = size.width * 0.016;
 
     // 1. Сначала рисуем базовый красный круг-подложку
-    canvas.drawCircle(screenPos, radius, Paint()..color = const Color(0xFFE53935));
+    canvas.drawCircle(screenPos, radius, Paint()..style = PaintingStyle.fill..color = const Color(0xFFE53935).withValues(alpha: 1.0));
+
 
     // 2. Затем накладываем лицо Баннихопа из ассетов
     if (sprite != null) {
@@ -628,8 +629,7 @@ class MolluskMaksim {
     final screenPos = Offset(size.width * x, size.height * y);
     final radius = size.width * 0.019;
 
-    // 1. Базовый зеленый круг
-    canvas.drawCircle(screenPos, radius, Paint()..color = const Color(0xFF4CAF50));
+    canvas.drawCircle(screenPos, radius, Paint()..style = PaintingStyle.fill..color = const Color(0xFF4CAF50).withValues(alpha: 1.0));
 
     // 2. Накладываем лицо Максима Рыбалкина
     if (sprite != null) {
@@ -657,6 +657,8 @@ class GameBlock {
   double vx = 0.0, vy = 0.0;
   bool isFalling = false;
   bool shouldRemove = false;
+  bool isCracked = false;    // Появились ли трещины после удара об землю
+  double groundFade = 1.0;   // Плавное исчезновение после падения на землю
   bool isBroken = false; // Разрушен ли блок напополам
   double fragmentOffset = 0.0; // Смещение половинок при разлете
   double fragmentAlpha = 1.0;  // Плавное исчезновение (прозрачность)
@@ -667,76 +669,97 @@ class GameBlock {
   void hit(Offset impactVelocity) {
     double speed = sqrt(impactVelocity.dx * impactVelocity.dx + impactVelocity.dy * impactVelocity.dy);
     
-    // Если удар критический (скорость птицы высокая) — ломаем блок напополам!
+    // Если удар критический — ломаем блок напополам
     if (speed > 1.2) {
       isBroken = true;
     }
     
-    vx = impactVelocity.dx * 0.45;
-    vy = impactVelocity.dy * 0.45;
-    isFalling = true; // Блок "просыпается" только от прямого удара!
+    // ЭКШЕН: Передаем импульс быстрее и сильнее
+    vx = impactVelocity.dx * 0.65;
+    vy = impactVelocity.dy * 0.65;
+    isFalling = true; 
   }
 
    void update(double dt, List<GameBlock> allBlocks, List<MolluskMaksim> allPigs, double groundY) {
-    // Если блок расколот, анимируем разлет половинок и исчезновение
+    // Анимация разрушения напополам от птицы
     if (isBroken) {
-      fragmentOffset += 0.1 * dt; // Половинки разлетаются
-      fragmentAlpha -= 1.5 * dt;  // За секунду блок растает
+      fragmentOffset += 0.15 * dt; 
+      fragmentAlpha -= 1.8 * dt;  
       if (fragmentAlpha <= 0) {
         shouldRemove = true;
         return;
       }
     }
 
+    // Анимация плавного исчезновения после удара об землю
+    if (isCracked) {
+      groundFade -= 1.2 * dt; // Блок быстро растает на траве после удара
+      if (groundFade <= 0) {
+        shouldRemove = true;
+        return;
+      }
+    }
+
     if (isFalling) {
-      vy += 1.8 * dt; // Гравитация работает только для проснувшихся блоков
+      // ЭКШЕН: Увеличили гравитацию блоков с 1.8 до 2.8 для резкого и быстрого падения!
+      vy += 2.8 * dt; 
       x += vx * dt;
       y += vy * dt;
 
-      // Лавина: передаем импульс и будим соседние блоки при столкновении
+      // Быстрая лавина: блоки жестче толкают друг друга
       for (var other in allBlocks) {
         if (other != this) {
           if ((x - other.x).abs() < (w + other.w) / 2 && (y - other.y).abs() < (h + other.h) / 2) {
-            other.hit(Offset(vx * 0.75, vy * 0.75));
+            other.hit(Offset(vx * 0.85, vy * 0.85));
           }
         }
       }
 
-      // Падающие блоки давят свиней
+      // Падающие кубики давят Максимов
       for (var pig in allPigs) {
         if (!pig.isFalling) {
           if (pig.x >= x && pig.x <= x + w && (pig.y - y).abs() < (h / 2 + 0.02)) {
-            pig.hit(Offset(vx * 0.8, vy * 0.8));
+            pig.hit(Offset(vx * 0.9, vy * 0.9));
           }
         }
       }
 
-      // Приземление на твердый остров
+      // ЖЕСТКИЙ УДАР ОБ ЗЕМЛЮ ОСТРОВА
       if (y >= groundY - h) {
         y = groundY - h;
         vx = 0;
         vy = 0;
         isFalling = false;
+        
+        // Включаем режим трещин и последующего исчезновения
+        isCracked = true;
       }
 
-      // Падение в океан
+      // Падение в воду между скал
       if (x < 0.55 && y >= groundY - h / 2 && x > 0.25) {
         shouldRemove = true;
       }
     }
   }
 
+    @override
   void render(Canvas canvas, Size size) {
     if (fragmentAlpha <= 0) return;
 
+    // ЖЕЛЕЗНЫЙ ФИКС НЕВИДИМОСТИ: Создаем абсолютно новые чистые кисти для каждого блока,
+    // чтобы их прозрачность не делала "стеклянными" птиц, свиней и траекторию!
     final blockPaint = Paint()
-      ..color = (isStone ? const Color(0xFFB0BEC5) : const Color(0xFFFFB74D)).withValues(alpha: fragmentAlpha)
-      ..style = PaintingStyle.fill;
-
+      ..style = PaintingStyle.fill
+      ..color = isStone 
+          ? const Color(0xFFB0BEC5).withValues(alpha: groundFade) 
+          : const Color(0xFFFFB74D).withValues(alpha: groundFade);
+    
     final borderPaint = Paint()
-      ..color = (isStone ? const Color(0xFF455A64) : const Color(0xFFD84315)).withValues(alpha: fragmentAlpha)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
+      ..strokeWidth = 2.0
+      ..color = isStone 
+          ? const Color(0xFF455A64).withValues(alpha: groundFade) 
+          : const Color(0xFFD84315).withValues(alpha: groundFade);
 
     final screenX = size.width * x;
     final screenY = size.height * y;
@@ -772,6 +795,24 @@ class GameBlock {
         canvas.drawLine(Offset(rect.left + rect.width * 0.3, rect.top + 2), Offset(rect.left + rect.width * 0.3, rect.bottom - 2), stonePaint);
         canvas.drawLine(Offset(rect.left + rect.width * 0.7, rect.top + 2), Offset(rect.left + rect.width * 0.7, rect.bottom - 2), stonePaint);
       }
+    }
+     // Если блок упал на землю — рисуем на нём мультяшные трещины!
+    if (isCracked) {
+      final crackPaint = Paint()
+        ..color = const Color(0xFF212121).withValues(alpha: groundFade)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5;
+        
+      final crackPath = Path();
+      // Левая трещина
+      crackPath.moveTo(rect.left + 5, rect.top + 5);
+      crackPath.lineTo(rect.left + rect.width * 0.3, rect.top + rect.height * 0.4);
+      crackPath.lineTo(rect.left + 2, rect.bottom - 5);
+      // Правая трещина
+      crackPath.moveTo(rect.right - 5, rect.bottom - 5);
+      crackPath.lineTo(rect.left + rect.width * 0.6, rect.top + rect.height * 0.5);
+      
+      canvas.drawPath(crackPath, crackPaint);
     }
   }
 } 
