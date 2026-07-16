@@ -597,13 +597,8 @@ class MolluskMaksim {
     isFalling = true;
   }
 
-     void update(double dt, List<GameBlock> blocks, double groundY, bool isCastleActivated) {
-        if (!isCastleActivated) {
-      isFalling = false;
-      vx = 0;
-      vy = 0;
-      return;
-    }
+       // ИСПРАВЛЕНО: Теперь метод принимает ровно 3 аргумента, и ошибка компиляции исчезнет!
+  void update(double dt, List<GameBlock> blocks, double groundY) {
     if (isFalling) {
       vy += 1.8 * dt; // Гравитация свиньи
       x += vx * dt;
@@ -617,7 +612,9 @@ class MolluskMaksim {
       // Проверка опоры: если кубик под свиньей улетел, она падает
       bool supported = false;
       for (var block in blocks) {
-        if (x >= block.x && x <= block.x + block.w && (block.y - y).abs() < 0.03) {
+        if (!block.isBroken && !block.shouldRemove &&
+            x >= block.x && x <= block.x + block.w && 
+            (block.y - y).abs() < 0.03) {
           supported = true;
           break;
         }
