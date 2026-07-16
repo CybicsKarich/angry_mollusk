@@ -534,43 +534,41 @@ class Bunnyhop {
   }
 
     void render(Canvas canvas, Size size, Sprite? sprite) {
-    const radius = 15.0; // Чистый радиус птицы в пикселях
+    final screenPos = Offset(size.width * position.dx, size.height * position.dy);
+    final radius = size.width * 0.019; // Крупный сочный размер птицы
 
-    // Базовая красная подложка
-    canvas.drawCircle(Offset.zero, radius, Paint()..color = const Color(0xFFE53935));
+    // 1. Рисуем красный круг-подложку (все три птицы гарантированно красные!)
+    canvas.drawCircle(screenPos, radius, Paint()..color = const Color(0xFFE53935));
 
-      // Исправлено: используем аргумент sprite, который пришел на вход метода
-     if (sprite != null) {
-      sprite.render(canvas, position: Vector2(-radius, -radius), size: Vector2(radius * 2, radius * 2));
-     }
+    // 2. Накладываем лицо Баннихопа строго по центру
+    if (sprite != null) {
+      sprite.render(canvas, position: Vector2(screenPos.dx - radius, screenPos.dy - radius), size: Vector2(radius * 2, radius * 2));
+    }
 
-
-    // ТЕПЕРЬ ПЕРЫШКИ СВЕРХУ ЛИЦА (Локально от центра!)
+    // 3. Рисуем мультяшные перышки-хохолок поверх лица
     final featherPaint = Paint()..color = const Color(0xFFD32F2F)..style = PaintingStyle.fill;
     final featherPath = Path();
-    // Левое пёрышко торчит вверх-влево
-    featherPath.moveTo(-5, -radius);
-    featherPath.lineTo(-8, -radius - 7);
-    featherPath.lineTo(0, -radius + 3);
-    // Правое пёрышко торчит вверх-вправо
-    featherPath.moveTo(0, -radius + 3);
-    featherPath.lineTo(4, -radius - 8);
-    featherPath.lineTo(5, -radius);
+    featherPath.moveTo(screenPos.dx - radius * 0.3, screenPos.dy - radius);
+    featherPath.lineTo(screenPos.dx - radius * 0.5, screenPos.dy - radius * 1.4);
+    featherPath.lineTo(screenPos.dx, screenPos.dy - radius * 0.8);
+    featherPath.moveTo(screenPos.dx, screenPos.dy - radius * 0.8);
+    featherPath.lineTo(screenPos.dx + radius * 0.2, screenPos.dy - radius * 1.5);
+    featherPath.lineTo(screenPos.dx + radius * 0.3, screenPos.dy - radius);
     featherPath.close();
     canvas.drawPath(featherPath, featherPaint);
 
-    // Траектория полёта белыми точками
+    // 4. Траектория полёта белыми точками
     if (isReadyForLaunch && !isLaunched && position.dx != 0.15) {
       final dotsPaint = Paint()..color = Colors.white;
       final slingX = 0.15;
-      final slingY = 0.73 - 0.04;
+      final slingY = 0.73 - 0.04; // Координата рогатки
       final simVelocity = Offset((slingX - position.dx) * 9.0, (slingY - position.dy) * 9.0);
 
       for (int i = 1; i < 14; i++) {
         double t = i * 0.10;
-        double x = simVelocity.dx * t * 100; 
-        double y = (simVelocity.dy * t + 0.5 * 0.35 * t * t) * 100;
-        canvas.drawCircle(Offset(x, y), 3.0, dotsPaint);
+        double x = position.dx + simVelocity.dx * t;
+        double y = position.dy + simVelocity.dy * t + 0.5 * 0.35 * t * t;
+        canvas.drawCircle(Offset(size.width * x, size.height * y), size.width * 0.003, dotsPaint);
       }
     }
   }
@@ -622,29 +620,27 @@ class MolluskMaksim {
     }
   }
 
-     void render(Canvas canvas, Size size, Sprite? sprite) {
-    const radius = 18.0; // Чистый радиус свиньи в пикселях
+    void render(Canvas canvas, Size size, Sprite? sprite) {
+    final screenPos = Offset(size.width * x, size.height * y);
+    final radius = size.width * 0.022; // Сочный размер свиньи
 
-    // Базовый зеленый круг
-    canvas.drawCircle(Offset.zero, radius, Paint()..color = const Color(0xFF4CAF50));
+    // 1. Базовый зеленый круг
+    canvas.drawCircle(screenPos, radius, Paint()..color = const Color(0xFF4CAF50));
 
-     // Исправлено: используем аргумент sprite
-      if (sprite != null) {
-      sprite.render(canvas, position: Vector2(-radius, -radius), size: Vector2(radius * 2, radius * 2));
-     }
+    // 2. Накладываем лицо Максима Рыбалкина
+    if (sprite != null) {
+      sprite.render(canvas, position: Vector2(screenPos.dx - radius, screenPos.dy - radius), size: Vector2(radius * 2, radius * 2));
+    }
 
-
-    // ТЕПЕРЬ СВИНЫЕ УШИ СВЕРХУ ЛИЦА (Локально от центра!)
+    // 3. Зеленые свиные уши поверх лица
     final earPaint = Paint()..color = const Color(0xFF4CAF50)..style = PaintingStyle.fill;
     final earBorderPaint = Paint()..color = const Color(0xFF2E7D32)..style = PaintingStyle.stroke..strokeWidth = 1.2;
     
-    // Левое ушко (сбоку и сверху головы)
-    canvas.drawOval(Rect.fromCenter(center: const Offset(-radius * 0.7, -radius * 0.5), width: 8, height: 12), earPaint);
-    canvas.drawOval(Rect.fromCenter(center: const Offset(-radius * 0.7, -radius * 0.5), width: 8, height: 12), earBorderPaint);
+    canvas.drawOval(Rect.fromCenter(center: Offset(screenPos.dx - radius * 0.7, screenPos.dy - radius * 0.5), width: 8, height: 12), earPaint);
+    canvas.drawOval(Rect.fromCenter(center: Offset(screenPos.dx - radius * 0.7, screenPos.dy - radius * 0.5), width: 8, height: 12), earBorderPaint);
     
-    // Правое ушко
-    canvas.drawOval(Rect.fromCenter(center: const Offset(radius * 0.7, -radius * 0.5), width: 8, height: 12), earPaint);
-    canvas.drawOval(Rect.fromCenter(center: const Offset(radius * 0.7, -radius * 0.5), width: 8, height: 12), earBorderPaint);
+    canvas.drawOval(Rect.fromCenter(center: Offset(screenPos.dx + radius * 0.7, screenPos.dy - radius * 0.5), width: 8, height: 12), earPaint);
+    canvas.drawOval(Rect.fromCenter(center: Offset(screenPos.dx + radius * 0.7, screenPos.dy - radius * 0.5), width: 8, height: 12), earBorderPaint);
   }
 }
 
@@ -740,16 +736,18 @@ class GameBlock {
     }
   }
 
-      @override
-  void render(Canvas canvas) {
+      void render(Canvas canvas, Size size) {
     if (groundFade <= 0) return;
 
-    // Исправлено: используем внутренние w и h этого кубика
-     final double blockW = w * 100;
-     final double blockH = h * 100;
+    // Переводим относительные координаты в реальные пиксели экрана смартфона
+    final rect = Rect.fromLTWH(
+      size.width * x, 
+      size.height * y, 
+      size.width * w, 
+      size.height * h
+    );
 
-
-    // Создаем изолированные кисти с учетом прозрачности groundFade
+    // Создаем изолированные кисти с прозрачностью для таяния на земле
     final paint = Paint()
       ..color = (isStone ? const Color(0xFFB0BEC5) : const Color(0xFFFFB74D)).withValues(alpha: groundFade)
       ..style = PaintingStyle.fill;
@@ -759,20 +757,38 @@ class GameBlock {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 
-    // Рисуем блок строго от локального центра (0,0)
-    final rect = Rect.fromCenter(center: Offset.zero, width: blockW, height: blockH);
+    // Рисуем сам кубик на экране
     canvas.drawRect(rect, paint);
     canvas.drawRect(rect, borderPaint);
 
-    // Узоры материалов (волокна дерева или швы кирпича)
+    // Рисуем текстуру материалов (дерево или кирпич)
     if (!isStone) {
       final woodPaint = Paint()..color = const Color(0xFFE65100).withValues(alpha: groundFade)..strokeWidth = 1.2;
       canvas.drawLine(Offset(rect.left + 3, rect.top + rect.height * 0.35), Offset(rect.right - 3, rect.top + rect.height * 0.35), woodPaint);
+      canvas.drawLine(Offset(rect.left + 3, rect.top + rect.height * 0.7), Offset(rect.right - 3, rect.top + rect.height * 0.7), woodPaint);
     } else {
       final stonePaint = Paint()..color = const Color(0xFF37474F).withValues(alpha: groundFade)..strokeWidth = 1.5;
-      canvas.drawLine(Offset(rect.left + rect.width * 0.5, rect.top + 2), Offset(rect.left + rect.width * 0.5, rect.bottom - 2), stonePaint);
+      canvas.drawLine(Offset(rect.left + rect.width * 0.3, rect.top + 2), Offset(rect.left + rect.width * 0.3, rect.bottom - 2), stonePaint);
+      canvas.drawLine(Offset(rect.left + rect.width * 0.7, rect.top + 2), Offset(rect.left + rect.width * 0.7, rect.bottom - 2), stonePaint);
     }
 
+    // НАСТОЯЩИЕ ТРЕЩИНЫ: Появляются, когда блок шмякается об землю острова
+    if (isCracked) {
+      final crackPaint = Paint()
+        ..color = const Color(0xFF212121).withValues(alpha: groundFade)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5;
+        
+      final crackPath = Path();
+      crackPath.moveTo(rect.left + 5, rect.top + 5);
+      crackPath.lineTo(rect.left + rect.width * 0.3, rect.top + rect.height * 0.4);
+      crackPath.lineTo(rect.left + 2, rect.bottom - 5);
+      crackPath.moveTo(rect.right - 5, rect.bottom - 5);
+      crackPath.lineTo(rect.left + rect.width * 0.6, rect.top + rect.height * 0.5);
+      
+      canvas.drawPath(crackPath, crackPaint);
+    }
+  
     // МУЛЬТЯШНЫЕ ТРЕЩИНЫ: Рисуются поверх блока, если он жестко шмякнулся о землю скалы
     if (isCracked) {
       final crackPaint = Paint()
