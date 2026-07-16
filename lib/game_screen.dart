@@ -533,8 +533,7 @@ class Bunnyhop {
     }
   }
 
-        @override
-  void render(Canvas canvas) {
+    void render(Canvas canvas, Size size, Sprite? sprite) {
     const radius = 15.0; // Чистый радиус птицы в пикселях
 
     // Базовая красная подложка
@@ -623,8 +622,7 @@ class MolluskMaksim {
     }
   }
 
-      @override
-  void render(Canvas canvas) {
+     void render(Canvas canvas, Size size, Sprite? sprite) {
     const radius = 18.0; // Чистый радиус свиньи в пикселях
 
     // Базовый зеленый круг
