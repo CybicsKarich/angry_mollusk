@@ -533,46 +533,44 @@ class Bunnyhop {
     }
   }
 
-      @override
-  void render(Canvas canvas, Size size, Sprite? sprite) {
-    final screenPos = Offset(size.width * position.dx, size.height * position.dy);
-    final radius = size.width * 0.016;
+        @override
+  void render(Canvas canvas) {
+    const radius = 15.0; // Чистый радиус птицы в пикселях
 
-    // 1. Сначала рисуем базовый красный круг-подложку
-    canvas.drawCircle(screenPos, radius, Paint()..style = PaintingStyle.fill..color = const Color(0xFFE53935).withValues(alpha: 1.0));
+    // Базовая красная подложка
+    canvas.drawCircle(Offset.zero, radius, Paint()..color = const Color(0xFFE53935));
 
-
-    // 2. Затем накладываем лицо Баннихопа из ассетов
-    if (sprite != null) {
-      sprite.render(canvas, position: Vector2(screenPos.dx - radius, screenPos.dy - radius), size: Vector2(radius * 2, radius * 2));
+    // Накладываем лицо Баннихопа из ассетов
+    if (birdSprite != null) {
+      birdSprite!.render(canvas, position: Vector2(-radius, -radius), size: Vector2(radius * 2, radius * 2));
     }
 
-    // 3. ТЕПЕРЬ ПЕРЫШКИ РИСУЮТСЯ ПОВЕРХ СПРАЙТА! Они точно не исчезнут
+    // ТЕПЕРЬ ПЕРЫШКИ СВЕРХУ ЛИЦА (Локально от центра!)
     final featherPaint = Paint()..color = const Color(0xFFD32F2F)..style = PaintingStyle.fill;
     final featherPath = Path();
-    // Левое пёрышко
-    featherPath.moveTo(screenPos.dx - radius * 0.3, screenPos.dy - radius);
-    featherPath.lineTo(screenPos.dx - radius * 0.5, screenPos.dy - radius * 1.4);
-    featherPath.lineTo(screenPos.dx, screenPos.dy - radius * 0.8);
-    // Правое пёрышко
-    featherPath.moveTo(screenPos.dx, screenPos.dy - radius * 0.8);
-    featherPath.lineTo(screenPos.dx + radius * 0.2, screenPos.dy - radius * 1.5);
-    featherPath.lineTo(screenPos.dx + radius * 0.3, screenPos.dy - radius);
+    // Левое пёрышко торчит вверх-влево
+    featherPath.moveTo(-5, -radius);
+    featherPath.lineTo(-8, -radius - 7);
+    featherPath.lineTo(0, -radius + 3);
+    // Правое пёрышко торчит вверх-вправо
+    featherPath.moveTo(0, -radius + 3);
+    featherPath.lineTo(4, -radius - 8);
+    featherPath.lineTo(5, -radius);
     featherPath.close();
     canvas.drawPath(featherPath, featherPaint);
 
-    // 4. Траектория полёта белыми точками
+    // Траектория полёта белыми точками
     if (isReadyForLaunch && !isLaunched && position.dx != 0.15) {
       final dotsPaint = Paint()..color = Colors.white;
       final slingX = 0.15;
-      final slingY = 0.73 - 0.04;
+      final slingY = gameRef.groundY - 0.04;
       final simVelocity = Offset((slingX - position.dx) * 9.0, (slingY - position.dy) * 9.0);
 
       for (int i = 1; i < 14; i++) {
         double t = i * 0.10;
-        double x = position.dx + simVelocity.dx * t;
-        double y = position.dy + simVelocity.dy * t + 0.5 * 0.35 * t * t;
-        canvas.drawCircle(Offset(size.width * x, size.height * y), size.width * 0.003, dotsPaint);
+        double x = simVelocity.dx * t * 100; 
+        double y = (simVelocity.dy * t + 0.5 * 0.35 * t * t) * 100;
+        canvas.drawCircle(Offset(x, y), 3.0, dotsPaint);
       }
     }
   }
@@ -624,29 +622,29 @@ class MolluskMaksim {
     }
   }
 
-    @override
-  void render(Canvas canvas, Size size, Sprite? sprite) {
-    final screenPos = Offset(size.width * x, size.height * y);
-    final radius = size.width * 0.019;
+      @override
+  void render(Canvas canvas) {
+    const radius = 18.0; // Чистый радиус свиньи в пикселях
 
-    canvas.drawCircle(screenPos, radius, Paint()..style = PaintingStyle.fill..color = const Color(0xFF4CAF50).withValues(alpha: 1.0));
+    // Базовый зеленый круг
+    canvas.drawCircle(Offset.zero, radius, Paint()..color = const Color(0xFF4CAF50));
 
-    // 2. Накладываем лицо Максима Рыбалкина
-    if (sprite != null) {
-      sprite.render(canvas, position: Vector2(screenPos.dx - radius, screenPos.dy - radius), size: Vector2(radius * 2, radius * 2));
+    // Накладываем лицо Максима Рыбалкина
+    if (pigSprite != null) {
+      pigSprite!.render(canvas, position: Vector2(-radius, -radius), size: Vector2(radius * 2, radius * 2));
     }
 
-    // 3. ТЕПЕРЬ ЗЕЛЕНЫЕ УШИ РИСУЮТСЯ ПОВЕРХ ЛИЦА!
+    // ТЕПЕРЬ СВИНЫЕ УШИ СВЕРХУ ЛИЦА (Локально от центра!)
     final earPaint = Paint()..color = const Color(0xFF4CAF50)..style = PaintingStyle.fill;
-    final earBorderPaint = Paint()..color = const Color(0xFF2E7D32)..style = PaintingStyle.stroke..strokeWidth = 1.5;
+    final earBorderPaint = Paint()..color = const Color(0xFF2E7D32)..style = PaintingStyle.stroke..strokeWidth = 1.2;
     
-    // Левое ушко (смещено влево и чуть вверх относительно центра screenPos)
-    canvas.drawOval(Rect.fromCenter(center: Offset(screenPos.dx - radius * 0.8, screenPos.dy - radius * 0.6), width: radius * 0.6, height: radius * 0.8), earPaint);
-    canvas.drawOval(Rect.fromCenter(center: Offset(screenPos.dx - radius * 0.8, screenPos.dy - radius * 0.6), width: radius * 0.6, height: radius * 0.8), earBorderPaint);
+    // Левое ушко (сбоку и сверху головы)
+    canvas.drawOval(Rect.fromCenter(center: const Offset(-radius * 0.7, -radius * 0.5), width: 8, height: 12), earPaint);
+    canvas.drawOval(Rect.fromCenter(center: const Offset(-radius * 0.7, -radius * 0.5), width: 8, height: 12), earBorderPaint);
     
-    // Правое ушко (смещено вправо и чуть вверх)
-    canvas.drawOval(Rect.fromCenter(center: Offset(screenPos.dx + radius * 0.8, screenPos.dy - radius * 0.6), width: radius * 0.6, height: radius * 0.8), earPaint);
-    canvas.drawOval(Rect.fromCenter(center: Offset(screenPos.dx + radius * 0.8, screenPos.dy - radius * 0.6), width: radius * 0.6, height: radius * 0.8), earBorderPaint);
+    // Правое ушко
+    canvas.drawOval(Rect.fromCenter(center: const Offset(radius * 0.7, -radius * 0.5), width: 8, height: 12), earPaint);
+    canvas.drawOval(Rect.fromCenter(center: const Offset(radius * 0.7, -radius * 0.5), width: 8, height: 12), earBorderPaint);
   }
 }
 
@@ -742,61 +740,39 @@ class GameBlock {
     }
   }
 
-    @override
-  void render(Canvas canvas, Size size) {
-    if (fragmentAlpha <= 0) return;
+      @override
+  void render(Canvas canvas) {
+    if (groundFade <= 0) return;
 
-    // ЖЕЛЕЗНЫЙ ФИКС НЕВИДИМОСТИ: Создаем абсолютно новые чистые кисти для каждого блока,
-    // чтобы их прозрачность не делала "стеклянными" птиц, свиней и траекторию!
-    final blockPaint = Paint()
-      ..style = PaintingStyle.fill
-      ..color = isStone 
-          ? const Color(0xFFB0BEC5).withValues(alpha: groundFade) 
-          : const Color(0xFFFFB74D).withValues(alpha: groundFade);
-    
+    // Переводим метры блока в пиксели для локального Canvas
+    final double blockW = size.x * 100;
+    final double blockH = size.y * 100;
+
+    // Создаем изолированные кисти с учетом прозрачности groundFade
+    final paint = Paint()
+      ..color = (isStone ? const Color(0xFFB0BEC5) : const Color(0xFFFFB74D)).withValues(alpha: groundFade)
+      ..style = PaintingStyle.fill;
+
     final borderPaint = Paint()
+      ..color = (isStone ? const Color(0xFF455A64) : const Color(0xFFD84315)).withValues(alpha: groundFade)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0
-      ..color = isStone 
-          ? const Color(0xFF455A64).withValues(alpha: groundFade) 
-          : const Color(0xFFD84315).withValues(alpha: groundFade);
+      ..strokeWidth = 2.0;
 
-    final screenX = size.width * x;
-    final screenY = size.height * y;
-    final screenW = size.width * w;
-    final screenH = size.height * h;
+    // Рисуем блок строго от локального центра (0,0)
+    final rect = Rect.fromCenter(center: Offset.zero, width: blockW, height: blockH);
+    canvas.drawRect(rect, paint);
+    canvas.drawRect(rect, borderPaint);
 
-    if (isBroken) {
-      // КРАСИВЫЙ РАЗЛЕТ НАДВОЕ: рисуем левую и правую половинки отдельно
-      final pOffset = fragmentOffset * size.width;
-      
-      // Левая половинка отлетает влево
-      final leftRect = Rect.fromLTWH(screenX - pOffset, screenY, screenW / 2, screenH);
-      canvas.drawRect(leftRect, blockPaint);
-      canvas.drawRect(leftRect, borderPaint);
-
-      // Правая половинка отлетает вправо
-      final rightRect = Rect.fromLTWH(screenX + screenW / 2 + pOffset, screenY, screenW / 2, screenH);
-      canvas.drawRect(rightRect, blockPaint);
-      canvas.drawRect(rightRect, borderPaint);
+    // Узоры материалов (волокна дерева или швы кирпича)
+    if (!isStone) {
+      final woodPaint = Paint()..color = const Color(0xFFE65100).withValues(alpha: groundFade)..strokeWidth = 1.2;
+      canvas.drawLine(Offset(rect.left + 3, rect.top + rect.height * 0.35), Offset(rect.right - 3, rect.top + rect.height * 0.35), woodPaint);
     } else {
-      // Обычный целый блок
-      final rect = Rect.fromLTWH(screenX, screenY, screenW, screenH);
-      canvas.drawRect(rect, blockPaint);
-      canvas.drawRect(rect, borderPaint);
-
-      // Узоры волокон дерева или швов кирпича
-      if (!isStone) {
-        final woodPaint = Paint()..color = const Color(0xFFE65100)..strokeWidth = 1.2;
-        canvas.drawLine(Offset(rect.left + 3, rect.top + rect.height * 0.35), Offset(rect.right - 3, rect.top + rect.height * 0.35), woodPaint);
-        canvas.drawLine(Offset(rect.left + 3, rect.top + rect.height * 0.7), Offset(rect.right - 3, rect.top + rect.height * 0.7), woodPaint);
-      } else {
-        final stonePaint = Paint()..color = const Color(0xFF37474F)..strokeWidth = 1.5;
-        canvas.drawLine(Offset(rect.left + rect.width * 0.3, rect.top + 2), Offset(rect.left + rect.width * 0.3, rect.bottom - 2), stonePaint);
-        canvas.drawLine(Offset(rect.left + rect.width * 0.7, rect.top + 2), Offset(rect.left + rect.width * 0.7, rect.bottom - 2), stonePaint);
-      }
+      final stonePaint = Paint()..color = const Color(0xFF37474F).withValues(alpha: groundFade)..strokeWidth = 1.5;
+      canvas.drawLine(Offset(rect.left + rect.width * 0.5, rect.top + 2), Offset(rect.left + rect.width * 0.5, rect.bottom - 2), stonePaint);
     }
-        // ПОЧИНЕНО: Рисуем мультяшные трещины напрямую через экранные координаты!
+
+    // МУЛЬТЯШНЫЕ ТРЕЩИНЫ: Рисуются поверх блока, если он жестко шмякнулся о землю скалы
     if (isCracked) {
       final crackPaint = Paint()
         ..color = const Color(0xFF212121).withValues(alpha: groundFade)
@@ -804,13 +780,13 @@ class GameBlock {
         ..strokeWidth = 1.5;
         
       final crackPath = Path();
-      // Левая трещина (рисуется от верхнего левого угла блока к центру и вниз)
-      crackPath.moveTo(screenX + 5, screenY + 5);
-      crackPath.lineTo(screenX + screenW * 0.3, screenY + screenH * 0.4);
-      crackPath.lineTo(screenX + 2, screenY + screenH - 5);
-      // Правая трещина (от правого нижнего угла к центру)
-      crackPath.moveTo(screenX + screenW - 5, screenY + screenH - 5);
-      crackPath.lineTo(screenX + screenW * 0.6, screenY + screenH * 0.5);
+      // Левая трещина идет от верхнего левого края к центру
+      crackPath.moveTo(rect.left + 5, rect.top + 5);
+      crackPath.lineTo(rect.left + rect.width * 0.3, rect.top + rect.height * 0.4);
+      crackPath.lineTo(rect.left + 2, rect.bottom - 5);
+      // Правая трещина
+      crackPath.moveTo(rect.right - 5, rect.bottom - 5);
+      crackPath.lineTo(rect.left + rect.width * 0.6, rect.top + rect.height * 0.5);
       
       canvas.drawPath(crackPath, crackPaint);
     }
