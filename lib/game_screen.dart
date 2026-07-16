@@ -224,7 +224,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     // Создаем 3 птиц Баннихопов в очередь с правильными аргументами Offset
     for (int i = 0; i < 3; i++) {
       final startX = 0.15 - (i * 0.04);
-      final startY = i == 0 ? groundY - 0.04 : groundY - 0.02; 
+      final startY = i == 0 ? groundY - 0.07 : groundY - 0.04; 
       final bird = Bunnyhop(Offset(startX, startY), i == 0);
       birdsQueue.add(bird);
     }
@@ -234,7 +234,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     buildLevelStructures();
   }
 
-  // НОВЫЙ ИДЕАЛЬНО РОВНЫЙ МЕТОД ПОСТРОЙКИ ЗАМКА
+   // НОВЫЙ ИДЕАЛЬНО РОВНЫЙ МЕТОД ПОСТРОЙКИ ЗАМКА
     void buildLevelStructures() {
     blocks.clear();
     pigs.clear();
@@ -308,6 +308,12 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     super.update(dt);
     if (isPaused) return;
 
+    if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed) {
+      levelCleared = true;
+      AudioManager.playVictory(); // Сочный скример победы включится сразу!
+      overlays.add('VictoryMenu');
+      return;
+    }
     // Анимация облаков и солнца
     sunRotation += 0.3 * dt;
     cloudOffset1 += 0.015 * dt;
@@ -335,15 +341,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     blocks.removeWhere((b) => b.shouldRemove);
     pigs.removeWhere((p) => p.shouldRemove);
 
-    // ЖЕЛЕЗНАЯ ЗАЩИТА ОТ АВТОПОБЕДЫ: Уровень не может быть пройден в первые 2 секунды
-    _safetyTimer += dt;
-    if (_safetyTimer < 2.0) return;
-
-    if (pigs.isEmpty && !levelCleared && !levelFailed) {
-      levelCleared = true;
-      AudioManager.playVictory();
-      overlays.add('VictoryMenu');
-    }
+    
       // ЖИВАЯ АТМОСФЕРА: Свиньи случайно сопят или хрюкают раз в 9 секунд, если они еще живы
     if (pigs.isNotEmpty && !levelCleared && !levelFailed) {
       _pigSoundTimer += dt;
@@ -491,7 +489,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       final touchY = event.localEndPosition.y / size.height;
 
       final slingX = 0.15;
-      final slingY = groundY - 0.04;
+      final slingY = groundY - 0.07;
 
       double dx = touchX - slingX;
       double dy = touchY - slingY;
@@ -512,7 +510,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     if (currentBird != null && currentBird!.isReadyForLaunch && !currentBird!.isLaunched) {
       AudioManager.stopStretch(); // Глушим звук натяжения рогатки
       AudioManager.playLaunch();  // Стреляем со случайной угарной фразой запуска!
-      currentBird!.launch(0.15, groundY - 0.04);
+      currentBird!.launch(0.15, groundY - 0.07);
     }
   }
 }
@@ -615,7 +613,7 @@ class Bunnyhop {
     if (isReadyForLaunch && !isLaunched && position.dx != 0.15) {
       final dotsPaint = Paint()..color = Colors.white;
       final slingX = 0.15;
-      final slingY = 0.73 - 0.04; // Координата рогатки
+      final slingY = 0.73 - 0.07;
       final simVelocity = Offset((slingX - position.dx) * 9.0, (slingY - position.dy) * 9.0);
 
       for (int i = 1; i < 14; i++) {
