@@ -419,7 +419,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
 
     // 8. ОТРИСОВКА ВСЕХ ОБЪЕКТОВ УРОВНЯ
     for (var block in blocks) {
-      block.render(canvas);
+      block.render(canvas, size);
     }
   }
 
