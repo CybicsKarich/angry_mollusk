@@ -474,10 +474,18 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     canvas.drawPath(grassPath, grassPaint);
   }
 
+    @override
+  void onDragStart(DragStartEvent event) {
+    super.onDragStart(event);
+    if (currentBird != null && currentBird!.isReadyForLaunch && !currentBird!.isLaunched) {
+      // Включаем звук натяжения строго ОДИН РАЗ в момент касания пальцем!
+      AudioManager.playStretch(); 
+    }
+  }
+
   @override
   void onDragUpdate(DragUpdateEvent event) {
     if (currentBird != null && currentBird!.isReadyForLaunch && !currentBird!.isLaunched) {
-      AudioManager.playStretch();
       final size = canvasSize.toSize();
       final touchX = event.localEndPosition.x / size.width;
       final touchY = event.localEndPosition.y / size.height;
