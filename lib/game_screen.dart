@@ -419,7 +419,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
 
     // 8. ОТРИСОВКА ВСЕХ ОБЪЕКТОВ УРОВНЯ
     for (var block in blocks) {
-      block.render(canvas, size);
+      block.render(canvas);
     }
   }
 
@@ -540,10 +540,11 @@ class Bunnyhop {
     // Базовая красная подложка
     canvas.drawCircle(Offset.zero, radius, Paint()..color = const Color(0xFFE53935));
 
-    // Накладываем лицо Баннихопа из ассетов
-    if (birdSprite != null) {
-      birdSprite!.render(canvas, position: Vector2(-radius, -radius), size: Vector2(radius * 2, radius * 2));
-    }
+      // Исправлено: используем аргумент sprite, который пришел на вход метода
+     if (sprite != null) {
+      sprite.render(canvas, position: Vector2(-radius, -radius), size: Vector2(radius * 2, radius * 2));
+     }
+
 
     // ТЕПЕРЬ ПЕРЫШКИ СВЕРХУ ЛИЦА (Локально от центра!)
     final featherPaint = Paint()..color = const Color(0xFFD32F2F)..style = PaintingStyle.fill;
@@ -563,7 +564,7 @@ class Bunnyhop {
     if (isReadyForLaunch && !isLaunched && position.dx != 0.15) {
       final dotsPaint = Paint()..color = Colors.white;
       final slingX = 0.15;
-      final slingY = gameRef.groundY - 0.04;
+      final slingY = 0.73 - 0.04;
       final simVelocity = Offset((slingX - position.dx) * 9.0, (slingY - position.dy) * 9.0);
 
       for (int i = 1; i < 14; i++) {
@@ -629,10 +630,11 @@ class MolluskMaksim {
     // Базовый зеленый круг
     canvas.drawCircle(Offset.zero, radius, Paint()..color = const Color(0xFF4CAF50));
 
-    // Накладываем лицо Максима Рыбалкина
-    if (pigSprite != null) {
-      pigSprite!.render(canvas, position: Vector2(-radius, -radius), size: Vector2(radius * 2, radius * 2));
-    }
+     // Исправлено: используем аргумент sprite
+      if (sprite != null) {
+      sprite.render(canvas, position: Vector2(-radius, -radius), size: Vector2(radius * 2, radius * 2));
+     }
+
 
     // ТЕПЕРЬ СВИНЫЕ УШИ СВЕРХУ ЛИЦА (Локально от центра!)
     final earPaint = Paint()..color = const Color(0xFF4CAF50)..style = PaintingStyle.fill;
@@ -744,9 +746,10 @@ class GameBlock {
   void render(Canvas canvas) {
     if (groundFade <= 0) return;
 
-    // Переводим метры блока в пиксели для локального Canvas
-    final double blockW = size.x * 100;
-    final double blockH = size.y * 100;
+    // Исправлено: используем внутренние w и h этого кубика
+     final double blockW = w * 100;
+     final double blockH = h * 100;
+
 
     // Создаем изолированные кисти с учетом прозрачности groundFade
     final paint = Paint()
