@@ -510,24 +510,39 @@ class Bunnyhop {
     trajectoryDots.clear();
   }
 
-  void update(double dt, List<GameBlock> blocks, List<MolluskMaksim> pigs, double groundY) {
+    void update(double dt, List<GameBlock> blocks, List<MolluskMaksim> pigs, double groundY) {
     _lifeTimer += dt;
     if (_lifeTimer > 3.5) {
       shouldRemove = true;
       return;
     }
 
-        // Влияние гравитации на вектор скорости снаряда
-        // Слабая гравитация для затяжного красивого полёта
     velocity = Offset(velocity.dx, velocity.dy + 0.35 * dt);
     position = Offset(position.dx + velocity.dx * dt, position.dy + velocity.dy * dt);
 
-    // Столкновение с кубиками замка Максима
+    // СТОЛКНОВЕНИЕ С ЗЕМЛЁЙ ОСТРОВА (Птица не пролетает сквозь сушу!)
+    if (position.dy >= groundY) {
+      // Если птица находится на левом острове (<= 0.25) или на правом (>= 0.55) — она врезается в сушу
+      if (position.dx <= 0.25 || position.dx >= 0.55) {
+        position = Offset(position.dx, groundY);
+        velocity = Offset.zero;
+        shouldRemove = true; // Останавливается и передает ход следующей птице
+        return;
+      }
+    }
+
+    // Пролёт сквозь воду (если упала в промежуток между 0.25 и 0.55, летит вниз до дна экрана)
+    if (position.dx > 0.25 && position.dx < 0.55 && position.dy >= 0.95) {
+      shouldRemove = true;
+      return;
+    }
+
+    // Столкновение с кубиками замка (будим их и передаем им траекторию удара!)
     for (var block in blocks) {
-      if (!block.isFalling &&
+      if (!block.isBroken && !block.shouldRemove &&
           position.dx >= block.x && position.dx <= block.x + block.w &&
           position.dy >= block.y && position.dy <= block.y + block.h) {
-        block.hit(velocity);
+        block.hit(velocity); // Передаем скорость удара блоку
       }
     }
 
@@ -540,6 +555,7 @@ class Bunnyhop {
       }
     }
   }
+
 
     void render(Canvas canvas, Size size, Sprite? sprite) {
     final screenPos = Offset(size.width * position.dx, size.height * position.dy);
@@ -658,6 +674,7 @@ class GameBlock {
   bool shouldRemove = false;
   bool isCracked = false;    // Появились ли трещины после удара об землю
   double groundFade = 1.0;   // Плавное исчезновение после падения на землю
+  bool isSleeping = true; // Блок спит и стоит мёртво до тех пор, пока в него не попадут
   bool isBroken = false; // Разрушен ли блок напополам
   double fragmentOffset = 0.0; // Смещение половинок при разлете
   double fragmentAlpha = 1.0;  // Плавное исчезновение (прозрачность)
@@ -666,21 +683,31 @@ class GameBlock {
   GameBlock(this.x, this.y, this.w, this.h, this.isStone);
 
   void hit(Offset impactVelocity) {
-    double speed = sqrt(impactVelocity.dx * impactVelocity.dx + impactVelocity.dy * impactVelocity.dy);
+    if (isBroken) return;
     
-    // Если удар критический — ломаем блок напополам
+    // Пробуждаем блок от удара
+    isSleeping = false;
+
+    double speed = sqrt(impactVelocity.dx * impactVelocity.dx + impactVelocity.dy * impactVelocity.dy);
     if (speed > 1.2) {
       isBroken = true;
     }
     
-    // ЭКШЕН: Передаем импульс быстрее и сильнее
+    // Передаем блоку скорость толчка птицы, чтобы он изменил свою траекторию!
     vx = impactVelocity.dx * 0.65;
     vy = impactVelocity.dy * 0.65;
     isFalling = true; 
   }
 
    void update(double dt, List<GameBlock> allBlocks, List<MolluskMaksim> allPigs, double groundY) {
-    // Анимация разрушения напополам от птицы
+    // Если блок спит — он физически не может упасть или сдвинуться сам по себе
+    if (isSleeping) {
+      isFalling = false;
+      vx = 0;
+      vy = 0;
+      return;
+    }
+
     if (isBroken) {
       fragmentOffset += 0.15 * dt; 
       fragmentAlpha -= 1.8 * dt;  
@@ -690,26 +717,60 @@ class GameBlock {
       }
     }
 
-    // Анимация плавного исчезновения после удара об землю
     if (isCracked) {
-      groundFade -= 1.2 * dt; // Блок быстро растает на траве после удара
+      groundFade -= 1.2 * dt; 
       if (groundFade <= 0) {
         shouldRemove = true;
         return;
       }
     }
 
-       // ИСПРАВЛЕНО: Если под блоком нет опоры (нижний блок сломался), он падает сам!
-    if (!isFalling && !isBroken && !isCracked && y < groundY - h) {
+    if (isFalling) {
+      vy += 2.8 * dt; // Скорость быстрого падения
+      x += vx * dt;
+      y += vy * dt;
+
+      // Лавина: падающий проснувшийся блок будит соседние блоки и толкает их в сторону своего движения!
+      for (var other in allBlocks) {
+        if (other != this) {
+          if ((x - other.x).abs() < (w + other.w) / 2 && (y - other.y).abs() < (h + other.h) / 2) {
+            other.isSleeping = false; // Будим соседа
+            other.hit(Offset(vx * 0.85, vy * 0.85)); // Передаем ему толчок
+          }
+        }
+      }
+
+      // Передаем импульс свиньям
+      for (var pig in allPigs) {
+        if (pig.x >= x && pig.x <= x + w && (pig.y - y).abs() < (h / 2 + 0.02)) {
+          pig.hit(Offset(vx * 0.9, vy * 0.9));
+        }
+      }
+
+      // ПРИЗЕМЛЕНИЕ НА ЗЕМЛЮ ОСТРОВА (Блок не проваливается сквозь землю!)
+      if (y >= groundY - h) {
+        // Проверяем, упал ли он на сушу острова, а не в воду (вода между 0.25 и 0.55)
+        if (x <= 0.25 || x >= 0.55) {
+          y = groundY - h;
+          vx = 0;
+          vy = 0;
+          isFalling = false;
+          isCracked = true; // Трескается и исчезает на суше
+        }
+      }
+
+      // ПАДЕНИЕ СКВОЗЬ ВОДУ (Если улетел в океан между скал, летит до самого дна экрана)
+      if (x > 0.25 && x < 0.55 && y >= 0.95) {
+        shouldRemove = true;
+      }
+    } else {
+      // Проверка потери опоры в динамике: если нижний блок разрушен, верхний просыпается и падает
       bool hasFloor = false;
-      // Если блок стоит на твёрдой земле острова
-      if ((y + h - groundY).abs() < 0.005) {
+      if ((y + h - groundY).abs() < 0.005 && (x <= 0.25 || x >= 0.55)) {
         hasFloor = true;
       } else {
-        // Проверяем, есть ли под нами другой целый блок
         for (var other in allBlocks) {
-          if (other != this && !other.isBroken && !other.shouldRemove) {
-            // Проверка совпадения по горизонтали (X) и прилегания по вертикали (Y)
+          if (other != this && !other.isBroken && !other.shouldRemove && !other.isSleeping) {
             if ((other.x - x).abs() < (w + other.w) * 0.48 &&
                 other.y > y &&
                 (other.y - (y + h)).abs() < 0.015) {
@@ -719,50 +780,9 @@ class GameBlock {
           }
         }
       }
-      // Если опоры нет — блок "просыпается" и начинает падать под действием гравитации
       if (!hasFloor) {
+        isSleeping = false;
         isFalling = true;
-      }
-    }
-
-     if (isFalling) {
-      // ЭКШЕН: Увеличили гравитацию блоков с 1.8 до 2.8 для резкого и быстрого падения!
-      vy += 2.8 * dt; 
-      x += vx * dt;
-      y += vy * dt;
-
-      // Быстрая лавина: блоки жестче толкают друг друга
-      for (var other in allBlocks) {
-        if (other != this) {
-          if ((x - other.x).abs() < (w + other.w) / 2 && (y - other.y).abs() < (h + other.h) / 2) {
-            other.hit(Offset(vx * 0.85, vy * 0.85));
-          }
-        }
-      }
-
-      // Падающие кубики давят Максимов
-      for (var pig in allPigs) {
-        if (!pig.isFalling) {
-          if (pig.x >= x && pig.x <= x + w && (pig.y - y).abs() < (h / 2 + 0.02)) {
-            pig.hit(Offset(vx * 0.9, vy * 0.9));
-          }
-        }
-      }
-
-      // ЖЕСТКИЙ УДАР ОБ ЗЕМЛЮ ОСТРОВА
-      if (y >= groundY - h) {
-        y = groundY - h;
-        vx = 0;
-        vy = 0;
-        isFalling = false;
-        
-        // Включаем режим трещин и последующего исчезновения
-        isCracked = true;
-      }
-
-      // Падение в воду между скал
-      if (x < 0.55 && y >= groundY - h / 2 && x > 0.25) {
-        shouldRemove = true;
       }
     }
   }
