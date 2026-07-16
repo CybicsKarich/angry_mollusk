@@ -77,16 +77,12 @@ class AudioManager {
     _playParallel('audio/game_over_fail.MP3');
   }
 
-  // ДИНАМИЧЕСКИЙ МЕТОД: Создает новый плеер на каждый чих для параллельного наложения!
+    // ИСПРАВЛЕНО: Убрали сломанный конструктор контекста, теперь компиляция пройдёт идеально!
   static void _playParallel(String assetPath) async {
     try {
       final AudioPlayer temporaryPlayer = AudioPlayer();
-      // LowLatency режим идеален для звуковых эффектов в играх (стрельба, взрывы, удары)
-      await temporaryPlayer.setAudioContext(AudioContext(
-        android: const AndroidAudioContext(isSubmix: true),
-      ));
       
-      // Запускаем звук в параллельном потоке
+      // Запускаем звук в параллельном потоке с низкой задержкой для игр
       await temporaryPlayer.play(AssetSource(assetPath), mode: PlayerMode.lowLatency);
       
       // Очищаем память: когда звук доиграет, плеер сам себя уничтожит
