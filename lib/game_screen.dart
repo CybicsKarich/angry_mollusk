@@ -309,7 +309,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     cloudOffset1 += 0.015 * dt;
     cloudOffset2 += 0.008 * dt;
 
-        // Обновление летящей птицы
+    // ВОТ ЭТОТ КОД ОБНОВЛЕНИЯ ПТИЦЫ ОБЯЗАТЕЛЬНО ДОЛЖЕН СТОЯТЬ ЗДЕСЬ (В МЕТОДЕ UPDATE):
     if (currentBird != null && currentBird!.isLaunched) {
       currentBird!.update(dt, blocks, pigs, groundY);
       if (currentBird!.shouldRemove) {
@@ -317,17 +317,15 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       }
     }
 
-    // Настоящее и правильное обновление блоков внутри метода update
+    // Обновление падающих блоков и цепных реакций
     for (var block in blocks) {
       block.update(dt, blocks, pigs, groundY);
     }
 
-    // Настоящее и правильное обновление свиней (передаем птицу как триггер активации)
-    bool birdFlew = currentBird != null && currentBird!.isLaunched && currentBird!.position.dx > 0.35;
+    // Обновление падающих свиней
     for (var pig in pigs) {
-      pig.update(dt, blocks, groundY, birdFlew);
+      pig.update(dt, blocks, groundY);
     }
-
 
     // Удаляем уничтоженные объекты
     blocks.removeWhere((b) => b.shouldRemove);
@@ -420,6 +418,16 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     // 8. ОТРИСОВКА ВСЕХ ОБЪЕКТОВ УРОВНЯ
     for (var block in blocks) {
       block.render(canvas, size);
+    }
+
+    // СЮДА ВСТАВЛЯЕМ СВИНЕЙ! (Они нарисуются поверх островов и блоков)
+    for (var pig in pigs) {
+      pig.render(canvas, size, maksimSprite);
+    }
+
+    // СЮДА ЖЕ ВСТАВЛЯЕМ ПТИЦУ С ТРАЕКТОРИЕЙ! (Чтобы она была видна игроку)
+    if (currentBird != null && (!currentBird!.isLaunched || !currentBird!.shouldRemove)) {
+      currentBird!.render(canvas, size, bunnySprite);
     }
   }
 
@@ -694,7 +702,33 @@ class GameBlock {
       }
     }
 
-    if (isFalling) {
+       // ИСПРАВЛЕНО: Если под блоком нет опоры (нижний блок сломался), он падает сам!
+    if (!isFalling && !isBroken && !isCracked && y < groundY - h) {
+      bool hasFloor = false;
+      // Если блок стоит на твёрдой земле острова
+      if ((y + h - groundY).abs() < 0.005) {
+        hasFloor = true;
+      } else {
+        // Проверяем, есть ли под нами другой целый блок
+        for (var other in allBlocks) {
+          if (other != this && !other.isBroken && !other.shouldRemove) {
+            // Проверка совпадения по горизонтали (X) и прилегания по вертикали (Y)
+            if ((other.x - x).abs() < (w + other.w) * 0.48 &&
+                other.y > y &&
+                (other.y - (y + h)).abs() < 0.015) {
+              hasFloor = true;
+              break;
+            }
+          }
+        }
+      }
+      // Если опоры нет — блок "просыпается" и начинает падать под действием гравитации
+      if (!hasFloor) {
+        isFalling = true;
+      }
+    }
+
+     if (isFalling) {
       // ЭКШЕН: Увеличили гравитацию блоков с 1.8 до 2.8 для резкого и быстрого падения!
       vy += 2.8 * dt; 
       x += vx * dt;
