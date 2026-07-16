@@ -796,7 +796,7 @@ class GameBlock {
         canvas.drawLine(Offset(rect.left + rect.width * 0.7, rect.top + 2), Offset(rect.left + rect.width * 0.7, rect.bottom - 2), stonePaint);
       }
     }
-     // Если блок упал на землю — рисуем на нём мультяшные трещины!
+        // ПОЧИНЕНО: Рисуем мультяшные трещины напрямую через экранные координаты!
     if (isCracked) {
       final crackPaint = Paint()
         ..color = const Color(0xFF212121).withValues(alpha: groundFade)
@@ -804,13 +804,13 @@ class GameBlock {
         ..strokeWidth = 1.5;
         
       final crackPath = Path();
-      // Левая трещина
-      crackPath.moveTo(rect.left + 5, rect.top + 5);
-      crackPath.lineTo(rect.left + rect.width * 0.3, rect.top + rect.height * 0.4);
-      crackPath.lineTo(rect.left + 2, rect.bottom - 5);
-      // Правая трещина
-      crackPath.moveTo(rect.right - 5, rect.bottom - 5);
-      crackPath.lineTo(rect.left + rect.width * 0.6, rect.top + rect.height * 0.5);
+      // Левая трещина (рисуется от верхнего левого угла блока к центру и вниз)
+      crackPath.moveTo(screenX + 5, screenY + 5);
+      crackPath.lineTo(screenX + screenW * 0.3, screenY + screenH * 0.4);
+      crackPath.lineTo(screenX + 2, screenY + screenH - 5);
+      // Правая трещина (от правого нижнего угла к центру)
+      crackPath.moveTo(screenX + screenW - 5, screenY + screenH - 5);
+      crackPath.lineTo(screenX + screenW * 0.6, screenY + screenH * 0.5);
       
       canvas.drawPath(crackPath, crackPaint);
     }
