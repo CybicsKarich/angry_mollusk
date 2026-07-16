@@ -6,6 +6,7 @@ class AudioManager {
   static final AudioPlayer _stretchPlayer = AudioPlayer();
   static final Random _random = Random();
   static bool _isStretching = false;
+  static int _lastBlockBreakTime = 0; 
 
   static Future<void> init() async {
     _stretchPlayer.setReleaseMode(ReleaseMode.loop);
@@ -51,14 +52,23 @@ class AudioManager {
     _playParallel('audio/bird_miss$num.MP3');
   }
 
-  // РАЗРУШЕНИЕ БЛОКОВ (КАМЕНЬ / ДЕРЕВО)
+    // СВЯЗАНО С ОГРАНИЧЕНИЕМ ПОВТОРОВ: Блоки больше не спамят звуком при скольжении!
   static void playBlockBreak(bool isStone) {
+    final int currentTime = DateTime.now().millisecondsSinceEpoch;
+    
+    // Если прошло меньше 150 миллисекунд с прошлой вспышки — глушим дубликат
+    if (currentTime - _lastBlockBreakTime < 150) {
+      return; 
+    }
+    _lastBlockBreakTime = currentTime;
+
     if (isStone) {
       _playParallel('audio/stone_break.mp3');
     } else {
       _playParallel('audio/wood_break.mp3');
     }
   }
+
 
   // СВИНУЮ СОПЕНИЕ МАКСИМА
   static void playPigSnort() {
@@ -77,15 +87,17 @@ class AudioManager {
     _playParallel('audio/game_over_fail.MP3');
   }
 
-    // ИСПРАВЛЕНО: Убрали сломанный конструктор контекста, теперь компиляция пройдёт идеально!
+      // ИСПРАВЛЕНО БЕСКОНЕЧНОЕ ВОСПРОИЗВЕДЕНИЕ: Вшит принудительный ReleaseMode!
   static void _playParallel(String assetPath) async {
     try {
       final AudioPlayer temporaryPlayer = AudioPlayer();
       
-      // Запускаем звук в параллельном потоке с низкой задержкой для игр
+      // Запрещаем звуку зацикливаться при любых обстоятельствах
+      await temporaryPlayer.setReleaseMode(ReleaseMode.release);
+      
+      // Запускаем в параллельном потоке
       await temporaryPlayer.play(AssetSource(assetPath), mode: PlayerMode.lowLatency);
       
-      // Очищаем память: когда звук доиграет, плеер сам себя уничтожит
       temporaryPlayer.onPlayerComplete.listen((_) {
         temporaryPlayer.dispose();
       });
