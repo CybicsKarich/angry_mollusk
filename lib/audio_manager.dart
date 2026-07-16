@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
 
 class AudioManager {
-  // Оставляем только один плеер для резинки, так как она должна быть под контролем (Loop)
+  // оставляем только один плеер для резинки, так как она должна быть под контролем (Loop)
   static final AudioPlayer _stretchPlayer = AudioPlayer();
   static final Random _random = Random();
   static bool _isStretching = false;
