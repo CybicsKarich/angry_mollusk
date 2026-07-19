@@ -286,6 +286,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     if (birdsQueue.isNotEmpty) {
       birdsQueue.removeAt(0);
       if (birdsQueue.isNotEmpty) {
+        AudioManager.resetTokensForNextBird(); 
         currentBird = birdsQueue.first;
         currentBird!.position = Offset(0.15, groundY - 0.04);
         currentBird!.isReadyForLaunch = true;
