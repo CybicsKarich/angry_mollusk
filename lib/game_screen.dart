@@ -215,11 +215,61 @@ class GameScreen extends StatelessWidget {
               },
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
+        // ИСПРАВЛЕНО: Возвращён на место полноценный мультяшный экран проигрыша!
+              'GameOverMenu': (BuildContext context, AngryMolluskGame game) {
+                return Center(
+                  child: Container(
+                    width: 300,
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF3E2723), // Тёмно-коричневый мультяшный квадрат
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFFFF9800), width: 4), // Оранжевая рамка
+                      boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 10, offset: Offset(0, 5))],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          'ПТИЦЫ КОНЧИЛИСЬ!\nМАКСИМ ПОБЕДИЛ!',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.1),
+                        ),
+                        const SizedBox(height: 24),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            // Кнопка: Мультяшный домик (В меню уровней)
+                            IconButton(
+                              icon: const Icon(Icons.home_rounded, color: Colors.white, size: 32),
+                              onPressed: () {
+                                game.overlays.remove('GameOverMenu');
+                                Navigator.pop(context);
+                              },
+                            ),
+                            // Кнопка: Перезапуск уровня (Стрелка по кругу)
+                            IconButton(
+                              icon: const Icon(Icons.refresh_rounded, color: Colors.white, size: 32),
+                              onPressed: () {
+                                game.overlays.remove('GameOverMenu');
+                                AngryMolluskGame.score = 0; // сброс статических очков
+                                game.isVictorySequenceStarted = false;
+                                game.levelCleared = false;
+                                game.buildLevelStructures(); // запускаем чистую пересборку
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ],
+          ),
+        );
+      }
+    }
 
 // Главный движок игры
 class AngryMolluskGame extends FlameGame with DragCallbacks {
@@ -294,6 +344,23 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     blocks.clear();
     pigs.clear();
 
+   // ИСПРАВЛЕНО: Полностью обнуляем состояние запуска, чтобы рогатка ожила при рестарте!
+    isVictorySequenceStarted = false;
+    levelCleared = false;
+    levelFailed = false;
+
+    // Заново наполняем очередь из 3 свежих птиц
+    for (int i = 0; i < 3; i++) {
+      final startX = 0.15 - (i * 0.04);
+      final startY = i == 0 ? groundY - 0.07 : groundY - 0.04; 
+      birdsQueue.add(Bunnyhop(Offset(startX, startY), i == 0));
+    }
+    
+    // Сбрасываем текущую птицу на первую в новой очереди
+    currentBird = birdsQueue.first;
+    currentBird!.isLaunched = false;
+    currentBird!.shouldRemove = false;
+    
     final double bx = 0.62; 
 
     // ЭТАЖ 1: Четыре каменные колонны (высота 0.14)
