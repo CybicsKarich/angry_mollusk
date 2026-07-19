@@ -18,7 +18,7 @@ class GameScreen extends StatelessWidget {
           GameWidget(
             game: gameInstance,
             overlayBuilderMap: {
-              // ИСПРАВЛЕННЫЙ ОВЕРЛЕЙ ПОБЕДЫ СО ЗВЁЗДАМИ
+                            // ОВЕРЛЕЙ ПОБЕДЫ СО ЗВЁЗДАМИ
               'VictoryMenu': (BuildContext context, AngryMolluskGame game) {
                 int starsCount = 0;
                 if (game.score >= game.targetScore3Stars) {
@@ -77,7 +77,6 @@ class GameScreen extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            // Кнопка: Меню уровней (Домик)
                             Container(
                               width: 60, height: 60,
                               decoration: const BoxDecoration(color: Color(0xFF4CAF50), shape: BoxShape.circle),
@@ -91,7 +90,6 @@ class GameScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 20),
-                            // Кнопка: Перезапуск уровня
                             Container(
                               width: 60, height: 60,
                               decoration: const BoxDecoration(color: Color(0xFFFF9800), shape: BoxShape.circle),
@@ -108,7 +106,6 @@ class GameScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 20),
-                            // Кнопка: Следующий уровень (заблокирована)
                             Container(
                               width: 60, height: 60,
                               decoration: BoxDecoration(color: Colors.grey.shade500, shape: BoxShape.circle),
@@ -124,8 +121,7 @@ class GameScreen extends StatelessWidget {
                     ),
                   ),
                 );
-              },
-              
+              }, // СКОБКА И ЗАПЯТАЯ ЗДЕСЬ СТОЯТ ИДЕАЛЬНО!
               // Оверлей МЕНЮ ПАУЗЫ (Оставляем рабочим)
               'PauseMenu': (BuildContext context, AngryMolluskGame game) {
                 return Center(
@@ -682,7 +678,7 @@ class MolluskMaksim {
 
       // Удар об землю острова
       if (y >= groundY - 0.02) {
-        game.score += 50;
+        gameInstance.score += 50;
         shouldRemove = true; // Умер от удара о скалу
       }
     } else {
@@ -775,7 +771,7 @@ class GameBlock {
       fragmentAlpha -= 1.8 * dt;  
       if (fragmentAlpha <= 0) {
         // НАЧИСЛЕНИЕ ОЧКОВ: Камень — 30, Дерево — 20
-        game.score += isStone ? 30 : 20; 
+        gameInstance.score += isStone ? 30 : 20; 
         shouldRemove = true;
         return;
       }
