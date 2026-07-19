@@ -5,6 +5,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart' hide Wallet;
 import 'package:angry_mollusk/audio_manager.dart'; // Подключаем наш звуковой движок
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Главный экран игры с поддержкой оверлеев: Победа, Пауза, Проигрыш
 class GameScreen extends StatelessWidget {
@@ -377,14 +378,14 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       else if (AngryMolluskGame.score >= targetScore2Stars) currentStars = 2;
       else if (AngryMolluskGame.score >= targetScore1Star) currentStars = 1;
 
-      // СОХРАНЯЕМ МАКСИМАЛЬНЫЙ РЕЗУЛЬТАТ ЗВЕЗД В ПАМЯТЬ ТЕЛЕФОНА (Для карточки уровня!)
-      import('package:shared_preferences/shared_preferences.dart').then((_) async {
-        final prefs = await SharedPreferences.getInstance();
+      // СОХРАНЯЕМ МАКСИМАЛЬНЫЙ РЕЗУЛЬТАТ ЗВЕЗД В ПАМЯТЬ ТЕЛЕФОНА
+      SharedPreferences.getInstance().then((prefs) async {
         int savedStars = prefs.getInt('level_1_stars') ?? 0;
         if (currentStars > savedStars) {
           await prefs.setInt('level_1_stars', currentStars);
         }
       });
+
 
       levelCleared = true;
       AudioManager.playVictory(); 
@@ -416,7 +417,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     blocks.removeWhere((b) => b.shouldRemove);
 
     for (var pig in pigs) {
-      pig.update(dt, blocks, groundY, this);
+      pig.update(dt, blocks, groundY, );
     }
     pigs.removeWhere((p) => p.shouldRemove);
 
