@@ -321,6 +321,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 class LevelsScreen extends StatelessWidget {
   const LevelsScreen({super.key});
 
+    Future<int> _loadLevel1Stars() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('level_1_stars') ?? 0; 
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -488,16 +493,48 @@ class LevelsScreen extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         
-        // Три небольшие серые мультяшные звезды под квадратом
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Icon(Icons.star_rounded, size: 22, color: Colors.grey),
-            SizedBox(width: 2),
-            Icon(Icons.star_rounded, size: 26, color: Colors.grey), // Центральная чуть больше для красоты
-            SizedBox(width: 2),
-            Icon(Icons.star_rounded, size: 22, color: Colors.grey),
-          ],
+                const SizedBox(height: 8),
+        
+        // ИСПРАВЛЕНО: Звёзды теперь динамически зажигаются жёлтым из памяти телефона для Уровня 1!
+        FutureBuilder<int>(
+          future: SharedPreferences.getInstance().then((prefs) {
+            // Если это карточка первого уровня, достаем его рекорд. Для остальных уровней пока возвращаем 0.
+            if (levelNumber == '1') {
+              return prefs.getInt('level_1_stars') ?? 0;
+            }
+            return 0;
+          }),
+          builder: (context, snapshot) {
+            final int savedStars = snapshot.data ?? 0;
+
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Левая звезда (желтая, если рекорда хватает на 1, 2 или 3 звезды)
+                Icon(
+                  Icons.star_rounded, 
+                  size: 22, 
+                  color: savedStars >= 1 ? const Color(0xFFFFD54F) : Colors.grey,
+                ),
+                const SizedBox(width: 2),
+                
+                // Центральная звезда (чуть больше, загорается если выбито 2 или 3 звезды)
+                Icon(
+                  Icons.star_rounded, 
+                  size: 26, 
+                  color: savedStars >= 2 ? const Color(0xFFFFD54F) : Colors.grey,
+                ), 
+                const SizedBox(width: 2),
+                
+                // Правая звезда (загорается только при идеальном прохождении на 3 звезды)
+                Icon(
+                  Icons.star_rounded, 
+                  size: 22, 
+                  color: savedStars >= 3 ? const Color(0xFFFFD54F) : Colors.grey,
+                ),
+              ],
+            );
+          },
         ),
       ],
     );
