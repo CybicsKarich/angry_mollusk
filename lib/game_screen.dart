@@ -123,22 +123,76 @@ class GameScreen extends StatelessWidget {
                   ),
                 );
               }, // СКОБКА И ЗАПЯТАЯ ЗДЕСЬ СТОЯТ ИДЕАЛЬНО!
-              // Оверлей МЕНЮ ПАУЗЫ (Оставляем рабочим)
+                            // ОБНОВЛЕННОЕ МЕНЮ ПАУЗЫ С ТРЕМЯ КНОПКАМИ УПРАВЛЕНИЯ
               'PauseMenu': (BuildContext context, AngryMolluskGame game) {
                 return Center(
                   child: Container(
-                    width: 260,
+                    width: 280,
                     padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(color: Colors.black87, borderRadius: BorderRadius.circular(20)),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.9),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.orange, width: 4),
+                      boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 10, offset: Offset(0, 5))],
+                    ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            game.overlays.remove('PauseMenu');
-                            game.resumeEngine();
-                          },
-                          child: const Text('ИГРАТЬ'),
+                        const Text(
+                          'ПАУЗА',
+                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2),
+                        ),
+                        const SizedBox(height: 20),
+                        
+                        // Кнопка 1: ПРОДОЛЖИТЬ ИГРАТЬ
+                        SizedBox(
+                          width: double.infinity,
+                          height: 44,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                            onPressed: () {
+                              game.overlays.remove('PauseMenu');
+                              game.resumeEngine();
+                            },
+                            child: const Text('ПРОДОЛЖИТЬ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Кнопка 2: НАЧАТЬ РЕСТАРТ УРОВНЯ ЗАНОВО
+                        SizedBox(
+                          width: double.infinity,
+                          height: 44,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                            onPressed: () {
+                              game.overlays.remove('PauseMenu');
+                              game.resumeEngine();
+                              
+                              // Сбрасываем и перезапускаем
+                              AngryMolluskGame.score = 0;
+                              game.isVictorySequenceStarted = false;
+                              game.levelCleared = false;
+                              game.buildLevelStructures();
+                            },
+                            child: const Text('ЗАНОВО', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+
+                        // Кнопка 3: ВЕРНУТЬСЯ В МЕНЮ УРОВНЕЙ
+                        SizedBox(
+                          width: double.infinity,
+                          height: 44,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                            onPressed: () {
+                              game.overlays.remove('PauseMenu');
+                              game.resumeEngine();
+                              Navigator.pop(context); // Выходим обратно на экран выбора уровней
+                            },
+                            child: const Text('В МЕНЮ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                          ),
                         ),
                       ],
                     ),
@@ -147,7 +201,6 @@ class GameScreen extends StatelessWidget {
               },
             },
           ),
-          
           // ПОЧИНЕНА КНОПКА ПАУЗЫ В УГЛУ ЭКРАНА
           Positioned(
             top: 16,
@@ -210,8 +263,9 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   Future<void> onLoad() async {
     await super.onLoad();
     await AudioManager.init();
-
-    // Загружаем текстуры для ручного рендеринга
+    AngryMolluskGame.score = 0;
+    
+      // Загружаем текстуры для ручного рендеринга
     bunnySprite = await loadSprite('bunnyhop.png');
     maksimSprite = await loadSprite('maksim.png');
     
@@ -309,19 +363,35 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     super.update(dt);
     if (isPaused) return;
 
-        // МГНОВЕННАЯ ПОБЕДА С ПОДСЧЁТОМ ОЧКОВ ЗА ПТИЦ
+        // МГНОВЕННЫЙ ЗАПУСК ЭКРАНА ВЫИГРЫША С ПОДСЧЁТОМ ВСЕХ ОСТАВШИХСЯ ПТИЦ
     if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictorySequenceStarted) {
       isVictorySequenceStarted = true;
       
-      // Добавляем по 70 очков за каждую оставшуюся птицу (включая текущую, если она на рогатке)
+      // Честно считаем абсолютно ВСЕХ оставшихся птиц в очереди
       int remainingBirds = birdsQueue.length;
-      score += remainingBirds * 70;
+      AngryMolluskGame.score += remainingBirds * 70; 
+      
+      // Расчет звезд для сохранения рекорда
+      int currentStars = 0;
+      if (AngryMolluskGame.score >= targetScore3Stars) currentStars = 3;
+      else if (AngryMolluskGame.score >= targetScore2Stars) currentStars = 2;
+      else if (AngryMolluskGame.score >= targetScore1Star) currentStars = 1;
+
+      // СОХРАНЯЕМ МАКСИМАЛЬНЫЙ РЕЗУЛЬТАТ ЗВЕЗД В ПАМЯТЬ ТЕЛЕФОНА (Для карточки уровня!)
+      import('package:shared_preferences/shared_preferences.dart').then((_) async {
+        final prefs = await SharedPreferences.getInstance();
+        int savedStars = prefs.getInt('level_1_stars') ?? 0;
+        if (currentStars > savedStars) {
+          await prefs.setInt('level_1_stars', currentStars);
+        }
+      });
 
       levelCleared = true;
       AudioManager.playVictory(); 
       overlays.add('VictoryMenu');
       return;
     }
+
 
     // Анимация облаков и солнца
     sunRotation += 0.3 * dt;
@@ -336,20 +406,20 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       }
     }
 
-        // Обновление падающих блоков (передаем 'this' как ссылку на игру)
+        // ИСПРАВЛЕНО: очки за блоки начисляются гарантированно при любом их удалении!
     for (var block in blocks) {
       block.update(dt, blocks, pigs, groundY, this);
+      if (block.shouldRemove) {
+        AngryMolluskGame.score += block.isStone ? 30 : 20;
+      }
     }
-
-    // Обновление падающих свиней (передаем 'this' как ссылку на игру)
-    for (var pig in pigs) {
-      pig.update(dt, blocks, groundY);
-    }
-
-
-    // Удаляем уничтоженные объекты
     blocks.removeWhere((b) => b.shouldRemove);
+
+    for (var pig in pigs) {
+      pig.update(dt, blocks, groundY, this);
+    }
     pigs.removeWhere((p) => p.shouldRemove);
+
 
     
       // ЖИВАЯ АТМОСФЕРА: Свиньи случайно сопят или хрюкают раз в 9 секунд, если они еще живы
@@ -472,6 +542,22 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     );
     textPainter.layout();
     textPainter.paint(canvas, Offset(size.width * 0.8, size.height * 0.05));
+      // ОТОБРАЖЕНИЕ ОСТАВШИХСЯ ПТИЦ В ЛЕВОМ НИЖНЕМ УГЛУ
+    final int birdsCount = birdsQueue.length;
+    final birdsPainter = TextPainter(
+      text: TextSpan(
+        text: 'BIRDS: $birdsCount',
+        style: TextStyle(
+          fontSize: size.width * 0.032,
+          fontWeight: FontWeight.bold,
+          color: const Color(0xFFE53935), // Фирменный красный цвет птиц
+          shadows: const [Shadow(offset: Offset(1.5, 1.5), blurRadius: 2.0, color: Colors.black87)],
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    birdsPainter.layout();
+    birdsPainter.paint(canvas, Offset(size.width * 0.05, size.height * 0.88));
   }
 
   void _renderIsland(Canvas canvas, Size size, double startPct, double endPct) {
