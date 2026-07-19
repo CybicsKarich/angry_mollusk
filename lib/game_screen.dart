@@ -10,179 +10,112 @@ import 'package:angry_mollusk/audio_manager.dart'; // Подключаем на�
 class GameScreen extends StatelessWidget {
   const GameScreen({super.key});
 
-  @override
+    @override
   Widget build(BuildContext context) {
-    final gameInstance = AngryMolluskGame();
+    return Scaffold(
+      body: Stack(
+        children: [
+          GameWidget(
+            game: gameInstance,
+            overlayBuilderMap: {
+              // ИСПРАВЛЕННЫЙ ОВЕРЛЕЙ ПОБЕДЫ СО ЗВЁЗДАМИ
+              'VictoryMenu': (BuildContext context, AngryMolluskGame game) {
+                int starsCount = 0;
+                if (game.score >= game.targetScore3Stars) {
+                  starsCount = 3;
+                } else if (game.score >= game.targetScore2Stars) {
+                  starsCount = 2;
+                } else if (game.score >= game.targetScore1Star) {
+                  starsCount = 1;
+                }
 
-    // ЖЕЛЕЗНАЯ РЕГИСТРАЦИЯ ОБНОВЛЕННОГО ЭКРАНА ПОБЕДЫ СО ЗВЕЗДАМИ
-    overlays.addEntry('VictoryMenu', (context, game) {
-      // Высчитываем, сколько звёзд зажглось от итогового счёта
-      int starsCount = 0;
-      if (score >= targetScore3Stars) {
-        starsCount = 3;
-      } else if (score >= targetScore2Stars) {
-        starsCount = 2;
-      } else if (score >= targetScore1Star) {
-        starsCount = 1;
-      }
-
-      return Center(
-        child: Container(
-          width: MediaQuery.of(context).size.width * 0.55, // Большой прямоугольник
-          height: MediaQuery.of(context).size.height * 0.75,
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFF9C4), // Мультяшный нежно-жёлтый фон под пергамент
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: const Color(0xFFFBC02D), width: 6), // Золотая кайма
-            boxShadow: const [
-              BoxShadow(color: Colors.black45, blurRadius: 15, offset: Offset(0, 8)),
-            ],
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              // 1. Надпись сверху
-              const Text(
-                "Ты победил, красавчик!",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w900,
-                  color: Color(0xFFD84315), // Сочный оранжево-красный
-                  shadows: [Shadow(offset: Offset(1, 1), blurRadius: 2, color: Colors.black25)],
-                ),
-              ),
-
-              // 2. Блок из 3-х звёзд в ряд
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(3, (index) {
-                  bool isLit = index < starsCount;
-                  return Icon(
-                    Icons.star_rounded,
-                    size: 65,
-                    color: isLit ? const Color(0xFFFFD54F) : Colors.grey.shade400,
-                    shadows: isLit ? const [Shadow(color: Color(0xFFFF8F00), blurRadius: 8)] : null,
-                  );
-                }),
-              ),
-
-              // 3. Итоговый счёт под звёздами
-              Text(
-                "ИТОГОВЫЙ СЧЁТ: $score",
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF3E2723), // Тёмно-коричневый
-                ),
-              ),
-
-              // 4. Панель круглых кнопок без надписей
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // Кнопка 3: В меню уровней (Мультяшный домик)
-                  Container(
-                    width: 60, height: 60,
-                    decoration: const BoxDecoration(color: Color(0xFF4CAF50), shape: BoxShape.circle),
-                    child: RawMaterialButton(
-                      shape: const CircleBorder(),
-                      onPressed: () {
-                        overlays.remove('VictoryMenu');
-                        // Возврат в меню уровней (если у тебя есть роут)
-                      },
-                      child: const Icon(Icons.home_rounded, color: Colors.white, size: 32),
-                    ),
-                  ),
-                  const SizedBox(width: 20),
-                  
-                  // Кнопка 2: Перезапуск уровня с начала (Стрелка по кругу)
-                  Container(
-                    width: 60, height: 60,
-                    decoration: const BoxDecoration(color: Color(0xFFFF9800), shape: BoxShape.circle),
-                    child: RawMaterialButton(
-                      shape: const CircleBorder(),
-                      onPressed: () {
-                        overlays.remove('VictoryMenu');
-                        // Сброс очков и перезапуск первого уровня
-                        score = 0;
-                        isVictorySequenceStarted = false;
-                        levelCleared = false;
-                        buildLevelStructures();
-                      },
-                      child: const Icon(Icons.refresh_rounded, color: Colors.white, size: 32),
-                    ),
-                  ),
-                  const SizedBox(width: 20),
-                  
-                  // Кнопка 1: Следующий уровень (Стрелка вправо — заблокирована)
-                  Container(
-                    width: 60, height: 60,
-                    decoration: BoxDecoration(color: Colors.grey.shade500, shape: BoxShape.circle),
-                    child: RawMaterialButton(
-                      shape: const CircleBorder(),
-                      onPressed: () {
-                        // Пока заблокирована и ничего не делает!
-                      },
-                      child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 32),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      );
-    });
-              // Оверлей ПАУЗЫ
-              'PauseMenu': (BuildContext context, AngryMolluskGame game) {
                 return Center(
                   child: Container(
-                    width: 340,
-                    padding: const EdgeInsets.all(24),
+                    width: MediaQuery.of(context).size.width * 0.55,
+                    height: MediaQuery.of(context).size.height * 0.75,
                     decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.9),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.redAccent, width: 4),
-                      boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 10, offset: Offset(0, 5))],
+                      color: const Color(0xFFFFF9C4), 
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: const Color(0xFFFBC02D), width: 6), 
+                      boxShadow: const [
+                        BoxShadow(color: Colors.black45, blurRadius: 15, offset: Offset(0, 8)),
+                      ],
                     ),
                     child: Column(
-                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         const Text(
-                          'ПАУЗА',
+                          "Ты победил, красавчик!",
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.5),
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFFD84315), 
+                            shadows: [Shadow(offset: Offset(1, 1), blurRadius: 2, color: Colors.black26)],
+                          ),
                         ),
-                        const SizedBox(height: 24),
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(3, (index) {
+                            bool isLit = index < starsCount;
+                            return Icon(
+                              Icons.star_rounded,
+                              size: 65,
+                              color: isLit ? const Color(0xFFFFD54F) : Colors.grey.shade400,
+                              shadows: isLit ? const [Shadow(color: Color(0xFFFF8F00), blurRadius: 8)] : null,
+                            );
+                          }),
+                        ),
+                        Text(
+                          "ИТОГОВЫЙ СЧЁТ: ${game.score}",
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF3E2723), 
+                          ),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Expanded(
-                              child: SizedBox(
-                                height: 48,
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    game.resumeEngine();
-                                    game.overlays.remove('PauseMenu');
-                                  },
-                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                                  child: const Text('ИГРАТЬ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
-                                ),
+                            // Кнопка: Меню уровней (Домик)
+                            Container(
+                              width: 60, height: 60,
+                              decoration: const BoxDecoration(color: Color(0xFF4CAF50), shape: BoxShape.circle),
+                              child: RawMaterialButton(
+                                shape: const CircleBorder(),
+                                onPressed: () {
+                                  game.overlays.remove('VictoryMenu');
+                                  Navigator.pop(context); 
+                                },
+                                child: const Icon(Icons.home_rounded, color: Colors.white, size: 32),
                               ),
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: SizedBox(
-                                height: 48,
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    game.resumeEngine();
-                                    game.overlays.remove('PauseMenu');
-                                    Navigator.pop(context);
-                                  },
-                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.grey.shade800, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                                  child: const Text('В МЕНЮ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
-                                ),
+                            const SizedBox(width: 20),
+                            // Кнопка: Перезапуск уровня
+                            Container(
+                              width: 60, height: 60,
+                              decoration: const BoxDecoration(color: Color(0xFFFF9800), shape: BoxShape.circle),
+                              child: RawMaterialButton(
+                                shape: const CircleBorder(),
+                                onPressed: () {
+                                  game.overlays.remove('VictoryMenu');
+                                  game.score = 0;
+                                  game.isVictorySequenceStarted = false;
+                                  game.levelCleared = false;
+                                  game.buildLevelStructures();
+                                },
+                                child: const Icon(Icons.refresh_rounded, color: Colors.white, size: 32),
+                              ),
+                            ),
+                            const SizedBox(width: 20),
+                            // Кнопка: Следующий уровень (заблокирована)
+                            Container(
+                              width: 60, height: 60,
+                              decoration: BoxDecoration(color: Colors.grey.shade500, shape: BoxShape.circle),
+                              child: RawMaterialButton(
+                                shape: const CircleBorder(),
+                                onPressed: () {},
+                                child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 32),
                               ),
                             ),
                           ],
@@ -192,38 +125,23 @@ class GameScreen extends StatelessWidget {
                   ),
                 );
               },
-              // Оверлей ПРОИГРЫША
-              'GameOverMenu': (BuildContext context, AngryMolluskGame game) {
+              
+              // Оверлей МЕНЮ ПАУЗЫ (Оставляем рабочим)
+              'PauseMenu': (BuildContext context, AngryMolluskGame game) {
                 return Center(
                   child: Container(
-                    width: 340,
+                    width: 260,
                     padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.9),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.red, width: 4),
-                      boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 10, offset: Offset(0, 5))],
-                    ),
+                    decoration: BoxDecoration(color: Colors.black87, borderRadius: BorderRadius.circular(20)),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text(
-                          'ПТИЦЫ КОНЧИЛИСЬ!\nМАКСИМ ПОБЕДИЛ!',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2, height: 1.4),
-                        ),
-                        const SizedBox(height: 24),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 48,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              game.overlays.remove('GameOverMenu');
-                              Navigator.replace(context, oldRoute: ModalRoute.of(context)!, newRoute: MaterialPageRoute(builder: (context) => const GameScreen()));
-                            },
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                            child: const Text('ПОВТОР ЗАПУСКА', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-                          ),
+                        ElevatedButton(
+                          onPressed: () {
+                            game.overlays.remove('PauseMenu');
+                            game.resumeEngine();
+                          },
+                          child: const Text('ИГРАТЬ'),
                         ),
                       ],
                     ),
@@ -233,13 +151,13 @@ class GameScreen extends StatelessWidget {
             },
           ),
           
-          // Кнопка Паузы
+          // ПОЧИНЕНА КНОПКА ПАУЗЫ В УГЛУ ЭКРАНА
           Positioned(
             top: 16,
             left: 16,
             child: IconButton(
-              icon: const Icon(Icons.pause_rounded, size: 32, color: Colors.white),
               style: IconButton.styleFrom(backgroundColor: Colors.black45, padding: const EdgeInsets.all(10)),
+              icon: const Icon(Icons.pause_rounded, color: Colors.white, size: 28),
               onPressed: () {
                 gameInstance.pauseEngine();
                 gameInstance.overlays.add('PauseMenu');
@@ -250,7 +168,6 @@ class GameScreen extends StatelessWidget {
       ),
     );
   }
-}
 
 // Главный движок игры
 class AngryMolluskGame extends FlameGame with DragCallbacks {
@@ -421,15 +338,16 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       }
     }
 
-    // Обновление падающих блоков и цепных реакций
+        // Обновление падающих блоков (передаем 'this' как ссылку на игру)
     for (var block in blocks) {
-      block.update(dt, blocks, pigs, groundY);
+      block.update(dt, blocks, pigs, groundY, this);
     }
 
-    // Обновление падающих свиней
+    // Обновление падающих свиней (передаем 'this' как ссылку на игру)
     for (var pig in pigs) {
-      pig.update(dt, blocks, groundY);
+      pig.update(dt, blocks, groundY, this);
     }
+
 
     // Удаляем уничтоженные объекты
     blocks.removeWhere((b) => b.shouldRemove);
@@ -764,7 +682,7 @@ class MolluskMaksim {
 
       // Удар об землю острова
       if (y >= groundY - 0.02) {
-        gameRef.score += 50;
+        game.score += 50;
         shouldRemove = true; // Умер от удара о скалу
       }
     } else {
@@ -843,7 +761,7 @@ class GameBlock {
     isFalling = true; 
   }
 
-   void update(double dt, List<GameBlock> allBlocks, List<MolluskMaksim> allPigs, double groundY) {
+     void update(double dt, List<GameBlock> allBlocks, List<MolluskMaksim> allPigs, double groundY, AngryMolluskGame game) {
     // Если блок спит — он физически не может упасть или сдвинуться сам по себе
     if (isSleeping) {
       isFalling = false;
@@ -857,7 +775,7 @@ class GameBlock {
       fragmentAlpha -= 1.8 * dt;  
       if (fragmentAlpha <= 0) {
         // НАЧИСЛЕНИЕ ОЧКОВ: Камень — 30, Дерево — 20
-        gameRef.score += isStone ? 30 : 20; 
+        game.score += isStone ? 30 : 20; 
         shouldRemove = true;
         return;
       }
