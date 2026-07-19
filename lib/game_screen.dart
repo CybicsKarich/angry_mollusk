@@ -308,10 +308,10 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     super.update(dt);
     if (isPaused) return;
 
-    if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed) {
+        if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed) {
       levelCleared = true;
-      AudioManager.playVictory(); // Сочный скример победы включится сразу!
-      overlays.add('VictoryMenu');
+      AudioManager.playVictory(); // Сначала запускаем независимый крик скримера!
+      overlays.add('VictoryMenu'); // Затем выводим меню паузы
       return;
     }
     // Анимация облаков и солнца
