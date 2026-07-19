@@ -10,25 +10,25 @@ import 'package:angry_mollusk/audio_manager.dart'; // Подключаем на�
 class GameScreen extends StatelessWidget {
     GameScreen({super.key});
 
-    @override
+      @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          GameWidget(
+          // ИСПРАВЛЕНО: Явно указали тип игры <AngryMolluskGame>
+          GameWidget<AngryMolluskGame>(
             game: gameInstance,
             overlayBuilderMap: {
-                            // ОВЕРЛЕЙ ПОБЕДЫ СО ЗВЁЗДАМИ
               'VictoryMenu': (BuildContext context, AngryMolluskGame game) {
+                // ИСПРАВЛЕНО: Проверяем звёзды через статическую переменную AngryMolluskGame.score
                 int starsCount = 0;
-                if (game.score >= game.targetScore3Stars) {
+                if (AngryMolluskGame.score >= game.targetScore3Stars) {
                   starsCount = 3;
-                } else if (game.score >= game.targetScore2Stars) {
+                } else if (AngryMolluskGame.score >= game.targetScore2Stars) {
                   starsCount = 2;
-                } else if (game.score >= game.targetScore1Star) {
+                } else if (AngryMolluskGame.score >= game.targetScore1Star) {
                   starsCount = 1;
                 }
-
                 return Center(
                   child: Container(
                     width: MediaQuery.of(context).size.width * 0.55,
@@ -67,7 +67,7 @@ class GameScreen extends StatelessWidget {
                           }),
                         ),
                         Text(
-                          "ИТОГОВЫЙ СЧЁТ: ${game.score}",
+                          "ИТОГОВЫЙ СЧЁТ: ${AngryMolluskGame.score}",
                           style: const TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -97,7 +97,7 @@ class GameScreen extends StatelessWidget {
                                 shape: const CircleBorder(),
                                 onPressed: () {
                                   game.overlays.remove('VictoryMenu');
-                                  game.score = 0;
+                                  AngryMolluskGame.score = 0;
                                   game.isVictorySequenceStarted = false;
                                   game.levelCleared = false;
                                   game.buildLevelStructures();
@@ -182,7 +182,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   bool isPaused = false;
 
     // СИСТЕМА ОЧКОВ И ЗВЁЗД
-  int score = 0;
+  static int score = 0;
   final int targetScore1Star = 200;
   final int targetScore2Stars = 250;
   final int targetScore3Stars = 300;
@@ -342,7 +342,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
 
     // Обновление падающих свиней (передаем 'this' как ссылку на игру)
     for (var pig in pigs) {
-      pig.update(dt, blocks, groundY, this);
+      pig.update(dt, blocks, groundY);
     }
 
 
@@ -679,7 +679,7 @@ class MolluskMaksim {
 
       // Удар об землю острова
       if (y >= groundY - 0.02) {
-        gameInstance.score += 50;
+        AngryMolluskGame.score += 50;
         shouldRemove = true; // Умер от удара о скалу
       }
     } else {
@@ -771,7 +771,7 @@ class GameBlock {
       fragmentOffset += 0.15 * dt; 
       fragmentAlpha -= 1.8 * dt;  
       if (fragmentAlpha <= 0) {
-        gameInstance.score += isStone ? 30 : 20; // начисляем через глобальный синглтон
+        AngryMolluskGame.score += isStone ? 30 : 20;
         shouldRemove = true;
         return;
       }
