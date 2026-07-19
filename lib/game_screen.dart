@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:flame/game.dart';
 import 'package:flame/components.dart';
@@ -13,50 +14,126 @@ class GameScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final gameInstance = AngryMolluskGame();
 
-    return Scaffold(
-      body: Stack(
-        children: [
-          GameWidget(
-            game: gameInstance,
-            overlayBuilderMap: {
-              // Оверлей ПОБЕДЫ
-              'VictoryMenu': (BuildContext context, AngryMolluskGame game) {
-                return Center(
-                  child: Container(
-                    width: 340,
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.9),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.orange, width: 4),
-                      boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 10, offset: Offset(0, 5))],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text(
-                          'ТЫ ПОБЕДИЛ, КРАСАВЧИК!',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2),
-                        ),
-                        const SizedBox(height: 24),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 48,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              game.overlays.remove('VictoryMenu');
-                              Navigator.pop(context);
-                            },
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                            child: const Text('К УРОВНЯМ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-                          ),
-                        ),
-                      ],
+    // ЖЕЛЕЗНАЯ РЕГИСТРАЦИЯ ОБНОВЛЕННОГО ЭКРАНА ПОБЕДЫ СО ЗВЕЗДАМИ
+    overlays.addEntry('VictoryMenu', (context, game) {
+      // Высчитываем, сколько звёзд зажглось от итогового счёта
+      int starsCount = 0;
+      if (score >= targetScore3Stars) {
+        starsCount = 3;
+      } else if (score >= targetScore2Stars) {
+        starsCount = 2;
+      } else if (score >= targetScore1Star) {
+        starsCount = 1;
+      }
+
+      return Center(
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.55, // Большой прямоугольник
+          height: MediaQuery.of(context).size.height * 0.75,
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFF9C4), // Мультяшный нежно-жёлтый фон под пергамент
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: const Color(0xFFFBC02D), width: 6), // Золотая кайма
+            boxShadow: const [
+              BoxShadow(color: Colors.black45, blurRadius: 15, offset: Offset(0, 8)),
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              // 1. Надпись сверху
+              const Text(
+                "Ты победил, красавчик!",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFFD84315), // Сочный оранжево-красный
+                  shadows: [Shadow(offset: Offset(1, 1), blurRadius: 2, color: Colors.black25)],
+                ),
+              ),
+
+              // 2. Блок из 3-х звёзд в ряд
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(3, (index) {
+                  bool isLit = index < starsCount;
+                  return Icon(
+                    Icons.star_rounded,
+                    size: 65,
+                    color: isLit ? const Color(0xFFFFD54F) : Colors.grey.shade400,
+                    shadows: isLit ? const [Shadow(color: Color(0xFFFF8F00), blurRadius: 8)] : null,
+                  );
+                }),
+              ),
+
+              // 3. Итоговый счёт под звёздами
+              Text(
+                "ИТОГОВЫЙ СЧЁТ: $score",
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF3E2723), // Тёмно-коричневый
+                ),
+              ),
+
+              // 4. Панель круглых кнопок без надписей
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Кнопка 3: В меню уровней (Мультяшный домик)
+                  Container(
+                    width: 60, height: 60,
+                    decoration: const BoxDecoration(color: Color(0xFF4CAF50), shape: BoxShape.circle),
+                    child: RawMaterialButton(
+                      shape: const CircleBorder(),
+                      onPressed: () {
+                        overlays.remove('VictoryMenu');
+                        // Возврат в меню уровней (если у тебя есть роут)
+                      },
+                      child: const Icon(Icons.home_rounded, color: Colors.white, size: 32),
                     ),
                   ),
-                );
-              },
+                  const SizedBox(width: 20),
+                  
+                  // Кнопка 2: Перезапуск уровня с начала (Стрелка по кругу)
+                  Container(
+                    width: 60, height: 60,
+                    decoration: const BoxDecoration(color: Color(0xFFFF9800), shape: BoxShape.circle),
+                    child: RawMaterialButton(
+                      shape: const CircleBorder(),
+                      onPressed: () {
+                        overlays.remove('VictoryMenu');
+                        // Сброс очков и перезапуск первого уровня
+                        score = 0;
+                        isVictorySequenceStarted = false;
+                        levelCleared = false;
+                        buildLevelStructures();
+                      },
+                      child: const Icon(Icons.refresh_rounded, color: Colors.white, size: 32),
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  
+                  // Кнопка 1: Следующий уровень (Стрелка вправо — заблокирована)
+                  Container(
+                    width: 60, height: 60,
+                    decoration: BoxDecoration(color: Colors.grey.shade500, shape: BoxShape.circle),
+                    child: RawMaterialButton(
+                      shape: const CircleBorder(),
+                      onPressed: () {
+                        // Пока заблокирована и ничего не делает!
+                      },
+                      child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 32),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    });
               // Оверлей ПАУЗЫ
               'PauseMenu': (BuildContext context, AngryMolluskGame game) {
                 return Center(
@@ -189,6 +266,14 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   double _safetyTimer = 0.0;
   double _pigSoundTimer = 0.0;
   bool isPaused = false;
+
+    // СИСТЕМА ОЧКОВ И ЗВЁЗД
+  int score = 0;
+  final int targetScore1Star = 200;
+  final int targetScore2Stars = 250;
+  final int targetScore3Stars = 300;
+  bool isVictorySequenceStarted = false; // Чтобы очки за птиц начислялись один раз
+
   
   // Контейнеры для управления объектами безForge2D
   List<GameBlock> blocks = [];
@@ -309,12 +394,20 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     super.update(dt);
     if (isPaused) return;
 
-        if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed) {
+        // МГНОВЕННАЯ ПОБЕДА С ПОДСЧЁТОМ ОЧКОВ ЗА ПТИЦ
+    if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictorySequenceStarted) {
+      isVictorySequenceStarted = true;
+      
+      // Добавляем по 70 очков за каждую оставшуюся птицу (включая текущую, если она на рогатке)
+      int remainingBirds = birdsQueue.length;
+      score += remainingBirds * 70;
+
       levelCleared = true;
-      AudioManager.playVictory(); // Сначала запускаем независимый крик скримера!
-      overlays.add('VictoryMenu'); // Затем выводим меню паузы
+      AudioManager.playVictory(); 
+      overlays.add('VictoryMenu');
       return;
     }
+
     // Анимация облаков и солнца
     sunRotation += 0.3 * dt;
     cloudOffset1 += 0.015 * dt;
@@ -445,6 +538,24 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     if (currentBird != null && (!currentBird!.isLaunched || !currentBird!.shouldRemove)) {
       currentBird!.render(canvas, size, bunnySprite);
     }
+       // ОТОБРАЖЕНИЕ СЧЁТЧИКА ОЧКОВ (В правом верхнем углу)
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: 'SCORE: $score',
+        style: TextStyle(
+          fontFamily: 'Arial',
+          fontSize: size.width * 0.035,
+          fontWeight: FontWeight.bold,
+          color: const Color(0xFFFFD54F), // Сочный жёлтый цвет
+          shadows: const [
+            Shadow(offset: Offset(2, 2), blurRadius: 3.0, color: Colors.black87),
+          ],
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
+    textPainter.layout();
+    textPainter.paint(canvas, Offset(size.width * 0.8, size.height * 0.05));
   }
 
   void _renderIsland(Canvas canvas, Size size, double startPct, double endPct) {
@@ -653,6 +764,7 @@ class MolluskMaksim {
 
       // Удар об землю острова
       if (y >= groundY - 0.02) {
+        gameRef.score += 50;
         shouldRemove = true; // Умер от удара о скалу
       }
     } else {
@@ -740,14 +852,17 @@ class GameBlock {
       return;
     }
 
-    if (isBroken) {
+         if (isBroken) {
       fragmentOffset += 0.15 * dt; 
       fragmentAlpha -= 1.8 * dt;  
       if (fragmentAlpha <= 0) {
+        // НАЧИСЛЕНИЕ ОЧКОВ: Камень — 30, Дерево — 20
+        gameRef.score += isStone ? 30 : 20; 
         shouldRemove = true;
         return;
       }
     }
+
 
     if (isCracked) {
       groundFade -= 1.2 * dt; 
