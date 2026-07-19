@@ -124,107 +124,39 @@ class GameScreen extends StatelessWidget {
                   ),
                 );
               }, // СКОБКА И ЗАПЯТАЯ ЗДЕСЬ СТОЯТ ИДЕАЛЬНО!
-                            // ОБНОВЛЕННОЕ МЕНЮ ПАУЗЫ С ТРЕМЯ КНОПКАМИ УПРАВЛЕНИЯ
+                                         // ОВЕРЛЕЙ МЕНЮ ПАУЗЫ
               'PauseMenu': (BuildContext context, AngryMolluskGame game) {
                 return Center(
                   child: Container(
-                    width: 280,
+                    width: 260,
                     padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.9),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.orange, width: 4),
-                      boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 10, offset: Offset(0, 5))],
-                    ),
+                    decoration: BoxDecoration(color: Colors.black87, borderRadius: BorderRadius.circular(20)),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text(
-                          'ПАУЗА',
-                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2),
-                        ),
-                        const SizedBox(height: 20),
-                        
-                        // Кнопка 1: ПРОДОЛЖИТЬ ИГРАТЬ
-                        SizedBox(
-                          width: double.infinity,
-                          height: 44,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                            onPressed: () {
-                              game.overlays.remove('PauseMenu');
-                              game.resumeEngine();
-                            },
-                            child: const Text('ПРОДОЛЖИТЬ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Кнопка 2: НАЧАТЬ РЕСТАРТ УРОВНЯ ЗАНОВО
-                        SizedBox(
-                          width: double.infinity,
-                          height: 44,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                            onPressed: () {
-                              game.overlays.remove('PauseMenu');
-                              game.resumeEngine();
-                              
-                              // Сбрасываем и перезапускаем
-                              AngryMolluskGame.score = 0;
-                              game.isVictorySequenceStarted = false;
-                              game.levelCleared = false;
-                              game.buildLevelStructures();
-                            },
-                            child: const Text('ЗАНОВО', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Кнопка 3: ВЕРНУТЬСЯ В МЕНЮ УРОВНЕЙ
-                        SizedBox(
-                          width: double.infinity,
-                          height: 44,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                            onPressed: () {
-                              game.overlays.remove('PauseMenu');
-                              game.resumeEngine();
-                              Navigator.pop(context); // Выходим обратно на экран выбора уровней
-                            },
-                            child: const Text('В МЕНЮ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
-                          ),
+                        ElevatedButton(
+                          onPressed: () {
+                            game.overlays.remove('PauseMenu');
+                            game.resumeEngine();
+                          },
+                          child: const Text('ИГРАТЬ'),
                         ),
                       ],
                     ),
                   ),
                 );
-              },
-            },
-          ),
-          // ПОЧИНЕНА КНОПКА ПАУЗЫ В УГЛУ ЭКРАНА
-          Positioned(
-            top: 16,
-            left: 16,
-            child: IconButton(
-              style: IconButton.styleFrom(backgroundColor: Colors.black45, padding: const EdgeInsets.all(10)),
-              icon: const Icon(Icons.pause_rounded, color: Colors.white, size: 28),
-              onPressed: () {
-                gameInstance.pauseEngine();
-                gameInstance.overlays.add('PauseMenu');
-              },
-            ),
-          ),
-        // ИСПРАВЛЕНО: Возвращён на место полноценный мультяшный экран проигрыша!
+              }, // <--- ВОТ ЭТА ЗАПЯТАЯОБЯЗАТЕЛЬНА!
+
+              // ИСПРАВЛЕНО: Теперь GameOverMenu лежит строго ВНУТРИ карты оверлеев!
               'GameOverMenu': (BuildContext context, AngryMolluskGame game) {
                 return Center(
                   child: Container(
                     width: 300,
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF3E2723), // Тёмно-коричневый мультяшный квадрат
+                      color: const Color(0xFF3E2723),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFFF9800), width: 4), // Оранжевая рамка
+                      border: Border.all(color: const Color(0xFFFF9800), width: 4),
                       boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 10, offset: Offset(0, 5))],
                     ),
                     child: Column(
@@ -239,7 +171,6 @@ class GameScreen extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            // Кнопка: Мультяшный домик (В меню уровней)
                             IconButton(
                               icon: const Icon(Icons.home_rounded, color: Colors.white, size: 32),
                               onPressed: () {
@@ -247,15 +178,14 @@ class GameScreen extends StatelessWidget {
                                 Navigator.pop(context);
                               },
                             ),
-                            // Кнопка: Перезапуск уровня (Стрелка по кругу)
                             IconButton(
                               icon: const Icon(Icons.refresh_rounded, color: Colors.white, size: 32),
                               onPressed: () {
                                 game.overlays.remove('GameOverMenu');
-                                AngryMolluskGame.score = 0; // сброс статических очков
+                                AngryMolluskGame.score = 0; 
                                 game.isVictorySequenceStarted = false;
                                 game.levelCleared = false;
-                                game.buildLevelStructures(); // запускаем чистую пересборку
+                                game.buildLevelStructures(); 
                               },
                             ),
                           ],
@@ -265,11 +195,8 @@ class GameScreen extends StatelessWidget {
                   ),
                 );
               },
-            ],
-          ),
-        );
-      }
-    }
+            }, // <--- ЭТА СКОБКА ТЕПЕРЬ ПРАВИЛЬНО ЗАКРЫВАЕТ КАРТУ OVERLAYBUILDERMAP!
+              
 
 // Главный движок игры
 class AngryMolluskGame extends FlameGame with DragCallbacks {
