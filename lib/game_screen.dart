@@ -12,17 +12,16 @@ class GameScreen extends StatelessWidget {
     final AngryMolluskGame gameInstance = AngryMolluskGame();
     GameScreen({super.key});
 
-      @override
+        @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // ИСПРАВЛЕНО: Явно указали тип игры <AngryMolluskGame>
           GameWidget<AngryMolluskGame>(
             game: gameInstance,
             overlayBuilderMap: {
+              // 1. ОВЕРЛЕЙ ПОБЕДЫ СО ЗВЁЗДАМИ
               'VictoryMenu': (BuildContext context, AngryMolluskGame game) {
-                // ИСПРАВЛЕНО: Проверяем звёзды через статическую переменную AngryMolluskGame.score
                 int starsCount = 0;
                 if (AngryMolluskGame.score >= game.targetScore3Stars) {
                   starsCount = 3;
@@ -31,6 +30,7 @@ class GameScreen extends StatelessWidget {
                 } else if (AngryMolluskGame.score >= game.targetScore1Star) {
                   starsCount = 1;
                 }
+
                 return Center(
                   child: Container(
                     width: MediaQuery.of(context).size.width * 0.55,
@@ -99,7 +99,7 @@ class GameScreen extends StatelessWidget {
                                 shape: const CircleBorder(),
                                 onPressed: () {
                                   game.overlays.remove('VictoryMenu');
-                                  AngryMolluskGame.score = 0;
+                                  AngryMolluskGame.score = 0; 
                                   game.isVictorySequenceStarted = false;
                                   game.levelCleared = false;
                                   game.buildLevelStructures();
@@ -123,31 +123,78 @@ class GameScreen extends StatelessWidget {
                     ),
                   ),
                 );
-              }, // СКОБКА И ЗАПЯТАЯ ЗДЕСЬ СТОЯТ ИДЕАЛЬНО!
-                                         // ОВЕРЛЕЙ МЕНЮ ПАУЗЫ
+              },
+              
+              // 2. ОВЕРЛЕЙ МЕНЮ ПАУЗЫ
               'PauseMenu': (BuildContext context, AngryMolluskGame game) {
                 return Center(
                   child: Container(
-                    width: 260,
+                    width: 280,
                     padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(color: Colors.black87, borderRadius: BorderRadius.circular(20)),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.orange, width: 4),
+                      boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 10, offset: Offset(0, 5))],
+                    ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            game.overlays.remove('PauseMenu');
-                            game.resumeEngine();
-                          },
-                          child: const Text('ИГРАТЬ'),
+                        const Text(
+                          'ПАУЗА',
+                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2),
+                        ),
+                        const SizedBox(height: 20),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 44,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                            onPressed: () {
+                              game.overlays.remove('PauseMenu');
+                              game.resumeEngine();
+                            },
+                            child: const Text('ПРОДОЛЖИТЬ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 44,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                            onPressed: () {
+                              game.overlays.remove('PauseMenu');
+                              game.resumeEngine();
+                              AngryMolluskGame.score = 0;
+                              game.isVictorySequenceStarted = false;
+                              game.levelCleared = false;
+                              game.buildLevelStructures();
+                            },
+                            child: const Text('ЗАНОВО', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 44,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                            onPressed: () {
+                              game.overlays.remove('PauseMenu');
+                              game.resumeEngine();
+                              Navigator.pop(context); 
+                            },
+                            child: const Text('В МЕНЮ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                          ),
                         ),
                       ],
                     ),
                   ),
                 );
-              }, // <--- ВОТ ЭТА ЗАПЯТАЯОБЯЗАТЕЛЬНА!
+              },
 
-              // ИСПРАВЛЕНО: Теперь GameOverMenu лежит строго ВНУТРИ карты оверлеев!
+                            // 3. ОВЕРЛЕЙ ПРОИГРЫША (GAME OVER)
               'GameOverMenu': (BuildContext context, AngryMolluskGame game) {
                 return Center(
                   child: Container(
@@ -195,7 +242,29 @@ class GameScreen extends StatelessWidget {
                   ),
                 );
               },
-            }, // <--- ЭТА СКОБКА ТЕПЕРЬ ПРАВИЛЬНО ЗАКРЫВАЕТ КАРТУ OVERLAYBUILDERMAP!
+            }, // Конец overlayBuilderMap
+          ), // Конец GameWidget
+          
+          // КНОПКА ПАУЗЫ В УГЛУ ЭКРАНА
+          Positioned(
+            top: 16,
+            left: 16,
+            child: IconButton(
+              style: IconButton.styleFrom(backgroundColor: Colors.black45, padding: const EdgeInsets.all(10)),
+              icon: const Icon(Icons.pause_rounded, color: Colors.white, size: 28),
+              onPressed: () {
+                gameInstance.pauseEngine();
+                gameInstance.overlays.add('PauseMenu');
+              },
+            ),
+          ),
+        ], // Конец Stack
+      ), // Конец Scaffold
+    ); // Конец return
+  } // Конец метода build
+} // Конец класса GameScreen
+
+
               
 
 // Главный движок игры
