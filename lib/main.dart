@@ -466,7 +466,7 @@ class LevelsScreen extends StatelessWidget {
   if (levelNumber == '1') {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const GameScreen()),
+      MaterialPageRoute(builder: (context) => GameScreen()),
     );
   }
 },
