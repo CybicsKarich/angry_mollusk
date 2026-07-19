@@ -2,21 +2,31 @@ import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
 
 class AudioManager {
-  // Плеер для резинки рогатки (Loop)
+  // Плееры для контролируемых звуков
   static final AudioPlayer _stretchPlayer = AudioPlayer();
-  
-  // АБСОЛЮТНО НЕЗАВИСИМЫЙ ПЛЕЕР ДЛЯ ФИНАЛОВ (Обходит паузу игры!)
   static final AudioPlayer _finalMenuPlayer = AudioPlayer();
-  
-  // Список активных плееров для контроля лимита дорожек
-  static final List<AudioPlayer> _activePlayers = [];
   
   static final Random _random = Random();
   static bool _isStretching = false;
 
+  // СИСТЕМА ЖЕТОНОВ: Ровно 1 звук каждого типа за весь полет одной птицы!
+  static bool hasStoneToken = true;
+  static bool hasWoodToken = true;
+  static bool hasPigHitToken = true;
+  static bool hasMissToken = true;
+
   static Future<void> init() async {
     _stretchPlayer.setReleaseMode(ReleaseMode.loop);
     _finalMenuPlayer.setReleaseMode(ReleaseMode.release);
+    resetTokensForNextBird(); // Заряжаем жетоны при старте
+  }
+
+  // МЕТОД ОБНУЛЕНИЯ: Вызывается, когда на рогатку встает НОВАЯ птица
+  static void resetTokensForNextBird() {
+    hasStoneToken = true;
+    hasWoodToken = true;
+    hasPigHitToken = true;
+    hasMissToken = true;
   }
 
   // 1. ЗВУК НАТЯЖЕНИЯ РОГАТКИ
@@ -40,31 +50,46 @@ class AudioManager {
     }
   }
 
-  // 2. СЛУЧАЙНЫЙ ВЫСТРЕЛ (Соблюдает лимит)
+  // 2. СЛУЧАЙНЫЙ ВЫСТРЕЛ (Играет всегда 1 раз при пуске)
   static void playLaunch() {
+    resetTokensForNextBird(); // В момент выстрела СБРАСЫВАЕМ жетоны для текущего полета!
     int num = _random.nextInt(2) + 1;
-    _playWithLimit('audio/sling_launch$num.mp3'); 
+    _playSingleEffect('audio/sling_launch$num.mp3'); 
   }
 
-  // 3. СЛУЧАЙНОЕ ПОПАДАНИЕ ПО СВИНЬЕ (Соблюдает лимит)
+  // 3. ПОПАДАНИЕ ПО СВИНЬЕ (Строго 1 раз за полет птицы)
   static void playPigHit() {
+    if (!hasPigHitToken) return; // Жетон сгорел — приглушаем все следующие повторы!
+    hasPigHitToken = false; 
+
     int num = _random.nextInt(3) + 1;
-    _playWithLimit('audio/pig_hit$num.MP3');
+    _playSingleEffect('audio/pig_hit$num.MP3');
   }
 
-  // 4. СЛУЧАЙНЫЙ ПРОМАХ (Соблюдает лимит)
+  // 4. ПРОМАХ БАННИХОПА (Строго 1 раз за полет птицы)
   static void playMiss() {
+    if (!hasMissToken) return; // Жетон сгорел — глушим эхо
+    hasMissToken = false;
+
     int num = _random.nextInt(3) + 1;
-    _playWithLimit('audio/bird_miss$num.MP3');
+    _playSingleEffect('audio/bird_miss$num.MP3');
   }
 
-  // 5. ЖИВОЕ СОПЕНИЕ (Соблюдает лимит)
+  // 5. ЖИВОЕ СОПЕНИЕ (Оставляем без изменений)
   static void playPigSnort() {
-    _playWithLimit('audio/pig_snort.mp3');
+    _playSingleEffect('audio/pig_snort.mp3');
   }
 
-  // 6. ХРУСТ БЛОКОВ: Играет ОБЯЗАТЕЛЬНО, но длится ровно 1 секунду!
+  // 6. ХРУСТ БЛОКОВ (Строго 1 раз для камня и 1 раз для дерева за полет!)
   static void playBlockBreak(bool isStone) async {
+    if (isStone) {
+      if (!hasStoneToken) return; // Если в этом выстреле камень УЖЕ ХРУСТЕЛ — выходим!
+      hasStoneToken = false;
+    } else {
+      if (!hasWoodToken) return; // Если дерево уже хрустело — выходим!
+      hasWoodToken = false;
+    }
+
     try {
       final AudioPlayer blockPlayer = AudioPlayer();
       await blockPlayer.setReleaseMode(ReleaseMode.release);
@@ -72,7 +97,7 @@ class AudioManager {
       String path = isStone ? 'audio/stone_break.mp3' : 'audio/wood_break.mp3';
       await blockPlayer.play(AssetSource(path), mode: PlayerMode.lowLatency);
       
-      // ТАЙМЕР ОБРЕЗКИ: Ровно через 1 секунду глушим звук камня/дерева, чтобы убрать эхо!
+      // ТАЙМЕР ОБРЕЗКИ: Ровно через 1 секунду намертво тушим плеер, убирая бесконечный гул!
       Future.delayed(const Duration(seconds: 1), () async {
         try {
           await blockPlayer.stop();
@@ -84,7 +109,7 @@ class AudioManager {
     }
   }
 
-  // 7. МГНОВЕННЫЙ ЗВУК ПОБЕДЫ (Использует глобальный плеер вне игрового цикла)
+  // 7. МГНОВЕННЫЙ ЗВУК ПОБЕДЫ (Глобальный плеер вне движка)
   static void playVictory() async {
     stopStretch();
     try {
@@ -106,31 +131,18 @@ class AudioManager {
     }
   }
 
-  // УМНЫЙ МЕТОД: Контролирует, чтобы одновременно играло не более 2 дорожек эффектов!
-  static void _playWithLimit(String assetPath) async {
-    // Чистим список от уже завершенных плееров
-    _activePlayers.removeWhere((p) => p.state == PlayerState.stopped);
-
-    // ЖЕСТКИЙ ЛИМИТ: Если уже играют 2 дорожки реплик — третью затыкаем и не произносим!
-    if (_activePlayers.length >= 2) {
-      return; 
-    }
-
+  // Внутренний метод: гарантирует, что эффект воспроизведется чисто и не зациклится
+  static void _playSingleEffect(String assetPath) async {
     try {
-      final AudioPlayer effPlayer = AudioPlayer();
-      await effPlayer.setReleaseMode(ReleaseMode.release);
+      final AudioPlayer temporaryPlayer = AudioPlayer();
+      await temporaryPlayer.setReleaseMode(ReleaseMode.release);
+      await temporaryPlayer.play(AssetSource(assetPath), mode: PlayerMode.lowLatency);
       
-      _activePlayers.add(effPlayer); // Добавляем в список активных
-
-      await effPlayer.play(AssetSource(assetPath), mode: PlayerMode.lowLatency);
-      
-      // По окончании удаляем плеер из памяти и из списка активных
-      effPlayer.onPlayerComplete.listen((_) {
-        _activePlayers.remove(effPlayer);
-        effPlayer.dispose();
+      temporaryPlayer.onPlayerComplete.listen((_) {
+        temporaryPlayer.dispose();
       });
     } catch (e) {
-      print("Ошибка лимитированного звука: $e");
+      print("Ошибка звука: $e");
     }
   }
 }
