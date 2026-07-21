@@ -146,3 +146,15 @@ class AudioManager {
     }
   }
 }
+
+  // ПОЛНАЯ ОСТАНОВКА ВСЕХ ЗВУКОВ УРОВНЯ (Вызывается при выходе в меню)
+  static void stopAllLevelSounds() async {
+    _isStretching = false;
+    try {
+      await _stretchPlayer.stop();
+      await _snortPlayer.stop();
+      await _finalMenuPlayer.stop();
+    } catch (e) {
+      print("Ошибка при полной остановке звуков: $e");
+    }
+  }
