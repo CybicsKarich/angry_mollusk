@@ -1,3 +1,4 @@
+import 'package:webview_flutter/webview_flutter.dart';
 import 'game_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -546,72 +547,87 @@ class LevelsScreen extends StatelessWidget {
   }
 }
 
-// КЛАСС ЭКРАНА "ДОПОЛНИТЕЛЬНО" С ДИСКЛЕЙМЕРОМ ДЛЯ ДРУЗЕЙ
+
+// 1. ОБНОВЛЕННЫЙ ЭКРАН "ДОПОЛНИТЕЛЬНО" С ФИРМЕННОЙ ПОДПИСЬЮ ivandrop
 class AdditionalScreen extends StatelessWidget {
   const AdditionalScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black54, // Затемняем фон главного меню
+      backgroundColor: Colors.black54,
       body: Center(
         child: Container(
-          width: MediaQuery.of(context).size.width * 0.65, // Удобная ширина прямоугольника
-          height: MediaQuery.of(context).size.height * 0.80, // Удобная высота
-          padding: const EdgeInsets.all(24),
+          width: MediaQuery.of(context).size.width * 0.70,
+          height: MediaQuery.of(context).size.height * 0.85,
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: const Color(0xFFFFF9C4), // Нежно-жёлтый мультяшный фон
+            color: const Color(0xFFFFF9C4),
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: const Color(0xFFFBC02D), width: 6), // Золотая рамка
-            boxShadow: const [
-              BoxShadow(color: Colors.black45, blurRadius: 15, offset: Offset(0, 8)),
-            ],
+            border: Border.all(color: const Color(0xFFFBC02D), width: 6),
+            boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 15, offset: Offset(0, 8))],
           ),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              // Шапка окна
               const Text(
                 "ДИСКЛЕЙМЕР",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                  color: Color(0xFFD84315), // Сочный оранжево-красный
-                  letterSpacing: 1.2,
-                ),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Color(0xFFD84315), letterSpacing: 1.5),
               ),
               const Divider(color: Color(0xFFFBC02D), thickness: 2, indent: 40, endIndent: 40),
               
-              // Твой доработанный текст извинений
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  "Парни, этот проект — чисто наш локальный прикол и дружеский угар! Я делал эту игру исключительно для того, чтобы мы вместе поржали с озвучки и разнесли пару замков, а не чтобы кого-то задеть или обидеть. Свиные ушки у Максимов — мультяшные, блоки камня и дерева — виртуальные, а наше уважение друг к другу и дружба — настоящие. Ребята, вы лучшие! Не обижайтесь на приколы, это всё любя и ради фана.",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF3E2723), // Читаемый тёмно-коричневый цвет
-                    height: 1.4, // Комфортный межстрочный интервал
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Column(
+                    children: [
+                      const Text(
+                        "Парни, этот проект — чисто наш локальный прикол и дружеский угар! Я делал эту игру исключительно для того, чтобы мы вместе поржали с озвучки и разнесли пару замков, а не чтобы кого-то задеть или обидеть. Свиные ушки у Максимов — мультяшные, blocks камня и дерева — виртуальные, а наше уважение друг к другу и дружба — настоящие. Ребята, вы лучшие! Не обижайтесь на приколы, это всё любя и ради фана.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF3E2723), height: 1.4),
+                      ),
+                      const SizedBox(height: 24),
+                      const Divider(color: Color(0xFFFBC02D), thickness: 1.5),
+                      const SizedBox(height: 8),
+                      const Text(
+                        "ПОПРОБУЙТЕ НАШИ ДРУГИЕ ИГРЫ:",
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF5D4037), letterSpacing: 1.1),
+                      ),
+                      const SizedBox(height: 12),
+                      
+                      // Кнопка запускает локальный HTML-файл из памяти APK!
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFFF9800),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        ),
+                        onPressed: () {
+                          // Переходим на внутренний экран с браузером
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const HtmlGameScreen()),
+                          );
+                        },
+                        icon: const Icon(Icons.html_rounded, color: Colors.white, size: 24),
+                        label: const Text("ИГРАТЬ В ОФФЛАЙНЕ", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        "ivandrop",
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, fontStyle: FontStyle.italic, color: Colors.brown),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              
-              // КНОПКА НАЗАД (Круглая зеленая кнопка со стрелкой влево)
+              const SizedBox(height: 10),
               Container(
-                width: 55,
-                height: 55,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF4CAF50), // Зелёный цвет кнопки
-                  shape: BoxShape.circle,
-                  boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 3))],
-                ),
+                width: 50, height: 50,
+                decoration: const BoxDecoration(color: Color(0xFF4CAF50), shape: BoxShape.circle),
                 child: RawMaterialButton(
                   shape: const CircleBorder(),
-                  onPressed: () {
-                    Navigator.pop(context); // Намертво закрывает окно и возвращает в меню!
-                  },
-                  child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 28),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 26),
                 ),
               ),
             ],
@@ -621,3 +637,42 @@ class AdditionalScreen extends StatelessWidget {
     );
   }
 }
+
+// 2. НОВЫЙ ЭКРАН-ПЛЕЕР ДЛЯ ВСТРОЕННОЙ HTML ИГРЫ
+class HtmlGameScreen extends StatefulWidget {
+  const HtmlGameScreen({super.key});
+
+  @override
+  State<HtmlGameScreen> createState() => _HtmlGameScreenState();
+}
+
+class _HtmlGameScreenState extends State<HtmlGameScreen> {
+  late final WebViewController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    // Инициализируем контроллер встроенного браузера
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted) // Включаем JS, чтобы HTML игра работала корректно
+      ..setBackgroundColor(Colors.black)
+      ..loadFlutterAsset('assets/web/index.html'); // Загружаем твой локальный файл игры!
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      // Сверху делаем маленькую мультяшную панель, чтобы можно было выйти обратно в меню
+      appBar: AppBar(
+        title: const Text("ИГРА: IVANDROP", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        backgroundColor: const Color(0xFFFBC02D),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded),
+          onPressed: () => Navigator.pop(context), // Выход в меню дисклеймера
+        ),
+      ),
+      body: WebViewWidget(controller: _controller), // Рисуем HTML игру на весь экран смартфона!
+    );
+  }
+}
+
