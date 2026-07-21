@@ -184,7 +184,12 @@ class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObse
                       const SizedBox(height: 16), // Вернули пробел 16
                       _buildMenuButton('ДОСТИЖЕНИЯ', Icons.emoji_events_rounded, Colors.amber, () {}),
                       const SizedBox(height: 16), // Вернули пробел 16
-                      _buildMenuButton('ДОПОЛНИТЕЛЬНО', Icons.extension_rounded, Colors.purple, () {}),
+                      _buildMenuButton('ДОПОЛНИТЕЛЬНО', Icons.extension_rounded, Colors.purple, () {
+                      Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const AdditionalScreen()),
+                      );
+                      }),
                       const SizedBox(height: 16), // Вернули пробел 16
                       _buildMenuButton('НАСТРОЙКИ', Icons.settings_rounded, Colors.grey, _openSettings),
                       ],
@@ -537,6 +542,82 @@ class LevelsScreen extends StatelessWidget {
           },
         ),
       ],
+    );
+  }
+}
+
+// КЛАСС ЭКРАНА "ДОПОЛНИТЕЛЬНО" С ДИСКЛЕЙМЕРОМ ДЛЯ ДРУЗЕЙ
+class AdditionalScreen extends StatelessWidget {
+  const AdditionalScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black54, // Затемняем фон главного меню
+      body: Center(
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.65, // Удобная ширина прямоугольника
+          height: MediaQuery.of(context).size.height * 0.80, // Удобная высота
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFF9C4), // Нежно-жёлтый мультяшный фон
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: const Color(0xFFFBC02D), width: 6), // Золотая рамка
+            boxShadow: const [
+              BoxShadow(color: Colors.black45, blurRadius: 15, offset: Offset(0, 8)),
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              // Шапка окна
+              const Text(
+                "ДИСКЛЕЙМЕР",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFFD84315), // Сочный оранжево-красный
+                  letterSpacing: 1.2,
+                ),
+              ),
+              const Divider(color: Color(0xFFFBC02D), thickness: 2, indent: 40, endIndent: 40),
+              
+              // Твой доработанный текст извинений
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  "Парни, этот проект — чисто наш локальный прикол и дружеский угар! Я делал эту игру исключительно для того, чтобы мы вместе поржали с озвучки и разнесли пару замков, а не чтобы кого-то задеть или обидеть. Свиные ушки у Максимов — мультяшные, блоки камня и дерева — виртуальные, а наше уважение друг к другу и дружба — настоящие. Ребята, вы лучшие! Не обижайтесь на приколы, это всё любя и ради фана.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF3E2723), // Читаемый тёмно-коричневый цвет
+                    height: 1.4, // Комфортный межстрочный интервал
+                  ),
+                ),
+              ),
+              
+              // КНОПКА НАЗАД (Круглая зеленая кнопка со стрелкой влево)
+              Container(
+                width: 55,
+                height: 55,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF4CAF50), // Зелёный цвет кнопки
+                  shape: BoxShape.circle,
+                  boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 3))],
+                ),
+                child: RawMaterialButton(
+                  shape: const CircleBorder(),
+                  onPressed: () {
+                    Navigator.pop(context); // Намертво закрывает окно и возвращает в меню!
+                  },
+                  child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 28),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
