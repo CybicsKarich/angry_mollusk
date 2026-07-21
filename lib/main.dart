@@ -479,7 +479,11 @@ class LevelsScreen extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => GameScreen()),
-    );
+    ).then((_) {
+      // ВОТ СЮДА ДОПИСЫВАЕМ СТРОЧКУ ВОЗОБНОВЛЕНИЯ МУЗЫКИ МЕНЮ!
+      // Замени menuPlayer на то, как у тебя называется переменная плеера в меню
+      audioPlayer.play(AssetSource('music/bg_music.mp3'));
+    });
   }
 },
             style: ElevatedButton.styleFrom(
