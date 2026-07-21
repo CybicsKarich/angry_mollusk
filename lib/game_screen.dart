@@ -85,7 +85,8 @@ class GameScreen extends StatelessWidget {
                               child: RawMaterialButton(
                                 shape: const CircleBorder(),
                                 onPressed: () {
-                                  game.overlays.remove('VictoryMenu');
+                                    AudioManager.stopAllLevelSounds();
+                                    game.overlays.remove('VictoryMenu');
                                   Navigator.pop(context); 
                                 },
                                 child: const Icon(Icons.home_rounded, color: Colors.white, size: 32),
@@ -151,7 +152,8 @@ class GameScreen extends StatelessWidget {
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                             onPressed: () {
-                              game.overlays.remove('PauseMenu');
+                                AudioManager.stopAllLevelSounds();
+                                game.overlays.remove('PauseMenu');
                               game.resumeEngine();
                             },
                             child: const Text('ПРОДОЛЖИТЬ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
@@ -221,7 +223,8 @@ class GameScreen extends StatelessWidget {
                             IconButton(
                               icon: const Icon(Icons.home_rounded, color: Colors.white, size: 32),
                               onPressed: () {
-                                game.overlays.remove('GameOverMenu');
+                                  AudioManager.stopAllLevelSounds();
+                                  game.overlays.remove('GameOverMenu');
                                 Navigator.pop(context);
                               },
                             ),
