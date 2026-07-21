@@ -322,15 +322,6 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     // Устанавливаем высоту земли ДО создания птиц, чтобы не было ошибок инициализации
     groundY = 0.73;
 
-    // Создаем 3 птиц Баннихопов в очередь с правильными аргументами Offset
-    for (int i = 0; i < 3; i++) {
-      final startX = 0.15 - (i * 0.04);
-      final startY = i == 0 ? groundY - 0.07 : groundY - 0.04; 
-      final bird = Bunnyhop(Offset(startX, startY), i == 0);
-      birdsQueue.add(bird);
-    }
-    currentBird = birdsQueue.first;
-
     // Вызываем выравнивание и постройку замка
     buildLevelStructures();
   }
@@ -340,7 +331,9 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     blocks.clear();
     pigs.clear();
 
-   // ИСПРАВЛЕНО: Полностью обнуляем состояние запуска, чтобы рогатка ожила при рестарте!
+    birdsQueue.clear(); 
+
+        // ИСПРАВЛЕНО: Полностью обнуляем состояние запуска, чтобы рогатка ожила при рестарте!
     isVictorySequenceStarted = false;
     levelCleared = false;
     levelFailed = false;
