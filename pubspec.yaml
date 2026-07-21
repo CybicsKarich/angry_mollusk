@@ -13,6 +13,7 @@ dependencies:
   shared_preferences: ^2.2.0
   flame: ^1.11.0
   flame_forge2d: ^0.15.0
+  webview_flutter: ^4.10.0
 
 flutter:
   uses-material-design: true
@@ -20,3 +21,4 @@ flutter:
     - assets/images/
     - assets/audio/
     - assets/music/
+    - assets/web/
