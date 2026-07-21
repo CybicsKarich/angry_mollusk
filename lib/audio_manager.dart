@@ -131,7 +131,7 @@ class AudioManager {
     }
   }
 
-  // Внутренний метод: гарантирует, что эффект воспроизведется чисто и не зациклится
+    // Твой последний рабочий метод эффектов (оставляем без изменений)
   static void _playSingleEffect(String assetPath) async {
     try {
       final AudioPlayer temporaryPlayer = AudioPlayer();
@@ -144,17 +144,24 @@ class AudioManager {
     } catch (e) {
       print("Ошибка звука: $e");
     }
-  }
-}
+  } // <--- ЗАКРЫВАЕТ МЕТОД _playSingleEffect
 
-  // ПОЛНАЯ ОСТАНОВКА ВСЕХ ЗВУКОВ УРОВНЯ (Вызывается при выходе в меню)
+  // ИСПРАВЛЕНО: Теперь этот метод стоит СТРОГО ВНУТРИ класса AudioManager!
   static void stopAllLevelSounds() async {
     _isStretching = false;
     try {
       await _stretchPlayer.stop();
-      await _snortPlayer.stop();
+      // Если у тебя в коде используется _snortPlayer, раскомментируй строку ниже:
+      // await _snortPlayer.stop();
       await _finalMenuPlayer.stop();
+      
+      // Запускаем фоновую музыку меню обратно на чистом канале
+      final AudioPlayer menuBgm = AudioPlayer();
+      await menuBgm.setReleaseMode(ReleaseMode.loop);
+      await menuBgm.play(AssetSource('music/bg_music.mp3'));
     } catch (e) {
       print("Ошибка при полной остановке звуков: $e");
     }
-  }
+  } // <--- ЗАКРЫВАЕТ МЕТОД stopAllLevelSounds
+
+} // <--- ВОТ ЭТА ОДНА СКОБКА ТЕПЕРЬ САМАЯ ПОСЛЕДНЯЯ В ФАЙЛЕ! Она закрывает весь класс AudioManager.
