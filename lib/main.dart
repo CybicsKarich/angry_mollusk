@@ -613,7 +613,7 @@ class AdditionalScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
                       const Text(
-                        "ivandrop",
+                        "IVANDROP",
                         style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, fontStyle: FontStyle.italic, color: Colors.brown),
                       ),
                     ],
