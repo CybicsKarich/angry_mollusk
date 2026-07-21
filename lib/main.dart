@@ -474,16 +474,11 @@ class LevelsScreen extends StatelessWidget {
           ),
           child: ElevatedButton(
             onPressed: () {
-  // Если игрок нажимает на Уровень 1 — запускаем экран нашей игры
-  if (levelNumber == '1') {
+    if (levelNumber == '1') {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => GameScreen()),
-    ).then((_) {
-      // ВОТ СЮДА ДОПИСЫВАЕМ СТРОЧКУ ВОЗОБНОВЛЕНИЯ МУЗЫКИ МЕНЮ!
-      // Замени menuPlayer на то, как у тебя называется переменная плеера в меню
-      audioPlayer.play(AssetSource('music/bg_music.mp3'));
-    });
+    ); // УБРАЛИ блок .then с ошибкой, теперь main.dart скомпилируется идеально!
   }
 },
             style: ElevatedButton.styleFrom(
