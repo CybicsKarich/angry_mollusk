@@ -474,17 +474,18 @@ class LevelsScreen extends StatelessWidget {
           ),
                       child: ElevatedButton(
             onPressed: () {
+              // ИСПРАВЛЕНО: Чистый запуск уровня без конфликтов плееров в main.dart
               GameScreen gameScreenInstance = GameScreen();
               int targetLevel = int.tryParse(levelNumber) ?? 1;
               gameScreenInstance.gameInstance.currentLevel = targetLevel;
               gameScreenInstance.gameInstance.worldScrollX = 0.0;
 
-              // Просто открываем экран без лишних .then блоков!
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => gameScreenInstance),
               );
             },
+
             
                         style: ElevatedButton.styleFrom(
               backgroundColor: Colors.transparent,
