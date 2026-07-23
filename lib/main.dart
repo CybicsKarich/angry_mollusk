@@ -472,15 +472,28 @@ class LevelsScreen extends StatelessWidget {
               BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 5)), // Объемная тень под кубиком
             ],
           ),
-          child: ElevatedButton(
+                    child: ElevatedButton(
             onPressed: () {
-    if (levelNumber == '1') {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => GameScreen()),
-    ); // УБРАЛИ блок .then с ошибкой, теперь main.dart скомпилируется идеально!
-  }
-},
+              // Создаем один общий экземпляр экрана игры
+              GameScreen gameScreenInstance = GameScreen();
+              
+              // Переводим текст '1' или '2' в число и передаем в движок Flame
+              int targetLevel = int.tryParse(levelNumber) ?? 1;
+              gameScreenInstance.gameInstance.currentLevel = targetLevel;
+              
+              // Сбрасываем камеру к рогатке при старте любого уровня
+              gameScreenInstance.gameInstance.worldScrollX = 0.0;
+
+              // Запускаем выбранный уровень
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => gameScreenInstance),
+              ).then((_) {
+                // ИСПРАВЛЕНО: Музыка меню возобновится при возврате с ЛЮБОГО уровня!
+                audioPlayer.play(AssetSource('music/bg_music.mp3')); 
+              });
+            },
+
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.transparent,
               shadowColor: Colors.transparent,
@@ -503,11 +516,7 @@ class LevelsScreen extends StatelessWidget {
         // ИСПРАВЛЕНО: Звёзды теперь динамически зажигаются жёлтым из памяти телефона для Уровня 1!
         FutureBuilder<int>(
           future: SharedPreferences.getInstance().then((prefs) {
-            // Если это карточка первого уровня, достаем его рекорд. Для остальных уровней пока возвращаем 0.
-            if (levelNumber == '1') {
-              return prefs.getInt('level_1_stars') ?? 0;
-            }
-            return 0;
+            return prefs.getInt('level_${levelNumber}_stars') ?? 0;
           }),
           builder: (context, snapshot) {
             final int savedStars = snapshot.data ?? 0;
