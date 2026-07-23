@@ -292,6 +292,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   double sunRotation = 0.0;
   double cloudOffset1 = 0.0;
   double cloudOffset2 = 0.0;
+  double worldScrollX = 0.0;
   double _safetyTimer = 0.0;
   double _pigSoundTimer = 0.0;
   bool isPaused = false;
@@ -673,32 +674,6 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     birdsPainter.paint(canvas, Offset(size.width * 0.05, size.height * 0.88));
   }
 
-  void _renderIsland(Canvas canvas, Size size, double startPct, double endPct) {
-    final startX = size.width * startPct;
-    final endX = size.width * endPct;
-    final topY = size.height * groundY;
-    final bottomY = size.height * 0.83;
-
-    // Коричневая скала
-    canvas.drawRect(Rect.fromLTRB(startX, topY, endX, bottomY), Paint()..color = const Color(0xFF6D4C41));
-
-    // Прослойки темной земли для детализации
-    final layerPaint = Paint()..color = const Color(0xFF4E342E)..strokeWidth = 3;
-    canvas.drawLine(Offset(startX, topY + 25), Offset(endX, topY + 28), layerPaint);
-    canvas.drawLine(Offset(startX, topY + 65), Offset(endX, topY + 62), layerPaint);
-
-    // Мультяшная зеленая трава с зубчиками
-    final grassPaint = Paint()..color = const Color(0xFF4CAF50);
-    canvas.drawRect(Rect.fromLTWH(startX, topY, endX - startX, 12), grassPaint);
-    final grassPath = Path();
-    for (double x = startX; x < endX; x += 10) {
-      grassPath.moveTo(x, topY + 11);
-      grassPath.lineTo(x + 5, topY + 19);
-      grassPath.lineTo(x + 10, topY + 11);
-    }
-    canvas.drawPath(grassPath, grassPaint);
-  }
-
     @override
   void onDragStart(DragStartEvent event) {
     super.onDragStart(event);
@@ -708,8 +683,6 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     }
   }
 
-    // Переменная смещения камеры (допиши в шапку класса к остальным даблам)
-  double worldScrollX = 0.0;
 
   @override
   void onDragUpdate(DragUpdateEvent event) {
@@ -753,7 +726,33 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       currentBird!.launch(0.15, groundY - 0.07);
     }
   }
-}
+  
+      void _renderIsland(Canvas canvas, Size size, double startPct, double endPct) {
+    final startX = size.width * startPct;
+    final endX = size.width * endPct;
+    final topY = size.height * groundY;
+    final bottomY = size.height * 0.83;
+
+    // Коричневая скала
+    canvas.drawRect(Rect.fromLTRB(startX, topY, endX, bottomY), Paint()..color = const Color(0xFF6D4C41));
+
+    // Прослойки темной земли для детализации
+    final layerPaint = Paint()..color = const Color(0xFF4E342E)..strokeWidth = 3;
+    canvas.drawLine(Offset(startX, topY + 25), Offset(endX, topY + 28), layerPaint);
+    canvas.drawLine(Offset(startX, topY + 65), Offset(endX, topY + 62), layerPaint);
+
+    // Мультяшная зеленая трава с зубчиками
+    final grassPaint = Paint()..color = const Color(0xFF4CAF50);
+    canvas.drawRect(Rect.fromLTWH(startX, topY, endX - startX, 12), grassPaint);
+    final grassPath = Path();
+    for (double x = startX; x < endX; x += 10) {
+      grassPath.moveTo(x, topY + 11);
+      grassPath.lineTo(x + 5, topY + 19);
+      grassPath.lineTo(x + 10, topY + 11);
+    }
+    canvas.drawPath(grassPath, grassPaint);
+  }
+  }
 }
     // ДЕТАЛИЗИРОВАННЫЙ КЛАСС ПТИЦЫ БАННИХОПА
 class Bunnyhop {
