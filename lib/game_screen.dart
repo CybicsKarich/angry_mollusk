@@ -727,8 +727,9 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     } 
     // 2. ЕСЛИ ТЯНЕМ В ПУСТОМ МЕСТЕ ЭКРАНА — ЭТО ПЛАВНЫЙ СКРОЛЛ ИГРОВОГО МИРА!
     else {
-      // Сдвигаем координату скролла на величину движения пальца (delta dx)
-      worldScrollX += event.delta.x / canvasSize.x;
+
+        // ИСПРАВЛЕНО: Во Flame 1.38+ смещение считывается через localDelta!
+      worldScrollX += event.localDelta.x / canvasSize.x;
       
       // Ставим жесткие ограничения, чтобы нельзя было укроллить в бесконечную пустоту
       if (worldScrollX > 0.0) worldScrollX = 0.0; // Левый край (рогатка)
