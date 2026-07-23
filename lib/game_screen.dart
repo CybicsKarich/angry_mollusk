@@ -108,13 +108,24 @@ class GameScreen extends StatelessWidget {
                                 child: const Icon(Icons.refresh_rounded, color: Colors.white, size: 32),
                               ),
                             ),
-                            const SizedBox(width: 20),
+                            const SizedBox(width: 20),                          
                             Container(
                               width: 60, height: 60,
-                              decoration: BoxDecoration(color: Colors.grey.shade500, shape: BoxShape.circle),
+                              decoration: const BoxDecoration(color: Color(0xFF4CAF50), shape: BoxShape.circle),
                               child: RawMaterialButton(
                                 shape: const CircleBorder(),
-                                onPressed: () {},
+                                onPressed: () {
+                                  game.overlays.remove('VictoryMenu');
+                                  
+                                  // Переключаем движок на второй уровень и обнуляем очки
+                                  game.currentLevel = 2;
+                                  AngryMolluskGame.score = 0;
+                                  game.worldScrollX = 0.0; // возвращаем камеру к рогатке
+                                  
+                                  game.isVictorySequenceStarted = false;
+                                  game.levelCleared = false;
+                                  game.buildLevelStructures(); // возводим замок "Два уха"
+                                },
                                 child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 32),
                               ),
                             ),
@@ -281,10 +292,13 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   double sunRotation = 0.0;
   double cloudOffset1 = 0.0;
   double cloudOffset2 = 0.0;
+  double worldScrollX = 0.0;
   double _safetyTimer = 0.0;
   double _pigSoundTimer = 0.0;
   bool isPaused = false;
 
+  int currentLevel = 1;
+    
     // СИСТЕМА ОЧКОВ И ЗВЁЗД
   static int score = 0;
   final int targetScore1Star = 200;
@@ -329,14 +343,11 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     buildLevelStructures();
   }
 
-   // НОВЫЙ ИДЕАЛЬНО РОВНЫЙ МЕТОД ПОСТРОЙКИ ЗАМКА
-    void buildLevelStructures() {
+  void buildLevelStructures() {
     blocks.clear();
     pigs.clear();
-
-    birdsQueue.clear(); 
-
-        // ИСПРАВЛЕНО: Полностью обнуляем состояние запуска, чтобы рогатка ожила при рестарте!
+    birdsQueue.clear();
+    
     isVictorySequenceStarted = false;
     levelCleared = false;
     levelFailed = false;
@@ -347,53 +358,87 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       final startY = i == 0 ? groundY - 0.07 : groundY - 0.04; 
       birdsQueue.add(Bunnyhop(Offset(startX, startY), i == 0));
     }
-    
-    // Сбрасываем текущую птицу на первую в новой очереди
     currentBird = birdsQueue.first;
-    currentBird!.isLaunched = false;
-    currentBird!.shouldRemove = false;
-    
-    final double bx = 0.62; 
 
-    // ЭТАЖ 1: Четыре каменные колонны (высота 0.14)
-    // Координата Y: groundY (0.73) - высота (0.14) = 0.59
-    blocks.add(GameBlock(bx + 0.00, 0.59, 0.02, 0.14, true));
-    blocks.add(GameBlock(bx + 0.07, 0.59, 0.02, 0.14, true));
-    blocks.add(GameBlock(bx + 0.14, 0.59, 0.02, 0.14, true));
-    blocks.add(GameBlock(bx + 0.21, 0.59, 0.02, 0.14, true));
-    
-    // Каменные перекрытия (высота 0.02) ложатся строго на Y = 0.59. 
-    // Значит их Y: 0.59 - 0.02 = 0.57
-    blocks.add(GameBlock(bx - 0.01, 0.57, 0.11, 0.02, true));
-    blocks.add(GameBlock(bx + 0.13, 0.57, 0.11, 0.02, true));
+    // ==========================================
+    // ГЕОМЕТРИЯ УРОВНЯ 1
+    // ==========================================
+    if (currentLevel == 1) {
+      final double bx = 0.62; 
+      blocks.add(GameBlock(bx + 0.00, 0.59, 0.02, 0.14, true));
+      blocks.add(GameBlock(bx + 0.07, 0.59, 0.02, 0.14, true));
+      blocks.add(GameBlock(bx + 0.14, 0.59, 0.02, 0.14, true));
+      blocks.add(GameBlock(bx + 0.21, 0.59, 0.02, 0.14, true));
+      blocks.add(GameBlock(bx - 0.01, 0.57, 0.11, 0.02, true));
+      blocks.add(GameBlock(bx + 0.13, 0.57, 0.11, 0.02, true));
+      blocks.add(GameBlock(bx + 0.01, 0.47, 0.015, 0.10, false));
+      blocks.add(GameBlock(bx + 0.10, 0.47, 0.015, 0.10, false));
+      blocks.add(GameBlock(bx + 0.20, 0.47, 0.015, 0.10, false));
+      blocks.add(GameBlock(bx + 0.00, 0.45, 0.23, 0.02, false));
+      blocks.add(GameBlock(bx + 0.05, 0.37, 0.015, 0.08, false));
+      blocks.add(GameBlock(bx + 0.16, 0.37, 0.015, 0.08, false));
+      blocks.add(GameBlock(bx + 0.03, 0.35, 0.17, 0.02, false));
 
-    // ЭТАЖ 2: Три деревянные стены (высота 0.10) ложатся на перекрытия (на Y = 0.57)
-    // Значит их Y: 0.57 - 0.10 = 0.47
-    blocks.add(GameBlock(bx + 0.01, 0.47, 0.015, 0.10, false));
-    blocks.add(GameBlock(bx + 0.10, 0.47, 0.015, 0.10, false));
-    blocks.add(GameBlock(bx + 0.20, 0.47, 0.015, 0.10, false));
+      pigs.add(MolluskMaksim(bx + 0.035, 0.57 - 0.019)); 
+      pigs.add(MolluskMaksim(bx + 0.175, 0.57 - 0.019)); 
+      pigs.add(MolluskMaksim(bx + 0.105, 0.45 - 0.019)); 
+    } 
+    // ==========================================
+    // ГЕОМЕТРИЯ УРОВНЯ 2 (ТОЧЬ-В-ТОЧЬ ПО ТРЕТЬЕЙ КАРТИНКЕ)
+    // ==========================================
+    else if (currentLevel == 2) {
+      final double bx = 1.35; // Унесли замок далеко вправо для огромной дистанции!
 
-    // Деревянный потолок (высота 0.02) ложится на стены (на Y = 0.47)
-    // Значит его Y: 0.47 - 0.02 = 0.45
-    blocks.add(GameBlock(bx + 0.00, 0.45, 0.23, 0.02, false));
+      // --- ПЕРВЫЙ ЭТАЖ (ДВА БОЛЬШИХ ОКНА РЯДОМ) ---
+      // Левое окно (вместо TNT ставим два прочных серых опорных камня внизу)
+      blocks.add(GameBlock(bx + 0.00, 0.57, 0.03, 0.16, false)); // левая стена окна
+      blocks.add(GameBlock(bx + 0.12, 0.57, 0.03, 0.16, false)); // правая стена окна
+      blocks.add(GameBlock(bx + 0.03, 0.70, 0.04, 0.03, true));  // левый нижний серый камень
+      blocks.add(GameBlock(bx + 0.08, 0.70, 0.04, 0.03, true));  // правый нижний серый камень
+      
+      // Правое окно (симметричное, полностью деревянное)
+      blocks.add(GameBlock(bx + 0.17, 0.57, 0.03, 0.16, false)); // левая стена
+      blocks.add(GameBlock(bx + 0.29, 0.57, 0.03, 0.16, false)); // правая стена
+      blocks.add(GameBlock(bx + 0.20, 0.70, 0.04, 0.03, false)); // нижняя опора
+      blocks.add(GameBlock(bx + 0.25, 0.70, 0.04, 0.03, false)); // нижняя опора
 
-    // ЭТАЖ 3: Башенка (высота 0.08) ложится на потолок (на Y = 0.45)
-    // Значит Y стен башни: 0.45 - 0.08 = 0.37
-    blocks.add(GameBlock(bx + 0.05, 0.37, 0.015, 0.08, false));
-    blocks.add(GameBlock(bx + 0.16, 0.37, 0.015, 0.08, false));
-    
-    // Крыша башни (высота 0.02) ложится сверху на Y = 0.37
-    // Значит её Y: 0.37 - 0.02 = 0.35
-    blocks.add(GameBlock(bx + 0.03, 0.35, 0.17, 0.02, false));
+      // Огромные горизонтальные перекрытия первого этажа (крыши окон)
+      blocks.add(GameBlock(bx - 0.01, 0.55, 0.16, 0.02, false)); // левое перекрытие
+      blocks.add(GameBlock(bx + 0.15, 0.55, 0.16, 0.02, false)); // правое перекрытие
 
-    // Свиньи сидят строго на своих этажах без зависания
-    pigs.add(MolluskMaksim(bx + 0.035, 0.57 - 0.019)); // На первом перекрытии
-    pigs.add(MolluskMaksim(bx + 0.175, 0.57 - 0.019)); // На втором перекрытии
-    pigs.add(MolluskMaksim(bx + 0.105, 0.45 - 0.019)); // На деревянном потолке
-    
+      // Свиньи первого этажа (сидят внутри окон)
+      pigs.add(MolluskMaksim(bx + 0.06, 0.65)); // Максим в левом окне
+      pigs.add(MolluskMaksim(bx + 0.23, 0.65)); // Максим в правом окне
+
+      // --- ВТОРОЙ ЭТАЖ (ВЕРХНИЕ КОМНАТЫ) ---
+      // Левая верхняя комната
+      blocks.add(GameBlock(bx + 0.01, 0.39, 0.025, 0.16, false));
+      blocks.add(GameBlock(bx + 0.11, 0.39, 0.025, 0.16, false));
+      blocks.add(GameBlock(bx + 0.00, 0.37, 0.14, 0.02, false)); // крыша левой комнаты
+
+      // Правая верхняя комната
+      blocks.add(GameBlock(bx + 0.18, 0.39, 0.025, 0.16, false));
+      blocks.add(GameBlock(bx + 0.28, 0.39, 0.025, 0.16, false));
+      blocks.add(GameBlock(bx + 0.17, 0.37, 0.14, 0.02, false)); // крыша правой комнаты
+
+      // Свиньи второго этажа (внутри верхних комнат)
+      pigs.add(MolluskMaksim(bx + 0.06, 0.47)); // Максим в левой комнате
+      pigs.add(MolluskMaksim(bx + 0.23, 0.47)); // Максим в правой комнате
+
+      // --- ДЕКОРАТИВНЫЕ МУЛЬТЯШНЫЕ ОКНА И УШКИ НА САМОЙ КРЫШЕ ---
+      // Левое "ухо"
+      blocks.add(GameBlock(bx + 0.02, 0.29, 0.03, 0.08, false));
+      blocks.add(GameBlock(bx + 0.08, 0.29, 0.03, 0.08, false));
+      blocks.add(GameBlock(bx + 0.01, 0.27, 0.11, 0.02, false));
+
+      // Правое "ухо"
+      blocks.add(GameBlock(bx + 0.20, 0.29, 0.03, 0.08, false));
+      blocks.add(GameBlock(bx + 0.26, 0.29, 0.03, 0.08, false));
+      blocks.add(GameBlock(bx + 0.19, 0.27, 0.11, 0.02, false));
+    }
+
     spawnCompleted = true;
   }
-
 
 
   void loadNextBird() {
@@ -500,7 +545,9 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   void render(Canvas canvas) {
     final size = canvasSize.toSize(); // Это исправит все ошибки с size.width и size.height!
 
-    // 1. ОТРИСОВКА НЕБА (ГРАДИЕНТ)
+    canvas.translate(size.width * worldScrollX, 0);
+     
+      // 1. ОТРИСОВКА НЕБА (ГРАДИЕНТ)
     final skyPaint = Paint()
       ..shader = const LinearGradient(
         begin: Alignment.topCenter,
@@ -655,29 +702,41 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     }
   }
 
+    // Переменная смещения камеры (допиши в шапку класса к остальным даблам)
+  double worldScrollX = 0.0;
+
   @override
   void onDragUpdate(DragUpdateEvent event) {
-    if (currentBird != null && currentBird!.isReadyForLaunch && !currentBird!.isLaunched) {
-      final size = canvasSize.toSize();
-      final touchX = event.localEndPosition.x / size.width;
-      final touchY = event.localEndPosition.y / size.height;
-
+    // 1. ЕСЛИ ПАЛЕЦ РЯДОМ С РОГАТКОЙ — ЭТО ОБЫЧНОЕ ПРИЦЕЛИВАНИЕ ПТИЦЫ
+    if (currentBird != null && currentBird!.isReadyForLaunch && !currentBird!.isLaunched && event.localStartPosition.x / canvasSize.x < 0.35) {
+      double touchX = event.localEndPosition.x / canvasSize.x;
+      double touchY = event.localEndPosition.y / canvasSize.y;
+      
       final slingX = 0.15;
       final slingY = groundY - 0.07;
-
+      
       double dx = touchX - slingX;
       double dy = touchY - slingY;
       double dist = sqrt(dx * dx + dy * dy);
-
-      // Ограничение максимальной длины растяжения резинки
-      if (dist > 0.06) {
-        dx = (dx / dist) * 0.06;
-        dy = (dy / dist) * 0.06;
+      
+      if (dist > 0.12) {
+        touchX = slingX + (dx / dist) * 0.12;
+        touchY = slingY + (dy / dist) * 0.12;
       }
-
-      currentBird!.position = Offset(slingX + dx, slingY + dy);
+      
+      currentBird!.position = Offset(touchX, touchY);
+    } 
+    // 2. ЕСЛИ ТЯНЕМ В ПУСТОМ МЕСТЕ ЭКРАНА — ЭТО ПЛАВНЫЙ СКРОЛЛ ИГРОВОГО МИРА!
+    else {
+      // Сдвигаем координату скролла на величину движения пальца (delta dx)
+      worldScrollX += event.delta.x / canvasSize.x;
+      
+      // Ставим жесткие ограничения, чтобы нельзя было укроллить в бесконечную пустоту
+      if (worldScrollX > 0.0) worldScrollX = 0.0; // Левый край (рогатка)
+      if (worldScrollX < -0.8) worldScrollX = -0.8; // Правый край (Уровень 2 замок)
     }
   }
+
 
     @override
   void onDragEnd(DragEndEvent event) {
