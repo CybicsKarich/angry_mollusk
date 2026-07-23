@@ -323,27 +323,24 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   // Координаты рогатки на экране (вычисляются в процентах от размера экрана)
   Offset get slingshotCenter => Offset(canvasSize.x * 0.2, canvasSize.y * 0.7);
 
-  @override
+    @override
   Future<void> onLoad() async {
     await super.onLoad();
     await AudioManager.init();
-    AngryMolluskGame.score = 0;
     
-      // Загружаем текстуры для ручного рендеринга
+    groundY = 0.73; // Земля установлена!
+    AngryMolluskGame.score = 0;
+    isVictorySequenceStarted = false;
+    
     bunnySprite = await loadSprite('bunnyhop.png');
     maksimSprite = await loadSprite('maksim.png');
     
-    // Задний фон (облака, солнце)
     add(BackgroundDecoration());
-
-    // Устанавливаем высоту земли ДО создания птиц, чтобы не было ошибок инициализации
-    groundY = 0.73;
-
-    // Вызываем выравнивание и постройку замка
-    buildLevelStructures();
+    buildLevelStructures(); // Вызываем чистую постройку
   }
 
-  void buildLevelStructures() {
+
+    void buildLevelStructures() {
     blocks.clear();
     pigs.clear();
     birdsQueue.clear();
@@ -352,7 +349,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     levelCleared = false;
     levelFailed = false;
 
-    // Заново наполняем очередь из 3 свежих птиц
+    // Свежая очередь из 3 птиц
     for (int i = 0; i < 3; i++) {
       final startX = 0.15 - (i * 0.04);
       final startY = i == 0 ? groundY - 0.07 : groundY - 0.04; 
@@ -361,10 +358,12 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     currentBird = birdsQueue.first;
 
     // ==========================================
-    // ГЕОМЕТРИЯ УРОВНЯ 1
+    // ГЕОМЕТРИЯ УРОВНЯ 1 (СТАРАЯ КЛАССИЧЕСКАЯ БАШНЯ)
     // ==========================================
     if (currentLevel == 1) {
       final double bx = 0.62; 
+      
+      // Стены и перекрытия
       blocks.add(GameBlock(bx + 0.00, 0.59, 0.02, 0.14, true));
       blocks.add(GameBlock(bx + 0.07, 0.59, 0.02, 0.14, true));
       blocks.add(GameBlock(bx + 0.14, 0.59, 0.02, 0.14, true));
@@ -379,66 +378,61 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       blocks.add(GameBlock(bx + 0.16, 0.37, 0.015, 0.08, false));
       blocks.add(GameBlock(bx + 0.03, 0.35, 0.17, 0.02, false));
 
-      pigs.add(MolluskMaksim(bx + 0.035, 0.57 - 0.019)); 
-      pigs.add(MolluskMaksim(bx + 0.175, 0.57 - 0.019)); 
-      pigs.add(MolluskMaksim(bx + 0.105, 0.45 - 0.019)); 
+      // Свиньи Уровня 1 (высота над землей и полками)
+      pigs.add(MolluskMaksim(bx + 0.035, groundY - 0.04)); 
+      pigs.add(MolluskMaksim(bx + 0.175, groundY - 0.04)); 
+      pigs.add(MolluskMaksim(bx + 0.105, 0.57 - 0.03)); 
     } 
     // ==========================================
-    // ГЕОМЕТРИЯ УРОВНЯ 2 (ТОЧЬ-В-ТОЧЬ ПО ТРЕТЬЕЙ КАРТИНКЕ)
+    // ГЕОМЕТРИЯ УРОВНЯ 2 (ЗАМОК "ДВА УХА" СТРОГО ПО КАРТИНКЕ)
     // ==========================================
     else if (currentLevel == 2) {
-      final double bx = 1.35; // Унесли замок далеко вправо для огромной дистанции!
+      final double bx = 1.35; // Замок унесен вправо на новый остров
 
-      // --- ПЕРВЫЙ ЭТАЖ (ДВА БОЛЬШИХ ОКНА РЯДОМ) ---
-      // Левое окно (вместо TNT ставим два прочных серых опорных камня внизу)
-      blocks.add(GameBlock(bx + 0.00, 0.57, 0.03, 0.16, false)); // левая стена окна
-      blocks.add(GameBlock(bx + 0.12, 0.57, 0.03, 0.16, false)); // правая стена окна
-      blocks.add(GameBlock(bx + 0.03, 0.70, 0.04, 0.03, true));  // левый нижний серый камень
-      blocks.add(GameBlock(bx + 0.08, 0.70, 0.04, 0.03, true));  // правый нижний серый камень
+      // --- ПЕРВЫЙ ЭТАЖ ---
+      blocks.add(GameBlock(bx + 0.00, 0.55, 0.03, 0.18, false)); 
+      blocks.add(GameBlock(bx + 0.12, 0.55, 0.03, 0.18, false)); 
+      blocks.add(GameBlock(bx + 0.03, 0.70, 0.04, 0.03, true));  
+      blocks.add(GameBlock(bx + 0.08, 0.70, 0.04, 0.03, true));  
       
-      // Правое окно (симметричное, полностью деревянное)
-      blocks.add(GameBlock(bx + 0.17, 0.57, 0.03, 0.16, false)); // левая стена
-      blocks.add(GameBlock(bx + 0.29, 0.57, 0.03, 0.16, false)); // правая стена
-      blocks.add(GameBlock(bx + 0.20, 0.70, 0.04, 0.03, false)); // нижняя опора
-      blocks.add(GameBlock(bx + 0.25, 0.70, 0.04, 0.03, false)); // нижняя опора
+      blocks.add(GameBlock(bx + 0.17, 0.55, 0.03, 0.18, false)); 
+      blocks.add(GameBlock(bx + 0.29, 0.55, 0.03, 0.18, false)); 
+      blocks.add(GameBlock(bx + 0.20, 0.70, 0.04, 0.03, false)); 
+      blocks.add(GameBlock(bx + 0.25, 0.70, 0.04, 0.03, false)); 
 
-      // Огромные горизонтальные перекрытия первого этажа (крыши окон)
-      blocks.add(GameBlock(bx - 0.01, 0.55, 0.16, 0.02, false)); // левое перекрытие
-      blocks.add(GameBlock(bx + 0.15, 0.55, 0.16, 0.02, false)); // правое перекрытие
+      blocks.add(GameBlock(bx - 0.01, 0.53, 0.16, 0.02, false)); 
+      blocks.add(GameBlock(bx + 0.15, 0.53, 0.16, 0.02, false)); 
 
-      // Свиньи первого этажа (сидят внутри окон)
-      pigs.add(MolluskMaksim(bx + 0.06, 0.65)); // Максим в левом окне
-      pigs.add(MolluskMaksim(bx + 0.23, 0.65)); // Максим в правом окне
+      // Свиньи первого этажа (жестко привязаны к высоте фундамента!)
+      pigs.add(MolluskMaksim(bx + 0.06, groundY - 0.04)); 
+      pigs.add(MolluskMaksim(bx + 0.23, groundY - 0.04)); 
 
-      // --- ВТОРОЙ ЭТАЖ (ВЕРХНИЕ КОМНАТЫ) ---
-      // Левая верхняя комната
-      blocks.add(GameBlock(bx + 0.01, 0.39, 0.025, 0.16, false));
-      blocks.add(GameBlock(bx + 0.11, 0.39, 0.025, 0.16, false));
-      blocks.add(GameBlock(bx + 0.00, 0.37, 0.14, 0.02, false)); // крыша левой комнаты
+      // --- ВТОРОЙ ЭТАЖ ---
+      blocks.add(GameBlock(bx + 0.01, 0.37, 0.025, 0.16, false));
+      blocks.add(GameBlock(bx + 0.11, 0.37, 0.025, 0.16, false));
+      blocks.add(GameBlock(bx + 0.00, 0.35, 0.14, 0.02, false)); 
 
-      // Правая верхняя комната
-      blocks.add(GameBlock(bx + 0.18, 0.39, 0.025, 0.16, false));
-      blocks.add(GameBlock(bx + 0.28, 0.39, 0.025, 0.16, false));
-      blocks.add(GameBlock(bx + 0.17, 0.37, 0.14, 0.02, false)); // крыша правой комнаты
+      blocks.add(GameBlock(bx + 0.18, 0.37, 0.025, 0.16, false));
+      blocks.add(GameBlock(bx + 0.28, 0.37, 0.025, 0.16, false));
+      blocks.add(GameBlock(bx + 0.17, 0.35, 0.14, 0.02, false)); 
 
-      // Свиньи второго этажа (внутри верхних комнат)
-      pigs.add(MolluskMaksim(bx + 0.06, 0.47)); // Максим в левой комнате
-      pigs.add(MolluskMaksim(bx + 0.23, 0.47)); // Максим в правой комнате
+      // Свиньи второго этажа (стоят строго внутри верхних окон!)
+      pigs.add(MolluskMaksim(bx + 0.06, 0.53 - 0.03)); 
+      pigs.add(MolluskMaksim(bx + 0.23, 0.53 - 0.03)); 
 
-      // --- ДЕКОРАТИВНЫЕ МУЛЬТЯШНЫЕ ОКНА И УШКИ НА САМОЙ КРЫШЕ ---
-      // Левое "ухо"
-      blocks.add(GameBlock(bx + 0.02, 0.29, 0.03, 0.08, false));
-      blocks.add(GameBlock(bx + 0.08, 0.29, 0.03, 0.08, false));
-      blocks.add(GameBlock(bx + 0.01, 0.27, 0.11, 0.02, false));
+      // --- ДЕКОРАТИВНЫЕ УШКИ НА КРЫШЕ ---
+      blocks.add(GameBlock(bx + 0.02, 0.27, 0.03, 0.08, false));
+      blocks.add(GameBlock(bx + 0.08, 0.27, 0.03, 0.08, false));
+      blocks.add(GameBlock(bx + 0.01, 0.25, 0.11, 0.02, false));
 
-      // Правое "ухо"
-      blocks.add(GameBlock(bx + 0.20, 0.29, 0.03, 0.08, false));
-      blocks.add(GameBlock(bx + 0.26, 0.29, 0.03, 0.08, false));
-      blocks.add(GameBlock(bx + 0.19, 0.27, 0.11, 0.02, false));
+      blocks.add(GameBlock(bx + 0.20, 0.27, 0.03, 0.08, false));
+      blocks.add(GameBlock(bx + 0.26, 0.27, 0.03, 0.08, false));
+      blocks.add(GameBlock(bx + 0.19, 0.25, 0.11, 0.02, false));
     }
 
     spawnCompleted = true;
   }
+
 
 
   void loadNextBird() {
@@ -889,10 +883,11 @@ class MolluskMaksim {
       x += vx * dt;
       y += vy * dt;
 
-      // Удар об землю острова
-      if (y >= groundY - 0.02) {
-        AngryMolluskGame.score += 50;
-        shouldRemove = true; // Умер от удара о скалу
+            
+      // Стало: Если свинья реально провалилась ниже уровня травы в ущелье
+      if (y >= groundY + 0.05) {
+        AngryMolluskGame.score += 50; 
+        shouldRemove = true; 
       }
     } else {
       // Проверка опоры: если кубик под свиньей улетел, она падает
