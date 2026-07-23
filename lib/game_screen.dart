@@ -544,55 +544,62 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   void render(Canvas canvas) {
     final size = canvasSize.toSize(); // Это исправит все ошибки с size.width и size.height!
 
+      @override
+  void render(Canvas canvas) {
+    final size = canvasSize.toSize();
+    
+    // Сдвигаем весь холст влево-вправо на величину скролла пальца
     canvas.translate(size.width * worldScrollX, 0);
-     
-      // 1. ОТРИСОВКА НЕБА (ГРАДИЕНТ)
+
+    // НАСТРОЙКА ШИРИНЫ МИРА: Для 1 уровня ширина обычная (1.0), для 2 уровня - расширенная (1.8)
+    final double worldWidthFactor = currentLevel == 1 ? 1.0 : 1.8;
+
+    // Градиент неба растягивается ровно под размер текущего уровня
     final skyPaint = Paint()
-      ..shader = const LinearGradient(
+      ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [Color(0xFF29B6F6), Color(0xFFE1F5FE)],
-        ).createShader(Offset.zero & size);
-        canvas.drawRect(Offset.zero & size, skyPaint);
+        colors: [Colors.blue.shade300, Colors.lightBlue.shade100],
+      ).createShader(Rect.fromLTWH(0, 0, size.width * worldWidthFactor, size.height));
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width * worldWidthFactor, size.height), skyPaint);
 
-    // 2. ДЕТАЛИЗИРОВАННОЕ ВРАЩАЮЩЕЕСЯ СОЛНЦЕ С КРАСИВЫМИ ЛУЧАМИ СЛЕВА
+    // Солнце (оставляем без изменений)
+    canvas.save();
     final sunCenter = Offset(size.width * 0.15, size.height * 0.2);
     final sunRadius = size.height * 0.08;
-    canvas.save();
     canvas.translate(sunCenter.dx, sunCenter.dy);
     canvas.rotate(sunRotation);
-    final rayPaint = Paint()..color = const Color(0xFFFFF59D).withValues(alpha: 0.4)..style = PaintingStyle.fill;
-    final rayPath = Path();
+    canvas.drawCircle(Offset.zero, sunRadius, Paint()..color = const Color(0xFFFFF176));
+    final rayPaint = Paint()..color = const Color(0xFFFFF59D)..style = PaintingStyle.stroke..strokeWidth = 3;
     for (int i = 0; i < 8; i++) {
-      double angle = (i * 2 * pi) / 8;
-      double nextAngle = angle + (pi / 8);
-      rayPath.moveTo(0, 0);
-      rayPath.lineTo(cos(angle) * sunRadius * 2.2, sin(angle) * sunRadius * 2.2);
-      rayPath.lineTo(cos(nextAngle) * sunRadius * 1.4, sin(nextAngle) * sunRadius * 1.4);
-      rayPath.close();
+      canvas.rotate(pi / 4);
+      canvas.drawLine(Offset(sunRadius + 5, 0), Offset(sunRadius + 20, 0), rayPaint);
     }
-    canvas.drawPath(rayPath, rayPaint);
     canvas.restore();
-    canvas.drawCircle(sunCenter, sunRadius, Paint()..color = const Color(0xFFFBC02D));
 
-    // 3. МУЛЬТЯШНЫЕ ПЛЫВУЩИЕ ОБЛАКА
+    // Облака летают в пределах ширины текущего уровня
     final cloudPaint = Paint()..color = Colors.white.withValues(alpha: 0.85);
-    double c1X = (size.width * 0.3 + cloudOffset1 * size.width) % (size.width + 200) - 100;
+    double c1X = (size.width * 0.3 + cloudOffset1 * size.width) % (size.width * worldWidthFactor + 200) - 100;
     canvas.drawCircle(Offset(c1X, size.height * 0.15), 30, cloudPaint);
     canvas.drawCircle(Offset(c1X + 35, size.height * 0.12), 42, cloudPaint);
     canvas.drawCircle(Offset(c1X + 75, size.height * 0.15), 32, cloudPaint);
 
-    double c2X = (size.width * 0.65 + cloudOffset2 * size.width) % (size.width + 200) - 100;
-    canvas.drawCircle(Offset(c2X, size.height * 0.23), 25, cloudPaint);
-    canvas.drawCircle(Offset(c2X + 30, size.height * 0.2), 35, cloudPaint);
+    // Вода тянется ровно до края текущего уровня
+    canvas.drawRect(Rect.fromLTWH(0, size.height * 0.83, size.width * worldWidthFactor, size.height * 0.02), Paint()..color = const Color(0xFF29B6F6));
+    canvas.drawRect(Rect.fromLTWH(0, size.height * 0.85, size.width * worldWidthFactor, size.height * 0.15), Paint()..color = const Color(0xFF0288D1));
 
-    // 4. ГЛУБОКАЯ ВОДА (ОПУЩЕНА В САМЫЙ НИЗ)
-    canvas.drawRect(Rect.fromLTWH(0, size.height * 0.83, size.width, size.height * 0.02), Paint()..color = const Color(0xFF29B6F6));
-    canvas.drawRect(Rect.fromLTWH(0, size.height * 0.85, size.width, size.height * 0.15), Paint()..color = const Color(0xFF0288D1));
+    // ОСТРОВА СУШИ: Настраиваем аккуратные размеры под каждый уровень!
+    _renderIsland(canvas, size, 0.0, 0.25); // Левый маленький островок для рогатки (одинаковый везде)
+    
+    if (currentLevel == 1) {
+      // Для 1 уровня оставляем старый добрый остров точь-в-точь как был!
+      _renderIsland(canvas, size, 0.55, 1.0); 
+    } else if (currentLevel == 2) {
+      // Для 2 уровня делаем аккуратный остров справа, чтобы на нём идеально уместился замок (bx = 1.35)
+      // Остров начинается чуть раньше здания (1.30) и заканчивается чуть позже (1.70)
+      _renderIsland(canvas, size, 1.30, 1.72); 
+    }
 
-    // 5. ОТРИСОВКА ОСТРОВОВ С ТЕКСТУРОЙ ЗЕМЛИ И ЗУБЧАТОЙ ТРАВОЙ
-    _renderIsland(canvas, size, 0.0, 0.25);
-    _renderIsland(canvas, size, 0.55, 1.0);
 
     // 6. КРАСНАЯ РЕЗИНКА РОГАТКИ (Отрисовывается ВСЕГДА до выстрела)
     final slingBaseX = size.width * 0.15;
