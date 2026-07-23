@@ -472,29 +472,21 @@ class LevelsScreen extends StatelessWidget {
               BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 5)), // Объемная тень под кубиком
             ],
           ),
-                    child: ElevatedButton(
+                      child: ElevatedButton(
             onPressed: () {
-              // Создаем один общий экземпляр экрана игры
               GameScreen gameScreenInstance = GameScreen();
-              
-              // Переводим текст '1' или '2' в число и передаем в движок Flame
               int targetLevel = int.tryParse(levelNumber) ?? 1;
               gameScreenInstance.gameInstance.currentLevel = targetLevel;
-              
-              // Сбрасываем камеру к рогатке при старте любого уровня
               gameScreenInstance.gameInstance.worldScrollX = 0.0;
 
-              // Запускаем выбранный уровень
+              // Просто открываем экран без лишних .then блоков!
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => gameScreenInstance),
-              ).then((_) {
-                // ИСПРАВЛЕНО: Музыка меню возобновится при возврате с ЛЮБОГО уровня!
-                audioPlayer.play(AssetSource('music/bg_music.mp3')); 
-              });
+              );
             },
-
-            style: ElevatedButton.styleFrom(
+            
+                        style: ElevatedButton.styleFrom(
               backgroundColor: Colors.transparent,
               shadowColor: Colors.transparent,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
