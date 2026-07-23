@@ -292,7 +292,6 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   double sunRotation = 0.0;
   double cloudOffset1 = 0.0;
   double cloudOffset2 = 0.0;
-  double worldScrollX = 0.0;
   double _safetyTimer = 0.0;
   double _pigSoundTimer = 0.0;
   bool isPaused = false;
