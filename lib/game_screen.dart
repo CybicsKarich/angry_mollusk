@@ -754,8 +754,8 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     }
   }
 }
-
-// ДЕТАЛИЗИРОВАННЫЙ КЛАСС ПТИЦЫ БАННИХОПА
+}
+    // ДЕТАЛИЗИРОВАННЫЙ КЛАСС ПТИЦЫ БАННИХОПА
 class Bunnyhop {
   Offset position;
   bool isReadyForLaunch;
