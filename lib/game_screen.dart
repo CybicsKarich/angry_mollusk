@@ -726,8 +726,9 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       currentBird!.launch(0.15, groundY - 0.07);
     }
   }
-  
-      void _renderIsland(Canvas canvas, Size size, double startPct, double endPct) {
+  }
+
+    void _renderIsland(Canvas canvas, Size size, double startPct, double endPct) {
     final startX = size.width * startPct;
     final endX = size.width * endPct;
     final topY = size.height * groundY;
@@ -751,7 +752,6 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       grassPath.lineTo(x + 10, topY + 11);
     }
     canvas.drawPath(grassPath, grassPaint);
-  }
   }
 }
     // ДЕТАЛИЗИРОВАННЫЙ КЛАСС ПТИЦЫ БАННИХОПА
