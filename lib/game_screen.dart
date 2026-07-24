@@ -665,8 +665,8 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   void onDragStart(DragStartEvent event) {
     super.onDragStart(event);
     
-    // Считаем позицию первого касания относительно экрана
-    double startX = event.localStartPosition.x / canvasSize.x;
+    // ИСПРАВЛЕНО: Во Flame 1.38+ начальная точка считывается через localPosition!
+    double startX = event.localPosition.x / canvasSize.x;
     
     // Если игрок нажал в левой части экрана (в районе рогатки, где x < 0.3)
     if (currentBird != null && currentBird!.isReadyForLaunch && !currentBird!.isLaunched && startX < 0.3) {
