@@ -281,7 +281,7 @@ class GameScreen extends StatelessWidget {
 
               
 
-class AngryMolluskGame extends FlameGame with PanDetector {
+class AngryMolluskGame extends FlameGame with DragCallbacks {
   double groundY = 0.73; // Уровень земли (73% от высоты экрана)
   AngryMolluskGame() : super();
 
@@ -529,27 +529,17 @@ class AngryMolluskGame extends FlameGame with PanDetector {
         }
       }
     }
-        // ОЧЕВИДНЫЙ ФИКС КАМЕРЫ: Возвращаем дефолтные нули, чтобы игра не улетала за экран!
-    if (currentLevel == 1) {
-      // На 1 уровне камера стоит строго по центру игрового мира (0, 0)
-      camera.viewfinder.position = Vector2(0.0, 0.0);
-    } 
-    else if (currentLevel == 2) {
-      // На 2 уровне камера смещается вправо относительно центра мира
-      // worldScrollX у нас меняется от 0.0 до 0.8. Переводим это в пиксели экрана:
-      double targetCameraX = worldScrollX * canvasSize.x;
-      camera.viewfinder.position = Vector2(targetCameraX, 0.0);
-    }
   }
 
   @override
   void render(Canvas canvas) {
     final size = canvasSize.toSize();
     
-    // ИСПРАВЛЕНО: Безопасный скролл! На 1 уровне сдвиг всегда строго 0, чтобы не было чёрного экрана
-    final double currentScroll = currentLevel == 1 ? 0.0 : worldScrollX;
+    canvas.save(); // ЗАЩИТА: Сохраняем состояние холста, чтобы экран НЕ чернел!
+    
+    // Сдвигаем холст на величину нашего скролла пальцем
+    canvas.translate(size.width * worldScrollX, 0);
 
-    // Настройка ширины мира под уровень
     final double worldWidthFactor = currentLevel == 1 ? 1.0 : 1.8;
 
         // Градиент неба растягивается под ширину уровня
@@ -667,22 +657,23 @@ class AngryMolluskGame extends FlameGame with PanDetector {
     birdsPainter.layout();
     birdsPainter.paint(canvas, Offset(size.width * 0.05, size.height * 0.88));
     
+    canvas.restore();
   }
 
-     @override
-  void onPanStart(DragStartInfo info) {
+       @override
+  void onDragStart(DragStartEvent event) {
+    super.onDragStart(event);
     if (currentBird != null && currentBird!.isReadyForLaunch && !currentBird!.isLaunched) {
       AudioManager.playStretch(); 
     }
   }
 
   @override
-  void onPanUpdate(DragUpdateInfo info) {
-    // 1. ПРИЦЕЛИВАНИЕ: Если палец зажат в левой части экрана (возле рогатки) — оттягиваем Баннихопа
-    // ИСПРАВЛЕНО: Заменили .local на .global для считывания координат экрана!
-    if (currentBird != null && currentBird!.isReadyForLaunch && !currentBird!.isLaunched && info.eventPosition.global.x / canvasSize.x < 0.35) {
-      double touchX = info.eventPosition.global.x / canvasSize.x;
-      double touchY = info.eventPosition.global.y / canvasSize.y;
+  void onDragUpdate(DragUpdateEvent event) {
+    // 1. ПРИЦЕЛИВАНИЕ (левая треть экрана)
+    if (currentBird != null && currentBird!.isReadyForLaunch && !currentBird!.isLaunched && event.localStartPosition.x / canvasSize.x < 0.35) {
+      double touchX = event.localEndPosition.x / canvasSize.x;
+      double touchY = event.localEndPosition.y / canvasSize.y;
       
       final slingX = 0.15;
       final slingY = groundY - 0.07;
@@ -695,28 +686,28 @@ class AngryMolluskGame extends FlameGame with PanDetector {
         touchX = slingX + (dx / dist) * 0.12;
         touchY = slingY + (dy / dist) * 0.12;
       }
-      
       currentBird!.position = Offset(touchX, touchY);
     } 
-    // 2. СКРОЛЛ: Если палец движется в любом другом месте экрана — плавно двигаем камеру
+    // 2. ЕСТЕСТВЕННЫЙ СКРОЛЛ (тянем пустой экран)
     else {
-      // ИСПРАВЛЕНО: Заменили .local на .global для считывания дельты сдвига пальца!
-      worldScrollX -= info.delta.global.x / canvasSize.x;
+      // Меняем знак на плюс, чтобы мир двигался вслед за пальцем!
+      worldScrollX += event.localDelta.x / canvasSize.x;
       
-      // Намертво держим камеру в границах уровня
-      if (worldScrollX < 0.0) worldScrollX = 0.0; 
-      if (worldScrollX > 0.8) worldScrollX = 0.8; 
+      // Ограничиваем скролл: от -0.8 (уехали к замку) до 0.0 (стоим у рогатки)
+      if (worldScrollX > 0.0) worldScrollX = 0.0; 
+      if (worldScrollX < -0.8) worldScrollX = -0.8; 
     }
   }
   
   @override
-  void onPanEnd(DragEndInfo info) {
+  void onDragEnd(DragEndEvent event) {
     if (currentBird != null && currentBird!.isReadyForLaunch && !currentBird!.isLaunched) {
       AudioManager.stopStretch(); 
       AudioManager.playLaunch();  
       currentBird!.launch(0.15, groundY - 0.07);
     }
   }
+
 
     
     void _renderIsland(Canvas canvas, Size size, double startPct, double endPct) {
