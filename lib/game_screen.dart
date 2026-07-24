@@ -281,8 +281,7 @@ class GameScreen extends StatelessWidget {
 
               
 
-// Главный движок игры
-class AngryMolluskGame extends FlameGame with DragCallbacks {
+class AngryMolluskGame extends FlameGame with PanDetector {
   double groundY = 0.73; // Уровень земли (73% от высоты экрана)
   AngryMolluskGame() : super();
 
@@ -671,19 +670,17 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     
   }
 
-    @override
-  void onDragStart(DragStartEvent event) {
-    super.onDragStart(event);
+     @override
+  void onPanStart(PanStartEvent event) {
     if (currentBird != null && currentBird!.isReadyForLaunch && !currentBird!.isLaunched) {
-      // Включаем звук натяжения строго ОДИН РАЗ в момент касания пальцем!
       AudioManager.playStretch(); 
     }
   }
 
 
   @override
-  void onDragUpdate(DragUpdateEvent event) {
-    // 1. ЕСЛИ ПАЛЕЦ РЯДОМ С РОГАТКОЙ — ЭТО ОБЫЧНОЕ ПРИЦЕЛИВАНИЕ ПТИЦЫ
+  void onPanUpdate(PanUpdateEvent event) {
+    // 1. ПРИЦЕЛИВАНИЕ: Если палец зажат в левой части экрана (возле рогатки) — оттягиваем Баннихопа
     if (currentBird != null && currentBird!.isReadyForLaunch && !currentBird!.isLaunched && event.localStartPosition.x / canvasSize.x < 0.35) {
       double touchX = event.localEndPosition.x / canvasSize.x;
       double touchY = event.localEndPosition.y / canvasSize.y;
@@ -702,22 +699,23 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       
       currentBird!.position = Offset(touchX, touchY);
     } 
-        else {
-      // Палец тянет влево — камера едет вправо за замком
-      worldScrollX += event.localDelta.x / canvasSize.x;
+    // 2. СКРОЛЛ: Если палец движется в любом другом месте экрана — плавно двигаем камеру
+    else {
+      // worldScrollX меняется от 0.0 (левый край) до 0.8 (правый край)
+      worldScrollX -= event.localDelta.x / canvasSize.x;
       
-      // Ограничиваем скролл: от 0.0 (рогатка) до 0.8 (далёкий замок)
+      // Намертво держим камеру в границах уровня
       if (worldScrollX < 0.0) worldScrollX = 0.0; 
       if (worldScrollX > 0.8) worldScrollX = 0.8; 
     }
   }
   
 
-    @override
-  void onDragEnd(DragEndEvent event) {
+     @override
+  void onPanEnd(PanEndEvent event) {
     if (currentBird != null && currentBird!.isReadyForLaunch && !currentBird!.isLaunched) {
-      AudioManager.stopStretch(); // Глушим звук натяжения рогатки
-      AudioManager.playLaunch();  // Стреляем со случайной угарной фразой запуска!
+      AudioManager.stopStretch(); 
+      AudioManager.playLaunch();  
       currentBird!.launch(0.15, groundY - 0.07);
     }
   }
