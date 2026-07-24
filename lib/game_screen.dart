@@ -378,10 +378,10 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       blocks.add(GameBlock(bx + 0.16, 0.37, 0.015, 0.08, false));
       blocks.add(GameBlock(bx + 0.03, 0.35, 0.17, 0.02, false));
 
-      // Свиньи Уровня 1 (высота над землей и полками)
-      pigs.add(MolluskMaksim(bx + 0.035, groundY - 0.04)); 
-      pigs.add(MolluskMaksim(bx + 0.175, groundY - 0.04)); 
-      pigs.add(MolluskMaksim(bx + 0.105, 0.57 - 0.03)); 
+      // ИСПРАВЛЕНО: Старые добрые фиксированные высоты 1-го уровня
+      pigs.add(MolluskMaksim(bx + 0.035, 0.57 - 0.019)); 
+      pigs.add(MolluskMaksim(bx + 0.175, 0.57 - 0.019)); 
+      pigs.add(MolluskMaksim(bx + 0.105, 0.45 - 0.019));
     } 
     // ==========================================
     // ГЕОМЕТРИЯ УРОВНЯ 2 (ЗАМОК "ДВА УХА" СТРОГО ПО КАРТИНКЕ)
@@ -403,10 +403,6 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       blocks.add(GameBlock(bx - 0.01, 0.53, 0.16, 0.02, false)); 
       blocks.add(GameBlock(bx + 0.15, 0.53, 0.16, 0.02, false)); 
 
-      // Свиньи первого этажа (жестко привязаны к высоте фундамента!)
-      pigs.add(MolluskMaksim(bx + 0.06, groundY - 0.04)); 
-      pigs.add(MolluskMaksim(bx + 0.23, groundY - 0.04)); 
-
       // --- ВТОРОЙ ЭТАЖ ---
       blocks.add(GameBlock(bx + 0.01, 0.37, 0.025, 0.16, false));
       blocks.add(GameBlock(bx + 0.11, 0.37, 0.025, 0.16, false));
@@ -416,10 +412,12 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       blocks.add(GameBlock(bx + 0.28, 0.37, 0.025, 0.16, false));
       blocks.add(GameBlock(bx + 0.17, 0.35, 0.14, 0.02, false)); 
 
-      // Свиньи второго этажа (стоят строго внутри верхних окон!)
-      pigs.add(MolluskMaksim(bx + 0.06, 0.53 - 0.03)); 
-      pigs.add(MolluskMaksim(bx + 0.23, 0.53 - 0.03)); 
-
+      // ИСПРАВЛЕНО: Высоты под замок 2-го уровня
+      pigs.add(MolluskMaksim(bx + 0.045, 0.53 - 0.019)); 
+      pigs.add(MolluskMaksim(bx + 0.215, 0.53 - 0.019)); 
+      pigs.add(MolluskMaksim(bx + 0.045, 0.35 - 0.019)); 
+      pigs.add(MolluskMaksim(bx + 0.215, 0.35 - 0.019)); 
+        
       // --- ДЕКОРАТИВНЫЕ УШКИ НА КРЫШЕ ---
       blocks.add(GameBlock(bx + 0.02, 0.27, 0.03, 0.08, false));
       blocks.add(GameBlock(bx + 0.08, 0.27, 0.03, 0.08, false));
@@ -462,13 +460,11 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     super.update(dt);
     if (isPaused) return;
 
-        // МГНОВЕННЫЙ ЗАПУСК ЭКРАНА ВЫИГРЫША С ПОДСЧЁТОМ ВСЕХ ОСТАВШИХСЯ ПТИЦ
     if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictorySequenceStarted) {
       isVictorySequenceStarted = true;
       
-      // Честно считаем абсолютно ВСЕХ оставшихся птиц в очереди
       int remainingBirds = birdsQueue.length;
-      AngryMolluskGame.score += remainingBirds * 70; 
+      AngryMolluskGame.score += remainingBirds * 70;  
       
       // Расчет звезд для сохранения рекорда
       int currentStars = 0;
@@ -543,13 +539,16 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   void render(Canvas canvas) {
     final size = canvasSize.toSize();
     
-    // Сдвигаем весь холст влево-вправо на величину скролла пальца
-    canvas.translate(size.width * worldScrollX, 0);
+    // ИСПРАВЛЕНО: Безопасный скролл! На 1 уровне сдвиг всегда строго 0, чтобы не было чёрного экрана
+    final double currentScroll = currentLevel == 1 ? 0.0 : worldScrollX;
+    
+    canvas.save(); // Сохраняем чистый холст
+    canvas.translate(size.width * currentScroll, 0); // Сдвигаем мир пальцем
 
-    // НАСТРОЙКА ШИРИНЫ МИРА: Для 1 уровня ширина обычная (1.0), для 2 уровня - расширенная (1.8)
+    // Настройка ширины мира под уровень
     final double worldWidthFactor = currentLevel == 1 ? 1.0 : 1.8;
 
-    // Градиент неба растягивается ровно под размер текущего уровня
+    // Градиент неба
     final skyPaint = Paint()
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
@@ -558,7 +557,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       ).createShader(Rect.fromLTWH(0, 0, size.width * worldWidthFactor, size.height));
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width * worldWidthFactor, size.height), skyPaint);
 
-    // Солнце (оставляем без изменений)
+    // Солнце (рисуется на фоне)
     canvas.save();
     final sunCenter = Offset(size.width * 0.15, size.height * 0.2);
     final sunRadius = size.height * 0.08;
@@ -572,29 +571,25 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     }
     canvas.restore();
 
-    // Облака летают в пределах ширины текущего уровня
+    // Облака
     final cloudPaint = Paint()..color = Colors.white.withValues(alpha: 0.85);
     double c1X = (size.width * 0.3 + cloudOffset1 * size.width) % (size.width * worldWidthFactor + 200) - 100;
     canvas.drawCircle(Offset(c1X, size.height * 0.15), 30, cloudPaint);
     canvas.drawCircle(Offset(c1X + 35, size.height * 0.12), 42, cloudPaint);
     canvas.drawCircle(Offset(c1X + 75, size.height * 0.15), 32, cloudPaint);
 
-    // Вода тянется ровно до края текущего уровня
+    // Вода и океан
     canvas.drawRect(Rect.fromLTWH(0, size.height * 0.83, size.width * worldWidthFactor, size.height * 0.02), Paint()..color = const Color(0xFF29B6F6));
     canvas.drawRect(Rect.fromLTWH(0, size.height * 0.85, size.width * worldWidthFactor, size.height * 0.15), Paint()..color = const Color(0xFF0288D1));
 
-    // ОСТРОВА СУШИ: Настраиваем аккуратные размеры под каждый уровень!
-    _renderIsland(canvas, size, 0.0, 0.25); // Левый маленький островок для рогатки (одинаковый везде)
+    // ОСТРОВА СУШИ: Чёткие соразмерные границы
+    _renderIsland(canvas, size, 0.0, 0.25); // Левый островок рогатки
     
     if (currentLevel == 1) {
-      // Для 1 уровня оставляем старый добрый остров точь-в-точь как был!
-      _renderIsland(canvas, size, 0.55, 1.0); 
+      _renderIsland(canvas, size, 0.55, 1.0); // Остров уровня 1
     } else if (currentLevel == 2) {
-      // Для 2 уровня делаем аккуратный остров справа, чтобы на нём идеально уместился замок (bx = 1.35)
-      // Остров начинается чуть раньше здания (1.30) и заканчивается чуть позже (1.70)
-      _renderIsland(canvas, size, 1.30, 1.72); 
+      _renderIsland(canvas, size, 1.28, 1.75); // Остров уровня 2 под замок bx=1.35
     }
-
 
     // 6. КРАСНАЯ РЕЗИНКА РОГАТКИ (Отрисовывается ВСЕГДА до выстрела)
     final slingBaseX = size.width * 0.15;
@@ -666,6 +661,8 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     );
     birdsPainter.layout();
     birdsPainter.paint(canvas, Offset(size.width * 0.05, size.height * 0.88));
+   
+    canvas.restore();
   }
 
     @override
@@ -884,10 +881,9 @@ class MolluskMaksim {
       y += vy * dt;
 
             
-      // Стало: Если свинья реально провалилась ниже уровня травы в ущелье
       if (y >= groundY + 0.05) {
         AngryMolluskGame.score += 50; 
-        shouldRemove = true; 
+        shouldRemove = true;
       }
     } else {
       // Проверка опоры: если кубик под свиньей улетел, она падает
