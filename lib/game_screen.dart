@@ -457,6 +457,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
 
   @override
   void update(double dt) {
+   if (canvasSize.x == 0 || canvasSize.y == 0) return;
     super.update(dt);
     if (isPaused) return;
 
@@ -529,12 +530,10 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
         }
       }
     }
-      // На 1 уровне камера стоит по центру экрана
+    // Управление камерой в самом конце метода update:
     if (currentLevel == 1) {
       camera.viewfinder.position = Vector2(canvasSize.x * 0.5, canvasSize.y * 0.5);
-    } 
-    // На 2 уровне камера плавно двигается за переменной worldScrollX
-    else if (currentLevel == 2) {
+    } else if (currentLevel == 2) {
       double targetCameraX = (canvasSize.x * 0.5) - (worldScrollX * canvasSize.x);
       camera.viewfinder.position = Vector2(targetCameraX, canvasSize.y * 0.5);
     }
