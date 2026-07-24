@@ -530,12 +530,16 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
         }
       }
     }
-    // Управление камерой в самом конце метода update:
+        // ОЧЕВИДНЫЙ ФИКС КАМЕРЫ: Возвращаем дефолтные нули, чтобы игра не улетала за экран!
     if (currentLevel == 1) {
-      camera.viewfinder.position = Vector2(canvasSize.x * 0.5, canvasSize.y * 0.5);
-    } else if (currentLevel == 2) {
-      double targetCameraX = (canvasSize.x * 0.5) - (worldScrollX * canvasSize.x);
-      camera.viewfinder.position = Vector2(targetCameraX, canvasSize.y * 0.5);
+      // На 1 уровне камера стоит строго по центру игрового мира (0, 0)
+      camera.viewfinder.position = Vector2(0.0, 0.0);
+    } 
+    else if (currentLevel == 2) {
+      // На 2 уровне камера смещается вправо относительно центра мира
+      // worldScrollX у нас меняется от 0.0 до 0.8. Переводим это в пиксели экрана:
+      double targetCameraX = worldScrollX * canvasSize.x;
+      camera.viewfinder.position = Vector2(targetCameraX, 0.0);
     }
   }
 
@@ -703,15 +707,15 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       currentBird!.position = Offset(touchX, touchY);
     } 
         else {
-      // Скроллим камеру естественно за пальцем
-      worldScrollX -= event.localDelta.x / canvasSize.x;
+      // Палец тянет влево — камера едет вправо за замком
+      worldScrollX += event.localDelta.x / canvasSize.x;
       
-      // Ограничители, чтобы не улететь в пустоту
+      // Ограничиваем скролл: от 0.0 (рогатка) до 0.8 (далёкий замок)
       if (worldScrollX < 0.0) worldScrollX = 0.0; 
       if (worldScrollX > 0.8) worldScrollX = 0.8; 
     }
   }
-
+  
 
     @override
   void onDragEnd(DragEndEvent event) {
