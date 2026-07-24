@@ -295,7 +295,8 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   double _safetyTimer = 0.0;
   double _pigSoundTimer = 0.0;
   bool isPaused = false;
-
+  bool isAiming = false;
+  
   int currentLevel = 1;
     
     // СИСТЕМА ОЧКОВ И ЗВЁЗД
@@ -660,18 +661,26 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     canvas.restore();
   }
 
-       @override
+         @override
   void onDragStart(DragStartEvent event) {
     super.onDragStart(event);
-    if (currentBird != null && currentBird!.isReadyForLaunch && !currentBird!.isLaunched) {
+    
+    // Считаем позицию первого касания относительно экрана
+    double startX = event.localStartPosition.x / canvasSize.x;
+    
+    // Если игрок нажал в левой части экрана (в районе рогатки, где x < 0.3)
+    if (currentBird != null && currentBird!.isReadyForLaunch && !currentBird!.isLaunched && startX < 0.3) {
+      isAiming = true; // Включаем режим прицеливания!
       AudioManager.playStretch(); 
+    } else {
+      isAiming = false; // Игрок нажал мимо рогатки — значит, он хочет скроллить мир!
     }
   }
 
   @override
   void onDragUpdate(DragUpdateEvent event) {
-    // 1. ПРИЦЕЛИВАНИЕ (левая треть экрана)
-    if (currentBird != null && currentBird!.isReadyForLaunch && !currentBird!.isLaunched && event.localStartPosition.x / canvasSize.x < 0.35) {
+    // 1. РЕЖИМ ПРИЦЕЛИВАНИЯ: Работает только если мы коснулись рогатки в самом начале!
+    if (isAiming && currentBird != null && currentBird!.isReadyForLaunch && !currentBird!.isLaunched) {
       double touchX = event.localEndPosition.x / canvasSize.x;
       double touchY = event.localEndPosition.y / canvasSize.y;
       
@@ -688,9 +697,8 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       }
       currentBird!.position = Offset(touchX, touchY);
     } 
-    // 2. ЕСТЕСТВЕННЫЙ СКРОЛЛ (тянем пустой экран)
-    else {
-      // Меняем знак на плюс, чтобы мир двигался вслед за пальцем!
+    // 2. РЕЖИМ СКРОЛЛА: Включается, если первое нажатие было мимо рогатки
+    else if (!isAiming) {
       worldScrollX += event.localDelta.x / canvasSize.x;
       
       // Ограничиваем скролл: от -0.8 (уехали к замку) до 0.0 (стоим у рогатки)
@@ -701,15 +709,19 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   
   @override
   void onDragEnd(DragEndEvent event) {
-    if (currentBird != null && currentBird!.isReadyForLaunch && !currentBird!.isLaunched) {
+    super.onDragEnd(event);
+    
+    // Выстрел происходит ТОЛЬКО если мы реально целились рогаткой
+    if (isAiming && currentBird != null && currentBird!.isReadyForLaunch && !currentBird!.isLaunched) {
       AudioManager.stopStretch(); 
       AudioManager.playLaunch();  
       currentBird!.launch(0.15, groundY - 0.07);
     }
+    
+    // В конце любого перетаскивания сбрасываем флаг прицеливания
+    isAiming = false;
   }
 
-
-    
     void _renderIsland(Canvas canvas, Size size, double startPct, double endPct) {
     final startX = size.width * startPct;
     final endX = size.width * endPct;
