@@ -511,8 +511,8 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     }
     blocks.removeWhere((b) => b.shouldRemove);
 
-    for (var pig in pigs) {
-      pig.update(dt, blocks, groundY, );
+        for (var pig in pigs) {
+      pig.update(dt, blocks, groundY);
     }
     pigs.removeWhere((p) => p.shouldRemove);
 
@@ -544,10 +544,6 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   }
 
   @override
-  void render(Canvas canvas) {
-    final size = canvasSize.toSize(); // Это исправит все ошибки с size.width и size.height!
-
-      @override
   void render(Canvas canvas) {
     final size = canvasSize.toSize();
     
@@ -796,8 +792,9 @@ class Bunnyhop {
       }
     }
 
-    // Пролёт сквозь воду (если упала в промежуток между 0.25 и 0.55, летит вниз до дна экрана)
-    if (position.dx > 0.25 && position.dx < 0.55 && position.dy >= 0.95) {
+        // ИСПРАВЛЕНО: Птица падает в воду честно по всей ширине пропасти!
+    double gapEnd = position.dx > 0.8 ? 1.28 : 0.55; 
+    if (position.dx > 0.25 && position.dx < gapEnd && position.dy >= 0.95) {
       AudioManager.playMiss();
       shouldRemove = true;
       return;
