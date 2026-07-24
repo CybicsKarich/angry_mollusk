@@ -670,20 +670,19 @@ class AngryMolluskGame extends FlameGame with PanDetector {
     
   }
 
-     @override
-  void onPanStart(PanStartEvent event) {
+       @override
+  void onPanStart(DragStartInfo info) {
     if (currentBird != null && currentBird!.isReadyForLaunch && !currentBird!.isLaunched) {
       AudioManager.playStretch(); 
     }
   }
 
-
   @override
-  void onPanUpdate(PanUpdateEvent event) {
+  void onPanUpdate(DragUpdateInfo info) {
     // 1. ПРИЦЕЛИВАНИЕ: Если палец зажат в левой части экрана (возле рогатки) — оттягиваем Баннихопа
-    if (currentBird != null && currentBird!.isReadyForLaunch && !currentBird!.isLaunched && event.localStartPosition.x / canvasSize.x < 0.35) {
-      double touchX = event.localEndPosition.x / canvasSize.x;
-      double touchY = event.localEndPosition.y / canvasSize.y;
+    if (currentBird != null && currentBird!.isReadyForLaunch && !currentBird!.isLaunched && info.eventPosition.local.x / canvasSize.x < 0.35) {
+      double touchX = info.eventPosition.local.x / canvasSize.x;
+      double touchY = info.eventPosition.local.y / canvasSize.y;
       
       final slingX = 0.15;
       final slingY = groundY - 0.07;
@@ -701,8 +700,8 @@ class AngryMolluskGame extends FlameGame with PanDetector {
     } 
     // 2. СКРОЛЛ: Если палец движется в любом другом месте экрана — плавно двигаем камеру
     else {
-      // worldScrollX меняется от 0.0 (левый край) до 0.8 (правый край)
-      worldScrollX -= event.localDelta.x / canvasSize.x;
+      // Считываем смещение через info.delta.local.x
+      worldScrollX -= info.delta.local.x / canvasSize.x;
       
       // Намертво держим камеру в границах уровня
       if (worldScrollX < 0.0) worldScrollX = 0.0; 
@@ -710,15 +709,15 @@ class AngryMolluskGame extends FlameGame with PanDetector {
     }
   }
   
-
-     @override
-  void onPanEnd(PanEndEvent event) {
+  @override
+  void onPanEnd(DragEndInfo info) {
     if (currentBird != null && currentBird!.isReadyForLaunch && !currentBird!.isLaunched) {
       AudioManager.stopStretch(); 
       AudioManager.playLaunch();  
       currentBird!.launch(0.15, groundY - 0.07);
     }
   }
+
 
     void _renderIsland(Canvas canvas, Size size, double startPct, double endPct) {
     final startX = size.width * startPct;
