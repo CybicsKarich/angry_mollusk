@@ -529,6 +529,15 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
         }
       }
     }
+      // На 1 уровне камера стоит по центру экрана
+    if (currentLevel == 1) {
+      camera.viewfinder.position = Vector2(canvasSize.x * 0.5, canvasSize.y * 0.5);
+    } 
+    // На 2 уровне камера плавно двигается за переменной worldScrollX
+    else if (currentLevel == 2) {
+      double targetCameraX = (canvasSize.x * 0.5) - (worldScrollX * canvasSize.x);
+      camera.viewfinder.position = Vector2(targetCameraX, canvasSize.y * 0.5);
+    }
   }
 
   @override
@@ -541,14 +550,11 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     
     // ИСПРАВЛЕНО: Безопасный скролл! На 1 уровне сдвиг всегда строго 0, чтобы не было чёрного экрана
     final double currentScroll = currentLevel == 1 ? 0.0 : worldScrollX;
-    
-    canvas.save(); // Сохраняем чистый холст
-    canvas.translate(size.width * currentScroll, 0); // Сдвигаем мир пальцем
 
     // Настройка ширины мира под уровень
     final double worldWidthFactor = currentLevel == 1 ? 1.0 : 1.8;
 
-    // Градиент неба
+        // Градиент неба растягивается под ширину уровня
     final skyPaint = Paint()
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
@@ -571,25 +577,26 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     }
     canvas.restore();
 
-    // Облака
+    // Облака летают по всей ширине фона
     final cloudPaint = Paint()..color = Colors.white.withValues(alpha: 0.85);
     double c1X = (size.width * 0.3 + cloudOffset1 * size.width) % (size.width * worldWidthFactor + 200) - 100;
     canvas.drawCircle(Offset(c1X, size.height * 0.15), 30, cloudPaint);
     canvas.drawCircle(Offset(c1X + 35, size.height * 0.12), 42, cloudPaint);
     canvas.drawCircle(Offset(c1X + 75, size.height * 0.15), 32, cloudPaint);
 
-    // Вода и океан
+    // Вода и океан тянутся до самого края фона уровня
     canvas.drawRect(Rect.fromLTWH(0, size.height * 0.83, size.width * worldWidthFactor, size.height * 0.02), Paint()..color = const Color(0xFF29B6F6));
     canvas.drawRect(Rect.fromLTWH(0, size.height * 0.85, size.width * worldWidthFactor, size.height * 0.15), Paint()..color = const Color(0xFF0288D1));
 
-    // ОСТРОВА СУШИ: Чёткие соразмерные границы
-    _renderIsland(canvas, size, 0.0, 0.25); // Левый островок рогатки
+    // Острова суши встают на свои места
+    _renderIsland(canvas, size, 0.0, 0.25); // Островок рогатки
     
     if (currentLevel == 1) {
       _renderIsland(canvas, size, 0.55, 1.0); // Остров уровня 1
     } else if (currentLevel == 2) {
       _renderIsland(canvas, size, 1.28, 1.75); // Остров уровня 2 под замок bx=1.35
     }
+
 
     // 6. КРАСНАЯ РЕЗИНКА РОГАТКИ (Отрисовывается ВСЕГДА до выстрела)
     final slingBaseX = size.width * 0.15;
@@ -662,7 +669,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     birdsPainter.layout();
     birdsPainter.paint(canvas, Offset(size.width * 0.05, size.height * 0.88));
    
-    canvas.restore();
+    
   }
 
     @override
@@ -696,15 +703,13 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       
       currentBird!.position = Offset(touchX, touchY);
     } 
-    // 2. ЕСЛИ ТЯНЕМ В ПУСТОМ МЕСТЕ ЭКРАНА — ЭТО ПЛАВНЫЙ СКРОЛЛ ИГРОВОГО МИРА!
-    else {
-
-        // ИСПРАВЛЕНО: Во Flame 1.38+ смещение считывается через localDelta!
-      worldScrollX += event.localDelta.x / canvasSize.x;
+        else {
+      // Скроллим камеру естественно за пальцем
+      worldScrollX -= event.localDelta.x / canvasSize.x;
       
-      // Ставим жесткие ограничения, чтобы нельзя было укроллить в бесконечную пустоту
-      if (worldScrollX > 0.0) worldScrollX = 0.0; // Левый край (рогатка)
-      if (worldScrollX < -0.8) worldScrollX = -0.8; // Правый край (Уровень 2 замок)
+      // Ограничители, чтобы не улететь в пустоту
+      if (worldScrollX < 0.0) worldScrollX = 0.0; 
+      if (worldScrollX > 0.8) worldScrollX = 0.8; 
     }
   }
 
