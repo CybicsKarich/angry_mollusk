@@ -502,7 +502,7 @@ class LevelsScreen extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 8)
+        const SizedBox(height: 8),
                
         // Звёзды динамически зажигаются жёлтым из памяти для ВСЕХ уровней!
         FutureBuilder<int>(
