@@ -301,9 +301,9 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     
     // СИСТЕМА ОЧКОВ И ЗВЁЗД
   static int score = 0;
-  final int targetScore1Star = 200;
-  final int targetScore2Stars = 250;
-  final int targetScore3Stars = 300;
+  int targetScore1Star = 200;
+  int targetScore2Stars = 250;
+  int targetScore3Stars = 300;
   bool isVictorySequenceStarted = false; // Чтобы очки за птиц начислялись один раз
 
   
@@ -361,7 +361,11 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     // ГЕОМЕТРИЯ УРОВНЯ 1 (СТАРАЯ КЛАССИЧЕСКАЯ БАШНЯ)
     // ==========================================
     if (currentLevel == 1) {
-      final double bx = 0.62; 
+    targetScore1Star = 200;
+    targetScore2Stars = 250;
+    targetScore3Stars = 300;
+       
+    final double bx = 0.62; 
       
       // Стены и перекрытия
       blocks.add(GameBlock(bx + 0.00, 0.59, 0.02, 0.14, true));
@@ -387,7 +391,11 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     // ГЕОМЕТРИЯ УРОВНЯ 2 (ЗАМОК "ДВА УХА" СТРОГО ПО КАРТИНКЕ)
     // ==========================================
     else if (currentLevel == 2) {
-      final double bx = 1.35; // Замок унесен вправо на новый остров
+    targetScore1Star = 600;
+    targetScore2Stars = 700;
+    targetScore3Stars = 800;
+        
+        final double bx = 1.35; // Замок унесен вправо на новый остров
 
       // --- ПЕРВЫЙ ЭТАЖ ---
       blocks.add(GameBlock(bx + 0.00, 0.55, 0.03, 0.18, false)); 
@@ -467,7 +475,6 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       int remainingBirds = birdsQueue.length;
       AngryMolluskGame.score += remainingBirds * 70;  
       
-      // Расчет звезд для сохранения рекорда
       int currentStars = 0;
       if (AngryMolluskGame.score >= targetScore3Stars) currentStars = 3;
       else if (AngryMolluskGame.score >= targetScore2Stars) currentStars = 2;
@@ -475,11 +482,12 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
 
       // СОХРАНЯЕМ МАКСИМАЛЬНЫЙ РЕЗУЛЬТАТ ЗВЕЗД В ПАМЯТЬ ТЕЛЕФОНА
       SharedPreferences.getInstance().then((prefs) async {
-        int savedStars = prefs.getInt('level_1_stars') ?? 0;
+        int savedStars = prefs.getInt('level_${currentLevel}_stars') ?? 0;
         if (currentStars > savedStars) {
-          await prefs.setInt('level_1_stars', currentStars);
+          await prefs.setInt('level_${currentLevel}_stars', currentStars);
         }
       });
+
 
 
       levelCleared = true;
