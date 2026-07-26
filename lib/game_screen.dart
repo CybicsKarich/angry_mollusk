@@ -799,7 +799,8 @@ class Bunnyhop {
     trajectoryDots.clear();
   }
 
-    void update(double dt, List<GameBlock> blocks, List<MolluskMaksim> pigs, double groundY) {
+      
+  void update(double dt, List<GameBlock> blocks, List<MolluskMaksim> pigs, double groundY, int level) {
     _lifeTimer += dt;
     if (_lifeTimer > 3.5) {
       shouldRemove = true;
