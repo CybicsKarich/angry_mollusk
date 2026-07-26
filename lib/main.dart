@@ -502,13 +502,12 @@ class LevelsScreen extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 8),
-        
-                const SizedBox(height: 8),
-        
-        // ИСПРАВЛЕНО: Звёзды теперь динамически зажигаются жёлтым из памяти телефона для Уровня 1!
+        const SizedBox(height: 8)
+               
+        // Звёзды динамически зажигаются жёлтым из памяти для ВСЕХ уровней!
         FutureBuilder<int>(
           future: SharedPreferences.getInstance().then((prefs) {
+            // Код сам подставит 'level_1_stars' или 'level_2_stars' на основе цифры на карточке!
             return prefs.getInt('level_${levelNumber}_stars') ?? 0;
           }),
           builder: (context, snapshot) {
@@ -517,7 +516,7 @@ class LevelsScreen extends StatelessWidget {
             return Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Левая звезда (желтая, если рекорда хватает на 1, 2 или 3 звезды)
+                // Левая звезда (желтая, если savedStars >= 1)
                 Icon(
                   Icons.star_rounded, 
                   size: 22, 
@@ -525,7 +524,7 @@ class LevelsScreen extends StatelessWidget {
                 ),
                 const SizedBox(width: 2),
                 
-                // Центральная звезда (чуть больше, загорается если выбито 2 или 3 звезды)
+                // Центральная звезда (чуть больше, загорается если savedStars >= 2)
                 Icon(
                   Icons.star_rounded, 
                   size: 26, 
@@ -533,7 +532,7 @@ class LevelsScreen extends StatelessWidget {
                 ), 
                 const SizedBox(width: 2),
                 
-                // Правая звезда (загорается только при идеальном прохождении на 3 звезды)
+                // Правая звезда (загорается только при 3-х звездах)
                 Icon(
                   Icons.star_rounded, 
                   size: 22, 
