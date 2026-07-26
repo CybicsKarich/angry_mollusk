@@ -439,9 +439,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     spawnCompleted = true;
   }
 
-
-
-    void loadNextBird() {
+  void loadNextBird() {
     if (birdsQueue.isNotEmpty) {
       birdsQueue.removeAt(0);
       if (birdsQueue.isNotEmpty) {
@@ -450,27 +448,81 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
         currentBird!.position = Offset(0.15, groundY - 0.04);
         currentBird!.isReadyForLaunch = true;
       } else {
-        currentBird = null;
-        // ИСПРАВЛЕНО: Таймер поражения сработает ТОЛЬКО если свиньи РЕАЛЬНО выжили через 3 секунды!
-        Future.delayed(const Duration(seconds: 3), () {
-          // Если свиньи всё ещё живы, и при этом игрок не победил и не проиграл ранее
-          if (pigs.isNotEmpty && !levelCleared && !levelFailed && !isVictorySequenceStarted) {
-            levelFailed = true;
-            AudioManager.playGameOver();
-            overlays.add('GameOverMenu');
-          }
-        });
+        // Птицы просто физически закончились в рогатке. 
+        // Игра сама проверит итог в методе update, когда все блоки и свиньи затихнут!
+        currentBird = null; 
       }
     }
   }
 
-  @override
+    @override
   void update(double dt) {
-   if (canvasSize.x == 0 || canvasSize.y == 0) return;
+    if (canvasSize.x == 0 || canvasSize.y == 0) return;
     super.update(dt);
     if (isPaused) return;
 
-      if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictorySequenceStarted) {
+    // Анимация облаков и солнца
+    sunRotation += 0.3 * dt;
+    cloudOffset1 += 0.015 * dt;
+    cloudOffset2 += 0.008 * dt;
+
+    // Обновление летящей птицы
+    if (currentBird != null && currentBird!.isLaunched) {
+      currentBird!.update(dt, blocks, pigs, groundY, currentLevel);
+      if (currentBird!.shouldRemove) {
+        loadNextBird();
+      }
+    }
+
+    // Обновление блоков замка и начисление очков
+    for (var block in blocks) {
+      block.update(dt, blocks, pigs, groundY, this);
+      if (block.shouldRemove) {
+        AngryMolluskGame.score += block.isStone ? 30 : 20;
+      }
+    }
+    blocks.removeWhere((b) => b.shouldRemove);
+
+    // Обновление свиней Максимов
+    for (var pig in pigs) {
+      pig.update(dt, blocks, groundY);
+    }
+    // КРИТИЧЕСКИЙ ФИКС: Удаляем убитых свиней строго ДО проверки победы!
+    pigs.removeWhere((p) => p.shouldRemove);
+
+    // Живая атмосфера (звуки свиней раз в 9 секунд)
+    if (pigs.isNotEmpty && !levelCleared && !levelFailed) {
+      _pigSoundTimer += dt;
+      if (_pigSoundTimer >= 9.0) {
+        _pigSoundTimer = 0.0; 
+        if (Random().nextBool()) {
+          AudioManager.playPigSnort(); 
+        }
+      }
+    }
+
+    // =========================================================================
+    // УМНАЯ СИСТЕМА ОЖИДАНИЯ КОНЦА ВСЕХ ДЕЙСТВИЙ (ФИКС СЧЁТА И АВТОПОРАЖЕНИЯ)
+    // =========================================================================
+    bool isAnythingMoving = false;
+    
+    // Проверяем, движется или разрушается ли сейчас хоть один блок
+    for (var b in blocks) {
+      if (b.isFalling || !b.isSleeping || b.isBroken) {
+        isAnythingMoving = true;
+        break;
+      }
+    }
+    // Проверяем, катится или падает ли сейчас хоть одна свинья
+    for (var p in pigs) {
+      if (p.isFalling) {
+        isAnythingMoving = true;
+        break;
+      }
+    }
+
+    // ЧЕСТНАЯ ПОБЕДА: Свиньи уничтожены, и ВСЕ блоки/осколки полностью затихли!
+    if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictorySequenceStarted && !isAnythingMoving) {
       isVictorySequenceStarted = true;
       
       int remainingBirds = birdsQueue.length;
@@ -481,7 +533,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       else if (AngryMolluskGame.score >= targetScore2Stars) currentStars = 2;
       else if (AngryMolluskGame.score >= targetScore1Star) currentStars = 1;
 
-      // Динамическое сохранение рекорда под текущий уровень
+      // Динамическое сохранение рекорда под текущий уровень в SharedPreferences
       SharedPreferences.getInstance().then((prefs) async {
         int savedStars = prefs.getInt('level_${currentLevel}_stars') ?? 0;
         if (currentStars > savedStars) {
@@ -492,56 +544,21 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       levelCleared = true;
       AudioManager.playVictory(); 
 
-      // ИСПРАВЛЕНО: Делаем микроскопическую паузу в 100 миллисекунд.
-      // За это время Flame успеет нарисовать финальный SCORE на экране уровня, 
-      // и только ПОСЛЕ этого мягко выкатит VictoryMenu! Табло больше не будет врать.
-      Future.delayed(const Duration(milliseconds: 100), () {
+      // Плавная задержка перед оверлеем, чтобы SCORE зафиксировал финальную цифру
+      Future.delayed(const Duration(milliseconds: 200), () {
         overlays.add('VictoryMenu');
       });
       return;
     }
 
-
-    // Анимация облаков и солнца
-    sunRotation += 0.3 * dt;
-    cloudOffset1 += 0.015 * dt;
-    cloudOffset2 += 0.008 * dt;
-
-    // ВОТ ЭТОТ КОД ОБНОВЛЕНИЯ ПТИЦЫ ОБЯЗАТЕЛЬНО ДОЛЖЕН СТОЯТЬ ЗДЕСЬ (В МЕТОДЕ UPDATE):
-    if (currentBird != null && currentBird!.isLaunched) {
-      currentBird!.update(dt, blocks, pigs, groundY);
-      if (currentBird!.shouldRemove) {
-        loadNextBird();
-      }
-    }
-
-        // ИСПРАВЛЕНО: очки за блоки начисляются гарантированно при любом их удалении!
-    for (var block in blocks) {
-      block.update(dt, blocks, pigs, groundY, this);
-      if (block.shouldRemove) {
-        AngryMolluskGame.score += block.isStone ? 30 : 20;
-      }
-    }
-    blocks.removeWhere((b) => b.shouldRemove);
-
-        for (var pig in pigs) {
-      pig.update(dt, blocks, groundY);
-    }
-    pigs.removeWhere((p) => p.shouldRemove);
-
-
-    
-      // ЖИВАЯ АТМОСФЕРА: Свиньи случайно сопят или хрюкают раз в 9 секунд, если они еще живы
-    if (pigs.isNotEmpty && !levelCleared && !levelFailed) {
-      _pigSoundTimer += dt;
-      if (_pigSoundTimer >= 9.0) {
-        _pigSoundTimer = 0.0; // Сбрасываем таймер
-        
-        // Подбрасываем монетку: 50% что Максим запетит/засопит
-        if (Random().nextBool()) {
-          AudioManager.playPigSnort(); // Включает pig_snort.mp3
-        }
-      }
+    // ЧЕСТНОЕ ПОРАЖЕНИЕ: Птицы кончились, всё остановилось, а свиньи ВЫЖИЛИ!
+    if (spawnCompleted && currentBird == null && birdsQueue.isEmpty && pigs.isNotEmpty && 
+        !levelCleared && !levelFailed && !isVictorySequenceStarted && !isAnythingMoving) {
+      
+      levelFailed = true;
+      AudioManager.playGameOver();
+      overlays.add('GameOverMenu');
+      return;
     }
   }
 
