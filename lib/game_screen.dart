@@ -441,7 +441,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
 
 
 
-  void loadNextBird() {
+    void loadNextBird() {
     if (birdsQueue.isNotEmpty) {
       birdsQueue.removeAt(0);
       if (birdsQueue.isNotEmpty) {
@@ -451,9 +451,10 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
         currentBird!.isReadyForLaunch = true;
       } else {
         currentBird = null;
-        // Если птицы кончились, а свиньи живы — через 3 секунды выводим проиграл
+        // ИСПРАВЛЕНО: Таймер поражения сработает ТОЛЬКО если свиньи РЕАЛЬНО выжили через 3 секунды!
         Future.delayed(const Duration(seconds: 3), () {
-          if (pigs.isNotEmpty && !levelCleared && !levelFailed) {
+          // Если свиньи всё ещё живы, и при этом игрок не победил и не проиграл ранее
+          if (pigs.isNotEmpty && !levelCleared && !levelFailed && !isVictorySequenceStarted) {
             levelFailed = true;
             AudioManager.playGameOver();
             overlays.add('GameOverMenu');
@@ -469,7 +470,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     super.update(dt);
     if (isPaused) return;
 
-    if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictorySequenceStarted) {
+      if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictorySequenceStarted) {
       isVictorySequenceStarted = true;
       
       int remainingBirds = birdsQueue.length;
@@ -480,7 +481,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       else if (AngryMolluskGame.score >= targetScore2Stars) currentStars = 2;
       else if (AngryMolluskGame.score >= targetScore1Star) currentStars = 1;
 
-      // СОХРАНЯЕМ МАКСИМАЛЬНЫЙ РЕЗУЛЬТАТ ЗВЕЗД В ПАМЯТЬ ТЕЛЕФОНА
+      // Динамическое сохранение рекорда под текущий уровень
       SharedPreferences.getInstance().then((prefs) async {
         int savedStars = prefs.getInt('level_${currentLevel}_stars') ?? 0;
         if (currentStars > savedStars) {
@@ -488,11 +489,15 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
         }
       });
 
-
-
       levelCleared = true;
       AudioManager.playVictory(); 
-      overlays.add('VictoryMenu');
+
+      // ИСПРАВЛЕНО: Делаем микроскопическую паузу в 100 миллисекунд.
+      // За это время Flame успеет нарисовать финальный SCORE на экране уровня, 
+      // и только ПОСЛЕ этого мягко выкатит VictoryMenu! Табло больше не будет врать.
+      Future.delayed(const Duration(milliseconds: 100), () {
+        overlays.add('VictoryMenu');
+      });
       return;
     }
 
