@@ -436,6 +436,49 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       blocks.add(GameBlock(bx + 0.19, 0.25, 0.11, 0.02, false));
     }
 
+        // ==========================================
+    // ГЕОМЕТРИЯ УРОВНЯ 3 (КРЕПОСТЬ С ЖИВЫМ ЩИТОМ)
+    // ==========================================
+    else if (currentLevel == 3) {
+      // Задаем лимиты очков под сложный Третий уровень
+      targetScore1Star = 600;
+      targetScore2Stars = 750;
+      targetScore3Stars = 900;
+
+      // 🏢 ЗДАНИЕ №1: ВЫСОКИЙ КАМЕННЫЙ ЖИВОЙ ЩИТ (Спереди на координате 1.22)
+      final double bx1 = 1.22;
+      // 1 этаж щита
+      blocks.add(GameBlock(bx1 + 0.00, 0.55, 0.03, 0.18, true)); 
+      blocks.add(GameBlock(bx1 + 0.10, 0.55, 0.03, 0.18, true)); 
+      blocks.add(GameBlock(bx1 - 0.01, 0.53, 0.15, 0.02, true)); 
+      // 2 этаж щита
+      blocks.add(GameBlock(bx1 + 0.02, 0.37, 0.03, 0.16, true)); 
+      blocks.add(GameBlock(bx1 + 0.08, 0.37, 0.03, 0.16, true)); 
+      blocks.add(GameBlock(bx1 + 0.01, 0.35, 0.11, 0.02, true)); 
+      // 3 этаж (тяжелая верхушка-монолит)
+      blocks.add(GameBlock(bx1 + 0.04, 0.25, 0.05, 0.10, true)); 
+      // Внутри этого здания свиней НЕТ — это глухая стена-таран!
+
+
+      // 🪵 ЗДАНИЕ №2: ДЕРЕВЯННАЯ РЕЗИДЕНЦИЯ С МАКСИМАМИ (Сзади на координате 1.55)
+      final double bx2 = 1.55;
+      // 1 этаж деревянного замка (две комнаты рядом)
+      blocks.add(GameBlock(bx2 + 0.00, 0.55, 0.025, 0.18, false)); 
+      blocks.add(GameBlock(bx2 + 0.11, 0.55, 0.025, 0.18, false)); 
+      blocks.add(GameBlock(bx2 + 0.22, 0.55, 0.025, 0.18, false)); 
+      blocks.add(GameBlock(bx2 - 0.01, 0.53, 0.26, 0.02, false)); // длинное перекрытие
+      
+      // 2 этаж деревянного замка (центральная башня)
+      blocks.add(GameBlock(bx2 + 0.05, 0.37, 0.025, 0.16, false)); 
+      blocks.add(GameBlock(bx2 + 0.16, 0.37, 0.025, 0.16, false)); 
+      blocks.add(GameBlock(bx2 + 0.04, 0.35, 0.16, 0.02, false)); // крыша
+
+      // Рассаживаем 3 Максимов строго внутри деревянного замка!
+      pigs.add(MolluskMaksim(bx2 + 0.04, groundY - 0.04));  // в левой нижней комнате
+      pigs.add(MolluskMaksim(bx2 + 0.15, groundY - 0.04));  // в правой нижней комнате
+      pigs.add(MolluskMaksim(bx2 + 0.09, 0.53 - 0.03));     // на втором этаже по центру
+    }
+
     spawnCompleted = true;
   }
 
@@ -571,7 +614,8 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     // Сдвигаем холст на величину нашего скролла пальцем
     canvas.translate(size.width * worldScrollX, 0);
 
-    final double worldWidthFactor = currentLevel == 1 ? 1.0 : 1.8;
+    
+    final double worldWidthFactor = currentLevel == 1 ? 1.0 : (currentLevel == 2 ? 1.8 : 2.0);
 
         // Градиент неба растягивается под ширину уровня
     final skyPaint = Paint()
@@ -614,6 +658,8 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       _renderIsland(canvas, size, 0.55, 1.0); // Остров уровня 1
     } else if (currentLevel == 2) {
       _renderIsland(canvas, size, 1.28, 1.75); // Остров уровня 2 под замок bx=1.35
+    }  else if (currentLevel == 3) {
+      _renderIsland(canvas, size, 1.15, 1.95); 
     }
 
 
@@ -727,13 +773,15 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       }
       currentBird!.position = Offset(touchX, touchY);
     } 
-    // 2. РЕЖИМ СКРОЛЛА: Включается, если первое нажатие было мимо рогатки
+        // 2. РЕЖИМ СКРОЛЛА: Включается, если первое нажатие было мимо рогатки
     else if (!isAiming) {
       worldScrollX += event.localDelta.x / canvasSize.x;
       
-      // Ограничиваем скролл: от -0.8 (уехали к замку) до 0.0 (стоим у рогатки)
+      // ИСПРАВЛЕНО: На 3 уровне раздвигаем лимит скролла до -1.0, чтобы увидеть деревянный замок сзади!
+      double minScroll = currentLevel == 3 ? -1.0 : -0.8;
+
       if (worldScrollX > 0.0) worldScrollX = 0.0; 
-      if (worldScrollX < -0.8) worldScrollX = -0.8; 
+      if (worldScrollX < minScroll) worldScrollX = minScroll; 
     }
   }
   
@@ -822,8 +870,7 @@ class Bunnyhop {
       }
     }
 
-        // ИСПРАВЛЕНО: Птица падает в воду честно по всей ширине пропасти!
-    double gapEnd = position.dx > 0.8 ? 1.28 : 0.55; 
+    double gapEnd = level == 1 ? 0.55 : (level == 2 ? 1.28 : 1.15);
     if (position.dx > 0.25 && position.dx < gapEnd && position.dy >= 0.95) {
       AudioManager.playMiss();
       shouldRemove = true;
@@ -1048,10 +1095,13 @@ class GameBlock {
         }
       }
 
-      // ПРИЗЕМЛЕНИЕ НА ЗЕМЛЮ ОСТРОВА (Блок не проваливается сквозь землю!)
+            // ПРИЗЕМЛЕНИЕ НА ЗЕМЛЮ ОСТРОВА (Блок не проваливается сквозь землю!)
       if (y >= groundY - h) {
-        // Проверяем, упал ли он на сушу острова, а не в воду (вода между 0.25 и 0.55)
-        if (x <= 0.25 || x >= 0.55) {
+        // ИСПРАВЛЕНО: Рассчитываем, где начинается суша для каждого из 3 уровней
+        double islandStart = game.currentLevel == 1 ? 0.55 : (game.currentLevel == 2 ? 1.28 : 1.15);
+
+        // Проверяем, упал ли блок на сушу острова на основе рассчитанного islandStart
+        if (x <= 0.25 || x >= islandStart) {
           y = groundY - h;
           vx = 0;
           vy = 0;
@@ -1060,6 +1110,7 @@ class GameBlock {
         }
       }
 
+
       // ПАДЕНИЕ СКВОЗЬ ВОДУ (Если улетел в океан между скал, летит до самого дна экрана)
       if (x > 0.25 && x < 0.55 && y >= 0.95) {
         shouldRemove = true;
@@ -1067,7 +1118,10 @@ class GameBlock {
     } else {
       // Проверка потери опоры в динамике: если нижний блок разрушен, верхний просыпается и падает
       bool hasFloor = false;
-      if ((y + h - groundY).abs() < 0.005 && (x <= 0.25 || x >= 0.55)) {
+      
+     double islandStart = game.currentLevel == 1 ? 0.55 : (game.currentLevel == 2 ? 1.28 : 1.15);
+        
+        if ((y + h - groundY).abs() < 0.005 && (x <= 0.25 || x >= 0.55)) {
         hasFloor = true;
       } else {
         for (var other in allBlocks) {
