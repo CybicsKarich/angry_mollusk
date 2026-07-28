@@ -462,6 +462,10 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
 
       // 🪵 ЗДАНИЕ №2: ДЕРЕВЯННАЯ РЕЗИДЕНЦИЯ С МАКСИМАМИ (Сзади на координате 1.55)
       final double bx2 = 1.55;
+      
+      blocks.add(GameBlock(bx2 + 0.02, 0.71, 0.08, 0.02, false)); // пол левой комнаты
+      blocks.add(GameBlock(bx2 + 0.13, 0.71, 0.08, 0.02, false)); // пол правой комнаты
+      
       // 1 этаж деревянного замка (две комнаты рядом)
       blocks.add(GameBlock(bx2 + 0.00, 0.55, 0.025, 0.18, false)); 
       blocks.add(GameBlock(bx2 + 0.11, 0.55, 0.025, 0.18, false)); 
@@ -955,14 +959,22 @@ class MolluskMaksim {
   }
 
 
-       // ИСПРАВЛЕНО: Теперь метод принимает ровно 3 аргумента, и ошибка компиляции исчезнет!
+         // ИСПРАВЛЕНО: Свинья теперь умеет останавливаться на траве острова и не вызывает автопобеду!
   void update(double dt, List<GameBlock> blocks, double groundY) {
     if (isFalling) {
       vy += 1.8 * dt; // Гравитация свиньи
       x += vx * dt;
       y += vy * dt;
 
+      // ИСПРАВЛЕНО: Если свинья шмякнулась о твердую землю острова — она останавливается!
+      if (y >= groundY - 0.022) { // 0.022 — это радиус свиньи
+        y = groundY - 0.022;
+        vx = 0;
+        vy = 0;
+        isFalling = false;
+      }
             
+      // Умирает только в том случае, если провалилась ниже земли (в океан)
       if (y >= groundY + 0.05) {
         AngryMolluskGame.score += 50; 
         shouldRemove = true;
@@ -983,6 +995,7 @@ class MolluskMaksim {
       }
     }
   }
+
 
     void render(Canvas canvas, Size size, Sprite? sprite) {
     final screenPos = Offset(size.width * x, size.height * y);
