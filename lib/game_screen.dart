@@ -881,21 +881,33 @@ class Bunnyhop {
       return;
     }
 
-    // Столкновение с кубиками замка (будим их и передаем им траекторию удара!)
+        // Столкновение с кубиками замка (будим их и передаем им траекторию удара!)
     for (var block in blocks) {
       if (!block.isBroken && !block.shouldRemove &&
           position.dx >= block.x && position.dx <= block.x + block.w &&
           position.dy >= block.y && position.dy <= block.y + block.h) {
+        
         block.hit(velocity); // Передаем скорость удара блоку
+
+        // ИСПРАВЛЕНО: Сопротивление материалов! Птица тормозит при ударе.
+        if (block.isStone) {
+          // Камень гасит скорость очень сильно (в 2 раза мощнее, чем дерево)
+          velocity = Offset(velocity.dx * 0.35, velocity.dy * 0.35);
+        } else {
+          // Усиленные доски гасят скорость умеренно
+          velocity = Offset(velocity.dx * 0.65, velocity.dy * 0.65);
+        }
       }
     }
 
-    // Столкновение со свиньями
-    for (var pig in pigs) {
+
+        for (var pig in pigs) {
       double dx = position.dx - pig.x;
       double dy = position.dy - pig.y;
       if (sqrt(dx * dx + dy * dy) < 0.03) {
         pig.hit(velocity);
+        pig.shouldRemove = true; // ИСПРАВЛЕНО: Баннихоп мгновенно уничтожает свинью при таране!
+        AngryMolluskGame.score += 50; // Сразу начисляем пацанские очки
       }
     }
   }
@@ -959,22 +971,30 @@ class MolluskMaksim {
   }
 
 
-         // ИСПРАВЛЕНО: Свинья теперь умеет останавливаться на траве острова и не вызывает автопобеду!
-  void update(double dt, List<GameBlock> blocks, double groundY) {
+          void update(double dt, List<GameBlock> blocks, double groundY) {
     if (isFalling) {
       vy += 1.8 * dt; // Гравитация свиньи
       x += vx * dt;
       y += vy * dt;
 
-      // ИСПРАВЛЕНО: Если свинья шмякнулась о твердую землю острова — она останавливается!
-      if (y >= groundY - 0.022) { // 0.022 — это радиус свиньи
+      // Если свинья шмякнулась о твердую землю острова
+      if (y >= groundY - 0.022) {
         y = groundY - 0.022;
-        vx = 0;
-        vy = 0;
-        isFalling = false;
+
+        // ИСПРАВЛЕНО: Если вертикальная скорость падения vy больше 0.6, 
+        // значит свинья летела с высоты — она разбивается насмерть!
+        if (vy > 0.6) {
+          AngryMolluskGame.score += 50;
+          shouldRemove = true;
+        } else {
+          // Если упала легонько — просто останавливается и выживает
+          vx = 0;
+          vy = 0;
+          isFalling = false;
+        }
       }
-            
-      // Умирает только в том случае, если провалилась ниже земли (в океан)
+
+      // Смерть при падении на дно океана (в пропасть)
       if (y >= groundY + 0.05) {
         AngryMolluskGame.score += 50; 
         shouldRemove = true;
@@ -995,7 +1015,6 @@ class MolluskMaksim {
       }
     }
   }
-
 
     void render(Canvas canvas, Size size, Sprite? sprite) {
     final screenPos = Offset(size.width * x, size.height * y);
