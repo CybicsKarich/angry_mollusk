@@ -971,7 +971,25 @@ class MolluskMaksim {
   }
 
 
-          void update(double dt, List<GameBlock> blocks, double groundY) {
+            void update(double dt, List<GameBlock> blocks, double groundY) {
+    // ИСПРАВЛЕНО: Проверка урона от падающих сверху блоков замка!
+    // Если на свинью падает или летит любой проснувшийся кубик — Максим погибает
+    for (var block in blocks) {
+      if (!block.isBroken && !block.shouldRemove && !block.isSleeping) {
+        // Проверяем, пересекаются ли координаты свиньи и движущегося блока
+        // Даём небольшой мультяшный запас по радиусу (0.025)
+        if (x >= block.x - 0.01 && x <= block.x + block.w + 0.01 &&
+            y >= block.y - 0.01 && y <= block.y + block.h + 0.01) {
+          
+          AudioManager.playPigHit(); // Включаем случайный крик свиньи
+          AngryMolluskGame.score += 50;
+          shouldRemove = true; // Свинья погибает от завала кубиками!
+          return; // Выходим из метода, так как свинья уже уничтожена
+        }
+      }
+    }
+
+    // Твоя остальная проверенная физика падения самой свиньи
     if (isFalling) {
       vy += 1.8 * dt; // Гравитация свиньи
       x += vx * dt;
@@ -980,9 +998,8 @@ class MolluskMaksim {
       // Если свинья шмякнулась о твердую землю острова
       if (y >= groundY - 0.022) {
         y = groundY - 0.022;
-
-        // ИСПРАВЛЕНО: Если вертикальная скорость падения vy больше 0.6, 
-        // значит свинья летела с высоты — она разбивается насмерть!
+        
+        // Если вертикальная скорость падения vy больше 0.6 — разбивается насмерть
         if (vy > 0.6) {
           AngryMolluskGame.score += 50;
           shouldRemove = true;
@@ -993,7 +1010,7 @@ class MolluskMaksim {
           isFalling = false;
         }
       }
-
+            
       // Смерть при падении на дно океана (в пропасть)
       if (y >= groundY + 0.05) {
         AngryMolluskGame.score += 50; 
@@ -1015,7 +1032,6 @@ class MolluskMaksim {
       }
     }
   }
-
     void render(Canvas canvas, Size size, Sprite? sprite) {
     final screenPos = Offset(size.width * x, size.height * y);
     final radius = size.width * 0.022; // Сочный размер свиньи
