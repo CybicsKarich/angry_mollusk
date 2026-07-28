@@ -477,10 +477,10 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       blocks.add(GameBlock(bx2 + 0.16, 0.37, 0.025, 0.16, false)); 
       blocks.add(GameBlock(bx2 + 0.04, 0.35, 0.16, 0.02, false)); // крыша
 
-            // ИСПРАВЛЕНО: Посадили нижних свиней ровно НА деревянный пол (0.71), убрав стартовое пересечение хитбоксов!
+          // ИСПРАВЛЕНО: Рассадка свиней под новую тактику! Две внизу, одна — король горы на крыше!
       pigs.add(MolluskMaksim(bx2 + 0.04, 0.71 - 0.019));  // в левой нижней комнате
       pigs.add(MolluskMaksim(bx2 + 0.15, 0.71 - 0.019));  // в правой нижней комнате
-      pigs.add(MolluskMaksim(bx2 + 0.09, 0.53 - 0.03));   // верхний Максим (оставляем как есть)
+      pigs.add(MolluskMaksim(bx2 + 0.13, 0.35 - 0.019));  // ИСПРАВЛЕНО: Третья свинья теперь на самой верхушке башни!
     }
 
     spawnCompleted = true;
@@ -971,26 +971,38 @@ class MolluskMaksim {
   }
 
 
-              void update(double dt, List<GameBlock> blocks, double groundY) {
-    // ИСПРАВЛЕНО: Свинья погибает только от падающих на СКОРОСТИ блоков (защита от прикосновений)
+      void update(double dt, List<GameBlock> blocks, double groundY) {
+    // ИСПРАВЛЕНО: Счётчик блоков, которые задели свинью в этом кадре
+    int hittingBlocksCount = 0;
+
     for (var block in blocks) {
       if (!block.isBroken && !block.shouldRemove && !block.isSleeping) {
-        // Считаем общую скорость летящего кубика
-        double blockSpeed = sqrt(block.vx * block.vx + block.vy * block.vy);
-        
-        // Преграда: Блок должен лететь со скоростью выше 0.25, чтобы нанести урон свинье!
-        if (blockSpeed > 0.25) {
-          // Проверяем пересечение координат свиньи и движущегося блока
-          if (x >= block.x - 0.01 && x <= block.x + block.w + 0.01 &&
-              y >= block.y - 0.01 && y <= block.y + block.h + 0.01) {
-            
+        // Проверяем, пересекаются ли хитбоксы свиньи и движущегося кубика
+        if (x >= block.x - 0.01 && x <= block.x + block.w + 0.01 &&
+            y >= block.y - 0.01 && y <= block.y + block.h + 0.01) {
+          
+          hittingBlocksCount++; // Нашли соприкосновение с падающим блоком!
+
+          // Считаем скорость конкретного летящего кубика
+          double blockSpeed = sqrt(block.vx * block.vx + block.vy * block.vy);
+          
+          // ТАКТИКА 1: Одиночный блок убивает, если его скорость выше порога 0.20
+          if (blockSpeed > 0.20) {
             AudioManager.playPigHit(); 
             AngryMolluskGame.score += 50;
-            shouldRemove = true; // Погибает строго от НАСТОЯЩЕГО удара
+            shouldRemove = true;
             return; 
           }
         }
       }
+    }
+
+    // ТАКТИКА 2: Автоматическая смерть от завала лавиной (если упало 2 или больше блоков одновременно)
+    if (hittingBlocksCount >= 2 && !shouldRemove) {
+      AudioManager.playPigHit(); 
+      AngryMolluskGame.score += 50;
+      shouldRemove = true;
+      return;
     }
 
     // Физика падения самой свиньи
@@ -1030,6 +1042,7 @@ class MolluskMaksim {
       }
     }
   }
+
 
     void render(Canvas canvas, Size size, Sprite? sprite) {
     final screenPos = Offset(size.width * x, size.height * y);
