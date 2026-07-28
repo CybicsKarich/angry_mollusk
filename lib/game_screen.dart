@@ -477,10 +477,10 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       blocks.add(GameBlock(bx2 + 0.16, 0.37, 0.025, 0.16, false)); 
       blocks.add(GameBlock(bx2 + 0.04, 0.35, 0.16, 0.02, false)); // крыша
 
-      // Рассаживаем 3 Максимов строго внутри деревянного замка!
-      pigs.add(MolluskMaksim(bx2 + 0.04, groundY - 0.04));  // в левой нижней комнате
-      pigs.add(MolluskMaksim(bx2 + 0.15, groundY - 0.04));  // в правой нижней комнате
-      pigs.add(MolluskMaksim(bx2 + 0.09, 0.53 - 0.03));     // на втором этаже по центру
+            // ИСПРАВЛЕНО: Посадили нижних свиней ровно НА деревянный пол (0.71), убрав стартовое пересечение хитбоксов!
+      pigs.add(MolluskMaksim(bx2 + 0.04, 0.71 - 0.019));  // в левой нижней комнате
+      pigs.add(MolluskMaksim(bx2 + 0.15, 0.71 - 0.019));  // в правой нижней комнате
+      pigs.add(MolluskMaksim(bx2 + 0.09, 0.53 - 0.03));   // верхний Максим (оставляем как есть)
     }
 
     spawnCompleted = true;
@@ -971,53 +971,51 @@ class MolluskMaksim {
   }
 
 
-            void update(double dt, List<GameBlock> blocks, double groundY) {
-    // ИСПРАВЛЕНО: Проверка урона от падающих сверху блоков замка!
-    // Если на свинью падает или летит любой проснувшийся кубик — Максим погибает
+              void update(double dt, List<GameBlock> blocks, double groundY) {
+    // ИСПРАВЛЕНО: Свинья погибает только от падающих на СКОРОСТИ блоков (защита от прикосновений)
     for (var block in blocks) {
       if (!block.isBroken && !block.shouldRemove && !block.isSleeping) {
-        // Проверяем, пересекаются ли координаты свиньи и движущегося блока
-        // Даём небольшой мультяшный запас по радиусу (0.025)
-        if (x >= block.x - 0.01 && x <= block.x + block.w + 0.01 &&
-            y >= block.y - 0.01 && y <= block.y + block.h + 0.01) {
-          
-          AudioManager.playPigHit(); // Включаем случайный крик свиньи
-          AngryMolluskGame.score += 50;
-          shouldRemove = true; // Свинья погибает от завала кубиками!
-          return; // Выходим из метода, так как свинья уже уничтожена
+        // Считаем общую скорость летящего кубика
+        double blockSpeed = sqrt(block.vx * block.vx + block.vy * block.vy);
+        
+        // Преграда: Блок должен лететь со скоростью выше 0.25, чтобы нанести урон свинье!
+        if (blockSpeed > 0.25) {
+          // Проверяем пересечение координат свиньи и движущегося блока
+          if (x >= block.x - 0.01 && x <= block.x + block.w + 0.01 &&
+              y >= block.y - 0.01 && y <= block.y + block.h + 0.01) {
+            
+            AudioManager.playPigHit(); 
+            AngryMolluskGame.score += 50;
+            shouldRemove = true; // Погибает строго от НАСТОЯЩЕГО удара
+            return; 
+          }
         }
       }
     }
 
-    // Твоя остальная проверенная физика падения самой свиньи
+    // Физика падения самой свиньи
     if (isFalling) {
-      vy += 1.8 * dt; // Гравитация свиньи
+      vy += 1.8 * dt; 
       x += vx * dt;
       y += vy * dt;
 
-      // Если свинья шмякнулась о твердую землю острова
       if (y >= groundY - 0.022) {
         y = groundY - 0.022;
-        
-        // Если вертикальная скорость падения vy больше 0.6 — разбивается насмерть
         if (vy > 0.6) {
           AngryMolluskGame.score += 50;
           shouldRemove = true;
         } else {
-          // Если упала легонько — просто останавливается и выживает
           vx = 0;
           vy = 0;
           isFalling = false;
         }
       }
             
-      // Смерть при падении на дно океана (в пропасть)
       if (y >= groundY + 0.05) {
         AngryMolluskGame.score += 50; 
         shouldRemove = true;
       }
     } else {
-      // Проверка опоры: если кубик под свиньей улетел, она падает
       bool supported = false;
       for (var block in blocks) {
         if (!block.isBroken && !block.shouldRemove &&
@@ -1032,6 +1030,7 @@ class MolluskMaksim {
       }
     }
   }
+
     void render(Canvas canvas, Size size, Sprite? sprite) {
     final screenPos = Offset(size.width * x, size.height * y);
     final radius = size.width * 0.022; // Сочный размер свиньи
