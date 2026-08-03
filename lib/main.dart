@@ -823,7 +823,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                       ),
                       const SizedBox(width: 35),
 
-                      // 2 КРУГ: Снайпер
+                                            // 2 КРУГ: Снайпер (Обновленный тактический вид!)
                       _buildAchievementCircle(
                         title: "Снайпер",
                         desc: "Пройди любой уровень,\nпотратив всего 1 птицу",
@@ -831,25 +831,84 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                         child: AnimatedBuilder(
                           animation: _animController,
                           builder: (context, _) {
-                            // Анимация наведения красной мишени на зелёную свинью
-                            double targetSize = 75.0 - (sin(_animController.value * pi * 2).abs() * 20.0);
+                            // Анимация пульсации прицела (сужается и расширяется)
+                            double targetSize = 85.0 - (sin(_animController.value * pi * 2).abs() * 15.0);
+                            
                             return Container(
-                              color: Colors.green.shade800,
+                              color: const Color(0xFF1B5E20), // Тёмно-зелёный глубокий фон для контраста
                               child: Stack(
                                 alignment: Alignment.center,
                                 children: [
-                                  // Зелёная круглая свинья по центру
-                                  Container(width: 42, height: 42, decoration: const BoxDecoration(color: Colors.lightGreen, shape: BoxShape.circle)),
-                                  // Красная снайперская мишень поверх
+                                  
+                                  // 1. ТЕНЬ СВИНЬИ (Силуэт с ушками по центру)
+                                  Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      // Левое ушко (тёмный овал)
+                                      Transform.translate(
+                                        offset: const Offset(-12, -14),
+                                        child: Transform.rotate(
+                                          angle: -0.2,
+                                          child: Container(width: 8, height: 12, decoration: const BoxDecoration(color: Color(0xFF0D3211), shape: BoxShape.circle)),
+                                        ),
+                                      ),
+                                      // Правое ушко (тёмный овал)
+                                      Transform.translate(
+                                        offset: const Offset(12, -14),
+                                        child: Transform.rotate(
+                                          angle: 0.2,
+                                          child: Container(width: 8, height: 12, decoration: const BoxDecoration(color: Color(0xFF0D3211), shape: BoxShape.circle)),
+                                        ),
+                                      ),
+                                      // Главное круглое тело — тень свиньи
+                                      Container(
+                                        width: 36,
+                                        height: 36,
+                                        decoration: const BoxDecoration(
+                                          color: Color(0xFF0D3211), // Тёмно-зелёный силуэт
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  // 2. НАСТОЯЩИЙ ИГРОВОЙ ПРИЦЕЛИК (Анимированный поверх свиньи)
                                   Container(
                                     width: targetSize,
                                     height: targetSize,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      border: Border.all(color: Colors.redAccent, width: 2.5),
-                                    ),
-                                    child: Center(
-                                      child: Container(width: 6, height: 6, decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle)),
+                                    child: Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        // Внешнее тонкое красное кольцо прицела
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            border: Border.all(color: Colors.redAccent, width: 1.5),
+                                          ),
+                                        ),
+                                        // Внутреннее тонкое красное кольцо прицела
+                                        Container(
+                                          width: targetSize * 0.6,
+                                          height: targetSize * 0.6,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            border: Border.all(color: Colors.redAccent, width: 1.5),
+                                          ),
+                                        ),
+                                        // Вертикальная ось перекрестия (выходит за края круга)
+                                        Container(width: 2.0, height: targetSize * 1.1, color: Colors.redAccent),
+                                        // Горизонтальная ось перекрестия (выходит за края круга)
+                                        Container(width: targetSize * 1.1, height: 2.0, color: Colors.redAccent),
+                                        
+                                        // Центральное прозрачное окно прицела (стирает оси в самом центре по картинке)
+                                        Container(
+                                          width: 16,
+                                          height: 16,
+                                          color: const Color(0xFF1B5E20), // Перекрывает оси фоновым цветом
+                                        ),
+                                        // Красная точка/мини-крестик строго в яблочке!
+                                        Container(width: 5, height: 5, decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle)),
+                                      ],
                                     ),
                                   ),
                                 ],
