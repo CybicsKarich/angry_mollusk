@@ -164,4 +164,13 @@ class AudioManager {
     }
   } // <--- ЗАКРЫВАЕТ МЕТОД stopAllLevelSounds
 
+static Future<void> playAchievement() async {
+    try {
+      // Запускаем из папки sounds. Если у тебя используется AudioPlayer, 
+      // код сыграет его поверх фоновой музыки без прерывания уровня!
+      await AudioPlayer().play(AssetSource('sounds/achievement_unlocked.mp3'));
+    } catch (e) {
+      print("Ошибка воспроизведения звука ачивки: $e");
+    }
+  }
 } // <--- ВОТ ЭТА ОДНА СКОБКА ТЕПЕРЬ САМАЯ ПОСЛЕДНЯЯ В ФАЙЛЕ! Она закрывает весь класс AudioManager.
