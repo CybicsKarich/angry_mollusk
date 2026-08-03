@@ -80,18 +80,32 @@ class GameScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Container(
-                              width: 60, height: 60,
-                              decoration: const BoxDecoration(color: Color(0xFF4CAF50), shape: BoxShape.circle),
-                              child: RawMaterialButton(
-                                shape: const CircleBorder(),
-                                onPressed: () {
-                                    AudioManager.stopAllLevelSounds();
-                                    game.overlays.remove('VictoryMenu');
-                                  Navigator.pop(context); 
-                                },
-                                child: const Icon(Icons.home_rounded, color: Colors.white, size: 32),
-                              ),
+                            width: 60, height: 60,
+                            decoration: const BoxDecoration(color: Color(0xFF4CAF50), shape: BoxShape.circle),
+                            child: RawMaterialButton(
+                              shape: const CircleBorder(),
+                              onPressed: () {
+                                game.overlays.remove('VictoryMenu');
+
+                                // ИСПРАВЛЕНО: Переносим игрока на следующий уровень динамически!
+                                // Если прошли 1 -> включится 2. Если прошли 2 -> включится 3.
+                                if (game.currentLevel < 3) {
+                                  game.currentLevel = game.currentLevel + 1;
+                                } else {
+                                  // Если прошли последний 3 уровень, можно просто перезапустить его или оставить на третьем
+                                  game.currentLevel = 3; 
+                                }
+
+                                AngryMolluskGame.score = 0;
+                                game.worldScrollX = 0.0; // Сбрасываем скролл камеры к рогатке
+
+                                game.isVictorySequenceStarted = false;
+                                game.levelCleared = false;
+                                game.buildLevelStructures(); // Строим замок нового уровня
+                              },
+                              child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 32),
                             ),
+                          ),
                             const SizedBox(width: 20),
                             Container(
                               width: 60, height: 60,
@@ -441,9 +455,9 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     // ==========================================
     else if (currentLevel == 3) {
       // Задаем лимиты очков под сложный Третий уровень
-      targetScore1Star = 600;
-      targetScore2Stars = 750;
-      targetScore3Stars = 900;
+      targetScore1Star = 450;
+      targetScore2Stars = 500;
+      targetScore3Stars = 550;
 
       // 🏢 ЗДАНИЕ №1: ВЫСОКИЙ КАМЕННЫЙ ЖИВОЙ ЩИТ (Спереди на координате 1.22)
       final double bx1 = 1.22;
