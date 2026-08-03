@@ -147,6 +147,47 @@ class GameScreen extends StatelessWidget {
                 );
               },
               
+                            
+              
+              // ИСПРАВЛЕНО: НОВОЕ ВСПЛЫВАЮЩЕЕ ОКНО ДОСТИЖЕНИЙ (ТОСТ НА 5 СЕКУНД)
+              'AchievementToast': (BuildContext context, AngryMolluskGame game) {
+                return Positioned(
+                  top: 24,
+                  left: MediaQuery.of(context).size.width * 0.25,
+                  right: MediaQuery.of(context).size.width * 0.25,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1565C0).withOpacity(0.95), // Сочный глянцевый синий фон
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFF64B5F6), width: 3),
+                      boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 10, offset: Offset(0, 4))],
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.emoji_events_rounded, color: Color(0xFFFFD54F), size: 28),
+                        SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              "ДОСТИЖЕНИЕ РАЗБЛОКИРОВАНО!",
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.1),
+                            ),
+                            Text(
+                              "Загляни в меню достижений на главном экране!",
+                              style: TextStyle(fontSize: 11, color: Color(0xFFE3F2FD)),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+
               // 2. ОВЕРЛЕЙ МЕНЮ ПАУЗЫ
               'PauseMenu': (BuildContext context, AngryMolluskGame game) {
                 return Center(
@@ -547,7 +588,74 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     // КРИТИЧЕСКИЙ ФИКС: Удаляем убитых свиней строго ДО проверки победы!
     pigs.removeWhere((p) => p.shouldRemove);
 
-    // Живая атмосфера (звуки свиней раз в 9 секунд)
+   // =========================================================================
+    // ТРИГГЕРЫ ДОСТИЖЕНИЙ (ПЕРВАЯ КРОВЬ И СНАЙПЕР)
+    // =========================================================================
+    
+    // 1. ПЕРВАЯ КРОВЬ: Если на 1 уровне массив свиней уменьшился (кто-то погиб)
+    if (spawnCompleted && currentLevel == 1 && pigs.length < 3) {
+      SharedPreferences.getInstance().then((prefs) async {
+        final alreadyUnlocked = prefs.getBool('achievement_first_blood') ?? false;
+        if (!alreadyUnlocked) {
+          await prefs.setBool('achievement_first_blood', true);
+          AudioManager.playAchievement(); // Бахает сочный победный звук фанфар!
+          overlays.add('AchievementToast'); // Показывает тост на экране боя
+          
+          // Автоматически прячем тост ровно через 5 секунд
+          Future.delayed(const Duration(seconds: 5), () {
+            overlays.remove('AchievementToast'); 
+          });
+        }
+      });
+    }
+
+    // 2. СНАЙПЕР: Если уровень пройден и в очереди осталось ровно 2 птицы (потрачена всего 1)
+    if (spawnCompleted && pigs.isEmpty && birdsQueue.length == 2 && !levelFailed && !levelCleared) {
+      SharedPreferences.getInstance().then((prefs) async {
+        final alreadyUnlocked = prefs.getBool('achievement_sniper') ?? false;
+        if (!alreadyUnlocked) {
+          await prefs.setBool('achievement_sniper', true);
+          AudioManager.playAchievement(); 
+          overlays.add('AchievementToast');
+          
+          Future.delayed(const Duration(seconds: 5), () {
+            overlays.remove('AchievementToast');
+          });
+        }
+      });
+    }
+     
+    // 3. ИСПРАВЛЕНО: ТРИУМФ (Если прямо сейчас игрок победил и потенциально набрал 9 звёзд)
+    if (spawnCompleted && pigs.isEmpty && !levelFailed && !levelCleared && !isVictorySequenceStarted) {
+      // Считаем текущие звёзды за этот раунд ДО сохранения
+      int currentRoundStars = 0;
+      if (AngryMolluskGame.score >= targetScore3Stars) currentRoundStars = 3;
+      else if (AngryMolluskGame.score >= targetScore2Stars) currentRoundStars = 2;
+      else if (AngryMolluskGame.score >= targetScore1Star) currentRoundStars = 1;
+
+      SharedPreferences.getInstance().then((prefs) async {
+        // Читаем старые рекорды остальных уровней
+        int s1 = currentLevel == 1 ? currentRoundStars : (prefs.getInt('level_1_stars') ?? 0);
+        int s2 = currentLevel == 2 ? currentRoundStars : (prefs.getInt('level_2_stars') ?? 0);
+        int s3 = currentLevel == 3 ? currentRoundStars : (prefs.getInt('level_3_stars') ?? 0);
+        
+        // Если суммарно набралось 9 звёзд
+        if ((s1 + s2 + s3) >= 9) {
+          final alreadyUnlocked = prefs.getBool('achievement_triumph') ?? false;
+          if (!alreadyUnlocked) {
+            await prefs.setBool('achievement_triumph', true);
+            AudioManager.playAchievement(); // Победный дзынь!
+            overlays.add('AchievementToast'); // Глянцевая плашка наверх
+            
+            Future.delayed(const Duration(seconds: 5), () {
+              overlays.remove('AchievementToast');
+            });
+          }
+        }
+      });
+    }
+      
+      // Живая атмосфера (звуки свиней раз в 9 секунд)
     if (pigs.isNotEmpty && !levelCleared && !levelFailed) {
       _pigSoundTimer += dt;
       if (_pigSoundTimer >= 9.0) {
