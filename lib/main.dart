@@ -183,8 +183,13 @@ class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObse
                             );
                           }),
                       const SizedBox(height: 16), // Вернули пробел 16
-                      _buildMenuButton('ДОСТИЖЕНИЯ', Icons.emoji_events_rounded, Colors.amber, () {}),
-                      const SizedBox(height: 16), // Вернули пробел 16
+                      _buildMenuButton('ДОСТИЖЕНИЯ', Icons.emoji_events_rounded, Colors.amber, () {
+                      Navigator.push(
+                       context,
+                        MaterialPageRoute(builder: (context) => const AchievementsScreen()),
+                       );
+                      }),
+                        const SizedBox(height: 16), // Вернули пробел 16
                       _buildMenuButton('ДОПОЛНИТЕЛЬНО', Icons.extension_rounded, Colors.purple, () {
                       Navigator.push(
                       context,
@@ -675,4 +680,279 @@ class _HtmlGameScreenState extends State<HtmlGameScreen> {
     );
   }
 }
+
+// =========================================================================
+// КЛАСС КОСМИЧЕСКОГО ЭКРАНА ДОСТИЖЕНИЙ С БЕСКОНЕЧНЫМИ АНИМАЦИЯМИ ВНУТРИ КРУГОВ
+// =========================================================================
+class AchievementsScreen extends StatefulWidget {
+  const AchievementsScreen({super.key});
+
+  @override
+  State<AchievementsScreen> createState() => _AchievementsScreenState();
+}
+
+class _AchievementsScreenState extends State<AchievementsScreen> with SingleTickerProviderStateMixin {
+  late AnimationController _animController;
+  
+  // Переменные для хранения статуса ачивок из памяти телефона
+  bool isFirstBloodUnlocked = false;
+  bool isSniperUnlocked = false;
+  bool isTriumphUnlocked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Бесконечный контроллер для круговых анимаций
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..repeat(); // Запускает бесконечный цикличный повтор
+
+    _loadAchievementsStatus();
+  }
+
+  // Загружаем данные, выполнил ли пацан условия ачивок ранее
+  Future<void> _loadAchievementsStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    
+    // 1 ачивка: Проверяем флаг Первой Крови
+    final firstBlood = prefs.getBool('achievement_first_blood') ?? false;
+    
+    // 2 ачивка: Проверяем флаг Снайпера
+    final sniper = prefs.getBool('achievement_sniper') ?? false;
+    
+    // 3 ачивка: Проверяем, выбито ли ровно 9 звезд суммарно за все 3 уровня (Триумф)
+    int s1 = prefs.getInt('level_1_stars') ?? 0;
+    int s2 = prefs.getInt('level_2_stars') ?? 0;
+    int s3 = prefs.getInt('level_3_stars') ?? 0;
+    bool triumph = (s1 + s2 + s3) >= 9;
+
+    setState(() {
+      isFirstBloodUnlocked = firstBlood;
+      isSniperUnlocked = sniper;
+      isTriumphUnlocked = triumph;
+    });
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      // Чёрный космический фон с огоньками-звёздами
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        color: const Color(0xFF0A0E17), // Глубокий космический тёмно-синий
+        child: Stack(
+          children: [
+            // Рисуем маленькие огоньки-звёзды на фоне космоса
+            ...List.generate(40, (index) {
+              final random = Random(index);
+              return Positioned(
+                top: random.nextDouble() * MediaQuery.of(context).size.height,
+                left: random.nextDouble() * MediaQuery.of(context).size.width,
+                child: Container(
+                  width: random.nextDouble() * 3 + 1,
+                  height: random.nextDouble() * 3 + 1,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(random.nextDouble() * 0.7 + 0.3),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              );
+            }),
+
+            // Кнопка закрытия ("Назад в меню") в левом углу
+            Positioned(
+              top: 16,
+              left: 16,
+              child: IconButton(
+                style: IconButton.styleFrom(backgroundColor: Colors.white12),
+                icon: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 28),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+
+            // Основной контент: 3 живых круга достижений в ряд
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "МЕНЮ ДОСТИЖЕНИЙ",
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      letterSpacing: 2.0,
+                      shadows: [Shadow(color: Colors.blueAccent, blurRadius: 10)],
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 1 КРУГ: Первая кровь
+                      _buildAchievementCircle(
+                        title: "Первая Кровь",
+                        desc: "Убей самую первую\nсвинью на 1 уровне",
+                        isUnlocked: isFirstBloodUnlocked,
+                        child: AnimatedBuilder(
+                          animation: _animController,
+                          builder: (context, _) {
+                            // Пульсирующая анимация брызг зелёной крови на синем фоне
+                            double scale = 1.0 + (sin(_animController.value * pi * 4) * 0.12);
+                            return Container(
+                              color: Colors.blue.shade900,
+                              child: Center(
+                                child: Transform.scale(
+                                  scale: scale,
+                                  child: const Icon(Icons.opacity, color: Colors.greenAccent, size: 55),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 35),
+
+                      // 2 КРУГ: Снайпер
+                      _buildAchievementCircle(
+                        title: "Снайпер",
+                        desc: "Пройди любой уровень,\nпотратив всего 1 птицу",
+                        isUnlocked: isSniperUnlocked,
+                        child: AnimatedBuilder(
+                          animation: _animController,
+                          builder: (context, _) {
+                            // Анимация наведения красной мишени на зелёную свинью
+                            double targetSize = 75.0 - (sin(_animController.value * pi * 2).abs() * 20.0);
+                            return Container(
+                              color: Colors.green.shade800,
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  // Зелёная круглая свинья по центру
+                                  Container(width: 42, height: 42, decoration: const BoxDecoration(color: Colors.lightGreen, shape: BoxShape.circle)),
+                                  // Красная снайперская мишень поверх
+                                  Container(
+                                    width: targetSize,
+                                    height: targetSize,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: Colors.redAccent, width: 2.5),
+                                    ),
+                                    child: Center(
+                                      child: Container(width: 6, height: 6, decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle)),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 35),
+
+                      // 3 КРУГ: Триумф
+                      _buildAchievementCircle(
+                        title: "Триумф",
+                        desc: "Пройди все 3 уровня\nна максимальные 3 звезды",
+                        isUnlocked: isTriumphUnlocked,
+                        child: AnimatedBuilder(
+                          animation: _animController,
+                          builder: (context, _) {
+                            // Анимация кружащихся звёзд вокруг рогатки со смайликом 💪
+                            return Container(
+                              color: Colors.purple.shade900,
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  const Text("💪", style: TextStyle(fontSize: 26)),
+                                  Transform.rotate(
+                                    angle: _animController.value * pi * 2,
+                                    child: Stack(
+                                      children: List.generate(8, (i) {
+                                        double angle = (i * pi / 4);
+                                        return Transform.translate(
+                                          offset: Offset(cos(angle) * 32, sin(angle) * 32),
+                                          child: const Icon(Icons.star_rounded, color: Colors.amber, size: 12),
+                                        );
+                                      }),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+    Widget _buildAchievementCircle({
+    required String title,
+    required String desc,
+    required bool isUnlocked,
+    required Widget child,
+  }) {
+    return Column(
+      children: [
+        Container(
+          width: 110,
+          height: 110,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: isUnlocked ? const Color(0xFFFFCC80) : Colors.grey.shade700, 
+              width: 5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: isUnlocked ? Colors.orange.withOpacity(0.3) : Colors.transparent, 
+                blurRadius: 12,
+              ),
+            ],
+          ),
+          child: ClipOval(
+            child: isUnlocked 
+                ? child 
+                : Container(
+                    color: Colors.grey.shade800,
+                    child: Icon(Icons.lock_rounded, color: Colors.grey.shade500, size: 40),
+                  ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: isUnlocked ? const Color(0xFFFFCC80) : Colors.grey,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          desc,
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 12, color: Colors.grey.shade400, height: 1.2),
+        ),
+      ],
+    );
+  }
+} // <--- Финальная скобка, закрывающая космическое меню ачивок!
 
