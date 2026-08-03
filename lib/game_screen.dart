@@ -76,37 +76,26 @@ class GameScreen extends StatelessWidget {
                             color: Color(0xFF3E2723), 
                           ),
                         ),
-                        Row(
+                                               Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
+                            // 1. КНОПКА СЛЕВА: ДОМИК (ВЫХОД В ГЛАВНОЕ МЕНЮ КАРТОЧЕК)
                             Container(
-                            width: 60, height: 60,
-                            decoration: const BoxDecoration(color: Color(0xFF4CAF50), shape: BoxShape.circle),
-                            child: RawMaterialButton(
-                              shape: const CircleBorder(),
-                              onPressed: () {
-                                game.overlays.remove('VictoryMenu');
-
-                                // ИСПРАВЛЕНО: Переносим игрока на следующий уровень динамически!
-                                // Если прошли 1 -> включится 2. Если прошли 2 -> включится 3.
-                                if (game.currentLevel < 3) {
-                                  game.currentLevel = game.currentLevel + 1;
-                                } else {
-                                  // Если прошли последний 3 уровень, можно просто перезапустить его или оставить на третьем
-                                  game.currentLevel = 3; 
-                                }
-
-                                AngryMolluskGame.score = 0;
-                                game.worldScrollX = 0.0; // Сбрасываем скролл камеры к рогатке
-
-                                game.isVictorySequenceStarted = false;
-                                game.levelCleared = false;
-                                game.buildLevelStructures(); // Строим замок нового уровня
-                              },
-                              child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 32),
+                              width: 60, height: 60,
+                              decoration: const BoxDecoration(color: Color(0xFF4CAF50), shape: BoxShape.circle),
+                              child: RawMaterialButton(
+                                shape: const CircleBorder(),
+                                onPressed: () {
+                                  AudioManager.stopAllLevelSounds();
+                                  game.overlays.remove('VictoryMenu');
+                                  Navigator.pop(context); // Возвращает в меню уровней
+                                },
+                                child: const Icon(Icons.home_rounded, color: Colors.white, size: 32),
+                              ),
                             ),
-                          ),
                             const SizedBox(width: 20),
+                            
+                            // 2. КНОПКА ПО ЦЕНТРУ: ЗАНОВО (ПЕРЕЗАПУСК ТЕКУЩЕГО УРОВНЯ)
                             Container(
                               width: 60, height: 60,
                               decoration: const BoxDecoration(color: Color(0xFFFF9800), shape: BoxShape.circle),
@@ -117,12 +106,14 @@ class GameScreen extends StatelessWidget {
                                   AngryMolluskGame.score = 0; 
                                   game.isVictorySequenceStarted = false;
                                   game.levelCleared = false;
-                                  game.buildLevelStructures();
+                                  game.buildLevelStructures(); // Перестраивает этот же уровень с нуля
                                 },
                                 child: const Icon(Icons.refresh_rounded, color: Colors.white, size: 32),
                               ),
                             ),
                             const SizedBox(width: 20),                          
+                            
+                            // 3. КНОПКА СПРАВА: УМНАЯ СТРЕЛКА (ПЕРЕХОД НА СЛЕДУЮЩИЙ УРОВЕНЬ)
                             Container(
                               width: 60, height: 60,
                               decoration: const BoxDecoration(color: Color(0xFF4CAF50), shape: BoxShape.circle),
@@ -131,14 +122,19 @@ class GameScreen extends StatelessWidget {
                                 onPressed: () {
                                   game.overlays.remove('VictoryMenu');
                                   
-                                  // Переключаем движок на второй уровень и обнуляем очки
-                                  game.currentLevel = 2;
+                                  // Динамически двигаем игрока вперед
+                                  if (game.currentLevel < 3) {
+                                    game.currentLevel = game.currentLevel + 1;
+                                  } else {
+                                    game.currentLevel = 3; 
+                                  }
+                                  
                                   AngryMolluskGame.score = 0;
-                                  game.worldScrollX = 0.0; // возвращаем камеру к рогатке
+                                  game.worldScrollX = 0.0; // Сбрасываем скролл камеры к рогатке
                                   
                                   game.isVictorySequenceStarted = false;
                                   game.levelCleared = false;
-                                  game.buildLevelStructures(); // возводим замок "Два уха"
+                                  game.buildLevelStructures(); // Строим замок следующего уровня
                                 },
                                 child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 32),
                               ),
