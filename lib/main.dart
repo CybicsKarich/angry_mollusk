@@ -913,7 +913,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // 4 КРУГ: КРОВОЖАДНАЯ МЕСТЬ (Засекреченная пасхалка 1-го уровня)
+                        // 4 КРУГ: КРОВОЖАДНАЯ МЕСТЬ (Обновлённый Ardor-стиль с крабьей клешнёй!)
                         _buildAchievementCircle(
                           title: isSecretChestUnlocked ? "Кровожадная месть" : "SECRET",
                           desc: isSecretChestUnlocked ? "Ты раскрыл тайну\nскрытого сундука!" : "???",
@@ -921,26 +921,114 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                           child: AnimatedBuilder(
                             animation: _animController,
                             builder: (context, _) {
-                              // Цикл бесконечной анимации: клешня вылезает + зловещая улыбка, затем плавно исчезают
+                              // Рассчитываем фазы для цикличной плавной анимации
                               double cycle = (_animController.value * 2) % 1.0; 
-                              bool isVisible = cycle < 0.5; // Половину времени элементы видны, половину скрыты
-                              double clawY = isVisible ? (25 - (cycle * 50)) : 40; 
+                              bool isVisible = cycle < 0.55; 
+                              
+                              // Анимация движения клешни вверх-вниз по фото
+                              double clawY = isVisible ? (32 - (cycle * 55)) : 45; 
+                              // Анимация раскрытия створок клешни
+                              double clawOpenAngle = isVisible ? (sin(cycle * pi * 4).abs() * 0.25) : 0.0;
 
                               return Container(
-                                color: const Color(0xFF1A0606), // Зловещий тёмно-красный фон
+                                color: const Color(0xFF050101), // Почти чёрный зловещий фон
                                 child: Stack(
                                   alignment: Alignment.center,
                                   children: [
-                                    // Зловещая улыбка на заднем плане
+                                    
+                                    // А) ЗЛОВЕЩИЙ ОСКАЛ И ГЛАЗА В СТИЛЕ ARDOR GAMING
                                     if (isVisible)
-                                      const Opacity(
-                                        opacity: 0.6,
-                                        child: Text("😈", style: TextStyle(fontSize: 48)),
+                                      Stack(
+                                        alignment: Alignment.center,
+                                        children: [
+                                          // 1. Светящиеся демонические глаза Ardor (левый и правый наклонные прямоугольники)
+                                          Transform.translate(
+                                            offset: const Offset(-16, -20),
+                                            child: Transform.rotate(
+                                              angle: 0.3,
+                                              child: Container(
+                                                width: 16, height: 6,
+                                                decoration: BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Colors.red.shade900, blurRadius: 8, spreadRadius: 4)]),
+                                              ),
+                                            ),
+                                          ),
+                                          Transform.translate(
+                                            offset: const Offset(16, -20),
+                                            child: Transform.rotate(
+                                              angle: -0.3,
+                                              child: Container(
+                                                width: 16, height: 6,
+                                                decoration: BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Colors.red.shade900, blurRadius: 8, spreadRadius: 4)]),
+                                              ),
+                                            ),
+                                          ),
+                                          
+                                          // 2. Жуткая широкая зубастая улыбка (дуга из белых острых клыков)
+                                          Transform.translate(
+                                            offset: const Offset(0, -2),
+                                            child: SizedBox(
+                                              width: 70,
+                                              height: 25,
+                                              child: Stack(
+                                                children: List.generate(7, (i) {
+                                                  double posX = i * 10.0;
+                                                  double posY = sin((i / 6) * pi) * 6.0; // создаем изгиб рта дугой
+                                                  return Positioned(
+                                                    left: posX,
+                                                    top: posY,
+                                                    child: Icon(Icons.change_history_rounded, color: Colors.grey.shade400, size: 10), // острые зубы-треугольники
+                                                  );
+                                                }),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    // Вылезающая зелёная клешня Босса Максима из будущего
+
+                                    // Б) НАСТОЯЩАЯ КРАБЬЯ ЗЕЛЁНАЯ КЛЕШНЯ (Оживает поверх лица босса)
                                     Transform.translate(
                                       offset: Offset(0, clawY),
-                                      child: const Icon(Icons.back_hand_rounded, color: Colors.green, size: 46),
+                                      child: SizedBox(
+                                        width: 50,
+                                        height: 60,
+                                        child: Stack(
+                                          alignment: Alignment.bottomCenter,
+                                          children: [
+                                            // 1. Нижний круглый сустав клешни (темный шарик на фото)
+                                            Positioned(
+                                              bottom: 0,
+                                              child: Container(width: 18, height: 14, decoration: const BoxDecoration(color: Color(0xFF1B4314), shape: BoxShape.circle)),
+                                            ),
+                                            // 2. Основное массивное тело клешни (зелёный кокон с фото)
+                                            Positioned(
+                                              bottom: 8,
+                                              child: Container(
+                                                width: 24,
+                                                height: 30,
+                                                decoration: BoxDecoration(color: const Color(0xFF2E6F22), borderRadius: BorderRadius.circular(8)),
+                                              ),
+                                            ),
+                                            // 3. Левая неподвижная створка щипца (верхний крюк)
+                                            Positioned(
+                                              top: 2,
+                                              left: 8,
+                                              child: Transform.rotate(
+                                                angle: -clawOpenAngle,
+                                                child: const Icon(Icons.gavel_rounded, color: Color(0xFF388E3C), size: 20),
+                                              ),
+                                            ),
+                                            // 4. Правая подвижная створка щипца (нижний зажим)
+                                            Positioned(
+                                              top: 2,
+                                              right: 8,
+                                              child: Transform.rotate(
+                                                angle: clawOpenAngle,
+                                                child: const Icon(Icons.navigation_rounded, color: Color(0xFF1B4314), size: 16),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 ),
