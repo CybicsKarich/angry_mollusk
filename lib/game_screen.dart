@@ -625,8 +625,8 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
           // =========================================================================
       // ЧЁТКИЙ ТРИГГЕР МЕДАЛИ "СНАЙПЕР"
       // =========================================================================
-      // Если в очереди осталось ровно 2 птицы из 3, значит, игрок потратил ровно одну!
-      if (remainingBirds == 2) {
+            // ИСПРАВЛЕНО: Читаем длину очереди напрямую, теперь компилятор не выдаст ошибку!
+      if (birdsQueue.length == 2) {
         SharedPreferences.getInstance().then((prefs) async {
           final alreadyUnlocked = prefs.getBool('achievement_sniper') ?? false;
           if (!alreadyUnlocked) {
