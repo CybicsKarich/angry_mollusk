@@ -149,6 +149,8 @@ class GameScreen extends StatelessWidget {
               
                             
               
+                            
+              
               // ИСПРАВЛЕНО: НОВОЕ ВСПЛЫВАЮЩЕЕ ОКНО ДОСТИЖЕНИЙ (ТОСТ НА 5 СЕКУНД)
               'AchievementToast': (BuildContext context, AngryMolluskGame game) {
                 return Positioned(
@@ -437,6 +439,17 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       pigs.add(MolluskMaksim(bx + 0.035, 0.57 - 0.019)); 
       pigs.add(MolluskMaksim(bx + 0.175, 0.57 - 0.019)); 
       pigs.add(MolluskMaksim(bx + 0.105, 0.45 - 0.019));
+   
+      pigs.add(MolluskMaksim(bx + 0.035, 0.57 - 0.019)); 
+      pigs.add(MolluskMaksim(bx + 0.175, 0.57 - 0.019)); 
+      pigs.add(MolluskMaksim(bx + 0.105, 0.45 - 0.019));
+
+      // ИСПРАВЛЕНО: ПАСХАЛКА ДЛЯ 1 УРОВНЯ (СУНДУК IVANDROP И ЖЕЛЕЗНЫЙ ЗАСЛОН В ТЕМНОТЕ)
+      // Спавним железную плиту-заслон на координате x = 1.35
+      blocks.add(GameBlock(1.35, 0.40, 0.04, 0.33, true)..isIronShield = true);
+      
+      // Спавним секретный сундук IvanDrop дальше в темноте — на x = 1.65
+      blocks.add(GameBlock(1.65, 0.55, 0.08, 0.18, false)..isSecretChest = true);
     } 
     // ==========================================
     // ГЕОМЕТРИЯ УРОВНЯ 2 (ЗАМОК "ДВА УХА" СТРОГО ПО КАРТИНКЕ)
@@ -895,16 +908,27 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       }
       currentBird!.position = Offset(touchX, touchY);
     } 
-        // 2. РЕЖИМ СКРОЛЛА: Включается, если первое нажатие было мимо рогатки
+
+          // 2. РЕЖИМ СКРОЛЛА: Включается, если первое нажатие было мимо рогатки
     else if (!isAiming) {
+      // ИСПРАВЛЕНО: КЛИК ПО ЖЕЛЕЗУ. Считаем, куда нажал игрок с учётом сдвига камеры worldScrollX
+      double clickX = event.localEndPosition.x / canvasSize.x - worldScrollX;
+      
+      // Если это 1 уровень и палец попал прямо в зону железного заслона (1.35)
+      if (currentLevel == 1 && (clickX - 1.35).abs() < 0.1) {
+        blocks.removeWhere((b) => b.isIronShield); // Ломаем железные ворота пальцем!
+        AudioManager.playBlockBreak(true); // Издаём сочный каменный/железный грохот
+      }
+
       worldScrollX += event.localDelta.x / canvasSize.x;
       
-      // ИСПРАВЛЕНО: На 3 уровне раздвигаем лимит скролла до -1.0, чтобы увидеть деревянный замок сзади!
-      double minScroll = currentLevel == 3 ? -1.0 : -0.8;
+      // ИСПРАВЛЕНО: На 1 уровне раздвигаем лимит скролла до -0.9, чтобы доехать камерой до сундука!
+      double minScroll = currentLevel == 3 ? -1.0 : (currentLevel == 1 ? -0.9 : -0.8);
 
       if (worldScrollX > 0.0) worldScrollX = 0.0; 
       if (worldScrollX < minScroll) worldScrollX = minScroll; 
     }
+
   }
   
   @override
@@ -999,25 +1023,33 @@ class Bunnyhop {
       return;
     }
 
-        // Столкновение с кубиками замка (будим их и передаем им траекторию удара!)
     for (var block in blocks) {
       if (!block.isBroken && !block.shouldRemove &&
           position.dx >= block.x && position.dx <= block.x + block.w &&
           position.dy >= block.y && position.dy <= block.y + block.h) {
         
-        block.hit(velocity); // Передаем скорость удара блоку
+        // ИСПРАВЛЕНО: ХАК ДЛЯ СУНДУКА! Если птица коснулась сундука IvanDrop — она намертво зависает в воздухе!
+        if (block.isSecretChest) {
+          velocity = Offset.zero; // Полностью гасим скорость снаряда в ноль
+          position = Offset(block.x + block.w / 2, block.y - 0.02); // Фиксируем птицу ровно над сундуком
+          block.chestCapturedBird = true; // Включаем таймер лора ачивки с клешнёй
+          return; // Мгновенно выходим из апдейта, чтобы птица не падала под землю и не удалялась!
+        }
 
-        // ИСПРАВЛЕНО: Сопротивление материалов! Птица тормозит при ударе.
+        // ИСПРАВЛЕНО: ХАК ДЛЯ ЖЕЛЕЗА! Если ворота не разбиты тапом пальца, птица просто бьётся о них и падает
+        if (block.isIronShield) {
+          velocity = Offset(-velocity.dx * 0.2, 0.1); // Рикошетит назад
+          return;
+        }
+
+        block.hit(velocity); 
         if (block.isStone) {
-          // Камень гасит скорость очень сильно (в 2 раза мощнее, чем дерево)
           velocity = Offset(velocity.dx * 0.35, velocity.dy * 0.35);
         } else {
-          // Усиленные доски гасят скорость умеренно
           velocity = Offset(velocity.dx * 0.65, velocity.dy * 0.65);
         }
       }
     }
-
 
         for (var pig in pigs) {
       double dx = position.dx - pig.x;
@@ -1200,8 +1232,13 @@ class GameBlock {
   double fragmentOffset = 0.0; // Смещение половинок при разлете
   double fragmentAlpha = 1.0;  // Плавное исчезновение (прозрачность)
 
+  // ИСПРАВЛЕНО: Добавляем флаги для секретной пасхалки IvanDrop!
+  bool isIronShield = false;       // Флаг стальных ворот (железа)
+  bool isSecretChest = false;      // Флаг секретного сундука
+  bool chestCapturedBird = false;  // Сработал ли захват Баннихопа
+  double chestAnimTimer = 0.0;     // Таймер для логики исчезновения сундука
   
-  GameBlock(this.x, this.y, this.w, this.h, this.isStone);
+    GameBlock(this.x, this.y, this.w, this.h, this.isStone);
 
   void hit(Offset impactVelocity) {
     if (isBroken) return;
@@ -1221,14 +1258,43 @@ class GameBlock {
     isFalling = true; 
   }
 
-     void update(double dt, List<GameBlock> allBlocks, List<MolluskMaksim> allPigs, double groundY, AngryMolluskGame game) {
-    // Если блок спит — он физически не может упасть или сдвинуться сам по себе
+       void update(double dt, List<GameBlock> allBlocks, List<MolluskMaksim> allPigs, double groundY, AngryMolluskGame game) {
+    // ИСПРАВЛЕНО: ЛОГИКА СЕКРЕТНОГО СУНДУКА IVANDROP С КЛЕШНЕЙ И СОХРАНЕНИЕМ МЕДАЛИ
+    if (isSecretChest && chestCapturedBird) {
+      isSleeping = false; // Пробуждаем сундук из спячки
+      chestAnimTimer += dt;
+      
+      // В самую первую миллисекунду касания запускаем звук фанфар и выдаём ачивку!
+      if (chestAnimTimer >= 0.02 && chestAnimTimer < 0.08) {
+        SharedPreferences.getInstance().then((prefs) async {
+          final alreadyUnlocked = prefs.getBool('achievement_secret_chest') ?? false;
+          if (!alreadyUnlocked) {
+            await prefs.setBool('achievement_secret_chest', true);
+            AudioManager.playAchievement(); // Твой новый победный звук 2.5 секунды!
+            game.overlays.add('AchievementToast'); // Выкатываем глянцевый тост наверх
+            
+            Future.delayed(const Duration(seconds: 5), () {
+              game.overlays.remove('AchievementToast');
+            });
+          }
+        });
+      }
+
+      // Ровно через 2 секунды (когда клешня "утащила" птицу), сундук красиво удаляется с поля боя
+      if (chestAnimTimer >= 2.0) {
+        shouldRemove = true;
+      }
+      return; // Блокируем для сундука стандартную физику падения блоков, чтобы он стоял монолитно
+    }
+
+    // Твой старый код апдейта обычных блоков (начинается с проверки сна):
     if (isSleeping) {
       isFalling = false;
       vx = 0;
       vy = 0;
       return;
     }
+
 
         if (isBroken) {
       fragmentOffset += 0.15 * dt; 
