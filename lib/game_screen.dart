@@ -22,7 +22,21 @@ class GameScreen extends StatelessWidget {
             overlayBuilderMap: {
               // 1. ОВЕРЛЕЙ ПОБЕДЫ СО ЗВЁЗДАМИ
               'VictoryMenu': (BuildContext context, AngryMolluskGame game) {
-                int starsCount = 0;
+                if (game.birdsQueue.length == 2) {
+                  SharedPreferences.getInstance().then((prefs) async {
+                    final alreadyUnlocked = prefs.getBool('achievement_sniper') ?? false;
+                    if (!alreadyUnlocked) {
+                      await prefs.setBool('achievement_sniper', true);
+                      AudioManager.playAchievement(); // Наш победный космический звук фанфар!
+                      game.overlays.add('AchievementToast');
+                      Future.delayed(const Duration(seconds: 5), () {
+                        game.overlays.remove('AchievementToast');
+                      });
+                    }
+                  });
+                }
+                  
+                  int starsCount = 0;
                 if (AngryMolluskGame.score >= game.targetScore3Stars) {
                   starsCount = 3;
                 } else if (AngryMolluskGame.score >= game.targetScore2Stars) {
@@ -621,26 +635,6 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
         }
       });
     }
-
-          // =========================================================================
-      // ЧЁТКИЙ ТРИГГЕР МЕДАЛИ "СНАЙПЕР"
-      // =========================================================================
-            // ИСПРАВЛЕНО: Читаем длину очереди напрямую, теперь компилятор не выдаст ошибку!
-      if (birdsQueue.length == 2) {
-        SharedPreferences.getInstance().then((prefs) async {
-          final alreadyUnlocked = prefs.getBool('achievement_sniper') ?? false;
-          if (!alreadyUnlocked) {
-            await prefs.setBool('achievement_sniper', true);
-            AudioManager.playAchievement(); // Звук фанфар
-            overlays.add('AchievementToast'); // Вылетает синяя плашка
-            
-            // Прячем плашку ровно через 5 секунд
-            Future.delayed(const Duration(seconds: 5), () {
-              overlays.remove('AchievementToast');
-            });
-          }
-        });
-      }
 
 
      
