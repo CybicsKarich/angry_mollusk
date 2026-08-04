@@ -622,21 +622,27 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       });
     }
 
-    // 2. СНАЙПЕР: Если уровень пройден и в очереди осталось ровно 2 птицы (потрачена всего 1)
-    if (spawnCompleted && pigs.isEmpty && birdsQueue.length == 2 && !levelFailed && !levelCleared) {
-      SharedPreferences.getInstance().then((prefs) async {
-        final alreadyUnlocked = prefs.getBool('achievement_sniper') ?? false;
-        if (!alreadyUnlocked) {
-          await prefs.setBool('achievement_sniper', true);
-          AudioManager.playAchievement(); 
-          overlays.add('AchievementToast');
-          
-          Future.delayed(const Duration(seconds: 5), () {
-            overlays.remove('AchievementToast');
-          });
-        }
-      });
-    }
+          // =========================================================================
+      // ЧЁТКИЙ ТРИГГЕР МЕДАЛИ "СНАЙПЕР"
+      // =========================================================================
+      // Если в очереди осталось ровно 2 птицы из 3, значит, игрок потратил ровно одну!
+      if (remainingBirds == 2) {
+        SharedPreferences.getInstance().then((prefs) async {
+          final alreadyUnlocked = prefs.getBool('achievement_sniper') ?? false;
+          if (!alreadyUnlocked) {
+            await prefs.setBool('achievement_sniper', true);
+            AudioManager.playAchievement(); // Звук фанфар
+            overlays.add('AchievementToast'); // Вылетает синяя плашка
+            
+            // Прячем плашку ровно через 5 секунд
+            Future.delayed(const Duration(seconds: 5), () {
+              overlays.remove('AchievementToast');
+            });
+          }
+        });
+      }
+
+
      
     // 3. ИСПРАВЛЕНО: ТРИУМФ (Если прямо сейчас игрок победил и потенциально набрал 9 звёзд)
     if (spawnCompleted && pigs.isEmpty && !levelFailed && !levelCleared && !isVictorySequenceStarted) {
@@ -699,11 +705,31 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       }
     }
 
+        // LINE: 33
     // ЧЕСТНАЯ ПОБЕДА: Свиньи уничтожены, и ВСЕ блоки/осколки полностью затихли!
     if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictorySequenceStarted && !isAnythingMoving) {
       isVictorySequenceStarted = true;
       
       int remainingBirds = birdsQueue.length;
+
+      // ИСПРАВЛЕНО: ВСТАВИЛИ ТРИГГЕР МЕДАЛИ "СНАЙПЕР" СТРОГО СЮДА!
+      // Проверяем в момент триумфа: если в очереди осталось ровно 2 птицы, значит потрачена всего одна!
+      if (remainingBirds == 2) {
+        SharedPreferences.getInstance().then((prefs) async {
+          final alreadyUnlocked = prefs.getBool('achievement_sniper') ?? false;
+          if (!alreadyUnlocked) {
+            await prefs.setBool('achievement_sniper', true);
+            AudioManager.playAchievement(); // Звук фанфар
+            overlays.add('AchievementToast'); // Вылетает синяя плашка
+            
+            // Прячем плашку ровно через 5 секунд
+            Future.delayed(const Duration(seconds: 5), () {
+              overlays.remove('AchievementToast');
+            });
+          }
+        });
+      }
+
       AngryMolluskGame.score += remainingBirds * 70;  
       
       int currentStars = 0;
@@ -728,6 +754,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       });
       return;
     }
+
 
     // ЧЕСТНОЕ ПОРАЖЕНИЕ: Птицы кончились, всё остановилось, а свиньи ВЫЖИЛИ!
     if (spawnCompleted && currentBird == null && birdsQueue.isEmpty && pigs.isNotEmpty && 
