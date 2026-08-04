@@ -774,16 +774,6 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
               );
             }),
 
-            Positioned(
-              top: 16,
-              left: 16,
-              child: IconButton(
-                style: IconButton.styleFrom(backgroundColor: Colors.white12),
-                icon: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 28),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ),
-
             Center(
               child: SingleChildScrollView(
                 child: Column(
@@ -997,6 +987,15 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                     const SizedBox(height: 40),
                   ],
                 ),
+              ),
+            ),
+            Positioned(
+              top: 16,
+              left: 16,
+              child: IconButton(
+                style: IconButton.styleFrom(backgroundColor: Colors.white12),
+                icon: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 28),
+                onPressed: () => Navigator.pop(context),
               ),
             ),
           ],
