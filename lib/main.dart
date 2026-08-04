@@ -609,6 +609,9 @@ class AdditionalScreen extends StatelessWidget {
                         ),
                         onPressed: () {
                           // Переходим на внутренний экран с браузером
+                          SharedPreferences.getInstance().then((prefs) async {
+                            await prefs.setBool('achievement_new_experience', true);
+                          });
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => const HtmlGameScreen()),
@@ -695,34 +698,37 @@ class AchievementsScreen extends StatefulWidget {
 class _AchievementsScreenState extends State<AchievementsScreen> with SingleTickerProviderStateMixin {
   late AnimationController _animController;
   
-  // Переменные для хранения статуса ачивок из памяти телефона
   bool isFirstBloodUnlocked = false;
   bool isSniperUnlocked = false;
   bool isTriumphUnlocked = false;
+  bool isSecretChestUnlocked = false; // 4 ачивка
+  bool isNewExperienceUnlocked = false; // 5 ачивка
+
+  // Генерируем случайные смещения для хаотичного полета монеток в ачивке IvanDrop
+  final List<Offset> _coinOffsets = List.generate(6, (i) {
+    final r = Random(i * 15);
+    return Offset(r.nextDouble() * 60 - 30, r.nextDouble() * 60 - 30);
+  });
 
   @override
   void initState() {
     super.initState();
-    // Бесконечный контроллер для круговых анимаций
     _animController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 4),
-    )..repeat(); // Запускает бесконечный цикличный повтор
+    )..repeat(); 
 
     _loadAchievementsStatus();
   }
 
-  // Загружаем данные, выполнил ли пацан условия ачивок ранее
   Future<void> _loadAchievementsStatus() async {
     final prefs = await SharedPreferences.getInstance();
     
-    // 1 ачивка: Проверяем флаг Первой Крови
     final firstBlood = prefs.getBool('achievement_first_blood') ?? false;
-    
-    // 2 ачивка: Проверяем флаг Снайпера
     final sniper = prefs.getBool('achievement_sniper') ?? false;
+    final secretChest = prefs.getBool('achievement_secret_chest') ?? false;
+    final newExp = prefs.getBool('achievement_new_experience') ?? false;
     
-    // 3 ачивка: Проверяем, выбито ли ровно 9 звезд суммарно за все 3 уровня (Триумф)
     int s1 = prefs.getInt('level_1_stars') ?? 0;
     int s2 = prefs.getInt('level_2_stars') ?? 0;
     int s3 = prefs.getInt('level_3_stars') ?? 0;
@@ -732,6 +738,8 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
       isFirstBloodUnlocked = firstBlood;
       isSniperUnlocked = sniper;
       isTriumphUnlocked = triumph;
+      isSecretChestUnlocked = secretChest;
+      isNewExperienceUnlocked = newExp;
     });
   }
 
@@ -744,14 +752,12 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Чёрный космический фон с огоньками-звёздами
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        color: const Color(0xFF0A0E17), // Глубокий космический тёмно-синий
+        color: const Color(0xFF0A0E17), 
         child: Stack(
           children: [
-            // Рисуем маленькие огоньки-звёзды на фоне космоса
             ...List.generate(40, (index) {
               final random = Random(index);
               return Positioned(
@@ -768,7 +774,6 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
               );
             }),
 
-            // Кнопка закрытия ("Назад в меню") в левом углу
             Positioned(
               top: 16,
               left: 16,
@@ -779,182 +784,219 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
               ),
             ),
 
-            // Основной контент: 3 живых круга достижений в ряд
             Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    "МЕНЮ ДОСТИЖЕНИЙ",
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                      letterSpacing: 2.0,
-                      shadows: [Shadow(color: Colors.blueAccent, blurRadius: 10)],
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 1 КРУГ: Первая кровь
-                      _buildAchievementCircle(
-                        title: "Первая Кровь",
-                        desc: "Убей самую первую\nсвинью на 1 уровне",
-                        isUnlocked: isFirstBloodUnlocked,
-                        child: AnimatedBuilder(
-                          animation: _animController,
-                          builder: (context, _) {
-                            // Пульсирующая анимация брызг зелёной крови на синем фоне
-                            double scale = 1.0 + (sin(_animController.value * pi * 4) * 0.12);
-                            return Container(
-                              color: Colors.blue.shade900,
-                              child: Center(
-                                child: Transform.scale(
-                                  scale: scale,
-                                  child: const Icon(Icons.opacity, color: Colors.greenAccent, size: 55),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 40),
+                    const Text(
+                      "МЕНЮ ДОСТИЖЕНИЙ",
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                        letterSpacing: 2.0,
+                        shadows: [Shadow(color: Colors.blueAccent, blurRadius: 10)],
                       ),
-                      const SizedBox(width: 35),
-
-                                            // 2 КРУГ: Снайпер (Обновленный тактический вид!)
-                      _buildAchievementCircle(
-                        title: "Снайпер",
-                        desc: "Пройди любой уровень,\nпотратив всего 1 птицу",
-                        isUnlocked: isSniperUnlocked,
-                        child: AnimatedBuilder(
-                          animation: _animController,
-                          builder: (context, _) {
-                            // Анимация пульсации прицела (сужается и расширяется)
-                            double targetSize = 85.0 - (sin(_animController.value * pi * 2).abs() * 15.0);
-                            
-                            return Container(
-                              color: const Color(0xFF1B5E20), // Тёмно-зелёный глубокий фон для контраста
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  
-                                  // 1. ТЕНЬ СВИНЬИ (Силуэт с ушками по центру)
-                                  Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      // Левое ушко (тёмный овал)
-                                      Transform.translate(
-                                        offset: const Offset(-12, -14),
-                                        child: Transform.rotate(
-                                          angle: -0.2,
-                                          child: Container(width: 8, height: 12, decoration: const BoxDecoration(color: Color(0xFF0D3211), shape: BoxShape.circle)),
-                                        ),
-                                      ),
-                                      // Правое ушко (тёмный овал)
-                                      Transform.translate(
-                                        offset: const Offset(12, -14),
-                                        child: Transform.rotate(
-                                          angle: 0.2,
-                                          child: Container(width: 8, height: 12, decoration: const BoxDecoration(color: Color(0xFF0D3211), shape: BoxShape.circle)),
-                                        ),
-                                      ),
-                                      // Главное круглое тело — тень свиньи
-                                      Container(
-                                        width: 36,
-                                        height: 36,
-                                        decoration: const BoxDecoration(
-                                          color: Color(0xFF0D3211), // Тёмно-зелёный силуэт
-                                          shape: BoxShape.circle,
-                                        ),
-                                      ),
-                                    ],
+                    ),
+                    const SizedBox(height: 30),
+                    
+                    // ПЕРВЫЙ РЯД АЧИВОК (1, 2, 3)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildAchievementCircle(
+                          title: "Первая Кровь",
+                          desc: "Убей самую первую\nсвинью на 1 уровне",
+                          isUnlocked: isFirstBloodUnlocked,
+                          child: AnimatedBuilder(
+                            animation: _animController,
+                            builder: (context, _) {
+                              double scale = 1.0 + (sin(_animController.value * pi * 4) * 0.12);
+                              return Container(
+                                color: Colors.blue.shade900,
+                                child: Center(
+                                  child: Transform.scale(
+                                    scale: scale,
+                                    child: const Icon(Icons.opacity, color: Colors.greenAccent, size: 55),
                                   ),
-
-                                  // 2. НАСТОЯЩИЙ ИГРОВОЙ ПРИЦЕЛИК (Анимированный поверх свиньи)
-                                  Container(
-                                    width: targetSize,
-                                    height: targetSize,
-                                    child: Stack(
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 35),
+                        _buildAchievementCircle(
+                          title: "Снайпер",
+                          desc: "Пройди любой уровень,\nпотратив всего 1 птицу",
+                          isUnlocked: isSniperUnlocked,
+                          child: AnimatedBuilder(
+                            animation: _animController,
+                            builder: (context, _) {
+                              double targetSize = 85.0 - (sin(_animController.value * pi * 2).abs() * 15.0);
+                              return Container(
+                                color: const Color(0xFF1B5E20), 
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    Stack(
                                       alignment: Alignment.center,
                                       children: [
-                                        // Внешнее тонкое красное кольцо прицела
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            border: Border.all(color: Colors.redAccent, width: 1.5),
+                                        Transform.translate(
+                                          offset: const Offset(-12, -14),
+                                          child: Transform.rotate(
+                                            angle: -0.2,
+                                            child: Container(width: 8, height: 12, decoration: const BoxDecoration(color: Color(0xFF0D3211), shape: BoxShape.circle)),
                                           ),
                                         ),
-                                        // Внутреннее тонкое красное кольцо прицела
-                                        Container(
-                                          width: targetSize * 0.6,
-                                          height: targetSize * 0.6,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            border: Border.all(color: Colors.redAccent, width: 1.5),
+                                        Transform.translate(
+                                          offset: const Offset(12, -14),
+                                          child: Transform.rotate(
+                                            angle: 0.2,
+                                            child: Container(width: 8, height: 12, decoration: const BoxDecoration(color: Color(0xFF0D3211), shape: BoxShape.circle)),
                                           ),
                                         ),
-                                        // Вертикальная ось перекрестия (выходит за края круга)
-                                        Container(width: 2.0, height: targetSize * 1.1, color: Colors.redAccent),
-                                        // Горизонтальная ось перекрестия (выходит за края круга)
-                                        Container(width: targetSize * 1.1, height: 2.0, color: Colors.redAccent),
-                                        
-                                        // Центральное прозрачное окно прицела (стирает оси в самом центре по картинке)
-                                        Container(
-                                          width: 16,
-                                          height: 16,
-                                          color: const Color(0xFF1B5E20), // Перекрывает оси фоновым цветом
-                                        ),
-                                        // Красная точка/мини-крестик строго в яблочке!
-                                        Container(width: 5, height: 5, decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle)),
+                                        Container(width: 36, height: 36, decoration: const BoxDecoration(color: Color(0xFF0D3211), shape: BoxShape.circle)),
                                       ],
                                     ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 35),
-
-                      // 3 КРУГ: Триумф
-                      _buildAchievementCircle(
-                        title: "Триумф",
-                        desc: "Пройди все 3 уровня\nна максимальные 3 звезды",
-                        isUnlocked: isTriumphUnlocked,
-                        child: AnimatedBuilder(
-                          animation: _animController,
-                          builder: (context, _) {
-                            // Анимация кружащихся звёзд вокруг рогатки со смайликом 💪
-                            return Container(
-                              color: Colors.purple.shade900,
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  const Text("💪", style: TextStyle(fontSize: 26)),
-                                  Transform.rotate(
-                                    angle: _animController.value * pi * 2,
-                                    child: Stack(
-                                      children: List.generate(8, (i) {
-                                        double angle = (i * pi / 4);
-                                        return Transform.translate(
-                                          offset: Offset(cos(angle) * 32, sin(angle) * 32),
-                                          child: const Icon(Icons.star_rounded, color: Colors.amber, size: 12),
-                                        );
-                                      }),
+                                    SizedBox(
+                                      width: targetSize,
+                                      height: targetSize,
+                                      child: Stack(
+                                        alignment: Alignment.center,
+                                        children: [
+                                          Container(decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.redAccent, width: 1.5))),
+                                          Container(width: targetSize * 0.6, height: targetSize * 0.6, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.redAccent, width: 1.5))),
+                                          Container(width: 2.0, height: targetSize * 1.1, color: Colors.redAccent),
+                                          Container(width: targetSize * 1.1, height: 2.0, color: Colors.redAccent),
+                                          Container(width: 16, height: 16, color: const Color(0xFF1B5E20)),
+                                          Container(width: 5, height: 5, decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle)),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                        const SizedBox(width: 35),
+                        _buildAchievementCircle(
+                          title: "Триумф",
+                                                    desc: "Пройди все 3 уровня\nна максимальные 3 звезды",
+                          isUnlocked: isTriumphUnlocked,
+                          child: AnimatedBuilder(
+                            animation: _animController,
+                            builder: (context, _) {
+                              return Container(
+                                color: Colors.purple.shade900,
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    const Text("💪", style: TextStyle(fontSize: 26)),
+                                    Transform.rotate(
+                                      angle: _animController.value * pi * 2,
+                                      child: Stack(
+                                        children: List.generate(8, (i) {
+                                          double angle = (i * pi / 4);
+                                          return Transform.translate(
+                                            offset: Offset(cos(angle) * 32, sin(angle) * 32),
+                                            child: const Icon(Icons.star_rounded, color: Colors.amber, size: 12),
+                                          );
+                                        }),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 30),
+
+                    // ВТОРОЙ РЯД АЧИВОК (4, 5)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 4 КРУГ: КРОВОЖАДНАЯ МЕСТЬ (Засекреченная пасхалка 1-го уровня)
+                        _buildAchievementCircle(
+                          title: isSecretChestUnlocked ? "Кровожадная месть" : "SECRET",
+                          desc: isSecretChestUnlocked ? "Ты раскрыл тайну\nскрытого сундука!" : "???",
+                          isUnlocked: isSecretChestUnlocked,
+                          child: AnimatedBuilder(
+                            animation: _animController,
+                            builder: (context, _) {
+                              // Цикл бесконечной анимации: клешня вылезает + зловещая улыбка, затем плавно исчезают
+                              double cycle = (_animController.value * 2) % 1.0; 
+                              bool isVisible = cycle < 0.5; // Половину времени элементы видны, половину скрыты
+                              double clawY = isVisible ? (25 - (cycle * 50)) : 40; 
+
+                              return Container(
+                                color: const Color(0xFF1A0606), // Зловещий тёмно-красный фон
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    // Зловещая улыбка на заднем плане
+                                    if (isVisible)
+                                      const Opacity(
+                                        opacity: 0.6,
+                                        child: Text("😈", style: TextStyle(fontSize: 48)),
+                                      ),
+                                    // Вылезающая зелёная клешня Босса Максима из будущего
+                                    Transform.translate(
+                                      offset: Offset(0, clawY),
+                                      child: const Icon(Icons.back_hand_rounded, color: Colors.green, size: 46),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 35),
+
+                        // 5 КРУГ: НОВЫЙ ОПЫТ (Клик по IvanDrop во вкладке Дополнительно)
+                        _buildAchievementCircle(
+                          title: "Новый опыт",
+                          desc: "Во вкладке дополнительно\nоткройте игру ivandrop",
+                          isUnlocked: isNewExperienceUnlocked,
+                          child: AnimatedBuilder(
+                            animation: _animController,
+                            builder: (context, _) {
+                              return Container(
+                                color: Colors.black, // Строго чёрный фон по твоему ТЗ
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    // По центру красными буквами написано название игры
+                                    const Text(
+                                      "ivandrop",
+                                      style: TextStyle(color: Colors.redAccent, fontSize: 15, fontWeight: FontWeight.bold),
+                                    ),
+                                    // Вокруг в хаотичном порядке летают маленькие золотые монетки
+                                    ...List.generate(_coinOffsets.length, (i) {
+                                      double animFactor = sin((_animController.value * pi * 2) + i);
+                                      return Transform.translate(
+                                        offset: Offset(_coinOffsets[i].dx * animFactor, _coinOffsets[i].dy * animFactor),
+                                        child: const Icon(Icons.monetization_on_rounded, color: Colors.amber, size: 10),
+                                      );
+                                    }),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 40),
+                  ],
+                ),
               ),
             ),
           ],
@@ -963,7 +1005,8 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
     );
   }
 
-    Widget _buildAchievementCircle({
+  // Конструктор-сборщик круглого элемента ачивки
+  Widget _buildAchievementCircle({
     required String title,
     required String desc,
     required bool isUnlocked,
@@ -1000,7 +1043,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
         Text(
           title,
           style: TextStyle(
-            fontSize: 18,
+            fontSize: 15, 
             fontWeight: FontWeight.bold,
             color: isUnlocked ? const Color(0xFFFFCC80) : Colors.grey,
           ),
@@ -1009,10 +1052,11 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
         Text(
           desc,
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 12, color: Colors.grey.shade400, height: 1.2),
+          style: TextStyle(fontSize: 11, color: Colors.grey.shade400, height: 1.2),
         ),
       ],
     );
   }
-} // <--- Финальная скобка, закрывающая космическое меню ачивок!
+}
+
 
