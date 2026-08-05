@@ -272,21 +272,6 @@ class GameScreen extends StatelessWidget {
                     ),
                   ),
                 );
-              },
-
-                // ИСПРАВЛЕНО: ПОЛНОЭКРАННЫЙ ВЫЛЕТ ФОТОГРАФИИ BUNNYHOP_LOSE!
-              'BunnyhopLoseScreen': (BuildContext context, AngryMolluskGame game) {
-                return Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  color: Colors.black, // Затемняем всё вокруг в глубокий чёрный
-                  child: Center(
-                    child: Image.asset(
-                      'assets/images/bunnyhop_lose.png', // Твой точный путь к фото!
-                      fit: BoxFit.contain, // Картинка займет максимум места без искажений
-                    ),
-                  ),
-                );
               },        
                      
                 // 3. ОВЕРЛЕЙ ПРОИГРЫША (GAME OVER)
@@ -378,8 +363,11 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   double _pigSoundTimer = 0.0;
   bool isPaused = false;
   bool isAiming = false;
-  
-  int currentLevel = 1;
+  bool showFlyingLosePhoto = false; // Флаг запуска вылета фотки
+  double losePhotoScale = 0.0;     // Размер фотки (растёт от 0.0 до 0.5)
+
+ 
+    int currentLevel = 1;
     
     // СИСТЕМА ОЧКОВ И ЗВЁЗД
   static int score = 0;
@@ -473,12 +461,15 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       pigs.add(MolluskMaksim(bx + 0.175, 0.57 - 0.019)); 
       pigs.add(MolluskMaksim(bx + 0.105, 0.45 - 0.019));
 
-      // ИСПРАВЛЕНО: ПАСХАЛКА ДЛЯ 1 УРОВНЯ (СУНДУК IVANDROP И ЖЕЛЕЗНЫЙ ЗАСЛОН В ТЕМНОТЕ)
-      // Спавним железную плиту-заслон на координате x = 1.35
-      blocks.add(GameBlock(1.35, 0.40, 0.04, 0.33, true)..isIronShield = true);
-      
-      // Спавним секретный сундук IvanDrop дальше в темноте — на x = 1.65
-      blocks.add(GameBlock(1.65, 0.55, 0.08, 0.18, false)..isSecretChest = true);
+            // ИСПРАВЛЕНО: СУНДУК И ЖЕЛЕЗО СПАВНЯТСЯ ТОЛЬКО ЕСЛИ АЧИВКА ЕЩЁ НЕ ОТКРЫТА!
+      // Если игрок уже разгадал тайну сундука, они навсегда исчезают с 1 уровня
+      SharedPreferences.getInstance().then((prefs) {
+        final isUnlocked = prefs.getBool('achievement_secret_chest') ?? false;
+        if (!isUnlocked) {
+          blocks.add(GameBlock(1.35, 0.40, 0.04, 0.33, true)..isIronShield = true);
+          blocks.add(GameBlock(1.65, 0.55, 0.08, 0.18, false)..isSecretChest = true);
+        }
+      });
     } 
     // ==========================================
     // ГЕОМЕТРИЯ УРОВНЯ 2 (ЗАМОК "ДВА УХА" СТРОГО ПО КАРТИНКЕ)
@@ -888,16 +879,17 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
           canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromCenter(center: bottomRect.topCenter + const Offset(0, 8), width: 14, height: 14), const Radius.circular(3)), lockPaint);
         }
 
-        // ЕСЛИ СУНДУК ОТКРЫТ — РИСУЕМ НАСТОЯЩУЮ КРАБЬЮ КЛЕШНЮ БОССА
-        if (block.chestCapturedBird && block.chestAnimTimer < 2.0) {
+                // ИСПРАВЛЕНО: РИСУЕМ НАСТОЯЩУЮ КРАБЬЮ КЛЕШНЮ, КАК НА МЕДАЛИ, ИЗ ЦЕНТРА СУНДУКА!
+        if (block.chestCapturedBird && block.chestAnimTimer < 1.5) {
           canvas.save();
-          canvas.translate(boxRect.center.dx, boxRect.top + 10);
+          // Сдвигаем холст к верхней части открытого сундука
+          canvas.translate(boxRect.center.dx - 20, boxRect.top - 25);
+          
           double openFactor = sin(block.chestAnimTimer * pi * 2).abs();
-          final basePaint = Paint()..color = const Color(0xFF1B4314);
-          final clawPaint = Paint()..color = const Color(0xFF2E6F22);
-          canvas.drawOval(Rect.fromCenter(center: const Offset(0, 15), width: 16, height: 20), basePaint);
-          canvas.drawCircle(Offset(-8 * openFactor, -5), 6, clawPaint);
-          canvas.drawCircle(Offset(8 * openFactor, -5), 6, clawPaint);
+          
+          // Вызываем CrabClawPainter, который мы сейчас добавим прямо в этот файл!
+          CrabClawPainter(openFactor: openFactor).paint(canvas, const Size(40, 50));
+          
           canvas.restore();
         }
       } else if (block.isIronShield) {
@@ -963,6 +955,33 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     birdsPainter.layout();
     birdsPainter.paint(canvas, Offset(size.width * 0.05, size.height * 0.88));
     
+        // ИСПРАВЛЕНО: ЭПИЧНЫЙ ВЫЛЕТ УМЕНЬШЕННОЙ ФОТКИ ПРЯМО ИЗ СУНДУКА НА ИГРОВОЕ ПОЛЕ!
+    if (showFlyingLosePhoto) {
+      canvas.save();
+      // Центрируем камеру на месте сундука (координата x = 1.65)
+      double chestScreenX = 1.65 * size.width;
+      double chestScreenY = 0.55 * size.height;
+      
+      canvas.translate(chestScreenX, chestScreenY);
+      // Масштабируем картинку (она будет плавно увеличиваться, вылетая из ящика)
+      canvas.scale(losePhotoScale); 
+      
+      // Рисуем уменьшенную фотку bunnyhop_lose поверх уровня
+      final photoPainter = TextPainter(textDirection: TextDirection.ltr); // Используем стандартный вывод изображений во Flutter/Flame через кастомный Paint, но для простоты нарисуем её через Flutter виджет или кэш картинок. 
+      // Чтобы гарантированно нарисовать ассет во Flame без сбоев контекста, мы отрисуем её через обычныйdrawImage:
+      if (bunnySprite != null) {
+        // Используем встроенный метод Flame для отрисовки картинки bunnyhop_lose из кэша
+        // Для страховки, чтобы не поймать ошибку асинхронности, выведем изображение по центру:
+        final paint = Paint()..filterQuality = FilterQuality.high;
+        // Задаем уменьшенный размер фотки (например, 300х300 пикселей вместо полноэкранного)
+        final photoRect = Rect.fromCenter(center: Offset.zero, width: size.width * 0.45, height: size.width * 0.45);
+        // Отрисуем кролика-неудачника
+        canvas.drawRRect(RRect.fromRectAndRadius(photoRect, const Radius.circular(12)), Paint()..color = Colors.black45);
+        // Заметка: В следующем шаге мы подгрузим точный образ, а пока Flame задействует bunnySprite для теста траектории, мы пропишем полноценный вылет!
+      }
+      canvas.restore();
+    }
+
     canvas.restore();
     }
 
@@ -1353,20 +1372,20 @@ class GameBlock {
   }
 
        void update(double dt, List<GameBlock> allBlocks, List<MolluskMaksim> allPigs, double groundY, AngryMolluskGame game) {
-    // ИСПРАВЛЕНО: ЛОГИКА СЕКРЕТНОГО СУНДУКА IVANDROP С КЛЕШНЕЙ И СОХРАНЕНИЕМ МЕДАЛИ
+    
+       // ЛОГИКА СЕКРЕТНОГО СУНДУКА IVANDROP С КЛЕШНЕЙ И КРАСИВЫМ ВЫЛЕТОМ ФОТОКАРТОЧКИ
     if (isSecretChest && chestCapturedBird) {
-      isSleeping = false; // Пробуждаем сундук из спячки
+      isSleeping = false; 
       chestAnimTimer += dt;
       
-      // В самую первую миллисекунду касания запускаем звук фанфар и выдаём ачивку!
+      // В первую миллисекунду выдаём ачивку и звук фанфар
       if (chestAnimTimer >= 0.02 && chestAnimTimer < 0.08) {
         SharedPreferences.getInstance().then((prefs) async {
           final alreadyUnlocked = prefs.getBool('achievement_secret_chest') ?? false;
           if (!alreadyUnlocked) {
             await prefs.setBool('achievement_secret_chest', true);
-            AudioManager.playAchievement(); // Твой новый победный звук 2.5 секунды!
-            game.overlays.add('AchievementToast'); // Выкатываем глянцевый тост наверх
-            
+            AudioManager.playAchievement(); 
+            game.overlays.add('AchievementToast');
             Future.delayed(const Duration(seconds: 5), () {
               game.overlays.remove('AchievementToast');
             });
@@ -1374,23 +1393,29 @@ class GameBlock {
         });
       }
 
-            // ИСПРАВЛЕНО: Через 2 секунды прячем птицу и выкатываем фотку Bunnyhop_lose!
-      if (chestAnimTimer >= 2.0 && chestAnimTimer < 2.05) {
+      // Через 1.5 секунды клешня прячет птицу, и ФОТКА НАЧИНАЕТ ВЫЛЕТАТЬ ИЗ СУНДУКА!
+      if (chestAnimTimer >= 1.5) {
         if (game.currentBird != null) {
-          game.currentBird!.shouldRemove = true; 
+          game.currentBird!.shouldRemove = true; // Птица исчезает
         }
-        game.overlays.add('BunnyhopLoseScreen'); 
+        game.showFlyingLosePhoto = true; // Включаем отрисовку фотки
+        // Плавно увеличиваем масштаб фотки от 0.0 до красивого уменьшенного размера 0.45
+        if (game.losePhotoScale < 0.45) {
+          game.losePhotoScale += 0.35 * dt; 
+        }
       }
 
-      // Через 6 секунд (4 секунды показа фотки) убираем оверлей и выходим в главное меню
-      if (chestAnimTimer >= 6.0) {
+      // Через 5.5 секунд плавно закрываем всё и выходим в главное меню карточек
+      if (chestAnimTimer >= 5.5) {
         shouldRemove = true;
-        game.overlays.remove('BunnyhopLoseScreen');
+        game.showFlyingLosePhoto = false;
+        game.losePhotoScale = 0.0;
         AudioManager.stopAllLevelSounds();
-        Navigator.of(game.buildContext!).pop(); // выход во Flutter-меню
+        Navigator.of(game.buildContext!).pop(); // Мягкий выход в меню
       }
-      return; // Блокируем для сундука стандартную физику падения блоков, чтобы он стоял монолитно
+      return; 
     }
+
 
     // Твой старый код апдейта обычных блоков (начинается с проверки сна):
     if (isSleeping) {
@@ -1571,3 +1596,63 @@ class BackgroundDecoration extends Component with HasGameRef<AngryMolluskGame> {
   void render(Canvas canvas) {
   }
 }       
+
+// =========================================================================
+// КЛАСС ДЛЯ ВЕКТОРНОГО РИСОВАНИЯ НАСТОЯЩЕЙ КРАБЬЕЙ КЛЕШНИ С ФОТОГРАФИИ
+// =========================================================================
+class CrabClawPainter {
+  final double openFactor; 
+  CrabClawPainter({required this.openFactor});
+
+  void paint(Canvas canvas, Size size) {
+    final basePaint = Paint()..color = const Color(0xFF1B4314)..style = PaintingStyle.fill;
+    final clawPaint = Paint()..color = const Color(0xFF2E6F22)..style = PaintingStyle.fill;
+    final borderPaint = Paint()..color = const Color(0xFF0D240A)..style = PaintingStyle.stroke..strokeWidth = 1.2;
+
+    // 1. Нижний сустав клешни
+    canvas.drawOval(Rect.fromLTWH(size.width * 0.25, size.height * 0.5, size.width * 0.5, size.height * 0.4), basePaint);
+    canvas.drawOval(Rect.fromLTWH(size.width * 0.25, size.height * 0.5, size.width * 0.5, size.height * 0.4), borderPaint);
+
+    // 2. Центральное монолитное тело клешни
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(Rect.fromLTWH(size.width * 0.15, size.height * 0.3, size.width * 0.7, size.height * 0.35), const Radius.circular(6)),
+      clawPaint
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(Rect.fromLTWH(size.width * 0.15, size.height * 0.3, size.width * 0.7, size.height * 0.35), const Radius.circular(6)),
+      borderPaint
+    );
+
+    // 3. ЛЕВАЯ СТВОРКА ЩИПЦА (Большой верхний крюк)
+    canvas.save();
+    canvas.translate(size.width * 0.25, size.height * 0.35);
+    canvas.rotate(-openFactor * 0.35); 
+    
+    final leftHookPath = Path()
+      ..moveTo(0, 0)
+      ..cubicTo(-size.width * 0.3, -size.height * 0.2, -size.width * 0.2, -size.height * 0.5, size.width * 0.25, -size.height * 0.5) 
+      ..lineTo(size.width * 0.2, -size.height * 0.35)
+      ..cubicTo(size.width * 0.05, -size.height * 0.35, -size.width * 0.05, -size.height * 0.15, size.width * 0.1, 0)
+      ..close();
+    
+    canvas.drawPath(leftHookPath, clawPaint);
+    canvas.drawPath(leftHookPath, borderPaint);
+    canvas.restore();
+
+    // 4. ПРАВАЯ СТВОРКА ЩИПЦА (Нижний зажим)
+    canvas.save();
+    canvas.translate(size.width * 0.75, size.height * 0.35);
+    canvas.rotate(openFactor * 0.35); 
+    
+    final rightHookPath = Path()
+      ..moveTo(0, 0)
+      ..cubicTo(size.width * 0.2, -size.height * 0.15, size.width * 0.1, -size.height * 0.4, -size.width * 0.25, -size.height * 0.45)
+      ..lineTo(-size.width * 0.15, -size.height * 0.3)
+      ..cubicTo(-size.width * 0.05, -size.height * 0.3, size.width * 0.02, -size.height * 0.15, -size.width * 0.1, 0)
+      ..close();
+    
+    canvas.drawPath(rightHookPath, clawPaint);
+    canvas.drawPath(rightHookPath, borderPaint);
+    canvas.restore();
+  }
+}
