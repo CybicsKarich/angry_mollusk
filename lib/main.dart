@@ -1166,7 +1166,7 @@ class ScaryMouthPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final teethPaint = Paint()..color = const Color(0xFFE0E0E0)..style = PaintingStyle.fill; // грязно-белые зубы
-    final c強iesPaint = Paint()..color = const Color(0xFF5D4037)..style = PaintingStyle.fill; // кариес (темные пятна)
+    final cariesPaint = Paint()..color = const Color(0xFF5D4037)..style = PaintingStyle.fill; // кариес (темные пятна)
     final crackPaint = Paint()..color = const Color(0xFF212121)..style = PaintingStyle.stroke..strokeWidth = 0.8; // трещины
     final borderPaint = Paint()..color = const Color(0xFF424242)..style = PaintingStyle.stroke..strokeWidth = 1.0;
 
@@ -1186,7 +1186,7 @@ class ScaryMouthPainter extends CustomPainter {
 
       // Добавляем кариес на центральные зубы (на i = 1 или 3)
       if (i == 1) {
-        canvas.drawCircle(Offset(rect.left + 3, rect.bottom - 3), 1.2, c強iesPaint);
+        canvas.drawCircle(Offset(rect.left + 3, rect.bottom - 3), 1.2, cariesPaint);
       }
       // Тонкая вертикальная трещинка на зубе
       if (i == 2) {
@@ -1205,7 +1205,7 @@ class ScaryMouthPainter extends CustomPainter {
 
       // Кариес на нижнем зубе
       if (i == 3) {
-        canvas.drawCircle(Offset(rect.right - 3, rect.top + 3), 1.5, c強iesPaint);
+        canvas.drawCircle(Offset(rect.right - 3, rect.top + 3), 1.5, cariesPaint);
       }
       // Трещина на нижнем зубе
       if (i == 4) {
