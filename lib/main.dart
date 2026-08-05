@@ -1161,19 +1161,13 @@ class CrabClawPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
-// КЛАСС ДЛЯ РИСОВАНИЯ ОДНОЙ СТИЛЬНОЙ ЗЛОВЕЩЕЙ УЛЫБКИ С МАЛЕНЬКИМИ ТЕМНЫМИ ЗУБАМИ
+// КЛАСС ДЛЯ РИСОВАНИЯ УЛЫБКИ, СФОРМИРОВАННОЙ СТРОГО ИЗ САМИХ КРОШЕЧНЫХ ЗУБИКОВ (БЕЗ ЛИНИИ ГУБ)
 class ScaryMouthPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    // Краска для самой дуги улыбки (тонкая зловещая линия)
-    final lipPaint = Paint()
-      ..color = const Color(0xFF301010) // Очень тёмный, бордово-чёрный цвет губ
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
-
-    // Краска для незаметных зубок (грязно-серые, скрывающиеся в темноте рта)
+    // Малозаметный графитовый цвет для маленьких зубиков
     final toothPaint = Paint()
-      ..color = const Color(0xFF424242) // Малозаметный графитовый цвет
+      ..color = const Color(0xFF424242) 
       ..style = PaintingStyle.fill;
 
     final borderPaint = Paint()
@@ -1181,34 +1175,28 @@ class ScaryMouthPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.5;
 
-    // 1. Рисуем красивую сплошную зловещую дугу улыбки (похоже на Ardor)
-    final mouthPath = Path()
-      ..moveTo(0, size.height * 0.2)
-      ..quadraticBezierTo(size.width * 0.5, size.height * 0.9, size.width, size.height * 0.2);
-    canvas.drawPath(mouthPath, lipPaint);
+    int teethCount = 7; // Чуть увеличили плотность, чтобы дуга зубов смотрелась цельнее
+    double toothW = size.width / (teethCount + 1);
+    double toothH = 4.5; // Маленькая высота зубиков
 
-    // 2. ИСПРАВЛЕНО: Один единственный ряд маленьких, еле заметных квадратных зубиков!
-    int teethCount = 6;
-    double toothW = size.width / (teethCount + 2);
-    double toothH = 4.0; // Совсем крошечная высота, еле видны!
-
+    // ИСПРАВЛЕНО: Линия улыбки полностью удалена! Рисуем только зубы, выстроенные в форме улыбки
     for (int i = 0; i < teethCount; i++) {
-      // Сдвигаем зубы ближе к центру улыбки, уходя от краев рта
-      double offsetX = toothW + (i * toothW);
+      // Центрируем ряд зубов по ширине
+      double offsetX = (size.width - (teethCount * toothW)) / 2 + (i * toothW);
       
-      // Вычисляем высоту зуба по параболе, чтобы они идеально сидели вдоль дуги улыбки
+      // Вычисляем высоту зуба по синусоидальной дуге, чтобы сами зубы образовали оскал
       double progress = i / (teethCount - 1);
-      double offsetY = size.height * 0.2 + (sin(progress * pi) * (size.height * 0.4));
+      double offsetY = size.height * 0.2 + (sin(progress * pi) * (size.height * 0.45));
 
-      final rect = Rect.fromLTWH(offsetX + 1, offsetY, toothW - 2, toothH);
+      final rect = Rect.fromLTWH(offsetX, offsetY, toothW - 1.5, toothH);
       
       canvas.drawRect(rect, toothPaint);
       canvas.drawRect(rect, borderPaint);
 
-      // Маленький незаметный кариес (микро-точка на одном из центральных зубиков)
-      if (i == 2) {
+      // Маленькая точка кариеса на одном из центральных зубиков для жути
+      if (i == 3) {
         final cariesPaint = Paint()..color = const Color(0xFF1A0A0A)..style = PaintingStyle.fill;
-        canvas.drawCircle(Offset(rect.center.dx, rect.bottom - 1), 0.7, cariesPaint);
+        canvas.drawCircle(Offset(rect.center.dx, rect.bottom - 1.2), 0.6, cariesPaint);
       }
     }
   }
@@ -1216,4 +1204,5 @@ class ScaryMouthPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
+
 
