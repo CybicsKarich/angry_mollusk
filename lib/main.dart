@@ -913,7 +913,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                                              // 4 КРУГ: КРОВОЖАДНАЯ МЕСТЬ (Идеальный Ardor-стиль, кастомная клешня и зелёная слюна!)
+                                                // 4 КРУГ: КРОВОЖАДНАЯ МЕСТЬ (Эпичный Ardor-стиль, квадратные зубы с кариесом!)
                         _buildAchievementCircle(
                           title: isSecretChestUnlocked ? "Кровожадная месть" : "SECRET",
                           desc: isSecretChestUnlocked ? "Ты раскрыл тайну\nскрытого сундука!" : "???",
@@ -921,14 +921,11 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                           child: AnimatedBuilder(
                             animation: _animController,
                             builder: (context, _) {
-                              // Рассчитываем фазы для цикличной плавной анимации
                               double cycle = (_animController.value * 2) % 1.0; 
                               bool isVisible = cycle < 0.55; 
                               
-                              // ОГРАНИЧИЛИ ДВИЖЕНИЕ: Клешня поднимается поменьше, чтобы не лезть на рот!
+                              // Клешня работает аккуратно снизу и не лезет на зубы
                               double clawY = isVisible ? (45 - (cycle * 25)) : 55; 
-                              
-                              // Скорость и угол раскрытия щипцов краба
                               double clawOpenFactor = isVisible ? (sin(cycle * pi * 4).abs()) : 0.0;
 
                               return Container(
@@ -937,12 +934,12 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                                   alignment: Alignment.center,
                                   children: [
                                     
-                                    // А) ЗЛОВЕЩИЙ ОСКАЛ И ГЛАЗА (Приподняты и уменьшены)
+                                    // А) ЗЛОВЕЩИЙ ОСКАЛ И ГЛАЗА ARDOR GAMING
                                     if (isVisible)
                                       Stack(
                                         alignment: Alignment.center,
                                         children: [
-                                          // 1. Светящиеся демонические глаза Ardor (Чуть повыше: -26)
+                                          // 1. Светящиеся демонические глаза Ardor
                                           Transform.translate(
                                             offset: const Offset(-14, -26),
                                             child: Transform.rotate(
@@ -964,50 +961,18 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                                             ),
                                           ),
                                           
-                                          // 2. Жуткая широкая зубастая улыбка (Сжата и приподнята: -8)
+                                          // 2. ИСПРАВЛЕНО: Сплошная челюсть с квадратными потрескавшимися зубами!
                                           Transform.translate(
-                                            offset: const Offset(0, -8),
-                                            child: SizedBox(
-                                              width: 60,
-                                              height: 25,
-                                              child: Stack(
-                                                children: [
-                                                  // Острые зубы-треугольники дугой
-                                                  ...List.generate(7, (i) {
-                                                    double posX = i * 8.5;
-                                                    double posY = sin((i / 6) * pi) * 5.0;
-                                                    return Positioned(
-                                                      left: posX,
-                                                      top: posY,
-                                                      child: Icon(Icons.change_history_rounded, color: Colors.grey.shade400, size: 9),
-                                                    );
-                                                  }),
-                                                  // ИСПРАВЛЕНО: Зелёная свиная слюна, стекающая каплями из-под зубов!
-                                                  ...List.generate(3, (i) {
-                                                    // Разносим капли слюны по центру рта
-                                                    double posX = 16.0 + (i * 12.0);
-                                                    double posY = 10.0 + sin(i * 1.5).abs() * 3;
-                                                    return Positioned(
-                                                      left: posX,
-                                                      top: posY,
-                                                      child: Container(
-                                                        width: 2.5,
-                                                        height: 5.0 + (i * 2 % 3), // небольшие сосульки слюны
-                                                        decoration: BoxDecoration(
-                                                          color: Colors.greenAccent.withValues(alpha: 0.8),
-                                                          borderRadius: BorderRadius.circular(2),
-                                                        ),
-                                                      ),
-                                                    );
-                                                  }),
-                                                ],
-                                              ),
+                                            offset: const Offset(0, -6),
+                                            child: CustomPaint(
+                                              size: const Size(60, 20),
+                                              painter: ScaryMouthPainter(),
                                             ),
                                           ),
                                         ],
                                       ),
 
-                                    // Б) НАСТОЯЩАЯ МОНОЛИТНАЯ ЗЕЛЁНАЯ КЛЕШНЯ КРАБА (Рисуется через холст CustomPaint!)
+                                    // Б) НАСТОЯЩАЯ МОНОЛИТНАЯ ЗЕЛЁНАЯ КЛЕШНЯ КРАБА
                                     Transform.translate(
                                       offset: Offset(0, clawY),
                                       child: CustomPaint(
@@ -1196,3 +1161,59 @@ class CrabClawPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
+// КЛАСС ДЛЯ РИСОВАНИЯ СПЛОШНОЙ ЧЕЛЮСТИ С КВАДРАТНЫМИ ЗУБАМИ И КАРИЕСОМ
+class ScaryMouthPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final teethPaint = Paint()..color = const Color(0xFFE0E0E0)..style = PaintingStyle.fill; // грязно-белые зубы
+    final c強iesPaint = Paint()..color = const Color(0xFF5D4037)..style = PaintingStyle.fill; // кариес (темные пятна)
+    final crackPaint = Paint()..color = const Color(0xFF212121)..style = PaintingStyle.stroke..strokeWidth = 0.8; // трещины
+    final borderPaint = Paint()..color = const Color(0xFF424242)..style = PaintingStyle.stroke..strokeWidth = 1.0;
+
+    // Ширина одного зуба (сделаем 5 штук в ряд сверху и 5 снизу для сплошного оскала)
+    double toothW = size.width / 5;
+    double toothH = size.height / 2;
+
+    // ВЕРХНИЙ РЯД ЗУБОВ (Сплошные, квадратные, идут дугой)
+    for (int i = 0; i < 5; i++) {
+      double offsetX = i * toothW;
+      // Делаем легкий изгиб челюсти дугой вниз по краям
+      double offsetY = sin((i / 4) * pi) * 2.5; 
+      
+      final rect = Rect.fromLTWH(offsetX + 0.5, offsetY, toothW - 1.0, toothH - 1.0);
+      canvas.drawRect(rect, teethPaint);
+      canvas.drawRect(rect, borderPaint);
+
+      // Добавляем кариес на центральные зубы (на i = 1 или 3)
+      if (i == 1) {
+        canvas.drawCircle(Offset(rect.left + 3, rect.bottom - 3), 1.2, c強iesPaint);
+      }
+      // Тонкая вертикальная трещинка на зубе
+      if (i == 2) {
+        canvas.drawLine(Offset(rect.center.dx, rect.top), Offset(rect.center.dx + 1, rect.bottom - 2), crackPaint);
+      }
+    }
+
+    // НИЖНИЙ РЯД ЗУБОВ (Смыкаются с верхними)
+    for (int i = 0; i < 5; i++) {
+      double offsetX = i * toothW;
+      double offsetY = sin((i / 4) * pi) * 2.5;
+
+      final rect = Rect.fromLTWH(offsetX + 0.5, toothH + offsetY, toothW - 1.0, toothH - 1.0);
+      canvas.drawRect(rect, teethPaint);
+      canvas.drawRect(rect, borderPaint);
+
+      // Кариес на нижнем зубе
+      if (i == 3) {
+        canvas.drawCircle(Offset(rect.right - 3, rect.top + 3), 1.5, c強iesPaint);
+      }
+      // Трещина на нижнем зубе
+      if (i == 4) {
+        canvas.drawLine(Offset(rect.left + 4, rect.bottom), Offset(rect.left + 2, rect.top + 2), crackPaint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
