@@ -913,7 +913,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // 4 КРУГ: КРОВОЖАДНАЯ МЕСТЬ (Обновлённый Ardor-стиль с крабьей клешнёй!)
+                                              // 4 КРУГ: КРОВОЖАДНАЯ МЕСТЬ (Идеальный Ardor-стиль, кастомная клешня и зелёная слюна!)
                         _buildAchievementCircle(
                           title: isSecretChestUnlocked ? "Кровожадная месть" : "SECRET",
                           desc: isSecretChestUnlocked ? "Ты раскрыл тайну\nскрытого сундука!" : "???",
@@ -925,10 +925,11 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                               double cycle = (_animController.value * 2) % 1.0; 
                               bool isVisible = cycle < 0.55; 
                               
-                              // Анимация движения клешни вверх-вниз по фото
-                              double clawY = isVisible ? (32 - (cycle * 55)) : 45; 
-                              // Анимация раскрытия створок клешни
-                              double clawOpenAngle = isVisible ? (sin(cycle * pi * 4).abs() * 0.25) : 0.0;
+                              // ОГРАНИЧИЛИ ДВИЖЕНИЕ: Клешня поднимается поменьше, чтобы не лезть на рот!
+                              double clawY = isVisible ? (45 - (cycle * 25)) : 55; 
+                              
+                              // Скорость и угол раскрытия щипцов краба
+                              double clawOpenFactor = isVisible ? (sin(cycle * pi * 4).abs()) : 0.0;
 
                               return Container(
                                 color: const Color(0xFF050101), // Почти чёрный зловещий фон
@@ -936,98 +937,82 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                                   alignment: Alignment.center,
                                   children: [
                                     
-                                    // А) ЗЛОВЕЩИЙ ОСКАЛ И ГЛАЗА В СТИЛЕ ARDOR GAMING
+                                    // А) ЗЛОВЕЩИЙ ОСКАЛ И ГЛАЗА (Приподняты и уменьшены)
                                     if (isVisible)
                                       Stack(
                                         alignment: Alignment.center,
                                         children: [
-                                          // 1. Светящиеся демонические глаза Ardor (левый и правый наклонные прямоугольники)
+                                          // 1. Светящиеся демонические глаза Ardor (Чуть повыше: -26)
                                           Transform.translate(
-                                            offset: const Offset(-16, -20),
+                                            offset: const Offset(-14, -26),
                                             child: Transform.rotate(
                                               angle: 0.3,
                                               child: Container(
-                                                width: 16, height: 6,
-                                                decoration: BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Colors.red.shade900, blurRadius: 8, spreadRadius: 4)]),
+                                                width: 14, height: 5,
+                                                decoration: BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Colors.red.shade900, blurRadius: 6, spreadRadius: 3)]),
                                               ),
                                             ),
                                           ),
                                           Transform.translate(
-                                            offset: const Offset(16, -20),
+                                            offset: const Offset(14, -26),
                                             child: Transform.rotate(
                                               angle: -0.3,
                                               child: Container(
-                                                width: 16, height: 6,
-                                                decoration: BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Colors.red.shade900, blurRadius: 8, spreadRadius: 4)]),
+                                                width: 14, height: 5,
+                                                decoration: BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Colors.red.shade900, blurRadius: 6, spreadRadius: 3)]),
                                               ),
                                             ),
                                           ),
                                           
-                                          // 2. Жуткая широкая зубастая улыбка (дуга из белых острых клыков)
+                                          // 2. Жуткая широкая зубастая улыбка (Сжата и приподнята: -8)
                                           Transform.translate(
-                                            offset: const Offset(0, -2),
+                                            offset: const Offset(0, -8),
                                             child: SizedBox(
-                                              width: 70,
+                                              width: 60,
                                               height: 25,
                                               child: Stack(
-                                                children: List.generate(7, (i) {
-                                                  double posX = i * 10.0;
-                                                  double posY = sin((i / 6) * pi) * 6.0; // создаем изгиб рта дугой
-                                                  return Positioned(
-                                                    left: posX,
-                                                    top: posY,
-                                                    child: Icon(Icons.change_history_rounded, color: Colors.grey.shade400, size: 10), // острые зубы-треугольники
-                                                  );
-                                                }),
+                                                children: [
+                                                  // Острые зубы-треугольники дугой
+                                                  ...List.generate(7, (i) {
+                                                    double posX = i * 8.5;
+                                                    double posY = sin((i / 6) * pi) * 5.0;
+                                                    return Positioned(
+                                                      left: posX,
+                                                      top: posY,
+                                                      child: Icon(Icons.change_history_rounded, color: Colors.grey.shade400, size: 9),
+                                                    );
+                                                  }),
+                                                  // ИСПРАВЛЕНО: Зелёная свиная слюна, стекающая каплями из-под зубов!
+                                                  ...List.generate(3, (i) {
+                                                    // Разносим капли слюны по центру рта
+                                                    double posX = 16.0 + (i * 12.0);
+                                                    double posY = 10.0 + sin(i * 1.5).abs() * 3;
+                                                    return Positioned(
+                                                      left: posX,
+                                                      top: posY,
+                                                      child: Container(
+                                                        width: 2.5,
+                                                        height: 5.0 + (i * 2 % 3), // небольшие сосульки слюны
+                                                        decoration: BoxDecoration(
+                                                          color: Colors.greenAccent.withValues(alpha: 0.8),
+                                                          borderRadius: BorderRadius.circular(2),
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }),
+                                                ],
                                               ),
                                             ),
                                           ),
                                         ],
                                       ),
 
-                                    // Б) НАСТОЯЩАЯ КРАБЬЯ ЗЕЛЁНАЯ КЛЕШНЯ (Оживает поверх лица босса)
+                                    // Б) НАСТОЯЩАЯ МОНОЛИТНАЯ ЗЕЛЁНАЯ КЛЕШНЯ КРАБА (Рисуется через холст CustomPaint!)
                                     Transform.translate(
                                       offset: Offset(0, clawY),
-                                      child: SizedBox(
-                                        width: 50,
-                                        height: 60,
-                                        child: Stack(
-                                          alignment: Alignment.bottomCenter,
-                                          children: [
-                                            // 1. Нижний круглый сустав клешни (темный шарик на фото)
-                                            Positioned(
-                                              bottom: 0,
-                                              child: Container(width: 18, height: 14, decoration: const BoxDecoration(color: Color(0xFF1B4314), shape: BoxShape.circle)),
-                                            ),
-                                            // 2. Основное массивное тело клешни (зелёный кокон с фото)
-                                            Positioned(
-                                              bottom: 8,
-                                              child: Container(
-                                                width: 24,
-                                                height: 30,
-                                                decoration: BoxDecoration(color: const Color(0xFF2E6F22), borderRadius: BorderRadius.circular(8)),
-                                              ),
-                                            ),
-                                            // 3. Левая неподвижная створка щипца (верхний крюк)
-                                            Positioned(
-                                              top: 2,
-                                              left: 8,
-                                              child: Transform.rotate(
-                                                angle: -clawOpenAngle,
-                                                child: const Icon(Icons.gavel_rounded, color: Color(0xFF388E3C), size: 20),
-                                              ),
-                                            ),
-                                            // 4. Правая подвижная створка щипца (нижний зажим)
-                                            Positioned(
-                                              top: 2,
-                                              right: 8,
-                                              child: Transform.rotate(
-                                                angle: clawOpenAngle,
-                                                child: const Icon(Icons.navigation_rounded, color: Color(0xFF1B4314), size: 16),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                                      child: CustomPaint(
+                                        size: const Size(40, 50),
+                                        painter: CrabClawPainter(openFactor: clawOpenFactor),
                                       ),
                                     ),
                                   ],
@@ -1035,7 +1020,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                               );
                             },
                           ),
-                        ),
+                        ),     
                         const SizedBox(width: 35),
 
                         // 5 КРУГ: НОВЫЙ ОПЫТ (Клик по IvanDrop во вкладке Дополнительно)
@@ -1146,4 +1131,68 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
   }
 }
 
+// КЛАСС ДЛЯ ВЕКТОРНОГО РИСОВАНИЯ НАСТОЯЩЕЙ КРАБЬЕЙ КЛЕШНИ С ФОТОГРАФИИ
+class CrabClawPainter extends CustomPainter {
+  final double openFactor; // отвечает за сжатие/раскрытие щипцов
+  CrabClawPainter({required this.openFactor});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Краски: тёмно-зелёная для базы и ярко-зелёная для верхних щипцов
+    final basePaint = Paint()..color = const Color(0xFF1B4314)..style = PaintingStyle.fill;
+    final clawPaint = Paint()..color = const Color(0xFF2E6F22)..style = PaintingStyle.fill;
+    final borderPaint = Paint()..color = const Color(0xFF0D240A)..style = PaintingStyle.stroke..strokeWidth = 1.2;
+
+    // 1. Рисуем нижнее массивное основание (сустав краба)
+    canvas.drawOval(Rect.fromLTWH(size.width * 0.25, size.height * 0.5, size.width * 0.5, size.height * 0.4), basePaint);
+    canvas.drawOval(Rect.fromLTWH(size.width * 0.25, size.height * 0.5, size.width * 0.5, size.height * 0.4), borderPaint);
+
+    // 2. Центральное тело клешни (монолитный кокон)
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(Rect.fromLTWH(size.width * 0.15, size.height * 0.3, size.width * 0.7, size.height * 0.35), const Radius.circular(6)),
+      clawPaint
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(Rect.fromLTWH(size.width * 0.15, size.height * 0.3, size.width * 0.7, size.height * 0.35), const Radius.circular(6)),
+      borderPaint
+    );
+
+    // 3. ЛЕВАЯ СТВОРКА ЩИПЦА (Большой загнутый верхний крюк с фотографии)
+    canvas.save();
+    // Сдвигаем точку вращения в место соединения створок (левый верхний край базы)
+    canvas.translate(size.width * 0.25, size.height * 0.35);
+    canvas.rotate(-openFactor * 0.35); // вращаем створку для раскрытия клешни
+    
+    final leftHookPath = Path()
+      ..moveTo(0, 0)
+      ..cubicTo(-size.width * 0.3, -size.height * 0.2, -size.width * 0.2, -size.height * 0.5, size.width * 0.25, -size.height * 0.5) // закругление крюка
+      ..lineTo(size.width * 0.2, -size.height * 0.35)
+      ..cubicTo(size.width * 0.05, -size.height * 0.35, -size.width * 0.05, -size.height * 0.15, size.width * 0.1, 0)
+      ..close();
+    
+    canvas.drawPath(leftHookPath, clawPaint);
+    canvas.drawPath(leftHookPath, borderPaint);
+    canvas.restore();
+
+    // 4. ПРАВАЯ СТВОРКА ЩИПЦА (Нижний зажимающий палец с фотографии)
+    canvas.save();
+    // Точка вращения правого щипца (правый верхний край базы)
+    canvas.translate(size.width * 0.75, size.height * 0.35);
+    canvas.rotate(openFactor * 0.35); // вращаем в противоположную сторону
+    
+    final rightHookPath = Path()
+      ..moveTo(0, 0)
+      ..cubicTo(size.width * 0.2, -size.height * 0.15, size.width * 0.1, -size.height * 0.4, -size.width * 0.25, -size.height * 0.45)
+      ..lineTo(-size.width * 0.15, -size.height * 0.3)
+      ..cubicTo(-size.width * 0.05, -size.height * 0.3, size.width * 0.02, -size.height * 0.15, -size.width * 0.1, 0)
+      ..close();
+    
+    canvas.drawPath(rightHookPath, clawPaint);
+    canvas.drawPath(rightHookPath, borderPaint);
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
 
