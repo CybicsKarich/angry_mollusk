@@ -274,8 +274,23 @@ class GameScreen extends StatelessWidget {
                 );
               },
 
-                            // 3. ОВЕРЛЕЙ ПРОИГРЫША (GAME OVER)
-              'GameOverMenu': (BuildContext context, AngryMolluskGame game) {
+                // ИСПРАВЛЕНО: ПОЛНОЭКРАННЫЙ ВЫЛЕТ ФОТОГРАФИИ BUNNYHOP_LOSE!
+              'BunnyhopLoseScreen': (BuildContext context, AngryMolluskGame game) {
+                return Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  color: Colors.black, // Затемняем всё вокруг в глубокий чёрный
+                  child: Center(
+                    child: Image.asset(
+                      'assets/images/bunnyhop_lose.png', // Твой точный путь к фото!
+                      fit: BoxFit.contain, // Картинка займет максимум места без искажений
+                    ),
+                  ),
+                );
+              },        
+                     
+                // 3. ОВЕРЛЕЙ ПРОИГРЫША (GAME OVER)
+                'GameOverMenu': (BuildContext context, AngryMolluskGame game) {
                 return Center(
                   child: Container(
                     width: 300,
@@ -761,7 +776,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     }
   }
 
-  @override
+    @override
   void render(Canvas canvas) {
     final size = canvasSize.toSize();
     
@@ -770,10 +785,9 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     // Сдвигаем холст на величину нашего скролла пальцем
     canvas.translate(size.width * worldScrollX, 0);
 
-    
     final double worldWidthFactor = currentLevel == 1 ? 1.0 : (currentLevel == 2 ? 1.8 : 2.0);
 
-        // Градиент неба растягивается под ширину уровня
+    // Градиент неба растягивается под ширину уровня
     final skyPaint = Paint()
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
@@ -797,7 +811,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     canvas.restore();
 
     // Облака летают по всей ширине фона
-    final cloudPaint = Paint()..color = Colors.white.withValues(alpha: 0.85);
+    final cloudPaint = Paint()..color = Colors.white.withOpacity(0.85);
     double c1X = (size.width * 0.3 + cloudOffset1 * size.width) % (size.width * worldWidthFactor + 200) - 100;
     canvas.drawCircle(Offset(c1X, size.height * 0.15), 30, cloudPaint);
     canvas.drawCircle(Offset(c1X + 35, size.height * 0.12), 42, cloudPaint);
@@ -814,10 +828,9 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       _renderIsland(canvas, size, 0.55, 1.0); // Остров уровня 1
     } else if (currentLevel == 2) {
       _renderIsland(canvas, size, 1.28, 1.75); // Остров уровня 2 под замок bx=1.35
-    }  else if (currentLevel == 3) {
+    } else if (currentLevel == 3) {
       _renderIsland(canvas, size, 1.15, 1.95); 
     }
-
 
     // 6. КРАСНАЯ РЕЗИНКА РОГАТКИ (Отрисовывается ВСЕГДА до выстрела)
     final slingBaseX = size.width * 0.15;
@@ -841,21 +854,82 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     canvas.drawLine(Offset(slingBaseX, slingTopY + 15), leftHorn, paintSlingshot);
     canvas.drawLine(Offset(slingBaseX, slingTopY + 15), rightHorn, paintSlingshot);
 
-    // 8. ОТРИСОВКА ВСЕХ ОБЪЕКТОВ УРОВНЯ
+    // 8. ИСПРАВЛЕНО: ОТРИСОВКА ВСЕХ ОБЪЕКТОВ С УМНОЙ ПРОВЕРКОЙ НА СУНДУК И ЖЕЛЕЗО
     for (var block in blocks) {
-      block.render(canvas, size);
+      if (block.isSecretChest) {
+        // Отрисовка кастомного сундука с твоей картинки (с замком и открыванием!)
+        final boxRect = Rect.fromLTWH(block.x * size.width, block.y * size.height, block.w * size.width, block.h * size.height);
+        final woodPaint = Paint()..color = const Color(0xFFD84315);
+        final goldPaint = Paint()..color = const Color(0xFFFFD54F);
+        final lockPaint = Paint()..color = const Color(0xFFFFB300);
+        final darkInside = Paint()..color = const Color(0xFF1A0A0A);
+        final borderPaint = Paint()..color = const Color(0xFF5D4037)..style = PaintingStyle.stroke..strokeWidth = 1.5;
+
+        if (!block.chestCapturedBird) {
+          // 🧰 А) ЗАКРЫТЫЙ СУНДУК С КАРТИНКИ
+          canvas.drawRect(boxRect, woodPaint);
+          canvas.drawRect(boxRect, borderPaint);
+          canvas.drawRect(Rect.fromLTWH(boxRect.left, boxRect.top, boxRect.width, 4), goldPaint);
+          canvas.drawRect(Rect.fromLTWH(boxRect.left, boxRect.bottom - 4, boxRect.width, 4), goldPaint);
+          canvas.drawRect(Rect.fromLTWH(boxRect.left, boxRect.top, 4, boxRect.height), goldPaint);
+          canvas.drawRect(Rect.fromLTWH(boxRect.right - 4, boxRect.top, 4, boxRect.height), goldPaint);
+          canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromCenter(center: boxRect.center, width: 14, height: 16), const Radius.circular(3)), lockPaint);
+          canvas.drawCircle(boxRect.center, 2.5, Paint()..color = const Color(0xFF3E2723));
+        } else {
+          // 🔓 Б) ОТКРЫТЫЙ СУНДУК С КАРТИНКИ (Крышка откинута назад)
+          final bottomRect = Rect.fromLTWH(boxRect.left, boxRect.top + boxRect.height * 0.4, boxRect.width, boxRect.height * 0.6);
+          canvas.drawRect(bottomRect, woodPaint);
+          canvas.drawRect(bottomRect, borderPaint);
+          final topRect = Rect.fromLTWH(boxRect.left, boxRect.top - boxRect.height * 0.2, boxRect.width, boxRect.height * 0.4);
+          canvas.drawRect(topRect, woodPaint);
+          canvas.drawRect(topRect, borderPaint);
+          canvas.drawRect(Rect.fromLTWH(boxRect.left + 4, boxRect.top + 2, boxRect.width - 8, boxRect.height * 0.35), darkInside);
+          canvas.drawRect(Rect.fromLTWH(bottomRect.left, bottomRect.bottom - 4, bottomRect.width, 4), goldPaint);
+          canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromCenter(center: bottomRect.topCenter + const Offset(0, 8), width: 14, height: 14), const Radius.circular(3)), lockPaint);
+        }
+
+        // ЕСЛИ СУНДУК ОТКРЫТ — РИСУЕМ НАСТОЯЩУЮ КРАБЬЮ КЛЕШНЮ БОССА
+        if (block.chestCapturedBird && block.chestAnimTimer < 2.0) {
+          canvas.save();
+          canvas.translate(boxRect.center.dx, boxRect.top + 10);
+          double openFactor = sin(block.chestAnimTimer * pi * 2).abs();
+          final basePaint = Paint()..color = const Color(0xFF1B4314);
+          final clawPaint = Paint()..color = const Color(0xFF2E6F22);
+          canvas.drawOval(Rect.fromCenter(center: const Offset(0, 15), width: 16, height: 20), basePaint);
+          canvas.drawCircle(Offset(-8 * openFactor, -5), 6, clawPaint);
+          canvas.drawCircle(Offset(8 * openFactor, -5), 6, clawPaint);
+          canvas.restore();
+        }
+      } else if (block.isIronShield) {
+        // 🧱 Отрисовка железных ворот серебристым цветом с заклёпками
+        final boxRect = Rect.fromLTWH(block.x * size.width, block.y * size.height, block.w * size.width, block.h * size.height);
+        final ironPaint = Paint()..color = const Color(0xFFB0BEC5);
+        final borderPaint = Paint()..color = const Color(0xFF37474F)..style = PaintingStyle.stroke..strokeWidth = 2.0;
+        canvas.drawRect(boxRect, ironPaint);
+        canvas.drawRect(boxRect, borderPaint);
+        // Заклёпки по углам железа
+        final rivetPaint = Paint()..color = const Color(0xFF455A64);
+        canvas.drawCircle(boxRect.topLeft + const Offset(5, 5), 2, rivetPaint);
+        canvas.drawCircle(boxRect.topRight + const Offset(-5, 5), 2, rivetPaint);
+        canvas.drawCircle(boxRect.bottomLeft + const Offset(5, -5), 2, rivetPaint);
+        canvas.drawCircle(boxRect.bottomRight + const Offset(-5, -5), 2, rivetPaint);
+      } else {
+        // Обычные блоки замка (дерево и камень) рисуются стандартно
+        block.render(canvas, size);
+      }
     }
 
-    // СЮДА ВСТАВЛЯЕМ СВИНЕЙ! (Они нарисуются поверх островов и блоков)
+    // СВИНЬИ! (Они нарисуются поверх островов и блоков)
     for (var pig in pigs) {
       pig.render(canvas, size, maksimSprite);
     }
 
-    // СЮДА ЖЕ ВСТАВЛЯЕМ ПТИЦУ С ТРАЕКТОРИЕЙ! (Чтобы она была видна игроку)
+    // ПТИЦА С ТРАЕКТОРИЕЙ!
     if (currentBird != null && (!currentBird!.isLaunched || !currentBird!.shouldRemove)) {
       currentBird!.render(canvas, size, bunnySprite);
     }
-       // ОТОБРАЖЕНИЕ СЧЁТЧИКА ОЧКОВ (В правом верхнем углу)
+
+    // ОТОБРАЖЕНИЕ СЧЁТЧИКА ОЧКОВ (В правом верхнем углу)
     final textPainter = TextPainter(
       text: TextSpan(
         text: 'SCORE: $score',
@@ -863,17 +937,16 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
           fontFamily: 'Arial',
           fontSize: size.width * 0.035,
           fontWeight: FontWeight.bold,
-          color: const Color(0xFFFFD54F), // Сочный жёлтый цвет
-          shadows: const [
-            Shadow(offset: Offset(2, 2), blurRadius: 3.0, color: Colors.black87),
-          ],
+          color: const Color(0xFFFFD54F),
+          shadows: const [Shadow(offset: Offset(2, 2), blurRadius: 3.0, color: Colors.black87)],
         ),
       ),
       textDirection: TextDirection.ltr,
     );
     textPainter.layout();
     textPainter.paint(canvas, Offset(size.width * 0.8, size.height * 0.05));
-      // ОТОБРАЖЕНИЕ ОСТАВШИХСЯ ПТИЦ В ЛЕВОМ НИЖНЕМ УГЛУ
+
+    // ОТОБРАЖЕНИЕ ОСТАВШИХСЯ ПТИЦ В ЛЕВОМ НИЖНЕМ УГЛУ
     final int birdsCount = birdsQueue.length;
     final birdsPainter = TextPainter(
       text: TextSpan(
@@ -881,7 +954,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
         style: TextStyle(
           fontSize: size.width * 0.032,
           fontWeight: FontWeight.bold,
-          color: const Color(0xFFE53935), // Фирменный красный цвет птиц
+          color: const Color(0xFFE53935),
           shadows: const [Shadow(offset: Offset(1.5, 1.5), blurRadius: 2.0, color: Colors.black87)],
         ),
       ),
@@ -891,7 +964,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     birdsPainter.paint(canvas, Offset(size.width * 0.05, size.height * 0.88));
     
     canvas.restore();
-  }
+    }
 
          @override
   void onDragStart(DragStartEvent event) {
@@ -1301,9 +1374,20 @@ class GameBlock {
         });
       }
 
-      // Ровно через 2 секунды (когда клешня "утащила" птицу), сундук красиво удаляется с поля боя
-      if (chestAnimTimer >= 2.0) {
+            // ИСПРАВЛЕНО: Через 2 секунды прячем птицу и выкатываем фотку Bunnyhop_lose!
+      if (chestAnimTimer >= 2.0 && chestAnimTimer < 2.05) {
+        if (game.currentBird != null) {
+          game.currentBird!.shouldRemove = true; 
+        }
+        game.overlays.add('BunnyhopLoseScreen'); 
+      }
+
+      // Через 6 секунд (4 секунды показа фотки) убираем оверлей и выходим в главное меню
+      if (chestAnimTimer >= 6.0) {
         shouldRemove = true;
+        game.overlays.remove('BunnyhopLoseScreen');
+        AudioManager.stopAllLevelSounds();
+        Navigator.of(game.buildContext!).pop(); // выход во Flutter-меню
       }
       return; // Блокируем для сундука стандартную физику падения блоков, чтобы он стоял монолитно
     }
@@ -1384,9 +1468,10 @@ class GameBlock {
       // Проверка потери опоры в динамике: если нижний блок разрушен, верхний просыпается и падает
       bool hasFloor = false;
       
-     double islandStart = game.currentLevel == 1 ? 0.55 : (game.currentLevel == 2 ? 1.28 : 1.15);
+          double islandStart = game.currentLevel == 1 ? 0.55 : (game.currentLevel == 2 ? 1.28 : 1.15);
         
-        if ((y + h - groundY).abs() < 0.005 && (x <= 0.25 || x >= 0.55)) {
+        // ИСПРАВЛЕНО: Теперь опора проверяется по умной переменной islandStart!
+        if ((y + h - groundY).abs() < 0.005 && (x <= 0.25 || x >= islandStart)) {
         hasFloor = true;
       } else {
         for (var other in allBlocks) {
