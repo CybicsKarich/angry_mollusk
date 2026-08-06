@@ -466,7 +466,7 @@ class _LevelsScreenState extends State<LevelsScreen> {
 
                   // ИСПРАВЛЕНО: ПАНЕЛЬ НАВИГАЦИИ С КНОПКАМИ ПО УГЛАМ
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, bottom: 15),
+                    padding: const EdgeInsets.only(left: 24, right: 24, bottom: 15),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
