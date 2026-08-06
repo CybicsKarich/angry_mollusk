@@ -1381,26 +1381,34 @@ class ComicIntroScreen extends StatelessWidget {
                             ),
                             
                             // БОЛЬШАЯ ПОДВИГНУТАЯ КОЖАНАЯ СУМКА-ТОРБА ПО ФОТО (С затяжками и ремнями!)
+                                                        // 3. БОЛЬШАЯ ОЧЕНЬ ДЕТАЛИЗИРОВАННАЯ КОЖАНАЯ СУМКА-ТОРБА (С КЛАПАНОМ И ПРЯЖКОЙ)
                             Positioned(
-                              bottom: -2, left: 52, // Пододвинули вплотную к Баннихопу
+                              bottom: -2, left: 52, // Вплотную к Ване
                               child: SizedBox(
                                 width: 50,
                                 height: 50,
                                 child: Stack(
                                   children: [
-                                    // Основное расширяющееся к низу тело сумки-мешка из коричневой матовой кожи
+                                    // Главное расширяющееся к низу тело сумки из матовой коричневой кожи
                                     Positioned(
                                       bottom: 0, left: 4, right: 4,
                                       child: Container(
                                         width: 42, height: 40,
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFF8D4F37), // Фирменный цвет кожи с фотографии
+                                          color: const Color(0xFF8D4F37), // Основной цвет кожи
                                           borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16), bottomLeft: Radius.circular(12), bottomRight: Radius.circular(12)),
                                           border: Border.all(color: const Color(0xFF4A2711), width: 2.0),
                                         ),
                                       ),
                                     ),
-                                    // Мягкие складки кожи сверху и стягивающий шнурок по фото
+                                    // Тёмные боковые складки мешка для придания объёма
+                                    Positioned(
+                                      bottom: 2, left: 6, child: Container(width: 3, height: 26, color: const Color(0xFF6E331B)),
+                                    ),
+                                    Positioned(
+                                      bottom: 2, right: 6, child: Container(width: 3, height: 26, color: const Color(0xFF6E331B)),
+                                    ),
+                                    // Мягкие верхние складки у горловины
                                     Positioned(
                                       top: 10, left: 8, right: 8,
                                       child: Container(
@@ -1411,25 +1419,44 @@ class ComicIntroScreen extends StatelessWidget {
                                         ),
                                       ),
                                     ),
-                                    // Свисающий завязанный кожаный шнурок-затяжка по центру фото
+                                    // НАКЛАДНОЙ КЛАПАН-КРЫШКА СВЕРХУ (По фото кожаных торб)
                                     Positioned(
-                                      top: 14, left: 22,
-                                                                            child: Container(
-                                        width: 3, height: 22,
-                                        decoration: BoxDecoration(color: const Color(0xFF4A2711), borderRadius: BorderRadius.circular(2)),
+                                      top: 13, left: 10, right: 10,
+                                      child: Container(
+                                        height: 18,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF753A22), // чуть темнее основы
+                                          borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(10), bottomRight: Radius.circular(10)),
+                                          border: Border.all(color: const Color(0xFF4A2711), width: 1.5),
+                                        ),
                                       ),
                                     ),
-                                    // Узелок на конце кожаного шнурка
+                                    // КРУГЛАЯ ЗОЛОТАЯ ПРЯЖКА-ЗАСТЁЖКА НА КЛАПАНЕ
                                     Positioned(
-                                      top: 33, left: 21,
-                                      child: Container(width: 5, height: 5, decoration: const BoxDecoration(color: Color(0xFF3E1E0A), shape: BoxShape.circle)),
+                                      top: 24, left: 22,
+                                      child: Container(
+                                        width: 6, height: 6,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFFFD54F), // золото
+                                          shape: BoxShape.circle,
+                                          border: Border.all(color: const Color(0xFF4A2711), width: 1.2),
+                                        ),
+                                      ),
+                                    ),
+                                    // Свисающий завязанный кожаный шнурок-затяжка
+                                    Positioned(
+                                      top: 29, left: 24,
+                                      child: Container(
+                                        width: 2, height: 12,
+                                        decoration: BoxDecoration(color: const Color(0xFF4A2711), borderRadius: BorderRadius.circular(1)),
+                                      ),
                                     ),
                                     // Длинный плечевой кожаный ремень, уходящий вбок
                                     Positioned(
                                       bottom: 2, left: 0,
                                       child: Transform.rotate(
                                         angle: 0.1,
-                                        child: Container(width: 48, height: 4, color: const Color(0xFF6E331B)),
+                                        child: Container(width: 48, height: 4, color: const Color(0xFF4A2711)),
                                       ),
                                     ),
                                   ],
@@ -1437,9 +1464,10 @@ class ComicIntroScreen extends StatelessWidget {
                               ),
                             ),
 
-                            // ПАЧКА ТАБЛЕТОК НАВЕРХУ СУМКИ (Яркая синяя пачка ВИАГРА)
+                            // ИСПРАВЛЕНО: ОПУСТИЛИ ПАЧКУ ВИАГРЫ ПОНИЖЕ! 
+                            // Теперь она лежит прямо на накладном клапане сумки
                             Positioned(
-                              bottom: 42, left: 62,
+                              bottom: 34, left: 62, // Было bottom: 42
                               child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
                                 decoration: BoxDecoration(
@@ -1451,6 +1479,7 @@ class ComicIntroScreen extends StatelessWidget {
                                 child: const Text("ВИАГРА", style: TextStyle(fontSize: 7.5, fontWeight: FontWeight.w900, color: Colors.blue), textAlign: TextAlign.center),
                               ),
                             ),
+
 
                             // Опустили слова Вани пониже, строго над его головой
                             Positioned(
