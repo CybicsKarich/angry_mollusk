@@ -329,11 +329,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 }
 
-// ЭКРАН ВЫБОРА УРОВНЕЙ
+// =========================================================================
+// ПОЛНЫЙ ИСПРАВЛЕННЫЙ КЛАСС ЭКРАНА ВЫБОРА УРОВНЕЙ С БАЛАНСОМ СКОБОК
+// =========================================================================
 class LevelsScreen extends StatelessWidget {
   const LevelsScreen({super.key});
 
-    Future<int> _loadLevel1Stars() async {
+  Future<int> _loadLevel1Stars() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt('level_1_stars') ?? 0; 
   }
@@ -343,7 +345,6 @@ class LevelsScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-         
           // 1. Мультяшный задний фон (Небо)
           Container(
             decoration: const BoxDecoration(
@@ -359,12 +360,12 @@ class LevelsScreen extends StatelessWidget {
           Positioned(
             top: 20,
             left: 50,
-            child: Icon(Icons.cloud_rounded, size: 80, color: Colors.white.withValues(alpha: 0.6)),
+            child: Icon(Icons.cloud_rounded, size: 80, color: Colors.white.withOpacity(0.6)),
           ),
           Positioned(
             top: 40,
             right: 80,
-            child: Icon(Icons.cloud_rounded, size: 100, color: Colors.white.withValues(alpha: 0.5)),
+            child: Icon(Icons.cloud_rounded, size: 100, color: Colors.white.withOpacity(0.5)),
           ),
 
           // 3. Декорации: Мультяшные зеленые холмы и трава внизу экрана
@@ -374,9 +375,9 @@ class LevelsScreen extends StatelessWidget {
             right: -50,
             child: Container(
               height: 120,
-              decoration: BoxDecoration(
-                color: const Color(0xFF81C784), // Светло-зеленый холм
-                borderRadius: const BorderRadius.all(Radius.elliptical(500, 100)),
+              decoration: const BoxDecoration(
+                color: Color(0xFF81C784), // Светло-зеленый холм
+                borderRadius: BorderRadius.all(Radius.elliptical(500, 100)),
               ),
             ),
           ),
@@ -386,9 +387,9 @@ class LevelsScreen extends StatelessWidget {
             right: -20,
             child: Container(
               height: 100,
-              decoration: BoxDecoration(
-                color: const Color(0xFF4CAF50), // Насыщенная зеленая трава ближе к нам
-                borderRadius: const BorderRadius.all(Radius.elliptical(600, 100)),
+              decoration: const BoxDecoration(
+                color: Color(0xFF4CAF50), // Насыщенная зеленая трава ближе к нам
+                borderRadius: BorderRadius.all(Radius.elliptical(600, 100)),
               ),
             ),
           ),
@@ -416,7 +417,7 @@ class LevelsScreen extends StatelessWidget {
                   
                   const Spacer(),
 
-                  // ИСПРАВЛЕНО: ДВУХСТРАНИЧНЫЙ ГОРИЗОНТАЛЬНЫЙ СВАЙП КАРТОЧЕК!
+                  // ДВУХСТРАНИЧНЫЙ ГОРИЗОНТАЛЬНЫЙ СВАЙП КАРТОЧЕК!
                   SizedBox(
                     height: 150, // Оптимальная высота под кубики и звёзды
                     child: PageView(
@@ -435,7 +436,7 @@ class LevelsScreen extends StatelessWidget {
                           ],
                         ),
 
-                        // СТРАНИЦА 2: УРОВНИ 4 И ??? (ЗАБЛОКИРОВАННЫЕ БУДУЩИЕ МИРЫ)
+                        // СТРАНИЦА 2: УРОВНИ 4 И 5 (ЗАБЛОКИРОВАННЫЕ БУДУЩИЕ МИРЫ)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -480,9 +481,9 @@ class LevelsScreen extends StatelessWidget {
         ],
       ),
     );
-  } // <--- ВОТ ЭТА СКОБКА ТЕПЕРЬ СТРОГО И ПРАВИЛЬНО ЗАКРЫВАЕТ МЕТОД BUILD!
+  }
 
-  // ИСПРАВЛЕНО: Метод теперь находится ТАКЖЕ внутри класса экрана уровней!
+  // Вспомогательный метод для заблокированных карточек 4 и 5 уровней
   Widget _buildLockedLevelCard(String levelNumber, String subtitle) {
     return Container(
       width: 85,
@@ -518,67 +519,24 @@ class LevelsScreen extends StatelessWidget {
     );
   }
 
-  
-  // ИСПРАВЛЕНО: Метод для создания стильных заблокированных карточек 4 и 5 уровней!
-  Widget _buildLockedLevelCard(String levelNumber, String subtitle) {
-    return Container(
-      width: 85,
-      height: 85,
-      decoration: BoxDecoration(
-        color: const Color(0xFF37474F), // Мрачный стальной цвет заблокированной заглушки
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: const Color(0xFF263238), width: 4), // Темная обводка
-        boxShadow: const [
-          BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 5)),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.lock_outline_rounded, color: Colors.grey.shade400, size: 20),
-          const SizedBox(height: 2),
-          Text(
-            levelNumber,
-            style: TextStyle(
-              fontSize: levelNumber == '???' ? 20 : 26,
-              fontWeight: FontWeight.w900,
-              color: Colors.grey.shade400,
-            ),
-          ),
-          Text(
-            subtitle,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 6, fontWeight: FontWeight.bold, color: Colors.redAccent, letterSpacing: 0.3),
-                ),
-               ],
-             ),
-           );
-         }
-        ],
-      ),
-    );
-  }
-
   // Вспомогательный метод для создания большой карточки уровня со звездами
   Widget _buildLevelCard(BuildContext context, String levelNumber) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Большой скругленный квадрат уровня
         Container(
           width: 85,
           height: 85,
           decoration: BoxDecoration(
-            color: const Color(0xFFFFCC80), // Приятный мультяшный желто-оранжевый цвет
-            borderRadius: BorderRadius.circular(22), // Сильное скругление для мультяшности
-            border: Border.all(color: const Color(0xFFE65100), width: 4), // Толстая темная обводка
+            color: const Color(0xFFFFCC80), 
+            borderRadius: BorderRadius.circular(22), 
+            border: Border.all(color: const Color(0xFFE65100), width: 4), 
             boxShadow: const [
-              BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 5)), // Объемная тень под кубиком
+              BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 5)), 
             ],
           ),
-                      child: ElevatedButton(
+          child: ElevatedButton(
             onPressed: () {
-              // ИСПРАВЛЕНО: Чистый запуск уровня без конфликтов плееров в main.dart
               GameScreen gameScreenInstance = GameScreen();
               int targetLevel = int.tryParse(levelNumber) ?? 1;
               gameScreenInstance.gameInstance.currentLevel = targetLevel;
@@ -589,9 +547,7 @@ class LevelsScreen extends StatelessWidget {
                 MaterialPageRoute(builder: (context) => gameScreenInstance),
               );
             },
-
-            
-                        style: ElevatedButton.styleFrom(
+            style: ElevatedButton.styleFrom(
               backgroundColor: Colors.transparent,
               shadowColor: Colors.transparent,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
@@ -601,17 +557,15 @@ class LevelsScreen extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 36,
                 fontWeight: FontWeight.w900,
-                color: Color(0xFFE65100), // Цвет цифры совпадает с обводкой
+                color: Color(0xFFE65100), 
               ),
             ),
           ),
         ),
         const SizedBox(height: 8),
                
-        // Звёзды динамически зажигаются жёлтым из памяти для ВСЕХ уровней!
         FutureBuilder<int>(
           future: SharedPreferences.getInstance().then((prefs) {
-            // Код сам подставит 'level_1_stars' или 'level_2_stars' на основе цифры на карточке!
             return prefs.getInt('level_${levelNumber}_stars') ?? 0;
           }),
           builder: (context, snapshot) {
@@ -620,23 +574,18 @@ class LevelsScreen extends StatelessWidget {
             return Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Левая звезда (желтая, если savedStars >= 1)
                 Icon(
                   Icons.star_rounded, 
                   size: 22, 
                   color: savedStars >= 1 ? const Color(0xFFFFD54F) : Colors.grey,
                 ),
                 const SizedBox(width: 2),
-                
-                // Центральная звезда (чуть больше, загорается если savedStars >= 2)
                 Icon(
                   Icons.star_rounded, 
                   size: 26, 
                   color: savedStars >= 2 ? const Color(0xFFFFD54F) : Colors.grey,
                 ), 
                 const SizedBox(width: 2),
-                
-                // Правая звезда (загорается только при 3-х звездах)
                 Icon(
                   Icons.star_rounded, 
                   size: 22, 
@@ -650,6 +599,8 @@ class LevelsScreen extends StatelessWidget {
     );
   }
 }
+
+
 
 
 // 1. ОБНОВЛЕННЫЙ ЭКРАН "ДОПОЛНИТЕЛЬНО" С ФИРМЕННОЙ ПОДПИСЬЮ ivandrop
