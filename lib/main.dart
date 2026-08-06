@@ -1240,7 +1240,7 @@ class ScaryMouthPainter extends CustomPainter {
 }
 
 // =========================================================================
-// ПОЛНОСТЬЮ ПЕРЕРАБОТАННЫЙ МЕМНЫЙ КОМИКС С ЛИЦАМИ ПАЦАНОВ И СОЛНЦЕМ
+// ПОЛНЫЙ ЦЕЛЬНЫЙ КЛАСС КОМИКСА: 3 МАКСИМА НА ВСЕХ КАДРАХ, СУМКА И ОБЛАЧКА
 // =========================================================================
 class ComicIntroScreen extends StatelessWidget {
   const ComicIntroScreen({super.key});
@@ -1269,9 +1269,9 @@ class ComicIntroScreen extends StatelessWidget {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
-                // ГЛАВНАЯ СЕТКА КОМИКСА: 3 крупных кадра в один ряд
                 child: Row(
                   children: [
+                    
                     // КАДР 1: ТРИ МАКСИМА ЗАМЫШЛЯЮТ ПЛАН
                     Expanded(
                       child: _buildComicFrame(
@@ -1292,7 +1292,7 @@ class ComicIntroScreen extends StatelessWidget {
                               child: _buildCharacterImage('assets/images/maksim.png', 50, isPig: true),
                             ),
                             
-                            // ИСПРАВЛЕНО: Опустили большой объём текста ниже, прямо к головам персонажей!
+                            // Опустили большой объём текста ниже, прямо к головам персонажей!
                             Positioned(
                               top: 28, left: 6, right: 6,
                               child: CustomPaint(
@@ -1313,7 +1313,7 @@ class ComicIntroScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 12),
 
-                    // КАДР 2: БАННИХОП ПОДФИГЕВАЕТ ОТ НАГЛОСТИ
+                    // КАДР 2: БАННИХОП ПОДФИГЕВАЕТ ОТ НАГЛОСТИ (ИСПРАВЛЕНО: ТЕПЕРЬ ТУТ 3 СВИНЬИ!)
                     Expanded(
                       child: _buildComicFrame(
                         child: Stack(
@@ -1324,17 +1324,22 @@ class ComicIntroScreen extends StatelessWidget {
                               bottom: 10, left: 12,
                               child: _buildCharacterImage('assets/images/bunnyhop.png', 75, isPig: false),
                             ),
-                            // Три свиньи Максима наглые стоят справа
+                            
+                            // ИСПРАВЛЕНО: Ровно три наглые свиньи Максима стоят справа!
                             Positioned(
-                              bottom: 10, right: 10,
+                              bottom: 10, right: 8,
                               child: _buildCharacterImage('assets/images/maksim.png', 45, isPig: true),
                             ),
                             Positioned(
-                              bottom: -2, right: 40,
+                              bottom: -2, right: 38,
                               child: _buildCharacterImage('assets/images/maksim.png', 50, isPig: true),
                             ),
+                            Positioned(
+                              bottom: 14, right: 68,
+                              child: _buildCharacterImage('assets/images/maksim.png', 42, isPig: true),
+                            ),
 
-                            // ИСПРАВЛЕНО: Опустили ругань свиней чуть ниже, строго над их головами справа
+                            // Ругань свиней чуть ниже, строго над их головами справа
                             Positioned(
                               top: 45, right: 10, width: 70,
                               child: CustomPaint(
@@ -1346,7 +1351,7 @@ class ComicIntroScreen extends StatelessWidget {
                               ),
                             ),
 
-                            // ИСПРАВЛЕНО: Опустили ответ Вани Баннихопа пониже, строго над его головой
+                            // Ответ Вани Баннихопа пониже, строго над его головой
                             Positioned(
                               top: 35, left: 10, width: 110,
                               child: CustomPaint(
@@ -1375,7 +1380,7 @@ class ComicIntroScreen extends StatelessWidget {
                               child: _buildCharacterImage('assets/images/bunnyhop.png', 80, isPig: false),
                             ),
                             
-                            // ИСПРАВЛЕНО: БОЛЬШАЯ ПОДВИГНУТАЯ КОЖАНАЯ СУМКА-ТОРБА ПО ФОТО (С затяжками и ремнями!)
+                            // БОЛЬШАЯ ПОДВИГНУТАЯ КОЖАНАЯ СУМКА-ТОРБА ПО ФОТО (С затяжками и ремнями!)
                             Positioned(
                               bottom: -2, left: 52, // Пододвинули вплотную к Баннихопу
                               child: SizedBox(
@@ -1401,7 +1406,7 @@ class ComicIntroScreen extends StatelessWidget {
                                       child: Container(
                                         height: 6,
                                         decoration: const BoxDecoration(
-                                          color: Color(0xFF6E331B), // более темные тени внутри складок
+                                          color: Color(0xFF6E331B), 
                                           borderRadius: BorderRadius.all(Radius.circular(4)),
                                         ),
                                       ),
@@ -1409,7 +1414,7 @@ class ComicIntroScreen extends StatelessWidget {
                                     // Свисающий завязанный кожаный шнурок-затяжка по центру фото
                                     Positioned(
                                       top: 14, left: 22,
-                                      child: Container(
+                                                                            child: Container(
                                         width: 3, height: 22,
                                         decoration: BoxDecoration(color: const Color(0xFF4A2711), borderRadius: BorderRadius.circular(2)),
                                       ),
@@ -1432,10 +1437,10 @@ class ComicIntroScreen extends StatelessWidget {
                               ),
                             ),
 
-                            // ПАЧКА ТАБЛЕТОК НАВЕРХУ СУМКИ
+                            // ПАЧКА ТАБЛЕТОК НАВЕРХУ СУМКИ (Яркая синяя пачка ВИАГРА)
                             Positioned(
                               bottom: 42, left: 62,
-                                                            child: Container(
+                              child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
                                 decoration: BoxDecoration(
                                   color: Colors.blue.shade50, 
@@ -1447,7 +1452,7 @@ class ComicIntroScreen extends StatelessWidget {
                               ),
                             ),
 
-                            // ИСПРАВЛЕНО: Опустили слова Вани пониже, строго над его головой
+                            // Опустили слова Вани пониже, строго над его головой
                             Positioned(
                               top: 35, left: 15, width: 115,
                               child: CustomPaint(
@@ -1464,8 +1469,9 @@ class ComicIntroScreen extends StatelessWidget {
                     ),
                   ],
                 ),
+              ),
+            ),
 
-            
             // КНОПКА ПОГНАЛИ СНИЗУ КОМИКСА
             Padding(
               padding: const EdgeInsets.all(16.0),
@@ -1493,12 +1499,11 @@ class ComicIntroScreen extends StatelessWidget {
     return Stack(
       alignment: Alignment.center,
       children: [
-        // Мультяшная круглая основа (Зелёная для свиньи, Красная птица с перьями для Баннихопа)
         Container(
           width: size,
           height: size,
           decoration: BoxDecoration(
-            color: isPig ? const Color(0xFF7CB342) : const Color(0xFFE53935), // свинья/птица
+            color: isPig ? const Color(0xFF7CB342) : const Color(0xFFE53935), 
             shape: BoxShape.circle,
             border: Border.all(color: Colors.black, width: 2),
             boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 3))],
@@ -1507,10 +1512,9 @@ class ComicIntroScreen extends StatelessWidget {
               ? null 
               : const Align(
                   alignment: Alignment.centerRight,
-                  child: Icon(Icons.linear_scale_rounded, color: Color(0xFFB71C1C), size: 14), // Симуляция хвоста-перьев птицы
+                  child: Icon(Icons.linear_scale_rounded, color: Color(0xFFB71C1C), size: 14), 
                 ),
         ),
-        // НАКЛАДЫВАЕМ ЛИЦО ПАЦАНА ИЗ ТВОИХ АССЕТОВ РОВНО ПО ЦЕНТРУ!
         ClipOval(
           child: Image.asset(
             assetPath,
@@ -1523,34 +1527,32 @@ class ComicIntroScreen extends StatelessWidget {
     );
   }
 
-  // Обёртка кадра с ЖЕСТКИМ фоном солнца, облаков и травы, чтобы луг не был пустым
+  // Обёртка кадра с ЖЕСТКИМ фоном солнца, облаков и травы (Задний фон уровня)
   Widget _buildComicFrame({required Widget child}) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Colors.blue.shade300, Colors.lightBlue.shade100], // Небо
+          colors: [Colors.blue.shade300, Colors.lightBlue.shade100], 
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF000000), width: 3.5), // Жирная комиксная обводка
+        border: Border.all(color: const Color(0xFF000000), width: 3.5), 
         boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 6, offset: Offset(0, 4))],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Stack(
           children: [
-            // НЕПОДВИЖНОЕ СОЛНЦЕ НА ЗАДНЕМ ФОНЕ КАЖДОГО КАДРА
+            // Рисуем яркое неподвижное солнце на фоне кадра
             Positioned(
               top: -15, right: -15,
               child: Container(width: 50, height: 50, decoration: const BoxDecoration(color: Color(0xFFFFF176), shape: BoxShape.circle)),
             ),
-            
-            // НЕПОДВИЖНЫЕ ОБЛАКА НА ЗАДНЕМ ФОНЕ
+            // Рисуем пушистые белые облака на небе
             Positioned(top: 15, left: 10, child: Icon(Icons.cloud_rounded, size: 28, color: Colors.white.withOpacity(0.5))),
             Positioned(top: 30, right: 35, child: Icon(Icons.cloud_rounded, size: 22, color: Colors.white.withOpacity(0.5))),
-            
-            // ЗЕЛЕНЫЙ МУЛЬТЯШНЫЙ ЛУГ (ТРАВА) СНИЗУ КАДРА
+            // Рисуем сочную зеленую траву луга в основании кадра
             Positioned(
               bottom: 0, left: 0, right: 0,
               child: Container(
@@ -1561,14 +1563,17 @@ class ComicIntroScreen extends StatelessWidget {
                 ),
               ),
             ),
-
-            child, // Поверх фона встают крупные герои и слова
+            child, 
           ],
         ),
       ),
     );
   }
 }
+
+
+                                      
+
 
 // ПРОДВИНУТЫЙ ВЕКТОРНЫЙ ХУДОЖНИК ОБЛАЧЕК МЫСЛЕЙ (С ХВОСТИКАМИ НАПРАВЛЕННЫМИ ВНИЗ)
 class SpeechBubblePainter extends CustomPainter {
