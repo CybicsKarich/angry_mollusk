@@ -525,7 +525,16 @@ class _LevelsScreenState extends State<LevelsScreen> {
           ),
           child: ElevatedButton(
             onPressed: () {
-              if (!isActive) return; // Блокируем клик для 4 и 5 уровня, пока они не готовы
+              // Если игрок нажал на 4 уровень — запускаем наш угарный сюжетный комикс!
+              if (levelNumber == '4') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ComicIntroScreen()),
+                );
+                return;
+              }
+              
+              if (!isActive) return; // 5 уровень пока заблокирован
               
               GameScreen gameScreenInstance = GameScreen();
               int targetLevel = int.tryParse(levelNumber) ?? 1;
@@ -1224,6 +1233,241 @@ class ScaryMouthPainter extends CustomPainter {
         canvas.drawCircle(Offset(rect.center.dx, rect.bottom - 1.2), 0.6, cariesPaint);
       }
     }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// =========================================================================
+// КЛАСС МЕМНОГО СЮЖЕТНОГО КОМИКСА ИЗ 3-Х КАРТИНОК НА ВЕСЬ ЭКРАН
+// =========================================================================
+class ComicIntroScreen extends StatelessWidget {
+  const ComicIntroScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF1A1A24), // Стильный тёмный фон вокруг комикса
+      body: SafeArea(
+        child: Column(
+          children: [
+            const SizedBox(height: 12),
+            const Text(
+              "ПРЕДЫСТОРИЯ УРОВНЯ 4",
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.amber, letterSpacing: 1.5),
+            ),
+            const SizedBox(height: 12),
+
+            // ГЛАВНАЯ СЕТКА КОМИКСА: 3 кадра, каждый занимает ровно 1/3 ширины экрана
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    // КАДР 1: Заговор Максимов
+                    Expanded(
+                      child: _buildComicFrame(
+                        child: Stack(
+                          children: [
+                            // Луг и холмы
+                            Positioned(bottom: 0, left: 0, right: 0, child: Container(height: 45, color: const Color(0xFF4CAF50))),
+                            // Три свиньи Максима (Используем иконки для гарантированной сборки)
+                            const Positioned(bottom: 25, left: 15, child: Icon(Icons.gite_rounded, color: Colors.pink, size: 24)),
+                            const Positioned(bottom: 12, left: 35, child: Icon(Icons.gite_rounded, color: Colors.pink, size: 28)),
+                            const Positioned(bottom: 20, left: 60, child: Icon(Icons.gite_rounded, color: Colors.pink, size: 22)),
+                            
+                            // Облачко со словами по ТЗ (Хвостик указывает влево-вниз к свиньям)
+                            Positioned(
+                              top: 8, left: 4, right: 4,
+                              child: CustomPaint(
+                                painter: SpeechBubblePainter(isLeftTail: true),
+                                child: const Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: Text(
+                                    "Баннихоп достал ломать дома. Проучим его! Сделаем дом из бронированного стекла. Тогда он точно не сможет его сломать!",
+                                    style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.black, height: 1.1),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+
+                    // КАДР 2: Подслушивание
+                    Expanded(
+                      child: _buildComicFrame(
+                        child: Stack(
+                          children: [
+                            Positioned(bottom: 0, left: 0, right: 0, child: Container(height: 45, color: const Color(0xFF4CAF50))),
+                            // Баннихоп повернут к нам слева
+                            const Positioned(bottom: 15, left: 15, child: Icon(Icons.cruelty_free_rounded, color: Colors.amber, size: 32)),
+                            // Три свиньи справа
+                            const Positioned(bottom: 15, right: 15, child: Icon(Icons.gite_rounded, color: Colors.pink, size: 24)),
+
+                            // Ругань свиней (Хвостик вправо к свиньям)
+                            Positioned(
+                              top: 12, right: 6, width: 65,
+                              child: CustomPaint(
+                                painter: SpeechBubblePainter(isLeftTail: false),
+                                child: const Padding(
+                                  padding: EdgeInsets.all(6.0),
+                                  child: Text("!$?!%", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Colors.red), textAlign: TextAlign.center),
+                                ),
+                              ),
+                            ),
+
+                            // Ответ Баннихопа (Хвостик влево к кролику)
+                            Positioned(
+                              bottom: 45, left: 6, width: 85,
+                              child: CustomPaint(
+                                painter: SpeechBubblePainter(isLeftTail: true),
+                                child: const Padding(
+                                  padding: EdgeInsets.all(6.0),
+                                  child: Text("Ах проучить меня решили?", style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+
+                    // КАДР 3: Секретное оружие (Таблетки)
+                    Expanded(
+                      child: _buildComicFrame(
+                        child: Stack(
+                          children: [
+                            Positioned(bottom: 0, left: 0, right: 0, child: Container(height: 45, color: const Color(0xFF4CAF50))),
+                            // Баннихоп гордо стоит слева
+                            const Positioned(bottom: 15, left: 10, child: Icon(Icons.cruelty_free_rounded, color: Colors.amber, size: 32)),
+                            
+                            // ВЕКТОРНАЯ КОРИЧНЕВАЯ СУМКА-МЕШОК ПЕРЕД НИМ
+                            Positioned(
+                              bottom: 12, right: 25,
+                              child: Container(
+                                width: 34, height: 26,
+                                decoration: BoxDecoration(
+                                  color: Colors.brown.shade700,
+                                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12), bottomLeft: Radius.circular(6), bottomRight: Radius.circular(6)),
+                                  border: Border.all(color: Colors.brown.shade900, width: 1.5),
+                                ),
+                                child: Stack(
+                                  alignment: Alignment.topCenter,
+                                  children: [
+                                    // Завязка на мешке
+                                    Container(width: 14, height: 3, color: Colors.amber.shade300),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                            // ПАЧКА ТАБЛЕТОК НАВЕРХУ СУМКИ
+                            Positioned(
+                              bottom: 35, right: 28,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+                                decoration: BoxDecoration(color: Colors.blue.shade100, border: Border.all(color: Colors.blue.shade700, width: 1), borderRadius: BorderRadius.circular(2)),
+                                child: const Text("ВИАГРА", style: TextStyle(fontSize: 5, fontWeight: FontWeight.bold, color: Colors.blue), textAlign: TextAlign.center),
+                              ),
+                            ),
+
+                            // Слова Баннихопа
+                            Positioned(
+                              top: 15, left: 10, right: 10,
+                              child: CustomPaint(
+                                painter: SpeechBubblePainter(isLeftTail: true),
+                                child: const Padding(
+                                  padding: EdgeInsets.all(6.0),
+                                  child: Text("А у меня вот это есть", style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // КНОПКА ПОГНАЛИ СНИЗУ КОМИКСА
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF9800),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+                ),
+                onPressed: () {
+                  Navigator.pop(context); // Возвращает в меню уровней
+                },
+                child: const Text("ПОГНАЛИ!", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+    Widget _buildComicFrame({required Widget child}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFE3F2FD), // Приятный небесный фон внутри кадра
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFF000000), width: 3.5), // Жирная обводка рамок комикса
+        boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 6, offset: Offset(0, 4))],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Stack(
+          children: [
+            // Рисуем задний план: Облачка на небе кадра
+            Positioned(top: 35, left: 10, child: Icon(Icons.cloud_queue_rounded, size: 24, color: Colors.white.withOpacity(0.4))),
+            Positioned(top: 20, right: 15, child: Icon(Icons.cloud_queue_rounded, size: 30, color: Colors.white.withOpacity(0.4))),
+            child,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ВЕКТОРНЫЙ РИСОВАЛЬЩИК КЛАССИЧЕСКИХ РЕЧЕВЫХ ПУЗЫРЕЙ С ХВОСТИКАМИ ИЗ ТВОЕГО РЕФЕРЕНСА
+class SpeechBubblePainter extends CustomPainter {
+  final bool isLeftTail; // Куда направлен хвостик облачка — влево или вправо
+  SpeechBubblePainter({required this.isLeftTail});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = Colors.white..style = PaintingStyle.fill;
+    final borderPaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.8;
+
+    final path = Path();
+    // Рисуем основное скругленное овальное облако рта
+    path.addRRect(RRect.fromRectAndRadius(Rect.fromLTWH(0, 0, size.width, size.height), const Radius.circular(10)));
+
+    // Дорисовываем острый хвостик речевого облачка чётко по твоему фото-референсу!
+    if (isLeftTail) {
+      path.moveTo(size.width * 0.2, size.height);
+      path.lineTo(size.width * 0.1, size.height + 8); // кончик хвостика уходит вниз-влево
+      path.lineTo(size.width * 0.3, size.height);
+    } else {
+      path.moveTo(size.width * 0.8, size.height);
+      path.lineTo(size.width * 0.9, size.height + 8); // кончик хвостика уходит вниз-вправо
+      path.lineTo(size.width * 0.7, size.height);
+    }
+
+    canvas.drawPath(path, paint);
+    canvas.drawPath(path, borderPaint);
   }
 
   @override
