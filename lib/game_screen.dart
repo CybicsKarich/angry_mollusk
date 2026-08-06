@@ -404,6 +404,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     
     bunnySprite = await loadSprite('bunnyhop.png');
     maksimSprite = await loadSprite('maksim.png');
+    await images.load('bunnyhop_lose.png');
     
     add(BackgroundDecoration());
     buildLevelStructures(); // Вызываем чистую постройку
@@ -955,32 +956,35 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     birdsPainter.layout();
     birdsPainter.paint(canvas, Offset(size.width * 0.05, size.height * 0.88));
     
-        // ИСПРАВЛЕНО: ЭПИЧНЫЙ ВЫЛЕТ УМЕНЬШЕННОЙ ФОТКИ ПРЯМО ИЗ СУНДУКА НА ИГРОВОЕ ПОЛЕ!
+        // ИСПРАВЛЕНО: Теперь на холст вылетает НАСТОЯЩАЯ фотография из памяти, а не чёрный квадрат!
     if (showFlyingLosePhoto) {
       canvas.save();
-      // Центрируем камеру на месте сундука (координата x = 1.65)
       double chestScreenX = 1.65 * size.width;
       double chestScreenY = 0.55 * size.height;
-      
+
       canvas.translate(chestScreenX, chestScreenY);
-      // Масштабируем картинку (она будет плавно увеличиваться, вылетая из ящика)
       canvas.scale(losePhotoScale); 
-      
-      // Рисуем уменьшенную фотку bunnyhop_lose поверх уровня
-      final photoPainter = TextPainter(textDirection: TextDirection.ltr); // Используем стандартный вывод изображений во Flutter/Flame через кастомный Paint, но для простоты нарисуем её через Flutter виджет или кэш картинок. 
-      // Чтобы гарантированно нарисовать ассет во Flame без сбоев контекста, мы отрисуем её через обычныйdrawImage:
-      if (bunnySprite != null) {
-        // Используем встроенный метод Flame для отрисовки картинки bunnyhop_lose из кэша
-        // Для страховки, чтобы не поймать ошибку асинхронности, выведем изображение по центру:
-        final paint = Paint()..filterQuality = FilterQuality.high;
-        // Задаем уменьшенный размер фотки (например, 300х300 пикселей вместо полноэкранного)
-        final photoRect = Rect.fromCenter(center: Offset.zero, width: size.width * 0.45, height: size.width * 0.45);
-        // Отрисуем кролика-неудачника
-        canvas.drawRRect(RRect.fromRectAndRadius(photoRect, const Radius.circular(12)), Paint()..color = Colors.black45);
-        // Заметка: В следующем шаге мы подгрузим точный образ, а пока Flame задействует bunnySprite для теста траектории, мы пропишем полноценный вылет!
+
+      try {
+        // Достаём загруженную картинку напрямую из кэша Flame
+        final loseImage = images.fromCache('bunnyhop_lose.png');
+
+        // Задаём фиксированный размер фотографии
+        double photoW = size.width * 0.45;
+        double photoH = size.width * 0.45;
+
+        // Центрируем картинку и рисуем её на игровом поле
+        final srcRect = Rect.fromLTWH(0, 0, loseImage.width.toDouble(), loseImage.height.toDouble());
+        final dstRect = Rect.fromCenter(center: Offset.zero, width: photoW, height: photoH);
+
+        canvas.drawImageRect(loseImage, srcRect, dstRect, Paint()..filterQuality = FilterQuality.high);
+      } catch (e) {
+        // Подстраховка на случай сбоя
+        canvas.drawRect(Rect.fromCenter(center: Offset.zero, width: 200, height: 200), Paint()..color = Colors.red);
       }
       canvas.restore();
     }
+
 
     canvas.restore();
     }
