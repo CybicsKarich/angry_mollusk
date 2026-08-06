@@ -1451,12 +1451,74 @@ class ComicIntroScreen extends StatelessWidget {
                                         decoration: BoxDecoration(color: const Color(0xFF4A2711), borderRadius: BorderRadius.circular(1)),
                                       ),
                                     ),
-                                    // Длинный плечевой кожаный ремень, уходящий вбок
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                                                        // ИСПРАВЛЕНО: СТИЛЬНЫЙ БЛИСТЕР С ТАБЛЕТКАМИ СТРОГО ПО ФОТОГРАФИИ!
+                            Positioned(
+                              bottom: 30, left: 60, // Оставили размер, сделали чуть пошире и побольше под 4 капсулы
+                              child: Container(
+                                width: 34,
+                                height: 34,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFCFD8DC), // Серебристо-металлический цвет блистера
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(color: const Color(0xFF78909C), width: 1.2),
+                                  boxShadow: const [BoxShadow(color: Colors.black38, blurRadius: 3, offset: Offset(0, 2))],
+                                ),
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    
+                                    // 1. Металлическая текстура (сетка пупырышек на фоне по фотографии)
+                                    Opacity(
+                                      opacity: 0.25,
+                                      child: GridView.count(
+                                        crossAxisCount: 4,
+                                        physics: const NeverScrollableScrollPhysics(),
+                                        children: List.generate(16, (i) => Container(
+                                          margin: const EdgeInsets.all(0.5),
+                                          decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                                        )),
+                                      ),
+                                    ),
+
+                                    // 2. ЧЕТЫРЕ ОБЪЁМНЫЕ СИНИЕ ТАБЛЕТКИ (Расположены ровно по углам палетки как на фото)
+                                    // Топ-левая капсула
                                     Positioned(
-                                      bottom: 2, left: 0,
-                                      child: Transform.rotate(
-                                        angle: 0.1,
-                                        child: Container(width: 48, height: 4, color: const Color(0xFF4A2711)),
+                                      top: 3, left: 4,
+                                      child: Container(width: 8, height: 11, decoration: BoxDecoration(color: const Color(0xFF29B6F6), borderRadius: BorderRadius.circular(4), border: Border.all(color: const Color(0xFF0288D1), width: 0.8))),
+                                    ),
+                                    // Топ-правая капсула
+                                    Positioned(
+                                      top: 3, right: 4,
+                                      child: Container(width: 8, height: 11, decoration: BoxDecoration(color: const Color(0xFF29B6F6), borderRadius: BorderRadius.circular(4), border: Border.all(color: const Color(0xFF0288D1), width: 0.8))),
+                                    ),
+                                    // Нижняя-левая капсула
+                                    Positioned(
+                                      bottom: 3, left: 4,
+                                      child: Container(width: 8, height: 11, decoration: BoxDecoration(color: const Color(0xFF29B6F6), borderRadius: BorderRadius.circular(4), border: Border.all(color: const Color(0xFF0288D1), width: 0.8))),
+                                    ),
+                                    // Нижняя-правая капсула
+                                    Positioned(
+                                      bottom: 3, right: 4,
+                                      child: Container(width: 8, height: 11, decoration: BoxDecoration(color: const Color(0xFF29B6F6), borderRadius: BorderRadius.circular(4), border: Border.all(color: const Color(0xFF0288D1), width: 0.8))),
+                                    ),
+
+                                    // 3. ПОЛНОЦЕННАЯ НАДПИСЬ "ВИАГРА" СТРОГО ПО ЦЕНТРУ БЛИСТЕРА ПО КРАСАТЕ
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.85),
+                                        borderRadius: BorderRadius.circular(2),
+                                        border: Border.all(color: const Color(0xFF01579B), width: 0.5),
+                                      ),
+                                      child: const Text(
+                                        "ВИАГРА",
+                                        style: TextStyle(fontSize: 5.5, fontWeight: FontWeight.w900, color: Color(0xFF01579B), letterSpacing: 0.2),
+                                        textAlign: TextAlign.center,
                                       ),
                                     ),
                                   ],
@@ -1464,21 +1526,6 @@ class ComicIntroScreen extends StatelessWidget {
                               ),
                             ),
 
-                            // ИСПРАВЛЕНО: ОПУСТИЛИ ПАЧКУ ВИАГРЫ ПОНИЖЕ! 
-                            // Теперь она лежит прямо на накладном клапане сумки
-                            Positioned(
-                              bottom: 34, left: 62, // Было bottom: 42
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue.shade50, 
-                                  border: Border.all(color: Colors.blue.shade800, width: 1.5), 
-                                  borderRadius: BorderRadius.circular(4),
-                                  boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 2)],
-                                ),
-                                child: const Text("ВИАГРА", style: TextStyle(fontSize: 7.5, fontWeight: FontWeight.w900, color: Colors.blue), textAlign: TextAlign.center),
-                              ),
-                            ),
 
 
                             // Опустили слова Вани пониже, строго над его головой
