@@ -517,7 +517,7 @@ class LevelsScreen extends StatelessWidget {
       ),
     );
   }
-}
+
   
   // ИСПРАВЛЕНО: Метод для создания стильных заблокированных карточек 4 и 5 уровней!
   Widget _buildLockedLevelCard(String levelNumber, String subtitle) {
