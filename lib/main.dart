@@ -343,6 +343,7 @@ class LevelsScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
+         
           // 1. Мультяшный задний фон (Небо)
           Container(
             decoration: const BoxDecoration(
@@ -392,7 +393,7 @@ class LevelsScreen extends StatelessWidget {
             ),
           ),
 
-                    // 4. Основной игровой интерфейс поверх декораций
+          // 4. Основной игровой интерфейс поверх декораций
           SafeArea(
             child: Center(
               child: Column(
@@ -479,8 +480,45 @@ class LevelsScreen extends StatelessWidget {
         ],
       ),
     );
-  }
+  } // <--- ВОТ ЭТА СКОБКА ТЕПЕРЬ СТРОГО И ПРАВИЛЬНО ЗАКРЫВАЕТ МЕТОД BUILD!
 
+  // ИСПРАВЛЕНО: Метод теперь находится ТАКЖЕ внутри класса экрана уровней!
+  Widget _buildLockedLevelCard(String levelNumber, String subtitle) {
+    return Container(
+      width: 85,
+      height: 85,
+      decoration: BoxDecoration(
+        color: const Color(0xFF37474F), // Мрачный стальной цвет заглушки
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: const Color(0xFF263238), width: 4), // Темная обводка
+        boxShadow: const [
+          BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 5)),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.lock_outline_rounded, color: Colors.grey.shade400, size: 20),
+          const SizedBox(height: 2),
+          Text(
+            levelNumber,
+            style: TextStyle(
+              fontSize: levelNumber == '???' ? 20 : 26,
+              fontWeight: FontWeight.w900,
+              color: Colors.grey.shade400,
+            ),
+          ),
+          Text(
+            subtitle,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 6, fontWeight: FontWeight.bold, color: Colors.redAccent, letterSpacing: 0.3),
+          ),
+        ],
+      ),
+    );
+  }
+}
+  
   // ИСПРАВЛЕНО: Метод для создания стильных заблокированных карточек 4 и 5 уровней!
   Widget _buildLockedLevelCard(String levelNumber, String subtitle) {
     return Container(
