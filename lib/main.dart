@@ -392,16 +392,16 @@ class LevelsScreen extends StatelessWidget {
             ),
           ),
 
-          // 4. Основной игровой интерфейс поверх декораций
+                    // 4. Основной игровой интерфейс поверх декораций
           SafeArea(
             child: Center(
               child: Column(
                 children: [
                   const SizedBox(height: 15),
                   
-                  // Верхняя плашка с мультяшной надписью
+                  // Стабильный монолитный мультяшный заголовок для всех страниц
                   const Text(
-                    'УРОВНИ 1-3',
+                    'УРОВНИ',
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.w900,
@@ -415,16 +415,36 @@ class LevelsScreen extends StatelessWidget {
                   
                   const Spacer(),
 
-                  // Ряд с большими мультяшными кнопками уровней
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildLevelCard(context, '1'),
-                      const SizedBox(width: 30), // Пробел между квадратами уровней
-                      _buildLevelCard(context, '2'),
-                      const SizedBox(width: 30),
-                      _buildLevelCard(context, '3'),
-                    ],
+                  // ИСПРАВЛЕНО: ДВУХСТРАНИЧНЫЙ ГОРИЗОНТАЛЬНЫЙ СВАЙП КАРТОЧЕК!
+                  SizedBox(
+                    height: 150, // Оптимальная высота под кубики и звёзды
+                    child: PageView(
+                      physics: const BouncingScrollPhysics(),
+                      children: [
+                        
+                        // СТРАНИЦА 1: УРОВНИ 1, 2, 3 (НАШИ ГОТОВЫЕ МИРЫ)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _buildLevelCard(context, '1'),
+                            const SizedBox(width: 24), 
+                            _buildLevelCard(context, '2'),
+                            const SizedBox(width: 24),
+                            _buildLevelCard(context, '3'),
+                          ],
+                        ),
+
+                        // СТРАНИЦА 2: УРОВНИ 4 И ??? (ЗАБЛОКИРОВАННЫЕ БУДУЩИЕ МИРЫ)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _buildLockedLevelCard('4', 'ПОДЗЕМЕЛЬЕ'),
+                            const SizedBox(width: 30),
+                            _buildLockedLevelCard('???', 'ФИНАЛЬНЫЙ БОСС'),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
 
                   const Spacer(),
@@ -456,6 +476,46 @@ class LevelsScreen extends StatelessWidget {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  // ИСПРАВЛЕНО: Метод для создания стильных заблокированных карточек 4 и 5 уровней!
+  Widget _buildLockedLevelCard(String levelNumber, String subtitle) {
+    return Container(
+      width: 85,
+      height: 85,
+      decoration: BoxDecoration(
+        color: const Color(0xFF37474F), // Мрачный стальной цвет заблокированной заглушки
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: const Color(0xFF263238), width: 4), // Темная обводка
+        boxShadow: const [
+          BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 5)),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.lock_outline_rounded, color: Colors.grey.shade400, size: 20),
+          const SizedBox(height: 2),
+          Text(
+            levelNumber,
+            style: TextStyle(
+              fontSize: levelNumber == '???' ? 20 : 26,
+              fontWeight: FontWeight.w900,
+              color: Colors.grey.shade400,
+            ),
+          ),
+          Text(
+            subtitle,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 6, fontWeight: FontWeight.bold, color: Colors.redAccent, letterSpacing: 0.3),
+                ),
+               ],
+             ),
+           );
+         }
         ],
       ),
     );
