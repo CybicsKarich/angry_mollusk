@@ -1316,7 +1316,8 @@ class ComicIntroScreen extends StatelessWidget {
                                 painter: SpeechBubblePainter(isLeftTail: false),
                                 child: const Padding(
                                   padding: EdgeInsets.all(6.0),
-                                  child: Text("!$?!%", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Colors.red), textAlign: TextAlign.center),
+                                  // ИСПРАВЛЕНО: Превратили строку в сырую (raw), добавив 'r'. Теперь знак $ читается как обычный текст!
+                                  child: const Text(r"!$?!%", style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900, color: Colors.red), textAlign: TextAlign.center),
                                 ),
                               ),
                             ),
