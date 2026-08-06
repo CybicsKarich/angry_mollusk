@@ -1269,9 +1269,9 @@ class ComicIntroScreen extends StatelessWidget {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
+                // ГЛАВНАЯ СЕТКА КОМИКСА: 3 крупных кадра в один ряд
                 child: Row(
                   children: [
-                    
                     // КАДР 1: ТРИ МАКСИМА ЗАМЫШЛЯЮТ ПЛАН
                     Expanded(
                       child: _buildComicFrame(
@@ -1292,9 +1292,9 @@ class ComicIntroScreen extends StatelessWidget {
                               child: _buildCharacterImage('assets/images/maksim.png', 50, isPig: true),
                             ),
                             
-                            // СЛОВА СТРОГО НАД ГОЛОВАМИ СВИНЕЙ (Хвостик ведет вниз по центру)
+                            // ИСПРАВЛЕНО: Опустили большой объём текста ниже, прямо к головам персонажей!
                             Positioned(
-                              top: 15, left: 6, right: 6,
+                              top: 28, left: 6, right: 6,
                               child: CustomPaint(
                                 painter: SpeechBubblePainter(tailXFactor: 0.5, tailGoesUp: false),
                                 child: const Padding(
@@ -1334,9 +1334,9 @@ class ComicIntroScreen extends StatelessWidget {
                               child: _buildCharacterImage('assets/images/maksim.png', 50, isPig: true),
                             ),
 
-                            // Ругань свиней над их головами справа (Хвостик уходит вправо-вниз)
+                            // ИСПРАВЛЕНО: Опустили ругань свиней чуть ниже, строго над их головами справа
                             Positioned(
-                              top: 25, right: 10, width: 70,
+                              top: 45, right: 10, width: 70,
                               child: CustomPaint(
                                 painter: SpeechBubblePainter(tailXFactor: 0.75, tailGoesUp: false),
                                 child: const Padding(
@@ -1346,9 +1346,9 @@ class ComicIntroScreen extends StatelessWidget {
                               ),
                             ),
 
-                            // Ответ Вани Баннихопа СТРОГО НАД ЕГО ГОЛОВОЙ (Хвостик влево-вниз)
+                            // ИСПРАВЛЕНО: Опустили ответ Вани Баннихопа пониже, строго над его головой
                             Positioned(
-                              top: 15, left: 10, width: 110,
+                              top: 35, left: 10, width: 110,
                               child: CustomPaint(
                                 painter: SpeechBubblePainter(tailXFactor: 0.25, tailGoesUp: false),
                                 child: const Padding(
@@ -1375,31 +1375,67 @@ class ComicIntroScreen extends StatelessWidget {
                               child: _buildCharacterImage('assets/images/bunnyhop.png', 80, isPig: false),
                             ),
                             
-                            // БОЛЬШАЯ ДЕТАЛИЗИРОВАННАЯ КОРИЧНЕВАЯ СУМКА-МЕШОК ПРЕД НИМ
+                            // ИСПРАВЛЕНО: БОЛЬШАЯ ПОДВИГНУТАЯ КОЖАНАЯ СУМКА-ТОРБА ПО ФОТО (С затяжками и ремнями!)
                             Positioned(
-                              bottom: -5, right: 20,
-                              child: Container(
-                                width: 55, height: 45,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF6D4C41), // коричневый суконный мешок
-                                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20), bottomLeft: Radius.circular(10), bottomRight: Radius.circular(10)),
-                                  border: Border.all(color: const Color(0xFF3E2723), width: 2.5),
-                                ),
+                              bottom: -2, left: 52, // Пододвинули вплотную к Баннихопу
+                              child: SizedBox(
+                                width: 50,
+                                height: 50,
                                 child: Stack(
-                                  alignment: Alignment.topCenter,
                                   children: [
-                                    // Складки и завязка золотой веревкой на мешке
-                                    Container(width: 24, height: 5, color: const Color(0xFFFFD54F)),
-                                    Positioned(top: 12, child: Container(width: 45, height: 2, color: const Color(0xFF4E342E))), // ремень мешка
+                                    // Основное расширяющееся к низу тело сумки-мешка из коричневой матовой кожи
+                                    Positioned(
+                                      bottom: 0, left: 4, right: 4,
+                                      child: Container(
+                                        width: 42, height: 40,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF8D4F37), // Фирменный цвет кожи с фотографии
+                                          borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16), bottomLeft: Radius.circular(12), bottomRight: Radius.circular(12)),
+                                          border: Border.all(color: const Color(0xFF4A2711), width: 2.0),
+                                        ),
+                                      ),
+                                    ),
+                                    // Мягкие складки кожи сверху и стягивающий шнурок по фото
+                                    Positioned(
+                                      top: 10, left: 8, right: 8,
+                                      child: Container(
+                                        height: 6,
+                                        decoration: const BoxDecoration(
+                                          color: Color(0xFF6E331B), // более темные тени внутри складок
+                                          borderRadius: BorderRadius.all(Radius.circular(4)),
+                                        ),
+                                      ),
+                                    ),
+                                    // Свисающий завязанный кожаный шнурок-затяжка по центру фото
+                                    Positioned(
+                                      top: 14, left: 22,
+                                      child: Container(
+                                        width: 3, height: 22,
+                                        decoration: BoxDecoration(color: const Color(0xFF4A2711), borderRadius: BorderRadius.circular(2)),
+                                      ),
+                                    ),
+                                    // Узелок на конце кожаного шнурка
+                                    Positioned(
+                                      top: 33, left: 21,
+                                      child: Container(width: 5, height: 5, decoration: const BoxDecoration(color: Color(0xFF3E1E0A), shape: BoxShape.circle)),
+                                    ),
+                                    // Длинный плечевой кожаный ремень, уходящий вбок
+                                    Positioned(
+                                      bottom: 2, left: 0,
+                                      child: Transform.rotate(
+                                        angle: 0.1,
+                                        child: Container(width: 48, height: 4, color: const Color(0xFF6E331B)),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
                             ),
 
-                            // КРУПНАЯ ПАЧКА ТАБЛЕТОК СВЕРХУ НА СУМКЕ
+                            // ПАЧКА ТАБЛЕТОК НАВЕРХУ СУМКИ
                             Positioned(
-                              bottom: 36, right: 26,
-                              child: Container(
+                              bottom: 42, left: 62,
+                                                            child: Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
                                 decoration: BoxDecoration(
                                   color: Colors.blue.shade50, 
@@ -1411,12 +1447,12 @@ class ComicIntroScreen extends StatelessWidget {
                               ),
                             ),
 
-                            // Слова Вани СТРОГО НАД ЕГО ГОЛОВОЙ (Хвостик влево-вниз)
+                            // ИСПРАВЛЕНО: Опустили слова Вани пониже, строго над его головой
                             Positioned(
-                              top: 25, left: 15, width: 115,
+                              top: 35, left: 15, width: 115,
                               child: CustomPaint(
                                 painter: SpeechBubblePainter(tailXFactor: 0.25, tailGoesUp: false),
-                                                                child: const Padding(
+                                child: const Padding(
                                   padding: EdgeInsets.all(8.0),
                                   child: Text("А у меня вот это есть", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
                                 ),
@@ -1428,9 +1464,8 @@ class ComicIntroScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
-            ),
 
+            
             // КНОПКА ПОГНАЛИ СНИЗУ КОМИКСА
             Padding(
               padding: const EdgeInsets.all(16.0),
