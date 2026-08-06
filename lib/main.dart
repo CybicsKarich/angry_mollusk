@@ -330,14 +330,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
 }
 
 // =========================================================================
-// ПОЛНЫЙ ИСПРАВЛЕННЫЙ КЛАСС ЭКРАНА ВЫБОРА УРОВНЕЙ С БАЛАНСОМ СКОБОК
+// ПОЛНОСТЬЮ ОБНОВЛЕННЫЙ ЭКРАН УРОВНЕЙ 1-5 С КНОПКАМИ-СТРЕЛКАМИ И ЗВЕЗДАМИ
 // =========================================================================
-class LevelsScreen extends StatelessWidget {
+class LevelsScreen extends StatefulWidget {
   const LevelsScreen({super.key});
 
-  Future<int> _loadLevel1Stars() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt('level_1_stars') ?? 0; 
+  @override
+  State<LevelsScreen> createState() => _LevelsScreenState();
+}
+
+class _LevelsScreenState extends State<LevelsScreen> {
+  // Контроллер для управления страницами PageView кнопками-стрелками
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
@@ -356,7 +366,7 @@ class LevelsScreen extends StatelessWidget {
             ),
           ),
 
-          // 2. Декорации: Мультяшные круглые облака на небе
+          // 2. Декорации: Облака
           Positioned(
             top: 20,
             left: 50,
@@ -368,7 +378,7 @@ class LevelsScreen extends StatelessWidget {
             child: Icon(Icons.cloud_rounded, size: 100, color: Colors.white.withOpacity(0.5)),
           ),
 
-          // 3. Декорации: Мультяшные зеленые холмы и трава внизу экрана
+          // 3. Декорации: Зеленые холмы
           Positioned(
             bottom: -30,
             left: -50,
@@ -376,7 +386,7 @@ class LevelsScreen extends StatelessWidget {
             child: Container(
               height: 120,
               decoration: const BoxDecoration(
-                color: Color(0xFF81C784), // Светло-зеленый холм
+                color: Color(0xFF81C784),
                 borderRadius: BorderRadius.all(Radius.elliptical(500, 100)),
               ),
             ),
@@ -388,61 +398,64 @@ class LevelsScreen extends StatelessWidget {
             child: Container(
               height: 100,
               decoration: const BoxDecoration(
-                color: Color(0xFF4CAF50), // Насыщенная зеленая трава ближе к нам
+                color: Color(0xFF4CAF50),
                 borderRadius: BorderRadius.all(Radius.elliptical(600, 100)),
               ),
             ),
           ),
 
-          // 4. Основной игровой интерфейс поверх декораций
+          // 4. Основной игровой интерфейс
           SafeArea(
             child: Center(
               child: Column(
                 children: [
                   const SizedBox(height: 15),
                   
-                  // Стабильный монолитный мультяшный заголовок для всех страниц
                   const Text(
                     'УРОВНИ',
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.w900,
-                      color: Color(0xFFF57C00), // Сочный оранжевый
+                      color: Color(0xFFF57C00),
                       letterSpacing: 2,
-                      shadows: [
-                        Shadow(offset: Offset(2.0, 2.0), blurRadius: 2.0, color: Colors.black26),
-                      ],
+                      shadows: [Shadow(offset: Offset(2.0, 2.0), blurRadius: 2.0, color: Colors.black26)],
                     ),
                   ),
                   
                   const Spacer(),
 
-                  // ДВУХСТРАНИЧНЫЙ ГОРИЗОНТАЛЬНЫЙ СВАЙП КАРТОЧЕК!
+                  // СВАЙП ПАНЕЛЬ С КАРТОЧКАМИ УРОВНЕЙ
                   SizedBox(
-                    height: 150, // Оптимальная высота под кубики и звёзды
+                    height: 150, 
                     child: PageView(
+                      controller: _pageController,
                       physics: const BouncingScrollPhysics(),
+                      onPageChanged: (index) {
+                        setState(() {
+                          _currentPage = index;
+                        });
+                      },
                       children: [
                         
-                        // СТРАНИЦА 1: УРОВНИ 1, 2, 3 (НАШИ ГОТОВЫЕ МИРЫ)
+                        // СТРАНИЦА 1: УРОВНИ 1, 2, 3
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            _buildLevelCard(context, '1'),
+                            _buildLevelCard('1', true),
                             const SizedBox(width: 24), 
-                            _buildLevelCard(context, '2'),
+                            _buildLevelCard('2', true),
                             const SizedBox(width: 24),
-                            _buildLevelCard(context, '3'),
+                            _buildLevelCard('3', true),
                           ],
                         ),
 
-                        // СТРАНИЦА 2: УРОВНИ 4 И 5 (ЗАБЛОКИРОВАННЫЕ БУДУЩИЕ МИРЫ)
+                        // СТРАНИЦА 2: ИСПРАВЛЕНО! УРОВНИ 4 И 5 ОРАНЖЕВЫЕ СО ЗВЕЗДАМИ, НО ЗАБЛОКИРОВАННЫЕ
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            _buildLockedLevelCard('4', 'ПОДЗЕМЕЛЬЕ'),
+                            _buildLevelCard('4', false), // false — пока выключает запуск физики
                             const SizedBox(width: 30),
-                            _buildLockedLevelCard('???', 'ФИНАЛЬНЫЙ БОСС'),
+                            _buildLevelCard('5', false), 
                           ],
                         ),
                       ],
@@ -451,27 +464,40 @@ class LevelsScreen extends StatelessWidget {
 
                   const Spacer(),
 
-                  // Мультяшная круглая кнопка Назад в левом нижнем углу
+                  // ИСПРАВЛЕНО: ПАНЕЛЬ НАВИГАЦИИ С КНОПКАМИ ПО УГЛАМ
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 3)),
-                          ],
-                        ),
-                        child: IconButton(
-                          icon: const Icon(Icons.arrow_back_rounded, size: 36, color: Colors.white),
-                          style: IconButton.styleFrom(
-                            backgroundColor: Colors.redAccent,
-                            padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, bottom: 15),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // СТРЕЛКА НАЗАД В ГЛАВНОЕ МЕНЮ (Всегда в левом углу)
+                        Container(
+                          decoration: const BoxDecoration(shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 3))]),
+                          child: IconButton(
+                            icon: const Icon(Icons.arrow_back_rounded, size: 32, color: Colors.white),
+                            style: IconButton.styleFrom(backgroundColor: Colors.redAccent, padding: const EdgeInsets.all(10)),
+                            onPressed: () => Navigator.pop(context),
                           ),
-                          onPressed: () => Navigator.pop(context),
                         ),
-                      ),
+
+                        // ИСПРАВЛЕНО: УМНАЯ СТРЕЛКА ВПЕРЁД С ПРАВОЙ СТОРОНЫ (Скрывается на 2-й странице!)
+                        if (_currentPage == 0)
+                          Container(
+                            decoration: const BoxDecoration(shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 3))]),
+                            child: IconButton(
+                              icon: const Icon(Icons.arrow_forward_rounded, size: 32, color: Colors.white),
+                              style: IconButton.styleFrom(backgroundColor: const Color(0xFF4CAF50), padding: const EdgeInsets.all(10)),
+                              onPressed: () {
+                                _pageController.nextPage(
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                );
+                              },
+                            ),
+                          )
+                        else
+                          const SizedBox(width: 52), // Заглушка, чтобы кнопка назад не прыгала
+                      ],
                     ),
                   ),
                 ],
@@ -483,44 +509,8 @@ class LevelsScreen extends StatelessWidget {
     );
   }
 
-  // Вспомогательный метод для заблокированных карточек 4 и 5 уровней
-  Widget _buildLockedLevelCard(String levelNumber, String subtitle) {
-    return Container(
-      width: 85,
-      height: 85,
-      decoration: BoxDecoration(
-        color: const Color(0xFF37474F), // Мрачный стальной цвет заглушки
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: const Color(0xFF263238), width: 4), // Темная обводка
-        boxShadow: const [
-          BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 5)),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.lock_outline_rounded, color: Colors.grey.shade400, size: 20),
-          const SizedBox(height: 2),
-          Text(
-            levelNumber,
-            style: TextStyle(
-              fontSize: levelNumber == '???' ? 20 : 26,
-              fontWeight: FontWeight.w900,
-              color: Colors.grey.shade400,
-            ),
-          ),
-          Text(
-            subtitle,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 6, fontWeight: FontWeight.bold, color: Colors.redAccent, letterSpacing: 0.3),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Вспомогательный метод для создания большой карточки уровня со звездами
-  Widget _buildLevelCard(BuildContext context, String levelNumber) {
+  // УНИВЕРСАЛЬНЫЙ МЕТОД КАРТОЧЕК ДЛЯ ВСЕХ 5 УРОВНЕЙ
+  Widget _buildLevelCard(String levelNumber, bool isActive) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -531,12 +521,12 @@ class LevelsScreen extends StatelessWidget {
             color: const Color(0xFFFFCC80), 
             borderRadius: BorderRadius.circular(22), 
             border: Border.all(color: const Color(0xFFE65100), width: 4), 
-            boxShadow: const [
-              BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 5)), 
-            ],
+            boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 5))],
           ),
           child: ElevatedButton(
             onPressed: () {
+              if (!isActive) return; // Блокируем клик для 4 и 5 уровня, пока они не готовы
+              
               GameScreen gameScreenInstance = GameScreen();
               int targetLevel = int.tryParse(levelNumber) ?? 1;
               gameScreenInstance.gameInstance.currentLevel = targetLevel;
@@ -564,6 +554,7 @@ class LevelsScreen extends StatelessWidget {
         ),
         const SizedBox(height: 8),
                
+        // Звёзды теперь честно горят под всеми 5 карточками!
         FutureBuilder<int>(
           future: SharedPreferences.getInstance().then((prefs) {
             return prefs.getInt('level_${levelNumber}_stars') ?? 0;
@@ -574,23 +565,11 @@ class LevelsScreen extends StatelessWidget {
             return Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.star_rounded, 
-                  size: 22, 
-                  color: savedStars >= 1 ? const Color(0xFFFFD54F) : Colors.grey,
-                ),
+                Icon(Icons.star_rounded, size: 22, color: savedStars >= 1 ? const Color(0xFFFFD54F) : Colors.grey),
                 const SizedBox(width: 2),
-                Icon(
-                  Icons.star_rounded, 
-                  size: 26, 
-                  color: savedStars >= 2 ? const Color(0xFFFFD54F) : Colors.grey,
-                ), 
+                Icon(Icons.star_rounded, size: 26, color: savedStars >= 2 ? const Color(0xFFFFD54F) : Colors.grey), 
                 const SizedBox(width: 2),
-                Icon(
-                  Icons.star_rounded, 
-                  size: 22, 
-                  color: savedStars >= 3 ? const Color(0xFFFFD54F) : Colors.grey,
-                ),
+                Icon(Icons.star_rounded, size: 22, color: savedStars >= 3 ? const Color(0xFFFFD54F) : Colors.grey),
               ],
             );
           },
@@ -599,9 +578,6 @@ class LevelsScreen extends StatelessWidget {
     );
   }
 }
-
-
-
 
 // 1. ОБНОВЛЕННЫЙ ЭКРАН "ДОПОЛНИТЕЛЬНО" С ФИРМЕННОЙ ПОДПИСЬЮ ivandrop
 class AdditionalScreen extends StatelessWidget {
