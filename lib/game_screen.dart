@@ -136,12 +136,13 @@ class GameScreen extends StatelessWidget {
                                 onPressed: () {
                                   game.overlays.remove('VictoryMenu');
                                   
-                                  // Динамически двигаем игрока вперед
-                                  if (game.currentLevel < 3) {
-                                    game.currentLevel = game.currentLevel + 1;
-                                  } else {
-                                    game.currentLevel = 3; 
-                                  }
+                               // ИСПРАВЛЕНО: Кнопка на экране победы 3-го уровня теперь честно переносит на 4-й!
+                                if (game.currentLevel < 4) {
+                                  game.currentLevel = game.currentLevel + 1;
+                                } else {
+                                  game.currentLevel = 4; 
+                                }
+
                                   
                                   AngryMolluskGame.score = 0;
                                   game.worldScrollX = 0.0; // Сбрасываем скролл камеры к рогатке
@@ -638,13 +639,20 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     cloudOffset1 += 0.015 * dt;
     cloudOffset2 += 0.008 * dt;
 
-    // Обновление летящей птицы
-    if (currentBird != null && currentBird!.isLaunched) {
+        if (currentBird != null && currentBird!.isLaunched) {
+      // ИСПРАВЛЕНО: Игра сама следит за петлёй и уменьшает pillsRemaining до вызова апдейта птицы!
+      if (currentLevel == 4 && !currentBird!.isAngryMode && pillsRemaining > 0) {
+        if (currentBird!.position.dx >= 0.72 && currentBird!.position.dx <= 0.86 && currentBird!.position.dy <= 0.38) {
+          pillsRemaining--; // Честно отнимаем таблетку из палетки!
+        }
+      }
+
       currentBird!.update(dt, blocks, pigs, groundY, currentLevel);
       if (currentBird!.shouldRemove) {
         loadNextBird();
       }
     }
+
 
     // Обновление блоков замка и начисление очков
     for (var block in blocks) {
