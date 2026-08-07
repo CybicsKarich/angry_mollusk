@@ -365,6 +365,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   bool isAiming = false;
   bool showFlyingLosePhoto = false; // Флаг запуска вылета фотки
   double losePhotoScale = 0.0;     // Размер фотки (растёт от 0.0 до 0.5)
+  int pillsRemaining = 3; // На 4 уровне будет ровно 3 таблетки внутри петли
 
  
     int currentLevel = 1;
@@ -566,6 +567,45 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       pigs.add(MolluskMaksim(bx2 + 0.04, 0.71 - 0.019));  // в левой нижней комнате
       pigs.add(MolluskMaksim(bx2 + 0.15, 0.71 - 0.019));  // в правой нижней комнате
       pigs.add(MolluskMaksim(bx2 + 0.13, 0.35 - 0.019));  // ИСПРАВЛЕНО: Третья свинья теперь на самой верхушке башни!
+    }
+
+        // =========================================================================
+    // ГЕОМЕТРИЯ УРОВНЯ 4 (МЁРТВАЯ ПЕТЛЯ RED BALL И БРОНЕСТЕКЛО)
+    // =========================================================================
+    else if (currentLevel == 4) {
+      // Сбрасываем пачку таблеток на старте уровня
+      pillsRemaining = 3;
+
+      targetScore1Star = 500;
+      targetScore2Stars = 650;
+      targetScore3Stars = 800;
+
+      // 🏢 ЗДАНИЕ №1: ВЫСОКАЯ УЗКАЯ БАШНЯ ИЗ БРОНЕСТЕКЛА (Спереди на координате 1.22)
+      final double bx1 = 1.22;
+      blocks.add(GameBlock(bx1 + 0.02, 0.55, 0.03, 0.18, false)..isGlassBlock = true); 
+      blocks.add(GameBlock(bx1 + 0.08, 0.55, 0.03, 0.18, false)..isGlassBlock = true); 
+      blocks.add(GameBlock(bx1 + 0.01, 0.53, 0.11, 0.02, false)..isGlassBlock = true); // крыша 1 этажа
+      blocks.add(GameBlock(bx1 + 0.04, 0.35, 0.03, 0.18, false)..isGlassBlock = true); // 2 этаж
+      
+      // Сажаем 1 Максима строго внутрь стеклянной башни!
+      pigs.add(MolluskMaksim(bx1 + 0.05, 0.53 - 0.019));
+
+      // 🪵 ЗДАНИЕ №2: ДЕРЕВЯННАЯ РЕЗИДЕНЦИЯ ОДИН В ОДИН КАК НА 3 УРОВНЕ! (Сзади на 1.55)
+      final double bx2 = 1.55;
+      blocks.add(GameBlock(bx2 + 0.02, 0.71, 0.08, 0.02, false)); // пол левой комнаты
+      blocks.add(GameBlock(bx2 + 0.13, 0.71, 0.08, 0.02, false)); // пол правой комнаты
+      blocks.add(GameBlock(bx2 + 0.00, 0.55, 0.025, 0.18, false)); 
+      blocks.add(GameBlock(bx2 + 0.11, 0.55, 0.025, 0.18, false)); 
+      blocks.add(GameBlock(bx2 + 0.22, 0.55, 0.025, 0.18, false)); 
+      blocks.add(GameBlock(bx2 - 0.01, 0.53, 0.26, 0.02, false)); 
+      blocks.add(GameBlock(bx2 + 0.05, 0.37, 0.025, 0.16, false)); 
+      blocks.add(GameBlock(bx2 + 0.16, 0.37, 0.025, 0.16, false)); 
+      blocks.add(GameBlock(bx2 + 0.04, 0.35, 0.16, 0.02, false)); 
+
+      // Рассаживаем 3 Максимов внутри деревянного дома в точности как на 3 уровне
+      pigs.add(MolluskMaksim(bx2 + 0.06, 0.71 - 0.019));  
+      pigs.add(MolluskMaksim(bx2 + 0.17, 0.71 - 0.019));  
+      pigs.add(MolluskMaksim(bx2 + 0.12, 0.53 - 0.019));  
     }
 
     spawnCompleted = true;
@@ -846,7 +886,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     canvas.drawLine(Offset(slingBaseX, slingTopY + 15), leftHorn, paintSlingshot);
     canvas.drawLine(Offset(slingBaseX, slingTopY + 15), rightHorn, paintSlingshot);
 
-    // 8. ИСПРАВЛЕНО: ОТРИСОВКА ВСЕХ ОБЪЕКТОВ С УМНОЙ ПРОВЕРКОЙ НА СУНДУК И ЖЕЛЕЗО
+        // 8. ИСПРАВЛЕНО: ОТРИСОВКА ВСЕХ ОБЪЕКТОВ С УМНОЙ ПРОВЕРКОЙ НА СУНДУК, ЖЕЛЕЗО И БРОНЕСТЕКЛО
     for (var block in blocks) {
       if (block.isSecretChest) {
         // Отрисовка кастомного сундука с твоей картинки (с замком и открыванием!)
@@ -880,7 +920,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
           canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromCenter(center: bottomRect.topCenter + const Offset(0, 8), width: 14, height: 14), const Radius.circular(3)), lockPaint);
         }
 
-                // ИСПРАВЛЕНО: РИСУЕМ НАСТОЯЩУЮ КРАБЬЮ КЛЕШНЮ, КАК НА МЕДАЛИ, ИЗ ЦЕНТРА СУНДУКА!
+        // ИСПРАВЛЕНО: РИСУЕМ НАСТОЯЩУЮ КРАБЬЮ КЛЕШНЮ, КАК НА МЕДАЛИ, ИЗ ЦЕНТРА СУНДУКА!
         if (block.chestCapturedBird && block.chestAnimTimer < 1.5) {
           canvas.save();
           // Сдвигаем холст к верхней части открытого сундука
@@ -906,21 +946,88 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
         canvas.drawCircle(boxRect.topRight + const Offset(-5, 5), 2, rivetPaint);
         canvas.drawCircle(boxRect.bottomLeft + const Offset(5, -5), 2, rivetPaint);
         canvas.drawCircle(boxRect.bottomRight + const Offset(-5, -5), 2, rivetPaint);
+      } else if (block.isGlassBlock) {
+        // ИСПРАВЛЕНО: КРАСИВОЕ ПОЛУПРОЗРАЧНОЕ НЕОНОВО-ГОЛУБОЕ БРОНЕСТЕКЛО МАКСИМОВ!
+        final boxRect = Rect.fromLTWH(block.x * size.width, block.y * size.height, block.w * size.width, block.h * size.height);
+        
+        // Неоновая полупрозрачная голубая заливка (альфа-канал 0x99)
+        final glassPaint = Paint()..color = const Color(0x9900E5FF); 
+        final borderPaint = Paint()..color = const Color(0xFF00B0FF)..style = PaintingStyle.stroke..strokeWidth = 2.0;
+        
+        canvas.drawRect(boxRect, glassPaint);
+        canvas.drawRect(boxRect, borderPaint);
+
+        // Мультяшные белые блики по диагонали стекла
+        final glarePaint = Paint()..color = Colors.white.withOpacity(0.4)..strokeWidth = 1.5;
+        canvas.drawLine(boxRect.bottomLeft + const Offset(4, -4), boxRect.topRight + const Offset(-4, 4), glarePaint);
+        
+        // Если обычная птица врезалась в стекло и оно затрещало — рисуем сочную паутину трещин!
+        if (block.isBroken || block.vx != 0) {
+          final crackPaint = Paint()..color = Colors.white..style = PaintingStyle.stroke..strokeWidth = 1.2;
+          canvas.drawLine(boxRect.center, boxRect.topLeft, crackPaint);
+          canvas.drawLine(boxRect.center, boxRect.topRight, crackPaint);
+          canvas.drawLine(boxRect.center, boxRect.bottomLeft, crackPaint);
+          canvas.drawLine(boxRect.center, boxRect.bottomRight, crackPaint);
+        }
       } else {
         // Обычные блоки замка (дерево и камень) рисуются стандартно
         block.render(canvas, size);
       }
     }
 
+
     // СВИНЬИ! (Они нарисуются поверх островов и блоков)
     for (var pig in pigs) {
       pig.render(canvas, size, maksimSprite);
     }
 
-    // ПТИЦА С ТРАЕКТОРИЕЙ!
+        // ПТИЦА С ТРАЕКТОРИЕЙ! (ИСПРАВЛЕНО: Электрические разряды и увеличение Angry-Баннихопа!)
     if (currentBird != null && (!currentBird!.isLaunched || !currentBird!.shouldRemove)) {
+      canvas.save();
+
+      // Если птица под действием таблетки — применяем магию эффектов
+      if (currentBird!.isAngryMode) {
+        double birdScreenX = currentBird!.position.dx * size.width;
+        double birdScreenY = currentBird!.position.dy * size.height;
+
+        // АВТОРСКИЙ СЕКРЕТ: Смещаем холст к птице, увеличиваем её масштаб в 1.8 раза и возвращаем назад
+        canvas.translate(birdScreenX, birdScreenY);
+        canvas.scale(1.8);
+        canvas.translate(-birdScreenX, -birdScreenY);
+
+        // РИСУЕМ ХАОТИЧНЫЕ СИНИЕ ЭЛЕКТРИЧЕСКИЕ ЗАРЯДЫ ВОКРУГ БАННИХОПА
+        final sparkPaint = Paint()
+          ..color = const Color(0xFF00E5FF) // Ярко-голубой электрический неон
+          ..strokeWidth = 2.0
+          ..style = PaintingStyle.stroke;
+
+        final random = Random((currentBird!.rageSparkTimer * 100).toInt());
+        final double birdRadius = (size.height * 0.024); // примерный радиус птицы
+
+        for (int i = 0; i < 5; i++) {
+          final path = Path();
+          // Начинаем молнию от края птицы
+          double startAngle = random.nextDouble() * pi * 2;
+          double startX = birdScreenX + cos(startAngle) * birdRadius;
+          double startY = birdScreenY + sin(startAngle) * birdRadius;
+          path.moveTo(startX, startY);
+
+          // Генерируем 3 ломаных хаотичных шага для каждого электрического разряда
+          double currentX = startX;
+          double currentY = startY;
+          for (int step = 0; step < 3; step++) {
+            currentX += (random.nextDouble() * 24 - 12);
+            currentY += (random.nextDouble() * 24 - 12);
+            path.lineTo(currentX, currentY);
+          }
+          canvas.drawPath(path, sparkPaint);
+        }
+      }
+
       currentBird!.render(canvas, size, bunnySprite);
+      canvas.restore();
     }
+
 
     // ОТОБРАЖЕНИЕ СЧЁТЧИКА ОЧКОВ (В правом верхнем углу)
     final textPainter = TextPainter(
@@ -1095,8 +1202,11 @@ class Bunnyhop {
   bool isReadyForLaunch;
   bool isLaunched = false;
   bool shouldRemove = false;
+  bool isAngryMode = false;   // Включена ли виагра
+  double rageSparkTimer = 0.0; // Таймер для хаотичных синих молний
 
-  Offset velocity = Offset.zero;
+ 
+    Offset velocity = Offset.zero;
   double _lifeTimer = 0.0;
   List<Offset> trajectoryDots = [];
 
@@ -1121,6 +1231,28 @@ class Bunnyhop {
     velocity = Offset(velocity.dx, velocity.dy + 0.35 * dt);
     position = Offset(position.dx + velocity.dx * dt, position.dy + velocity.dy * dt);
 
+        // =========================================================================
+    // ТРИГГЕР МЁРТВОЙ ПЕТЛИ И АКТИВАЦИИ ВИАГРЫ НА 4 УРОВНЕ
+    // =========================================================================
+    if (game.currentLevel == 4 && !isAngryMode && game.pillsRemaining > 0) {
+      // Если птица пролетает высоко у неба в зоне подвешенного кольца (x около 0.8)
+      if (position.dx >= 0.72 && position.dx <= 0.86 && position.dy <= 0.38) {
+        isAngryMode = true;
+        game.pillsRemaining--; // Тратим одну таблетку из пачки
+        
+        AudioManager.playRage(); // Сочный научно-фантастический гул ярости с аудио-замком!
+        
+        // Эффект таблетки: Ускоряем Баннихопа в 2.5 раза вперёд-вниз для сочного тарана!
+        velocity = Offset(velocity.dx * 2.5, velocity.dy * 2.0 + 0.3);
+      }
+    }
+
+    // Если Баннихоп уже злой — обновляем таймер для хаотичных вспышек электричества
+    if (isAngryMode) {
+      rageSparkTimer += dt;
+    }
+
+      
     // СТОЛКНОВЕНИЕ С ЗЕМЛЁЙ ОСТРОВА (Птица не пролетает сквозь сушу!)
     if (position.dy >= groundY) {
       // Если птица находится на левом острове (<= 0.25) или на правом (>= 0.55) — она врезается в сушу
@@ -1140,23 +1272,38 @@ class Bunnyhop {
       return;
     }
 
+        // Столкновение с кубиками замка
     for (var block in blocks) {
       if (!block.isBroken && !block.shouldRemove &&
           position.dx >= block.x && position.dx <= block.x + block.w &&
           position.dy >= block.y && position.dy <= block.y + block.h) {
-        
-        // ИСПРАВЛЕНО: ХАК ДЛЯ СУНДУКА! Если птица коснулась сундука IvanDrop — она намертво зависает в воздухе!
+
+        // Хак для сундука
         if (block.isSecretChest) {
-          velocity = Offset.zero; // Полностью гасим скорость снаряда в ноль
-          position = Offset(block.x + block.w / 2, block.y - 0.02); // Фиксируем птицу ровно над сундуком
-          block.chestCapturedBird = true; // Включаем таймер лора ачивки с клешнёй
-          return; // Мгновенно выходим из апдейта, чтобы птица не падала под землю и не удалялась!
+          velocity = Offset.zero; 
+          position = Offset(block.x + block.w / 2, block.y - 0.02); 
+          block.chestCapturedBird = true; 
+          return; 
         }
 
-        // ИСПРАВЛЕНО: ХАК ДЛЯ ЖЕЛЕЗА! Если ворота не разбиты тапом пальца, птица просто бьётся о них и падает
+        // Хак для железа
         if (block.isIronShield) {
-          velocity = Offset(-velocity.dx * 0.2, 0.1); // Рикошетит назад
+          velocity = Offset(-velocity.dx * 0.2, 0.1); 
           return;
+        }
+
+        // ИСПРАВЛЕНО: ЖЕЛЕЗНАЯ ФИЗИКА БРОНЕСТЕКЛА НА 4 УРОВНЕ!
+        if (block.isGlassBlock) {
+          if (!isAngryMode) {
+            // ТАКТИКА 1: ОБЫЧНЫЙ БАННИХОП. 0% пробиваемости, скорость падает в ноль, стекло целое!
+            velocity = Offset.zero; 
+            return; // Птица бессильно отлипает и падает вниз
+          } else {
+            // ТАКТИКА 2: ЗЛОЙ БАННИХОП ПОД ТАБЛЕТКОЙ. Прошибает стекло со скоростью камня!
+            block.hit(velocity);
+            velocity = Offset(velocity.dx * 0.35, velocity.dy * 0.35); // гасит скорость умеренно
+            continue; // Летит шибать замок дальше!
+          }
         }
 
         block.hit(velocity); 
@@ -1167,6 +1314,7 @@ class Bunnyhop {
         }
       }
     }
+
 
         for (var pig in pigs) {
       double dx = position.dx - pig.x;
@@ -1342,7 +1490,8 @@ class GameBlock {
   double vx = 0.0, vy = 0.0;
   bool isFalling = false;
   bool shouldRemove = false;
-  bool isCracked = false;    // Появились ли трещины после удара об землю
+  bool isGlassBlock = false;  // Флаг бронестекла Максимов
+ bool isCracked = false;    // Появились ли трещины после удара об землю
   double groundFade = 1.0;   // Плавное исчезновение после падения на землю
   bool isSleeping = true; // Блок спит и стоит мёртво до тех пор, пока в него не попадут
   bool isBroken = false; // Разрушен ли блок напополам
