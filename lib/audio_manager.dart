@@ -21,6 +21,25 @@ class AudioManager {
     resetTokensForNextBird(); // Заряжаем жетоны при старте
   }
 
+  // ИСПРАВЛЕНО: Флаг-замок, который запрещает другим звукам играть, пока Баннихоп злится!
+  static bool _isRageSoundPlaying = false;
+
+  static Future<void> playRage() async {
+    if (_isRageSoundPlaying) return; // Если звук уже играет — игнорируем повторный вызов
+    
+    _isRageSoundPlaying = true;
+    try {
+      await AudioPlayer().play(AssetSource('sounds/bunnyhop_rage.mp3'));
+    } catch (e) {
+      print("Ошибка звука ярости: $e");
+    }
+
+    // Ровно через 2500 миллисекунд (длина трека) снимаем блокировку
+    Future.delayed(const Duration(milliseconds: 2500), () {
+      _isRageSoundPlaying = false;
+    });
+  }
+    
   // МЕТОД ОБНУЛЕНИЯ: Вызывается, когда на рогатку встает НОВАЯ птица
   static void resetTokensForNextBird() {
     hasStoneToken = true;
