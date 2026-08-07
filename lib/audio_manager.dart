@@ -79,6 +79,7 @@ class AudioManager {
   // 3. ПОПАДАНИЕ ПО СВИНЬЕ (Строго 1 раз за полет птицы)
   static void playPigHit() {
     if (_isRageSoundPlaying) return;
+    if (_isRageSoundPlaying) return;
     if (!hasPigHitToken) return; // Жетон сгорел — приглушаем все следующие повторы!
     hasPigHitToken = false; 
 
@@ -88,6 +89,7 @@ class AudioManager {
 
   // 4. ПРОМАХ БАННИХОПА (Строго 1 раз за полет птицы)
   static void playMiss() {
+    if (_isRageSoundPlaying) return;
     if (!hasMissToken) return; // Жетон сгорел — глушим эхо
     hasMissToken = false;
 
