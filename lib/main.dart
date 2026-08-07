@@ -1558,10 +1558,20 @@ class ComicIntroScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 14),
                   elevation: 5,
                 ),
-                onPressed: () {
-                  Navigator.pop(context); // Назад в меню уровней
-                },
-                child: const Text("ПОГНАЛИ!", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                 onPressed: () {
+                Navigator.pop(context); // Закрываем экран комикса
+
+                // ИСПРАВЛЕНО: Прямой и честный старт Четвёртого уровня прямо из комикса!
+                GameScreen gameScreenInstance = GameScreen();
+                gameScreenInstance.gameInstance.currentLevel = 4;
+                gameScreenInstance.gameInstance.worldScrollX = 0.0;
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => gameScreenInstance),
+                );
+              },
+              child: const Text("ПОГНАЛИ!", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
               ),
             ),
           ],
