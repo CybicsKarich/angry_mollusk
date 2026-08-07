@@ -588,8 +588,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       blocks.add(GameBlock(bx1 + 0.01, 0.53, 0.11, 0.02, false)..isGlassBlock = true); // крыша 1 этажа
       blocks.add(GameBlock(bx1 + 0.04, 0.35, 0.03, 0.18, false)..isGlassBlock = true); // 2 этаж
       
-      // Сажаем 1 Максима строго внутрь стеклянной башни!
-      pigs.add(MolluskMaksim(bx1 + 0.05, 0.53 - 0.019));
+      pigs.add(MolluskMaksim(bx1 + 0.08, 0.53 - 0.019));
 
       // 🪵 ЗДАНИЕ №2: ДЕРЕВЯННАЯ РЕЗИДЕНЦИЯ ОДИН В ОДИН КАК НА 3 УРОВНЕ! (Сзади на 1.55)
       final double bx2 = 1.55;
@@ -865,12 +864,14 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     _renderIsland(canvas, size, 0.0, 0.25); // Островок рогатки
     
     if (currentLevel == 1) {
-      _renderIsland(canvas, size, 0.55, 1.0); // Остров уровня 1
+      _renderIsland(canvas, size, 0.55, 1.0); 
     } else if (currentLevel == 2) {
-      _renderIsland(canvas, size, 1.28, 1.75); // Остров уровня 2 под замок bx=1.35
-    } else if (currentLevel == 3) {
+      _renderIsland(canvas, size, 1.28, 1.75); 
+    } else if (currentLevel == 3 || currentLevel == 4) {
+      // ИСПРАВЛЕНО: На 4 уровне земля и трава второго острова теперь отрисовываются на 100%!
       _renderIsland(canvas, size, 1.15, 1.95); 
     }
+
 
     // 6. КРАСНАЯ РЕЗИНКА РОГАТКИ (Отрисовывается ВСЕГДА до выстрела)
     final slingBaseX = size.width * 0.15;
@@ -894,7 +895,43 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     canvas.drawLine(Offset(slingBaseX, slingTopY + 15), leftHorn, paintSlingshot);
     canvas.drawLine(Offset(slingBaseX, slingTopY + 15), rightHorn, paintSlingshot);
 
-        // 8. ИСПРАВЛЕНО: ОТРИСОВКА ВСЕХ ОБЪЕКТОВ С УМНОЙ ПРОВЕРКОЙ НА СУНДУК, ЖЕЛЕЗО И БРОНЕСТЕКЛО
+    if (currentLevel == 4) {
+      final loopCenter = Offset(0.78 * size.width, 0.25 * size.height);
+      final loopRadius = size.height * 0.15; 
+      
+      final loopPaint = Paint()
+        ..color = const Color(0xFF795548) 
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 12.0;
+      final trackPaint = Paint()
+        ..color = const Color(0xFF4E342E) 
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3.5;
+
+      canvas.drawCircle(loopCenter, loopRadius, loopPaint);
+      canvas.drawCircle(loopCenter, loopRadius - 4, trackPaint);
+
+      if (pillsRemaining > 0) {
+        final pillPaint = Paint()..color = const Color(0xFF29B6F6); 
+        final pillBorder = Paint()..color = Colors.white..style = PaintingStyle.stroke..strokeWidth = 1.0;
+        
+        for (int i = 0; i < pillsRemaining; i++) {
+          double angle = (pi * 0.25) + (i * 0.45);
+          Offset pillPos = Offset(loopCenter.dx + cos(angle) * (loopRadius - 12), loopCenter.dy + sin(angle) * (loopRadius - 12));
+          
+          canvas.drawCircle(pillPos, 6.0, pillPaint);
+          canvas.drawCircle(pillPos, 6.0, pillBorder);
+          
+          final tp = TextPainter(
+            text: const TextSpan(text: 'V', style: TextStyle(fontSize: 7, fontWeight: FontWeight.bold, color: Colors.white)),
+            textDirection: TextDirection.ltr,
+          )..layout();
+          tp.paint(canvas, pillPos + const Offset(-2.5, -4.5));
+        }
+      }
+    }
+      
+      // 8. ИСПРАВЛЕНО: ОТРИСОВКА ВСЕХ ОБЪЕКТОВ С УМНОЙ ПРОВЕРКОЙ НА СУНДУК, ЖЕЛЕЗО И БРОНЕСТЕКЛО
     for (var block in blocks) {
       if (block.isSecretChest) {
         // Отрисовка кастомного сундука с твоей картинки (с замком и открыванием!)
@@ -1242,20 +1279,24 @@ class Bunnyhop {
         // =========================================================================
     // ТРИГГЕР МЁРТВОЙ ПЕТЛИ И АКТИВАЦИИ ВИАГРЫ НА 4 УРОВНЕ (ИСПРАВЛЕНО!)
     // =========================================================================
-    // Мы передаём в метод update птицы аргументы: blocks, pigs, groundY, level.
-    // Используем level вместо game.currentLevel, а таблетки уменьшаем через оверлей-клик или проверку координат!
     if (level == 4 && !isAngryMode) {
-      if (position.dx >= 0.72 && position.dx <= 0.86 && position.dy <= 0.38) {
-        // Проверяем, остались ли ещё таблетки на уровне (хакаем через координаты)
-        // Чтобы не вызывать ошибку 'game', мы можем просто активировать ярость!
+      if (position.dx >= 0.70 && position.dx <= 0.88 && position.dy <= 0.42) {
         isAngryMode = true;
-        
-        AudioManager.playRage(); // Сочный гул ярости с аудио-замком
-        
-        // Эффект таблетки: Ускоряем Ваня-птицу в 2.5 раза вперёд-вниз для сочного тарана!
-        velocity = Offset(velocity.dx * 2.5, velocity.dy * 2.0 + 0.3);
+
+        AudioManager.playRage(); // Гул ярости
+
+        // ИСПРАВЛЕНО: Увеличиваем скорость ровно в 1.5 раза без дикого ускорения!
+        velocity = Offset(velocity.dx * 1.5, velocity.dy * 1.3);
       }
     }
+
+    // Если Баннихоп злой — обновляем таймер для хаотичных вспышек электричества
+    if (isAngryMode) {
+      rageSparkTimer += dt;
+      // ЗАМЕТКА: Масштаб холста (scale) в методе render мы больше НЕ трогаем, 
+      // так что Ваня Баннихоп останется своего стандартного, честного размера!
+    }
+
 
 
     // Если Баннихоп уже злой — обновляем таймер для хаотичных вспышек электричества
