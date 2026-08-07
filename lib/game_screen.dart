@@ -895,28 +895,37 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     canvas.drawLine(Offset(slingBaseX, slingTopY + 15), leftHorn, paintSlingshot);
     canvas.drawLine(Offset(slingBaseX, slingTopY + 15), rightHorn, paintSlingshot);
 
+        // ИСПРАВЛЕНО: Рисуем открытую деревянную мёртвую петлю-арку Red Ball 4 у неба!
     if (currentLevel == 4) {
       final loopCenter = Offset(0.78 * size.width, 0.25 * size.height);
       final loopRadius = size.height * 0.15; 
       
       final loopPaint = Paint()
-        ..color = const Color(0xFF795548) 
+        ..color = const Color(0xFF795548) // Деревянный каркас
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 12.0;
+        ..strokeWidth = 12.0
+        ..strokeCap = StrokeCap.round; // Скругленные открытые края рампы
+        
       final trackPaint = Paint()
-        ..color = const Color(0xFF4E342E) 
+        ..color = const Color(0xFF4E342E) // Полотно трека разгона
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 3.5;
+        ..strokeWidth = 3.5
+        ..strokeCap = StrokeCap.round;
 
-      canvas.drawCircle(loopCenter, loopRadius, loopPaint);
-      canvas.drawCircle(loopCenter, loopRadius - 4, trackPaint);
+      // Рисуем рампу дугой (отставляем открытый зев на 60 градусов снизу, чтобы птица влетала!)
+      // Оборот идет от 0.2*pi до 1.8*pi (незамкнутый круг)
+      final loopRect = Rect.fromCircle(center: loopCenter, radius: loopRadius);
+      canvas.drawArc(loopRect, 0.2 * pi, 1.6 * pi, false, loopPaint);
+      canvas.drawArc(Rect.fromCircle(center: loopCenter, radius: loopRadius - 4), 0.2 * pi, 1.6 * pi, false, trackPaint);
 
+      // Отрисовываем таблетки виагры, висящие строго на полотне внутри дуги
       if (pillsRemaining > 0) {
         final pillPaint = Paint()..color = const Color(0xFF29B6F6); 
         final pillBorder = Paint()..color = Colors.white..style = PaintingStyle.stroke..strokeWidth = 1.0;
         
         for (int i = 0; i < pillsRemaining; i++) {
-          double angle = (pi * 0.25) + (i * 0.45);
+          // Разносим таблетки по внутренней дуге трека
+          double angle = (pi * 0.4) + (i * 0.4);
           Offset pillPos = Offset(loopCenter.dx + cos(angle) * (loopRadius - 12), loopCenter.dy + sin(angle) * (loopRadius - 12));
           
           canvas.drawCircle(pillPos, 6.0, pillPaint);
@@ -930,6 +939,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
         }
       }
     }
+
       
       // 8. ИСПРАВЛЕНО: ОТРИСОВКА ВСЕХ ОБЪЕКТОВ С УМНОЙ ПРОВЕРКОЙ НА СУНДУК, ЖЕЛЕЗО И БРОНЕСТЕКЛО
     for (var block in blocks) {
@@ -1026,52 +1036,46 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       pig.render(canvas, size, maksimSprite);
     }
 
-        // ПТИЦА С ТРАЕКТОРИЕЙ! (ИСПРАВЛЕНО: Электрические разряды и увеличение Angry-Баннихопа!)
-    if (currentBird != null && (!currentBird!.isLaunched || !currentBird!.shouldRemove)) {
-      canvas.save();
+          // ПТИЦА С ТРАЕКТОРИЕЙ! (ИСПРАВЛЕНО: Убрали увеличение размера, оставили только синие заряды!)
+      if (currentBird != null && (!currentBird!.isLaunched || !currentBird!.shouldRemove)) {
+        canvas.save();
+        
+        // Если птица под действием таблетки — рисуем хаотичные электрические разряды вокруг неё стандартного размера
+        if (currentBird!.isAngryMode) {
+          double birdScreenX = currentBird!.position.dx * size.width;
+          double birdScreenY = currentBird!.position.dy * size.height;
 
-      // Если птица под действием таблетки — применяем магию эффектов
-      if (currentBird!.isAngryMode) {
-        double birdScreenX = currentBird!.position.dx * size.width;
-        double birdScreenY = currentBird!.position.dy * size.height;
+          final sparkPaint = Paint()
+            ..color = const Color(0xFF00E5FF) // Ярко-голубой электрический неон
+            ..strokeWidth = 2.0
+            ..style = PaintingStyle.stroke;
 
-        // АВТОРСКИЙ СЕКРЕТ: Смещаем холст к птице, увеличиваем её масштаб в 1.8 раза и возвращаем назад
-        canvas.translate(birdScreenX, birdScreenY);
-        canvas.scale(1.8);
-        canvas.translate(-birdScreenX, -birdScreenY);
+          final random = Random((currentBird!.rageSparkTimer * 100).toInt());
+          final double birdRadius = (size.height * 0.024); // Радиус Баннихопа (стандартный 1.0)
 
-        // РИСУЕМ ХАОТИЧНЫЕ СИНИЕ ЭЛЕКТРИЧЕСКИЕ ЗАРЯДЫ ВОКРУГ БАННИХОПА
-        final sparkPaint = Paint()
-          ..color = const Color(0xFF00E5FF) // Ярко-голубой электрический неон
-          ..strokeWidth = 2.0
-          ..style = PaintingStyle.stroke;
+          for (int i = 0; i < 5; i++) {
+            final path = Path();
+            double startAngle = random.nextDouble() * pi * 2;
+            double startX = birdScreenX + cos(startAngle) * birdRadius;
+            double startY = birdScreenY + sin(startAngle) * birdRadius;
+            path.moveTo(startX, startY);
 
-        final random = Random((currentBird!.rageSparkTimer * 100).toInt());
-        final double birdRadius = (size.height * 0.024); // примерный радиус птицы
-
-        for (int i = 0; i < 5; i++) {
-          final path = Path();
-          // Начинаем молнию от края птицы
-          double startAngle = random.nextDouble() * pi * 2;
-          double startX = birdScreenX + cos(startAngle) * birdRadius;
-          double startY = birdScreenY + sin(startAngle) * birdRadius;
-          path.moveTo(startX, startY);
-
-          // Генерируем 3 ломаных хаотичных шага для каждого электрического разряда
-          double currentX = startX;
-          double currentY = startY;
-          for (int step = 0; step < 3; step++) {
-            currentX += (random.nextDouble() * 24 - 12);
-            currentY += (random.nextDouble() * 24 - 12);
-            path.lineTo(currentX, currentY);
+            double currentX = startX;
+            double currentY = startY;
+            for (int step = 0; step < 3; step++) {
+              currentX += (random.nextDouble() * 20 - 10);
+              currentY += (random.nextDouble() * 20 - 10);
+              path.lineTo(currentX, currentY);
+            }
+            canvas.drawPath(path, sparkPaint);
           }
-          canvas.drawPath(path, sparkPaint);
         }
+
+        // Отрисовываем птицу в её честном родном масштабе
+        currentBird!.render(canvas, size, bunnySprite);
+        canvas.restore();
       }
 
-      currentBird!.render(canvas, size, bunnySprite);
-      canvas.restore();
-    }
 
 
     // ОТОБРАЖЕНИЕ СЧЁТЧИКА ОЧКОВ (В правом верхнем углу)
@@ -1249,7 +1253,10 @@ class Bunnyhop {
   bool shouldRemove = false;
   bool isAngryMode = false;   // Включена ли виагра
   double rageSparkTimer = 0.0; // Таймер для хаотичных синих молний
-
+  // ИСПРАВЛЕНО: Свойства для честного вращения Баннихопа внутри петли на 360 градусов!
+  bool isInLoopRotation = false; // Летит ли птица сейчас по кругу внутри петли
+  double loopAngle = 0.0;        // Текущий угол вращения птицы внутри кольца
+  double loopSpeed = 7.5;        // Скорость набора угла (вращения)
  
     Offset velocity = Offset.zero;
   double _lifeTimer = 0.0;
@@ -1276,33 +1283,46 @@ class Bunnyhop {
     velocity = Offset(velocity.dx, velocity.dy + 0.35 * dt);
     position = Offset(position.dx + velocity.dx * dt, position.dy + velocity.dy * dt);
 
-        // =========================================================================
-    // ТРИГГЕР МЁРТВОЙ ПЕТЛИ И АКТИВАЦИИ ВИАГРЫ НА 4 УРОВНЕ (ИСПРАВЛЕНО!)
-    // =========================================================================
-    if (level == 4 && !isAngryMode) {
-      if (position.dx >= 0.70 && position.dx <= 0.88 && position.dy <= 0.42) {
-        isAngryMode = true;
+    if (isInLoopRotation) {
+      rageSparkTimer += dt;
+      
+            // Наращиваем угол вращения через нашу новую переменную loopSpeed!
+      loopAngle += loopSpeed * dt;
 
-        AudioManager.playRage(); // Гул ярости
+      
+      double loopCenterX = 0.78;
+      double loopCenterY = 0.25;
+      double loopRadiusY = 0.15; 
+      double loopRadiusX = 0.15 / 1.7; // Коррекция пропорций экрана 16:9
 
-        // ИСПРАВЛЕНО: Увеличиваем скорость ровно в 1.5 раза без дикого ускорения!
-        velocity = Offset(velocity.dx * 1.5, velocity.dy * 1.3);
+      // Считаем круговые координаты Вани Баннихопа внутри рампы
+      double currentAngle = (pi * 0.5) + loopAngle;
+      x = loopCenterX + cos(currentAngle) * loopRadiusX;
+      y = loopCenterY + sin(currentAngle) * loopRadiusY;
+      position = Offset(x, y);
+
+      // Как только Ваня сделал честный полный круг в 360 градусов (угол больше 2*pi)
+      if (loopAngle >= pi * 2) {
+        isInLoopRotation = false; // Отключаем круговой режим
+        isAngryMode = true;       // Передаем флаг твоему старому коду!
+        
+        // Задаём вылет из петли вперёд-вниз со скоростью, увеличенной в 1.5 раза по ТЗ!
+        vx = 0.35 * 1.5;
+        vy = 0.15 * 1.3;
+        velocity = Offset(vx, vy);
       }
+      return; // МГНОВЕННО ВЫХОДИМ, блокируя обычное падение, пока птица делает оборот!
     }
 
-    // Если Баннихоп злой — обновляем таймер для хаотичных вспышек электричества
-    if (isAngryMode) {
-      rageSparkTimer += dt;
-      // ЗАМЕТКА: Масштаб холста (scale) в методе render мы больше НЕ трогаем, 
-      // так что Ваня Баннихоп останется своего стандартного, честного размера!
-    }
+    // ТРИГГЕР ЗАХВАТА ПТИЦЫ ПРИ ВЛЁТЕ В ЗЕВ ПЕТЛИ СНИЗУ
+    if (level == 4 && !isAngryMode && !isInLoopRotation) {
+      // Если обычный Ваня пролетает в зоне основания рампы (x около 0.73-0.83, y около 0.34-0.41)
+      if (position.dx >= 0.73 && position.dx <= 0.83 && position.dy >= 0.34 && position.dy <= 0.41) {
+        isInLoopRotation = true; // Переключаем в режим вращения
+        loopAngle = 0.0;         // Сбрасываем угол на старт
+        AudioManager.playRage(); // Запускаем пацанский гул ярости
+      }
 
-
-
-    // Если Баннихоп уже злой — обновляем таймер для хаотичных вспышек электричества
-    if (isAngryMode) {
-      rageSparkTimer += dt;
-    }
 
       
     // СТОЛКНОВЕНИЕ С ЗЕМЛЁЙ ОСТРОВА (Птица не пролетает сквозь сушу!)
