@@ -78,6 +78,7 @@ class AudioManager {
 
   // 3. ПОПАДАНИЕ ПО СВИНЬЕ (Строго 1 раз за полет птицы)
   static void playPigHit() {
+    if (_isRageSoundPlaying) return;
     if (!hasPigHitToken) return; // Жетон сгорел — приглушаем все следующие повторы!
     hasPigHitToken = false; 
 
@@ -96,11 +97,13 @@ class AudioManager {
 
   // 5. ЖИВОЕ СОПЕНИЕ (Оставляем без изменений)
   static void playPigSnort() {
+    if (_isRageSoundPlaying) return;
     _playSingleEffect('audio/pig_snort.mp3');
   }
 
   // 6. ХРУСТ БЛОКОВ (Строго 1 раз для камня и 1 раз для дерева за полет!)
   static void playBlockBreak(bool isStone) async {
+    if (_isRageSoundPlaying) return;
     if (isStone) {
       if (!hasStoneToken) return; // Если в этом выстреле камень УЖЕ ХРУСТЕЛ — выходим!
       hasStoneToken = false;
