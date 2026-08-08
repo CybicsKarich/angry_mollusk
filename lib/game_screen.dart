@@ -608,6 +608,16 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       pigs.add(MolluskMaksim(bx2 + 0.12, 0.53 - 0.019));  
     }
 
+      final double loopX = 0.78;
+      final double loopY = 0.25;
+      
+      // Левая внешняя стена петли
+      blocks.add(GameBlock(loopX - 0.16, loopY - 0.05, 0.02, 0.20, false)..isSleeping = true);
+      // Правая внешняя стена петли
+      blocks.add(GameBlock(loopX + 0.14, loopY - 0.05, 0.02, 0.20, false)..isSleeping = true);
+      // Верхняя крышка петли (небо)
+      blocks.add(GameBlock(loopX - 0.14, loopY - 0.15, 0.28, 0.02, false)..isSleeping = true);
+    
     spawnCompleted = true;
   }
 
@@ -900,7 +910,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     canvas.drawLine(Offset(slingBaseX, slingTopY + 15), leftHorn, paintSlingshot);
     canvas.drawLine(Offset(slingBaseX, slingTopY + 15), rightHorn, paintSlingshot);
 
-        // ИСПРАВЛЕНО: Рисуем открытую деревянную мёртвую петлю-арку Red Ball 4 у неба!
+        // ИСПРАВЛЕНО: Развернули мёртвую петлю Red Ball 4 открытой частью СТРОГО ВНИЗ!
     if (currentLevel == 4) {
       final loopCenter = Offset(0.78 * size.width, 0.25 * size.height);
       final loopRadius = size.height * 0.15; 
@@ -909,28 +919,27 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
         ..color = const Color(0xFF795548) // Деревянный каркас
         ..style = PaintingStyle.stroke
         ..strokeWidth = 12.0
-        ..strokeCap = StrokeCap.round; // Скругленные открытые края рампы
+        ..strokeCap = StrokeCap.round; // Красивые скругленные края въезда
         
       final trackPaint = Paint()
-        ..color = const Color(0xFF4E342E) // Полотно трека разгона
+        ..color = const Color(0xFF4E342E) // Внутреннее полотно трека
         ..style = PaintingStyle.stroke
         ..strokeWidth = 3.5
         ..strokeCap = StrokeCap.round;
 
-      // Рисуем рампу дугой (отставляем открытый зев на 60 градусов снизу, чтобы птица влетала!)
-      // Оборот идет от 0.2*pi до 1.8*pi (незамкнутый круг)
+      // ИСПРАВЛЕНО: Углы изменены так, чтобы разомкнутый зев смотрел вертикально вниз!
       final loopRect = Rect.fromCircle(center: loopCenter, radius: loopRadius);
-      canvas.drawArc(loopRect, 0.2 * pi, 1.6 * pi, false, loopPaint);
-      canvas.drawArc(Rect.fromCircle(center: loopCenter, radius: loopRadius - 4), 0.2 * pi, 1.6 * pi, false, trackPaint);
+      canvas.drawArc(loopRect, 0.7 * pi, 1.6 * pi, false, loopPaint);
+      canvas.drawArc(Rect.fromCircle(center: loopCenter, radius: loopRadius - 4), 0.7 * pi, 1.6 * pi, false, trackPaint);
 
-      // Отрисовываем таблетки виагры, висящие строго на полотне внутри дуги
+      // Отрисовываем таблетки виагры, висящие по внутренней дуге
       if (pillsRemaining > 0) {
         final pillPaint = Paint()..color = const Color(0xFF29B6F6); 
         final pillBorder = Paint()..color = Colors.white..style = PaintingStyle.stroke..strokeWidth = 1.0;
         
         for (int i = 0; i < pillsRemaining; i++) {
-          // Разносим таблетки по внутренней дуге трека
-          double angle = (pi * 0.4) + (i * 0.4);
+          // Разносим 3 таблетки дугой по верхней части кольца
+          double angle = (pi * 1.1) + (i * 0.4);
           Offset pillPos = Offset(loopCenter.dx + cos(angle) * (loopRadius - 12), loopCenter.dy + sin(angle) * (loopRadius - 12));
           
           canvas.drawCircle(pillPos, 6.0, pillPaint);
@@ -944,6 +953,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
         }
       }
     }
+
 
       
       // 8. ИСПРАВЛЕНО: ОТРИСОВКА ВСЕХ ОБЪЕКТОВ С УМНОЙ ПРОВЕРКОЙ НА СУНДУК, ЖЕЛЕЗО И БРОНЕСТЕКЛО
@@ -1321,9 +1331,9 @@ class Bunnyhop {
         isInLoopRotation = false; // Отключаем круговой режим
         
         // Перезаписываем вектор скорости velocity напрямую:
-        // Если таблетку съел — вылетает со скоростью увеличенной в 1.5 раза.
-        double speedMultiplier = isAngryMode ? 1.5 : 1.0;
-        velocity = Offset(0.35 * speedMultiplier, 0.15 * (isAngryMode ? 1.3 : 1.0));
+        // Если таблетку съел — вылетает со скоростью увеличенной в 1.2 раза.
+        double speedMultiplier = isAngryMode ? 1.2 : 1.0;
+        velocity = Offset(0.35 * speedMultiplier, 0.15 * (isAngryMode ? 1.15 : 1.0));
       }
       return; // МГНОВЕННО ВЫХОДИМ, блокируя обычное падение, пока птица делает оборот!
     }
@@ -1358,7 +1368,8 @@ class Bunnyhop {
 
         // Столкновение с кубиками замка
     for (var block in blocks) {
-      if (!block.isBroken && !block.shouldRemove &&
+       if (isInLoopRotation) continue; 
+        if (!block.isBroken && !block.shouldRemove &&
           position.dx >= block.x && position.dx <= block.x + block.w &&
           position.dy >= block.y && position.dy <= block.y + block.h) {
 
