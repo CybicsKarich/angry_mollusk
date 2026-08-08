@@ -638,25 +638,25 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     cloudOffset1 += 0.015 * dt;
     cloudOffset2 += 0.008 * dt;
 
-          if (currentBird != null && currentBird!.isLaunched) {
-          if (currentLevel == 4 && !currentBird!.isAngryMode && pillsRemaining > 0) {
-          // ИСПРАВЛЕНО: Скорректировали зону под новые размеры большой петли
-          if (currentBird!.position.dx >= 0.71 && currentBird!.position.dx <= 0.83 && currentBird!.position.dy <= 0.44) {
+                if (currentBird != null && currentBird!.isLaunched) {
+        // ИСПРАВЛЕНО: Скорректировали зону съедения таблеток под огромную дыру в 120 градусов!
+        if (currentLevel == 4 && !currentBird!.isAngryMode && pillsRemaining > 0) {
+          if (currentBird!.position.dx >= 0.70 && currentBird!.position.dx <= 0.86 && currentBird!.position.dy <= 0.46) {
             pillsRemaining--; 
           }
         }
 
-
         currentBird!.update(dt, blocks, pigs, groundY, currentLevel);
         
-        // ИСПРАВЛЕНО: Если птица отработала заряд или разбилась насмерть — гасим звук ярости на месте!
+        // Если птица отработала заряд или разбилась насмерть — гасим звук ярости на месте
         if (currentBird!.shouldRemove) {
           if (currentLevel == 4 && currentBird!.isAngryMode) {
-            AudioManager.stopRage(); // Глушим гул таблетки мгновенно, не дожидаясь конца трека!
+            AudioManager.stopRage(); // Глушим гул таблетки мгновенно
           }
           loadNextBird(); // Загружаем следующую птицу у рогатки
         }
       }
+
 
 
 
