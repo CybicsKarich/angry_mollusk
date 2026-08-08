@@ -639,12 +639,14 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     cloudOffset2 += 0.008 * dt;
 
                 if (currentBird != null && currentBird!.isLaunched) {
-        // ИСПРАВЛЕНО: Скорректировали зону съедения таблеток под огромную дыру в 120 градусов!
-        if (currentLevel == 4 && !currentBird!.isAngryMode && pillsRemaining > 0) {
-          if (currentBird!.position.dx >= 0.70 && currentBird!.position.dx <= 0.86 && currentBird!.position.dy <= 0.46) {
+                if (currentLevel == 4 && currentBird!.isInLoopRotation && game.pillsRemaining > 0) {
+          // ИСПРАВЛЕНО: Таблетка отнимается из пачки СТРОГО тогда, когда птица 
+          // внутри вращения физически докатывается до верхней точки свода петли!
+          if (currentBird!.loopAngle >= pi * 0.6 && currentBird!.loopAngle <= pi * 0.7) {
             pillsRemaining--; 
           }
         }
+
 
         currentBird!.update(dt, blocks, pigs, groundY, currentLevel);
         
@@ -902,9 +904,8 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     canvas.drawLine(Offset(slingBaseX, slingTopY + 15), leftHorn, paintSlingshot);
     canvas.drawLine(Offset(slingBaseX, slingTopY + 15), rightHorn, paintSlingshot);
 
-            // ИСПРАВЛЕНО: Петля вернулась к аккуратным размерам, а дыра снизу распабнута на 120 градусов!
+        // ИСПРАВЛЕНО: Распахнули левую и правую стороны дыры на максимум (Симметричный огромный зев!)
     if (currentLevel == 4) {
-      // Возвращаем центр и стандартный компактный радиус кольца
       final loopCenter = Offset(0.78 * size.width, 0.25 * size.height);
       final loopRadius = size.height * 0.15; 
       
@@ -912,7 +913,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
         ..color = const Color(0xFF795548) // Деревянный каркас
         ..style = PaintingStyle.stroke
         ..strokeWidth = 12.0
-        ..strokeCap = StrokeCap.round; // Аккуратные круглые края укороченных стенок
+        ..strokeCap = StrokeCap.round; 
         
       final trackPaint = Paint()
         ..color = const Color(0xFF4E342E) // Полотно трека разгона
@@ -920,18 +921,18 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
         ..strokeWidth = 3.5
         ..strokeCap = StrokeCap.round;
 
-      // ИСПРАВЛЕНО: ОГРОМНАЯ ДЫРА СНИЗУ В 120 ГРАДУСОВ! (Дуга рисуется только сверху и по бокам)
+      // ИСПРАВЛЕНО: Укоротили балки с обеих сторон, дыра снизу теперь полностью открыта для влёта!
       final loopRect = Rect.fromCircle(center: loopCenter, radius: loopRadius);
-      canvas.drawArc(loopRect, 0.83 * pi, 1.34 * pi, false, loopPaint);
-      canvas.drawArc(Rect.fromCircle(center: loopCenter, radius: loopRadius - 4), 0.83 * pi, 1.34 * pi, false, trackPaint);
+      canvas.drawArc(loopRect, 0.9 * pi, 1.2 * pi, false, loopPaint);
+      canvas.drawArc(Rect.fromCircle(center: loopCenter, radius: loopRadius - 4), 0.9 * pi, 1.2 * pi, false, trackPaint);
 
-      // Отрисовываем 3 таблетки виагры, висящие глубоко внутри верхнего свода дуги
+      // Отрисовываем 3 таблетки виагры, висящие по внутренней дуге
       if (pillsRemaining > 0) {
         final pillPaint = Paint()..color = const Color(0xFF29B6F6); 
         final pillBorder = Paint()..color = Colors.white..style = PaintingStyle.stroke..strokeWidth = 1.0;
         
         for (int i = 0; i < pillsRemaining; i++) {
-          // Таблетки висят строго по центру верхнего внутреннего потолка петли
+          // Таблетки висят строго по центру верхнего свода петли
           double angle = (pi * 1.15) + (i * 0.35);
           Offset pillPos = Offset(loopCenter.dx + cos(angle) * (loopRadius - 15), loopCenter.dy + sin(angle) * (loopRadius - 15));
           
@@ -946,6 +947,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
         }
       }
     }
+
 
       
       // 8. ИСПРАВЛЕНО: ОТРИСОВКА ВСЕХ ОБЪЕКТОВ С УМНОЙ ПРОВЕРКОЙ НА СУНДУК, ЖЕЛЕЗО И БРОНЕСТЕКЛО
@@ -1299,7 +1301,7 @@ class Bunnyhop {
       
       // Радиус проката чётко по внутренней колее трека
       double loopRadiusY = 0.15 - 0.035; 
-      double loopRadiusX = (0.15 / 1.7) - 0.022; 
+      double loopRadiusX = (0.15 / 1.7) - 0.022; // Коррекция пропорций экрана 16:9
 
       // Крутим Баннихопа внутри арки по часовой стрелке
       double currentAngle = (pi * 0.5) + loopAngle;
@@ -1308,42 +1310,43 @@ class Bunnyhop {
         loopCenterY + sin(currentAngle) * loopRadiusY,
       );
 
-      // Включаем хаотичные электрические вспышки, раз Ваня уже сожрал таблетку на входе!
+      // ИСПРАВЛЕНО: Ваня съедает таблетку строго В УПОР на верхушке свода петли!
+      if (loopAngle >= 0.9 * pi && loopAngle <= 1.1 * pi && !isAngryMode) {
+        isAngryMode = true; // Включаем статус ярости и хаотичные синие искры
+        AudioManager.playRage(); // ГАРАНТИРОВАННО запускаем сочный гул таблетки!
+      }
+
+      // Если Баннихоп уже злой — обновляем таймер хаотичных электрических вспышек
       if (isAngryMode) {
         rageSparkTimer += dt;
       }
 
-      // Вылет из петли вверху справа после полного внутреннего кувырка на 360 градусов
+      // Вылет из петли после полного внутреннего кувырка на 360 градусов
       if (loopAngle >= pi * 2) {
         isInLoopRotation = false; // Отключаем круговой режим
         
-        // Вылетает вперёд со скоростью, увеличенной в 1.2 раза по ТЗ!
+        // Вылетает вперёд со скоростью, увеличенной в 1.2 раза
         double speedMultiplier = isAngryMode ? 1.2 : 1.0;
         velocity = Offset(0.35 * speedMultiplier, 0.15 * (isAngryMode ? 1.15 : 1.0));
       }
-      return; // Блокируем обычную гравитацию, пока идёт прокат
+      return; // Блокируем обычную гравитацию, пока идёт внутренний прокат
     }
 
-    // ИСПРАВЛЕНО: УМНАЯ ФИЛЬТРАЦИЯ КАСАНИЯ СТОРОН ПЕТЛИ (ЛЕВАЯ И ПРАВАЯ)
+    // ИСПРАВЛЕНО: ВОЗВРАТИЛИ ДВА ЧЁТКИХ ТРИГГЕРА ДЛЯ ЛЕВОЙ И ПРАВОЙ СТОРОН!
     if (level == 4 && !isAngryMode && !isInLoopRotation) {
       
-      // СИТУАЦИЯ А: Касание ВНЕШНЕЙ ЛЕВОЙ стороны петли (промах мимо зева)
-      // Если птица летит низко слева и шоркает внешнюю обшивку (x от 0.64 до 0.72)
+      // ТРИГГЕР 1: Касание ВНЕШНЕЙ ЛЕВОЙ стороны петли (промах мимо дыры)
       if (position.dx >= 0.64 && position.dx < 0.72 && position.dy >= 0.22 && position.dy <= 0.40) {
-        // ЖЕСТКОЕ ПРАВИЛО: Никакого вращения! Птица просто рикошетит и летит дальше на замок или падает в воду
+        // Никакого вращения! Птица просто рикошетит и летит дальше на замок
         velocity = Offset(velocity.dx * 0.7, velocity.dy + 0.1); 
         return;
       }
 
-      // СИТУАЦИЯ Б: Касание ПРАВОЙ стороны — ЧЕСТНЫЙ ВЛЁТ В ЗЕВ ПЕТЛИ СНИЗУ!
-      // Ловим птицу строго в проёме зева с правой внутренней стороны (x от 0.73 до 0.84, y до 0.45)
-      if (position.dx >= 0.73 && position.dx <= 0.84 && position.dy >= 0.26 && position.dy <= 0.45) {
-        // УБЕДИТЕЛЬНЫЙ ФИКС ЗВУКА И ТАБЛЕТКИ: Активируем всё СРАЗУ в миг захвата в петлю!
+      // ТРИГГЕР 2: Касание ПРАВОЙ стороны — ЧЕСТНЫЙ ВЛЁТ В ЗЕВ ПЕТЛИ СНИЗУ!
+      // Ловим птицу строго в проёме открытого 120-градусного зева
+      if (position.dx >= 0.73 && position.dx <= 0.86 && position.dy >= 0.26 && position.dy <= 0.46) {
         isInLoopRotation = true; 
         loopAngle = 0.0; // Стартуем вращение с нуля
-        isAngryMode = true; // Сразу включаем статус ярости и синие молнии!
-        
-        AudioManager.playRage(); // ГАРАНТИРОВАННО бахает сочный гул таблетки bunnyhop_rage.mp3!
         return;
       }
     }
