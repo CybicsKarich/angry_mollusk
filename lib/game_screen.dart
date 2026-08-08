@@ -1330,10 +1330,10 @@ class Bunnyhop {
         double speedMultiplier = isAngryMode ? 1.4 : 1.0;
         velocity = Offset(0.35 * speedMultiplier, 0.15 * (isAngryMode ? 1.35 : 1.0));
       }
-
+         return; // Блокируем обычную гравитацию, пока идёт внутренний прокат
       }
-      return; // Блокируем обычную гравитацию, пока идёт внутренний прокат
-    }
+      
+    
 
     // ИСПРАВЛЕНО: ВОЗВРАТИЛИ ДВА ЧЁТКИХ ТРИГГЕРА ДЛЯ ЛЕВОЙ И ПРАВОЙ СТОРОН!
     if (level == 4 && !isAngryMode && !isInLoopRotation) {
