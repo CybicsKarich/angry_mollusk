@@ -638,19 +638,24 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     cloudOffset1 += 0.015 * dt;
     cloudOffset2 += 0.008 * dt;
 
-        if (currentBird != null && currentBird!.isLaunched) {
-      // ИСПРАВЛЕНО: Игра сама следит за петлёй и уменьшает pillsRemaining до вызова апдейта птицы!
-      if (currentLevel == 4 && !currentBird!.isAngryMode && pillsRemaining > 0) {
-        if (currentBird!.position.dx >= 0.72 && currentBird!.position.dx <= 0.86 && currentBird!.position.dy <= 0.38) {
-          pillsRemaining--; // Честно отнимаем таблетку из палетки!
+          if (currentBird != null && currentBird!.isLaunched) {
+        if (currentLevel == 4 && !currentBird!.isAngryMode && pillsRemaining > 0) {
+          if (currentBird!.position.dx >= 0.72 && currentBird!.position.dx <= 0.86 && currentBird!.position.dy <= 0.38) {
+            pillsRemaining--; 
+          }
+        }
+
+        currentBird!.update(dt, blocks, pigs, groundY, currentLevel);
+        
+        // ИСПРАВЛЕНО: Если птица отработала заряд или разбилась насмерть — гасим звук ярости на месте!
+        if (currentBird!.shouldRemove) {
+          if (currentLevel == 4 && currentBird!.isAngryMode) {
+            AudioManager.stopRage(); // Глушим гул таблетки мгновенно, не дожидаясь конца трека!
+          }
+          loadNextBird(); // Загружаем следующую птицу у рогатки
         }
       }
 
-      currentBird!.update(dt, blocks, pigs, groundY, currentLevel);
-      if (currentBird!.shouldRemove) {
-        loadNextBird();
-      }
-    }
 
 
     // Обновление блоков замка и начисление очков
@@ -1284,43 +1289,50 @@ class Bunnyhop {
     position = Offset(position.dx + velocity.dx * dt, position.dy + velocity.dy * dt);
 
     if (isInLoopRotation) {
-      rageSparkTimer += dt;
-      
-            // Наращиваем угол вращения через нашу новую переменную loopSpeed!
+      // Наращиваем угол вращения через нашу переменную loopSpeed
       loopAngle += loopSpeed * dt;
-
       
       double loopCenterX = 0.78;
       double loopCenterY = 0.25;
       double loopRadiusY = 0.15; 
       double loopRadiusX = 0.15 / 1.7; // Коррекция пропорций экрана 16:9
 
-      // Считаем круговые координаты Вани Баннихопа внутри рампы
+      // Рассчитываем координаты position напрямую без лишних переменных
       double currentAngle = (pi * 0.5) + loopAngle;
-      x = loopCenterX + cos(currentAngle) * loopRadiusX;
-      y = loopCenterY + sin(currentAngle) * loopRadiusY;
-      position = Offset(x, y);
+      position = Offset(
+        loopCenterX + cos(currentAngle) * loopRadiusX,
+        loopCenterY + sin(currentAngle) * loopRadiusY,
+      );
+
+      // ИСПРАВЛЕНО: ФУНКЦИЯ СЪЕДЕНИЯ ТАБЛЕТКИ И ПРИМЕНЕНИЯ ЯРОСТИ!
+      // Когда угол проката loopAngle доходит до зоны таблеток (от 1/3 до половины круга)
+      if (loopAngle >= pi * 0.35 && loopAngle <= pi * 1.5 && !isAngryMode) {
+        isAngryMode = true; // Ваня съедает таблетку и переходит в ярость!
+        AudioManager.playRage(); // Сочный гул ярости с аудио-замком
+      }
+
+      // Если Баннихоп уже злой — обновляем таймер хаотичных электрических вспышек
+      if (isAngryMode) {
+        rageSparkTimer += dt;
+      }
 
       // Как только Ваня сделал честный полный круг в 360 градусов (угол больше 2*pi)
       if (loopAngle >= pi * 2) {
         isInLoopRotation = false; // Отключаем круговой режим
-        isAngryMode = true;       // Передаем флаг твоему старому коду!
         
-        // Задаём вылет из петли вперёд-вниз со скоростью, увеличенной в 1.5 раза по ТЗ!
-        vx = 0.35 * 1.5;
-        vy = 0.15 * 1.3;
-        velocity = Offset(vx, vy);
+        // Перезаписываем вектор скорости velocity напрямую:
+        // Если таблетку съел — вылетает со скоростью увеличенной в 1.5 раза.
+        double speedMultiplier = isAngryMode ? 1.5 : 1.0;
+        velocity = Offset(0.35 * speedMultiplier, 0.15 * (isAngryMode ? 1.3 : 1.0));
       }
       return; // МГНОВЕННО ВЫХОДИМ, блокируя обычное падение, пока птица делает оборот!
     }
 
     // ТРИГГЕР ЗАХВАТА ПТИЦЫ ПРИ ВЛЁТЕ В ЗЕВ ПЕТЛИ СНИЗУ
     if (level == 4 && !isAngryMode && !isInLoopRotation) {
-      // Если обычный Ваня пролетает в зоне основания рампы (x около 0.73-0.83, y около 0.34-0.41)
       if (position.dx >= 0.73 && position.dx <= 0.83 && position.dy >= 0.34 && position.dy <= 0.41) {
         isInLoopRotation = true; // Переключаем в режим вращения
         loopAngle = 0.0;         // Сбрасываем угол на старт
-        AudioManager.playRage(); // Запускаем пацанский гул ярости
       }
     }
 
