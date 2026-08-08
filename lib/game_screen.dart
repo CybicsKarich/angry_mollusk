@@ -639,13 +639,13 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     cloudOffset2 += 0.008 * dt;
 
                 if (currentBird != null && currentBird!.isLaunched) {
-                if (currentLevel == 4 && currentBird!.isInLoopRotation && pillsRemaining > 0) {
-          // ИСПРАВЛЕНО: Таблетка отнимается из пачки СТРОГО тогда, когда птица 
-          // внутри вращения физически докатывается до верхней точки свода петли!
-          if (currentBird!.loopAngle >= pi * 0.6 && currentBird!.loopAngle <= pi * 0.7) {
+                        if (currentLevel == 4 && currentBird!.isInLoopRotation && pillsRemaining > 0) {
+          // ИСПРАВЛЕНО: Синхронизировали точечный забор под обновлённую траекторию правой стороны
+          if (currentBird!.loopAngle >= 0.85 * pi && currentBird!.loopAngle <= 1.05 * pi) {
             pillsRemaining--; 
           }
         }
+
 
 
         currentBird!.update(dt, blocks, pigs, groundY, currentLevel);
@@ -921,10 +921,11 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
         ..strokeWidth = 3.5
         ..strokeCap = StrokeCap.round;
 
-      // ИСПРАВЛЕНО: Укоротили балки с обеих сторон, дыра снизу теперь полностью открыта для влёта!
+            // ИСПРАВЛЕНО: Правая сторона удлинена для старта движения, а левая осталась открытой!
       final loopRect = Rect.fromCircle(center: loopCenter, radius: loopRadius);
-      canvas.drawArc(loopRect, 0.9 * pi, 1.2 * pi, false, loopPaint);
-      canvas.drawArc(Rect.fromCircle(center: loopCenter, radius: loopRadius - 4), 0.9 * pi, 1.2 * pi, false, trackPaint);
+      canvas.drawArc(loopRect, 0.45 * pi, 1.7 * pi, false, loopPaint);
+      canvas.drawArc(Rect.fromCircle(center: loopCenter, radius: loopRadius - 4), 0.45 * pi, 1.7 * pi, false, trackPaint);
+
 
       // Отрисовываем 3 таблетки виагры, висящие по внутренней дуге
       if (pillsRemaining > 0) {
@@ -1320,14 +1321,16 @@ class Bunnyhop {
       if (isAngryMode) {
         rageSparkTimer += dt;
       }
-
-      // Вылет из петли после полного внутреннего кувырка на 360 градусов
+        
+              // Завершение полного оборота внутри петли на 360 градусов
       if (loopAngle >= pi * 2) {
         isInLoopRotation = false; // Отключаем круговой режим
         
-        // Вылетает вперёд со скоростью, увеличенной в 1.2 раза
-        double speedMultiplier = isAngryMode ? 1.2 : 1.0;
-        velocity = Offset(0.35 * speedMultiplier, 0.15 * (isAngryMode ? 1.15 : 1.0));
+        // ИСПРАВЛЕНО: Скорость вылета после таблетки составляет ровно 1.4 раза!
+        double speedMultiplier = isAngryMode ? 1.4 : 1.0;
+        velocity = Offset(0.35 * speedMultiplier, 0.15 * (isAngryMode ? 1.35 : 1.0));
+      }
+
       }
       return; // Блокируем обычную гравитацию, пока идёт внутренний прокат
     }
