@@ -639,11 +639,13 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     cloudOffset2 += 0.008 * dt;
 
           if (currentBird != null && currentBird!.isLaunched) {
-        if (currentLevel == 4 && !currentBird!.isAngryMode && pillsRemaining > 0) {
-          if (currentBird!.position.dx >= 0.72 && currentBird!.position.dx <= 0.86 && currentBird!.position.dy <= 0.38) {
+          if (currentLevel == 4 && !currentBird!.isAngryMode && pillsRemaining > 0) {
+          // ИСПРАВЛЕНО: Скорректировали зону под новые размеры большой петли
+          if (currentBird!.position.dx >= 0.71 && currentBird!.position.dx <= 0.83 && currentBird!.position.dy <= 0.44) {
             pillsRemaining--; 
           }
         }
+
 
         currentBird!.update(dt, blocks, pigs, groundY, currentLevel);
         
@@ -900,51 +902,50 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     canvas.drawLine(Offset(slingBaseX, slingTopY + 15), leftHorn, paintSlingshot);
     canvas.drawLine(Offset(slingBaseX, slingTopY + 15), rightHorn, paintSlingshot);
 
-        // ИСПРАВЛЕНО: Развернули мёртвую петлю Red Ball 4 открытой частью СТРОГО ВНИЗ!
+        // ИСПРАВЛЕНО: Сделали мёртвую петлю НАМНОГО больше и раскрыли зев снизу до 90 градусов!
     if (currentLevel == 4) {
-      final loopCenter = Offset(0.78 * size.width, 0.25 * size.height);
-      final loopRadius = size.height * 0.15; 
+      // Центр петли оставляем примерно там же, но поднимаем чуть повыше к небу
+      final loopCenter = Offset(0.76 * size.width, 0.22 * size.height);
+      final loopRadius = size.height * 0.19; // КРУПНЫЙ, увеличенный радиус кольца (был 0.15)
       
       final loopPaint = Paint()
         ..color = const Color(0xFF795548) // Деревянный каркас
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 12.0
-        ..strokeCap = StrokeCap.round; // Красивые скругленные края въезда
+        ..strokeWidth = 14.0 // Сделали балки петли потолще и выразительнее
+        ..strokeCap = StrokeCap.round;
         
       final trackPaint = Paint()
-        ..color = const Color(0xFF4E342E) // Внутреннее полотно трека
+        ..color = const Color(0xFF4E342E) // Полотно трека разгона
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 3.5
+        ..strokeWidth = 4.0
         ..strokeCap = StrokeCap.round;
 
-      // ИСПРАВЛЕНО: Углы изменены так, чтобы разомкнутый зев смотрел вертикально вниз!
+      // ИСПРАВЛЕНО: Углы изменены так, чтобы снизу образовался огромный зев ровно в 90 градусов (от 0.75*pi до 2.25*pi)
       final loopRect = Rect.fromCircle(center: loopCenter, radius: loopRadius);
-      canvas.drawArc(loopRect, 0.7 * pi, 1.6 * pi, false, loopPaint);
-      canvas.drawArc(Rect.fromCircle(center: loopCenter, radius: loopRadius - 4), 0.7 * pi, 1.6 * pi, false, trackPaint);
+      canvas.drawArc(loopRect, 0.75 * pi, 1.5 * pi, false, loopPaint);
+      canvas.drawArc(Rect.fromCircle(center: loopCenter, radius: loopRadius - 5), 0.75 * pi, 1.5 * pi, false, trackPaint);
 
-      // Отрисовываем таблетки виагры, висящие по внутренней дуге
+      // Отрисовываем 3 пачки-таблетки виагры, висящие по внутренней дуге увеличенного кольца
       if (pillsRemaining > 0) {
         final pillPaint = Paint()..color = const Color(0xFF29B6F6); 
         final pillBorder = Paint()..color = Colors.white..style = PaintingStyle.stroke..strokeWidth = 1.0;
         
         for (int i = 0; i < pillsRemaining; i++) {
-          // Разносим 3 таблетки дугой по верхней части кольца
-          double angle = (pi * 1.1) + (i * 0.4);
-          Offset pillPos = Offset(loopCenter.dx + cos(angle) * (loopRadius - 12), loopCenter.dy + sin(angle) * (loopRadius - 12));
+          // Разносим таблетки посредине верхнего свода большой петли
+          double angle = (pi * 1.15) + (i * 0.35);
+          Offset pillPos = Offset(loopCenter.dx + cos(angle) * (loopRadius - 14), loopCenter.dy + sin(angle) * (loopRadius - 14));
           
-          canvas.drawCircle(pillPos, 6.0, pillPaint);
-          canvas.drawCircle(pillPos, 6.0, pillBorder);
+          canvas.drawCircle(pillPos, 6.5, pillPaint);
+          canvas.drawCircle(pillPos, 6.5, pillBorder);
           
           final tp = TextPainter(
-            text: const TextSpan(text: 'V', style: TextStyle(fontSize: 7, fontWeight: FontWeight.bold, color: Colors.white)),
+            text: const TextSpan(text: 'V', style: TextStyle(fontSize: 7.5, fontWeight: FontWeight.bold, color: Colors.white)),
             textDirection: TextDirection.ltr,
           )..layout();
           tp.paint(canvas, pillPos + const Offset(-2.5, -4.5));
         }
       }
     }
-
-
       
       // 8. ИСПРАВЛЕНО: ОТРИСОВКА ВСЕХ ОБЪЕКТОВ С УМНОЙ ПРОВЕРКОЙ НА СУНДУК, ЖЕЛЕЗО И БРОНЕСТЕКЛО
     for (var block in blocks) {
@@ -1289,52 +1290,49 @@ class Bunnyhop {
     position = Offset(position.dx + velocity.dx * dt, position.dy + velocity.dy * dt);
 
     if (isInLoopRotation) {
-      // Наращиваем угол вращения через нашу переменную loopSpeed
       loopAngle += loopSpeed * dt;
       
-      double loopCenterX = 0.78;
-      double loopCenterY = 0.25;
+      // Координаты центра должны строго совпадать с методом render!
+      double loopCenterX = 0.76;
+      double loopCenterY = 0.22;
       
-      // ИСПРАВЛЕНО: Уменьшили радиус вращения на 12 пикселей (loopRadius - 12),
-      // чтобы Баннихоп катился СТРОГО ПО ВНУТРЕННЕЙ дорожке трека, а не по внешней обшивке!
-      double loopRadiusY = 0.15 - 0.022; 
-      double loopRadiusX = (0.15 / 1.7) - 0.013; // Коррекция пропорций экрана 16:9
+      // ИСПРАВЛЕНО: Подстроили внутренний радиус под увеличенные размеры петли!
+      double loopRadiusY = 0.19 - 0.024; 
+      double loopRadiusX = (0.19 / 1.7) - 0.014; 
 
-      // Стартуем оборот с угла pi * 0.5 (строго нижняя точка) и крутимся внутри арки
+      // Крутим Баннихопа строго по внутренней дорожке большой арки
       double currentAngle = (pi * 0.5) + loopAngle;
       position = Offset(
         loopCenterX + cos(currentAngle) * loopRadiusX,
         loopCenterY + sin(currentAngle) * loopRadiusY,
       );
 
-      // Функция съедения таблетки и применения ярости (когда пролетает по внутренней дуге)
+      // Таблетка съедается и включает ярость посреди оборота
       if (loopAngle >= pi * 0.35 && loopAngle <= pi * 1.5 && !isAngryMode) {
         isAngryMode = true; 
-        AudioManager.playRage(); // Сочный гул ярости с аудио-замком
+        AudioManager.playRage(); 
       }
 
       if (isAngryMode) {
         rageSparkTimer += dt;
       }
 
-      // Завершение полного оборота внутри петли на 360 градусов
+      // Вылет из петли после полного оборота
       if (loopAngle >= pi * 2) {
-        isInLoopRotation = false; // Отключаем круговой режим
-        
-        // Вылетает из петли с ускорением х1.2 по ТЗ
+        isInLoopRotation = false; 
         double speedMultiplier = isAngryMode ? 1.2 : 1.0;
         velocity = Offset(0.35 * speedMultiplier, 0.15 * (isAngryMode ? 1.15 : 1.0));
       }
-      return; // Блокируем обычную гравитацию, пока птица делает внутренний оборот!
+      return; 
     }
 
-    // ИСПРАВЛЕНО: ТРИГГЕР ЗАХВАТА ПТИЦЫ СТРОГО ПРИ ВЛЁТЕ ВНУТРЬ ПЕТЛИ
+    // ИСПРАВЛЕНО: РАСШИРЕННЫЙ И ПРАВИЛЬНЫЙ ТРИГГЕР ЗАХВАТА ПОД ЗЕВ В 90 ГРАДУСОВ!
     if (level == 4 && !isAngryMode && !isInLoopRotation) {
-      // Ловим момент, когда Баннихоп залетает навесом СНИЗУ ВНУТРЬ открытого зева кольца
-      // Координаты сужены чётко под внутренний вход (x: 0.76-0.80, y: 0.30-0.34)
-      if (position.dx >= 0.75 && position.dx <= 0.81 && position.dy >= 0.28 && position.dy <= 0.34) {
+      // Раздвинули границы по X и Y. Теперь как только Ваня влетает снизу в огромные ворота арки,
+      // физика его железно ловит, закручивает по кругу и не даёт пролететь сквозь текстуры насквозь!
+      if (position.dx >= 0.71 && position.dx <= 0.83 && position.dy >= 0.33 && position.dy <= 0.44) {
         isInLoopRotation = true; 
-        loopAngle = 0.0;         // Сбрасываем угол на старт вращения
+        loopAngle = 0.0; 
       }
     }
 
