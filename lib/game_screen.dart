@@ -1291,50 +1291,60 @@ class Bunnyhop {
     position = Offset(position.dx + velocity.dx * dt, position.dy + velocity.dy * dt);
 
     if (isInLoopRotation) {
+      // Наращиваем угол вращения через нашу переменную loopSpeed
       loopAngle += loopSpeed * dt;
       
       double loopCenterX = 0.78;
       double loopCenterY = 0.25;
       
-      // ИСПРАВЛЕНО: Сильно уменьшили радиус проката (минус 25 пикселей по вертикали!),
-      // чтобы Баннихоп летел глубоко ВНУТРИ дуги и физически не мог оказаться снаружи!
+      // Радиус проката чётко по внутренней колее трека
       double loopRadiusY = 0.15 - 0.035; 
       double loopRadiusX = (0.15 / 1.7) - 0.022; 
 
-      // Крутим Баннихопа по глубокому внутреннему кольцу арки
+      // Крутим Баннихопа внутри арки по часовой стрелке
       double currentAngle = (pi * 0.5) + loopAngle;
       position = Offset(
         loopCenterX + cos(currentAngle) * loopRadiusX,
         loopCenterY + sin(currentAngle) * loopRadiusY,
       );
 
-      // Функция съедения таблетки и применения ярости внутри свода
-      if (loopAngle >= pi * 0.35 && loopAngle <= pi * 1.5 && !isAngryMode) {
-        isAngryMode = true; 
-        AudioManager.playRage(); 
-      }
-
+      // Включаем хаотичные электрические вспышки, раз Ваня уже сожрал таблетку на входе!
       if (isAngryMode) {
         rageSparkTimer += dt;
       }
 
-      // Вылет из петли после полного внутреннего кувырка
+      // Вылет из петли вверху справа после полного внутреннего кувырка на 360 градусов
       if (loopAngle >= pi * 2) {
-        isInLoopRotation = false; 
+        isInLoopRotation = false; // Отключаем круговой режим
+        
+        // Вылетает вперёд со скоростью, увеличенной в 1.2 раза по ТЗ!
         double speedMultiplier = isAngryMode ? 1.2 : 1.0;
         velocity = Offset(0.35 * speedMultiplier, 0.15 * (isAngryMode ? 1.15 : 1.0));
       }
-      return; 
+      return; // Блокируем обычную гравитацию, пока идёт прокат
     }
 
-    // ИСПРАВЛЕНО: ШИРОКИЙ ТРИГГЕР ЗАХВАТА ПОД ОГРОМНУЮ ДЫРУ В 120 ГРАДУСОВ!
+    // ИСПРАВЛЕНО: УМНАЯ ФИЛЬТРАЦИЯ КАСАНИЯ СТОРОН ПЕТЛИ (ЛЕВАЯ И ПРАВАЯ)
     if (level == 4 && !isAngryMode && !isInLoopRotation) {
-      // Мы сильно расширили зону влёта по ширине (X от 0.70 до 0.86) и опустили её ниже (Y до 0.46).
-      // Теперь укороченные боковые балки не мешают птице, она залетает в огромную дыру снизу,
-      // и физика мгновенно подхватывает её на внутренний круг!
-      if (position.dx >= 0.70 && position.dx <= 0.86 && position.dy >= 0.28 && position.dy <= 0.46) {
+      
+      // СИТУАЦИЯ А: Касание ВНЕШНЕЙ ЛЕВОЙ стороны петли (промах мимо зева)
+      // Если птица летит низко слева и шоркает внешнюю обшивку (x от 0.64 до 0.72)
+      if (position.dx >= 0.64 && position.dx < 0.72 && position.dy >= 0.22 && position.dy <= 0.40) {
+        // ЖЕСТКОЕ ПРАВИЛО: Никакого вращения! Птица просто рикошетит и летит дальше на замок или падает в воду
+        velocity = Offset(velocity.dx * 0.7, velocity.dy + 0.1); 
+        return;
+      }
+
+      // СИТУАЦИЯ Б: Касание ПРАВОЙ стороны — ЧЕСТНЫЙ ВЛЁТ В ЗЕВ ПЕТЛИ СНИЗУ!
+      // Ловим птицу строго в проёме зева с правой внутренней стороны (x от 0.73 до 0.84, y до 0.45)
+      if (position.dx >= 0.73 && position.dx <= 0.84 && position.dy >= 0.26 && position.dy <= 0.45) {
+        // УБЕДИТЕЛЬНЫЙ ФИКС ЗВУКА И ТАБЛЕТКИ: Активируем всё СРАЗУ в миг захвата в петлю!
         isInLoopRotation = true; 
-        loopAngle = 0.0; 
+        loopAngle = 0.0; // Стартуем вращение с нуля
+        isAngryMode = true; // Сразу включаем статус ярости и синие молнии!
+        
+        AudioManager.playRage(); // ГАРАНТИРОВАННО бахает сочный гул таблетки bunnyhop_rage.mp3!
+        return;
       }
     }
       
