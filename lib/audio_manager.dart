@@ -21,23 +21,43 @@ class AudioManager {
     resetTokensForNextBird(); // Заряжаем жетоны при старте
   }
 
-  // ИСПРАВЛЕНО: Флаг-замок, который запрещает другим звукам играть, пока Баннихоп злится!
+  // ИСПРАВЛЕНО: Сохраняем ссылку на плеер ярости, чтобы им можно было управлять!
+  static AudioPlayer? _ragePlayer;
   static bool _isRageSoundPlaying = false;
 
+  // Возвращаем статус аудио-замка, чтобы другие методы могли его считывать
+  static bool get isRageSoundPlaying => _isRageSoundPlaying;
+
   static Future<void> playRage() async {
-    if (_isRageSoundPlaying) return; // Если звук уже играет — игнорируем повторный вызов
+    if (_isRageSoundPlaying) return; // Защита от наложения
     
     _isRageSoundPlaying = true;
     try {
-      await AudioPlayer().play(AssetSource('sounds/bunnyhop_rage.mp3'));
+      // ИСПРАВЛЕНО: Создаем плеер и сохраняем его в переменную
+      _ragePlayer = AudioPlayer();
+      await _ragePlayer!.play(AssetSource('sounds/bunnyhop_rage.mp3'));
     } catch (e) {
       print("Ошибка звука ярости: $e");
     }
 
-    // Ровно через 2500 миллисекунд (длина трека) снимаем блокировку
+    // Автоматический сброс замка через 2.5 секунды, если птица выжила
     Future.delayed(const Duration(milliseconds: 2500), () {
       _isRageSoundPlaying = false;
+      _ragePlayer = null;
     });
+  }
+
+  // ИСПРАВЛЕНО: Новый метод мгновенной остановки гула при смерти Вани Баннихопа!
+  static Future<void> stopRage() async {
+    if (_ragePlayer != null) {
+      try {
+        await _ragePlayer!.stop(); // Выключаем звук намертво!
+      } catch (e) {
+        print("Ошибка остановки звука ярости: $e");
+      }
+      _ragePlayer = null;
+    }
+    _isRageSoundPlaying = false; // Мгновенно открываем аудио-замок для других эффектов
   }
     
   // МЕТОД ОБНУЛЕНИЯ: Вызывается, когда на рогатку встает НОВАЯ птица
