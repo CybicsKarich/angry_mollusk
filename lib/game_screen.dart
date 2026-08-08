@@ -607,16 +607,6 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       pigs.add(MolluskMaksim(bx2 + 0.17, 0.71 - 0.019));  
       pigs.add(MolluskMaksim(bx2 + 0.12, 0.53 - 0.019));  
     }
-
-      final double loopX = 0.78;
-      final double loopY = 0.25;
-      
-      // Левая внешняя стена петли
-      blocks.add(GameBlock(loopX - 0.16, loopY - 0.05, 0.02, 0.20, false)..isSleeping = true);
-      // Правая внешняя стена петли
-      blocks.add(GameBlock(loopX + 0.14, loopY - 0.05, 0.02, 0.20, false)..isSleeping = true);
-      // Верхняя крышка петли (небо)
-      blocks.add(GameBlock(loopX - 0.14, loopY - 0.15, 0.28, 0.02, false)..isSleeping = true);
     
     spawnCompleted = true;
   }
@@ -1304,45 +1294,47 @@ class Bunnyhop {
       
       double loopCenterX = 0.78;
       double loopCenterY = 0.25;
-      double loopRadiusY = 0.15; 
-      double loopRadiusX = 0.15 / 1.7; // Коррекция пропорций экрана 16:9
+      
+      // ИСПРАВЛЕНО: Уменьшили радиус вращения на 12 пикселей (loopRadius - 12),
+      // чтобы Баннихоп катился СТРОГО ПО ВНУТРЕННЕЙ дорожке трека, а не по внешней обшивке!
+      double loopRadiusY = 0.15 - 0.022; 
+      double loopRadiusX = (0.15 / 1.7) - 0.013; // Коррекция пропорций экрана 16:9
 
-      // Рассчитываем координаты position напрямую без лишних переменных
+      // Стартуем оборот с угла pi * 0.5 (строго нижняя точка) и крутимся внутри арки
       double currentAngle = (pi * 0.5) + loopAngle;
       position = Offset(
         loopCenterX + cos(currentAngle) * loopRadiusX,
         loopCenterY + sin(currentAngle) * loopRadiusY,
       );
 
-      // ИСПРАВЛЕНО: ФУНКЦИЯ СЪЕДЕНИЯ ТАБЛЕТКИ И ПРИМЕНЕНИЯ ЯРОСТИ!
-      // Когда угол проката loopAngle доходит до зоны таблеток (от 1/3 до половины круга)
+      // Функция съедения таблетки и применения ярости (когда пролетает по внутренней дуге)
       if (loopAngle >= pi * 0.35 && loopAngle <= pi * 1.5 && !isAngryMode) {
-        isAngryMode = true; // Ваня съедает таблетку и переходит в ярость!
+        isAngryMode = true; 
         AudioManager.playRage(); // Сочный гул ярости с аудио-замком
       }
 
-      // Если Баннихоп уже злой — обновляем таймер хаотичных электрических вспышек
       if (isAngryMode) {
         rageSparkTimer += dt;
       }
 
-      // Как только Ваня сделал честный полный круг в 360 градусов (угол больше 2*pi)
+      // Завершение полного оборота внутри петли на 360 градусов
       if (loopAngle >= pi * 2) {
         isInLoopRotation = false; // Отключаем круговой режим
         
-        // Перезаписываем вектор скорости velocity напрямую:
-        // Если таблетку съел — вылетает со скоростью увеличенной в 1.2 раза.
+        // Вылетает из петли с ускорением х1.2 по ТЗ
         double speedMultiplier = isAngryMode ? 1.2 : 1.0;
         velocity = Offset(0.35 * speedMultiplier, 0.15 * (isAngryMode ? 1.15 : 1.0));
       }
-      return; // МГНОВЕННО ВЫХОДИМ, блокируя обычное падение, пока птица делает оборот!
+      return; // Блокируем обычную гравитацию, пока птица делает внутренний оборот!
     }
 
-    // ТРИГГЕР ЗАХВАТА ПТИЦЫ ПРИ ВЛЁТЕ В ЗЕВ ПЕТЛИ СНИЗУ
+    // ИСПРАВЛЕНО: ТРИГГЕР ЗАХВАТА ПТИЦЫ СТРОГО ПРИ ВЛЁТЕ ВНУТРЬ ПЕТЛИ
     if (level == 4 && !isAngryMode && !isInLoopRotation) {
-      if (position.dx >= 0.73 && position.dx <= 0.83 && position.dy >= 0.34 && position.dy <= 0.41) {
-        isInLoopRotation = true; // Переключаем в режим вращения
-        loopAngle = 0.0;         // Сбрасываем угол на старт
+      // Ловим момент, когда Баннихоп залетает навесом СНИЗУ ВНУТРЬ открытого зева кольца
+      // Координаты сужены чётко под внутренний вход (x: 0.76-0.80, y: 0.30-0.34)
+      if (position.dx >= 0.75 && position.dx <= 0.81 && position.dy >= 0.28 && position.dy <= 0.34) {
+        isInLoopRotation = true; 
+        loopAngle = 0.0;         // Сбрасываем угол на старт вращения
       }
     }
 
@@ -1367,8 +1359,7 @@ class Bunnyhop {
     }
 
         // Столкновение с кубиками замка
-    for (var block in blocks) {
-       if (isInLoopRotation) continue; 
+    for (var block in blocks) { 
         if (!block.isBroken && !block.shouldRemove &&
           position.dx >= block.x && position.dx <= block.x + block.w &&
           position.dy >= block.y && position.dy <= block.y + block.h) {
