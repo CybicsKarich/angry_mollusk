@@ -639,7 +639,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     cloudOffset2 += 0.008 * dt;
 
                 if (currentBird != null && currentBird!.isLaunched) {
-                if (currentLevel == 4 && currentBird!.isInLoopRotation && game.pillsRemaining > 0) {
+                if (currentLevel == 4 && currentBird!.isInLoopRotation && pillsRemaining > 0) {
           // ИСПРАВЛЕНО: Таблетка отнимается из пачки СТРОГО тогда, когда птица 
           // внутри вращения физически докатывается до верхней точки свода петли!
           if (currentBird!.loopAngle >= pi * 0.6 && currentBird!.loopAngle <= pi * 0.7) {
