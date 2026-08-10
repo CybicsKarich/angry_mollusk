@@ -375,7 +375,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   bool isAiming = false;
   bool showFlyingLosePhoto = false; // Флаг запуска вылета фотки
   double losePhotoScale = 0.0;     // Размер фотки (растёт от 0.0 до 0.5)
-  int pillsRemaining = 3; // На 4 уровне будет ровно 3 таблетки внутри петли
+  static int pillsRemaining = 3;
   double acidBackgroundTimer = 0.0;
  
     int currentLevel = 1;
@@ -651,15 +651,9 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
 
               if (currentBird != null && currentBird!.isLaunched) {
         if (currentLevel == 4 && currentBird!.isInLoopRotation) {
-          // ИСПРАВЛЕНО: Если птица докатилась до верхушки свода петли
-          if (currentBird!.loopAngle >= 0.85 * pi && currentBird!.loopAngle <= 1.05 * pi) {
-            if (pillsRemaining > 0) {
-              pillsRemaining--; // Честно забираем таблетку, если пачка не пуста
-            } else {
-              // ИСПРАВЛЕНО: ЖЕСТКОЕ ПРАВИЛО! Если таблеток не осталось — принудительно 
-              // тушим ярость у птицы! Пролёт по петле станет пустым и ничего не даст.
-              currentBird!.isAngryMode = false; 
-            }
+          // Сама игра уменьшает статическую пачку таблеток ровно в момент проката
+          if (currentBird!.loopAngle >= 0.85 * pi && currentBird!.loopAngle <= 1.05 * pi && AngryMolluskGame.pillsRemaining > 0) {
+            AngryMolluskGame.pillsRemaining--; 
           }
         }
 
@@ -669,6 +663,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
         }
 
         currentBird!.update(dt, blocks, pigs, groundY, currentLevel);
+
 
         
         // Если птица отработала заряд или разбилась насмерть — гасим звук ярости на месте
@@ -981,14 +976,15 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       canvas.drawArc(loopRect, 0.85 * pi, 1.3 * pi, false, loopPaint);
       canvas.drawArc(Rect.fromCircle(center: loopCenter, radius: loopRadius - 4), 0.85 * pi, 1.3 * pi, false, trackPaint);
 
-      // Отрисовываем 3 таблетки виагры, висящие по внутренней дуге верхнего свода
-      if (pillsRemaining > 0) {
+            // ИСПРАВЛЕНО: Проверяем таблетки через статический вызов AngryMolluskGame.pillsRemaining
+      if (AngryMolluskGame.pillsRemaining > 0) {
         final pillPaint = Paint()..color = const Color(0xFF29B6F6); 
         final pillBorder = Paint()..color = Colors.white..style = PaintingStyle.stroke..strokeWidth = 1.0;
         
-        for (int i = 0; i < pillsRemaining; i++) {
-          // Таблетки висят ровно по центру верхнего внутреннего потолка арки
-          double angle = (pi * 1.15) + (i * 0.35);
+        // ИСПРАВЛЕНО: В цикле тоже читаем статическую переменную класса
+        for (int i = 0; i < AngryMolluskGame.pillsRemaining; i++) {
+          // Таблетки висят на верхнем внутреннем своде
+          double angle = (pi * 1.1) + (i * 0.35);
           Offset pillPos = Offset(loopCenter.dx + cos(angle) * (loopRadius - 12), loopCenter.dy + sin(angle) * (loopRadius - 12));
           
           canvas.drawCircle(pillPos, 6.0, pillPaint);
@@ -1440,10 +1436,17 @@ class Bunnyhop {
         loopCenterY + sin(currentAngle) * loopRadiusY,
       );
 
-      // ИСПРАВЛЕНО: Функция съедения таблетки строго В УПОР!
+            // ИСПРАВЛЕНО: Ваня съедает таблетку строго В УПОР и ТОЛЬКО если они реально есть в пачке!
       if (loopAngle >= 0.9 * pi && loopAngle <= 1.1 * pi && !isAngryMode) {
-        isAngryMode = true; // Ваня съедает пачку, включается кислота неба и эффекты подложки!
+        if (AngryMolluskGame.pillsRemaining > 0) {
+          isAngryMode = true; // Включаем статус ярости и хаотичные синие искры
+          AudioManager.playRage(); // ГАРАНТИРОВАННО запускаем сочный гул таблетки!
+        } else {
+          // Если пачка пуста — жестко гарантируем, что Ваня останется обычным!
+          isAngryMode = false;
+        }
       }
+
 
       if (isAngryMode) {
         rageSparkTimer += dt;
