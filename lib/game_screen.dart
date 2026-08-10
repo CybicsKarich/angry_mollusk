@@ -1145,10 +1145,13 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
           canvas.drawPath(auraPath, auraFill);
           canvas.drawPath(auraPath, auraBorder);
 
-          // =========================================================================
-          // В) ХАОТИЧНЫЕ СИНИЕ ЭЛЕКТРИЧЕСКИЕ РАЗРЯДЫ ИЗ КОНЧИКОВ ШИПОВ ПОДЛОЖКИ
-          // =========================================================================
-          final sparkPaint = Paint()..color = Colors.white..strokeWidth = 1.8..style = PaintingStyle.stroke;
+         // В) ИСПРАВЛЕНО: ХАОТИЧНЫЕ НЕОНОВО-СИНИЕ ЭЛЕКТРИЧЕСКИЕ РАЗРЯДЫ (УКОРОЧЕНЫ В УПОР К ШИПАМ!)
+            
+            final sparkPaint = Paint()
+            ..color = const Color(0xFF00E5FF) // Ярко-голубой/синий неон вместо белого
+            ..strokeWidth = 2.0
+            ..style = PaintingStyle.stroke;
+
           final rand = Random((currentBird!.rageSparkTimer * 80).toInt());
           for (int i = 0; i < 4; i++) {
             double sparkAngle = rand.nextDouble() * pi * 2;
@@ -1157,14 +1160,15 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
             
             final sparkPath = Path()..moveTo(startX, startY);
             double cx = startX; double cy = startY;
+            
             for (int step = 0; step < 2; step++) {
-              cx += cos(sparkAngle) * 12 + (rand.nextDouble() * 8 - 4);
-              cy += sin(sparkAngle) * 12 + (rand.nextDouble() * 8 - 4);
+              cx += cos(sparkAngle) * 6 + (rand.nextDouble() * 4 - 2);
+              cy += sin(sparkAngle) * 6 + (rand.nextDouble() * 4 - 2);
               sparkPath.lineTo(cx, cy);
             }
             canvas.drawPath(sparkPath, sparkPaint);
           }
-          canvas.restore(); // Закрываем вращение подложки
+          canvas.restore();
 
           // =========================================================================
           // Г) ВЫЛЕТАЮЩИЕ МАЛЕНЬКИЕ ЖЁЛТЫЕ ЗВЁЗДОЧКИ С КРАЁВ АУРЫ ПО ФОТОГРАФИИ
