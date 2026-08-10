@@ -904,9 +904,10 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     canvas.drawLine(Offset(slingBaseX, slingTopY + 15), leftHorn, paintSlingshot);
     canvas.drawLine(Offset(slingBaseX, slingTopY + 15), rightHorn, paintSlingshot);
 
-        // ИСПРАВЛЕНО: Распахнули левую и правую стороны дыры на максимум (Симметричный огромный зев!)
+        // ИСПРАВЛЕНО: СМЕСТИЛИ ВСЮ ПЕТЛЮ НИЖЕ К ВОДЕ И НАПРАВИЛИ ДЫРУ СТРОГО ВНИЗ!
     if (currentLevel == 4) {
-      final loopCenter = Offset(0.78 * size.width, 0.25 * size.height);
+      // ИСПРАВЛЕНО: Опустили высоту центра петли с 0.25 до 0.52 — прямо на траекторию Баннихопа!
+      final loopCenter = Offset(0.78 * size.width, 0.52 * size.height);
       final loopRadius = size.height * 0.15; 
       
       final loopPaint = Paint()
@@ -921,7 +922,8 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
         ..strokeWidth = 3.5
         ..strokeCap = StrokeCap.round;
 
-        final loopRect = Rect.fromCircle(center: loopCenter, radius: loopRadius);
+      // ИСПРАВЛЕНО: Дыра огромная, смотрит на воду, правый край длинный (0.55*pi), левый — укорочен
+      final loopRect = Rect.fromCircle(center: loopCenter, radius: loopRadius);
       canvas.drawArc(loopRect, 0.55 * pi, 1.35 * pi, false, loopPaint);
       canvas.drawArc(Rect.fromCircle(center: loopCenter, radius: loopRadius - 4), 0.55 * pi, 1.35 * pi, false, trackPaint);
 
@@ -931,9 +933,9 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
         final pillBorder = Paint()..color = Colors.white..style = PaintingStyle.stroke..strokeWidth = 1.0;
         
         for (int i = 0; i < pillsRemaining; i++) {
-          // Таблетки висят строго по центру верхнего свода петли
-          double angle = (pi * 1.15) + (i * 0.35);
-          Offset pillPos = Offset(loopCenter.dx + cos(angle) * (loopRadius - 15), loopCenter.dy + sin(angle) * (loopRadius - 15));
+          // Таблетки висят ровно по верхнему внутреннему своду арки
+          double angle = (pi * 1.05) + (i * 0.35);
+          Offset pillPos = Offset(loopCenter.dx + cos(angle) * (loopRadius - 12), loopCenter.dy + sin(angle) * (loopRadius - 12));
           
           canvas.drawCircle(pillPos, 6.0, pillPaint);
           canvas.drawCircle(pillPos, 6.0, pillBorder);
@@ -946,6 +948,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
         }
       }
     }
+
 
 
       
