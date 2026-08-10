@@ -1394,6 +1394,7 @@ class Bunnyhop {
   double loopSpeed = 7.5;        // Скорость набора угла (вращения)
   // Массив хранит прошлые позиции птицы для создания анимированного синего шлейфа
   final List<Offset> rageTailPositions = [];
+  bool hasDoneLoop = false;
 
  
     Offset velocity = Offset.zero;
@@ -1436,7 +1437,8 @@ class Bunnyhop {
         loopCenterY + sin(currentAngle) * loopRadiusY,
       );
 
-            // ИСПРАВЛЕНО: Ваня съедает таблетку строго В УПОР и ТОЛЬКО если они реально есть в пачке!
+     
+      // Ваня съедает таблетку строго В УПОР и ТОЛЬКО если они реально есть в пачке!
       if (loopAngle >= 0.9 * pi && loopAngle <= 1.1 * pi && !isAngryMode) {
         if (AngryMolluskGame.pillsRemaining > 0) {
           isAngryMode = true; // Включаем статус ярости и хаотичные синие искры
@@ -1447,7 +1449,6 @@ class Bunnyhop {
         }
       }
 
-
       if (isAngryMode) {
         rageSparkTimer += dt;
         // Копируем текущую позицию Вани в массив шлейфа ярости
@@ -1455,21 +1456,27 @@ class Bunnyhop {
         if (rageTailPositions.length > 8) rageTailPositions.removeAt(0); // лимит длины хвоста
       }
 
+            // Вылет из петли после полного внутреннего кувырка на 360 градусов
       if (loopAngle >= pi * 2) {
-        isInLoopRotation = false; 
-        double speedMultiplier = isAngryMode ? 1.4 : 1.0; // Скорость 1.4 по твоей команде!
+        isInLoopRotation = false; // Отключаем круговой режим
+        hasDoneLoop = true;       // ИСПРАВЛЕНО: Запомнили, что птица уже открутилась!
+        
+        double speedMultiplier = isAngryMode ? 1.4 : 1.0;
         velocity = Offset(0.35 * speedMultiplier, 0.15 * (isAngryMode ? 1.35 : 1.0));
       }
       return; 
     }
 
-    // ИСПРАВЛЕНО: ЖЕЛЕЗНЫЙ ВЛЁТ И ВЫЗОВ ЗВУКА НА СТАРТЕ ПРАВОГО ЗЕВА!
-    if (level == 4 && !isAngryMode && !isInLoopRotation) {
-      // Ситуация А: Левый внешний рикошет
-      if (position.dx >= 0.64 && position.dx < 0.72 && position.dy >= 0.22 && position.dy <= 0.40) {
-        velocity = Offset(velocity.dx * 0.7, velocity.dy + 0.1); 
+        // ИСПРАВЛЕНО: Захват в петлю сработает ТОЛЬКО если птица ещё не делала круг!
+    if (level == 4 && !isAngryMode && !isInLoopRotation && !hasDoneLoop) {
+      // Ловим птицу строго в проёме открытого зева
+      if (position.dx >= 0.73 && position.dx <= 0.86 && position.dy >= 0.26 && position.dy <= 0.46) {
+        isInLoopRotation = true; 
+        loopAngle = 0.0; // Стартуем вращение с нуля
         return;
       }
+    
+
 
       // Ситуация Б: Влёт в правый зев
       if (position.dx >= 0.73 && position.dx <= 0.86 && position.dy >= 0.26 && position.dy <= 0.46) {
