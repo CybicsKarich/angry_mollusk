@@ -1,3 +1,4 @@
+import 'main.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:flame/game.dart';
@@ -143,7 +144,7 @@ class GameScreen extends StatelessWidget {
                                     // 2. Мгновенно открываем экран нашего сюжетного комикса
                                     Navigator.push(
                                       context,
-                                      MaterialPageRoute(builder: (context) => const ComicIntroScreen()),
+                                      MaterialPageRoute(builder: (context) => ComicIntroScreen()),
                                     );
                                   } else if (game.currentLevel < 3) {
                                     // Для 1 и 2 уровней оставляем обычный переход на следующий уровень
