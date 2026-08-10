@@ -766,7 +766,8 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
     int s1 = prefs.getInt('level_1_stars') ?? 0;
     int s2 = prefs.getInt('level_2_stars') ?? 0;
     int s3 = prefs.getInt('level_3_stars') ?? 0;
-    bool triumph = (s1 + s2 + s3) >= 9;
+    int s4 = prefs.getInt('level_4_stars') ?? 0;
+    bool triumph = (s1 + s2 + s3 + s4) >= 12;
 
     setState(() {
       isFirstBloodUnlocked = firstBlood;
@@ -909,7 +910,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                         const SizedBox(width: 35),
                         _buildAchievementCircle(
                           title: "Триумф",
-                                                    desc: "Пройди все 3 уровня\nна максимальные 3 звезды",
+                          desc: "Пройди все 4 уровня\nна максимальные 3 звезды",
                           isUnlocked: isTriumphUnlocked,
                           child: AnimatedBuilder(
                             animation: _animController,
