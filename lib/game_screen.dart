@@ -376,7 +376,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   bool showFlyingLosePhoto = false; // Флаг запуска вылета фотки
   double losePhotoScale = 0.0;     // Размер фотки (растёт от 0.0 до 0.5)
   int pillsRemaining = 3; // На 4 уровне будет ровно 3 таблетки внутри петли
-
+  double acidBackgroundTimer = 0.0;
  
     int currentLevel = 1;
     
@@ -844,16 +844,48 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     // Сдвигаем холст на величину нашего скролла пальцем
     canvas.translate(size.width * worldScrollX, 0);
 
-    final double worldWidthFactor = currentLevel == 1 ? 1.0 : (currentLevel == 2 ? 1.8 : 2.0);
+        final double worldWidthFactor = currentLevel == 1 ? 1.0 : (currentLevel == 2 ? 1.8 : 2.0);
 
-    // Градиент неба растягивается под ширину уровня
-    final skyPaint = Paint()
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [Colors.blue.shade300, Colors.lightBlue.shade100],
-      ).createShader(Rect.fromLTWH(0, 0, size.width * worldWidthFactor, size.height));
+    // ИСПРАВЛЕНО: КИСЛОТНОЕ НЕБО С БЛИКАМИ ПРИ АКТИВАЦИИ ТАБЛЕТКИ!
+    Paint skyPaint;
+    if (currentLevel == 4 && currentBird != null && currentBird!.isAngryMode) {
+      // Генерируем сумасшедшие неоновые поп-арт цвета на основе синуса времени
+      double hueFactor = (sin(acidBackgroundTimer * 6.0) + 1.0) / 2.0; 
+      Color colorTop = Color.lerp(const Color(0xFFD500F9), const Color(0xFF00E676), hueFactor)!; // Ярко-фиолетовый в кислотно-зеленый
+      Color colorBottom = Color.lerp(const Color(0xFFFF1744), const Color(0xFF2979FF), hueFactor)!; // Бешеный розовый в неоново-синий
+
+      skyPaint = Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [colorTop, colorBottom],
+        ).createShader(Rect.fromLTWH(0, 0, size.width * worldWidthFactor, size.height));
+    } else {
+      // Обычное красивое мультяшное небо для остальных уровней
+      skyPaint = Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Colors.blue.shade300, Colors.lightBlue.shade100],
+        ).createShader(Rect.fromLTWH(0, 0, size.width * worldWidthFactor, size.height));
+    }
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width * worldWidthFactor, size.height), skyPaint);
+
+    // ИСПРАВЛЕНО: СВЕТОВЫЕ БЛИКИ НА НЕБЕ ДЛЯ ТРЭШ-ЭФФЕКТА ТАБЛЕТКИ
+    if (currentLevel == 4 && currentBird != null && currentBird!.isAngryMode) {
+      final glarePaint = Paint()..color = Colors.white.withOpacity(0.15)..style = PaintingStyle.fill;
+      for (int i = 0; i < 4; i++) {
+        double offsetX = (size.width * 0.3 * i) + sin(acidBackgroundTimer * 4 + i) * 60;
+        final path = Path()
+          ..moveTo(offsetX, 0)
+          ..lineTo(offsetX + 60, 0)
+          ..lineTo(offsetX - 40, size.height)
+          ..lineTo(offsetX - 100, size.height)
+          ..close();
+        canvas.drawPath(path, glarePaint);
+      }
+    }
+
 
     // Солнце (рисуется на фоне)
     canvas.save();
@@ -1060,45 +1092,114 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       pig.render(canvas, size, maksimSprite);
     }
 
-          // ПТИЦА С ТРАЕКТОРИЕЙ! (ИСПРАВЛЕНО: Убрали увеличение размера, оставили только синие заряды!)
+          // ПТИЦА С ТРАЕКТОРИЕЙ! (ИСПРАВЛЕНО: Синий шлейф, шипастая подложка по картинке, звезды и молнии!)
       if (currentBird != null && (!currentBird!.isLaunched || !currentBird!.shouldRemove)) {
         canvas.save();
         
-        // Если птица под действием таблетки — рисуем хаотичные электрические разряды вокруг неё стандартного размера
+        double birdScreenX = currentBird!.position.dx * size.width;
+        double birdScreenY = currentBird!.position.dy * size.height;
+        final double birdRadius = (size.height * 0.024);
+
         if (currentBird!.isAngryMode) {
-          double birdScreenX = currentBird!.position.dx * size.width;
-          double birdScreenY = currentBird!.position.dy * size.height;
+          // =========================================================================
+          // А) АНИМИРОВАННЫЙ СИНИЙ ШЛЕЙФ ЗА СПИНОЙ БАННИХОПА
+          // =========================================================================
+          final tailPaint = Paint()..color = const Color(0x3300B0FF)..style = PaintingStyle.fill;
+          for (int i = 0; i < currentBird!.rageTailPositions.length; i++) {
+            double tailX = currentBird!.rageTailPositions[i].dx * size.width;
+            double tailY = currentBird!.rageTailPositions[i].dy * size.height;
+            double factor = (i + 1) / currentBird!.rageTailPositions.length;
+            canvas.drawCircle(Offset(tailX, tailY), birdRadius * 1.5 * factor, tailPaint);
+          }
 
-          final sparkPaint = Paint()
-            ..color = const Color(0xFF00E5FF) // Ярко-голубой электрический неон
-            ..strokeWidth = 2.0
-            ..style = PaintingStyle.stroke;
+          // =========================================================================
+          // Б) КРУТЯЩАЯСЯ РВАНАЯ ПОП-АРТ ПОДЛОЖКА ПО ТВОЕЙ КАРТИНКЕ (ШИПЫ И ОБВОДКА)
+          // =========================================================================
+          canvas.save();
+          canvas.translate(birdScreenX, birdScreenY);
+          // Бешено вращаем подложку вокруг Вани Баннихопа!
+          canvas.rotate(currentBird!.rageSparkTimer * 12.0); 
+          
+          // Эффект пульсации: шипы мягко сжимаются и разжимаются от синуса времени
+          double pulse = 1.0 + (sin(currentBird!.rageSparkTimer * 15.0) * 0.08);
 
-          final random = Random((currentBird!.rageSparkTimer * 100).toInt());
-          final double birdRadius = (size.height * 0.024); // Радиус Баннихопа (стандартный 1.0)
+          final auraFill = Paint()..color = const Color(0xFF00E5FF)..style = PaintingStyle.fill; // Ярко-голубой поп-арт
+          final auraBorder = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 2.5;
 
-          for (int i = 0; i < 5; i++) {
-            final path = Path();
-            double startAngle = random.nextDouble() * pi * 2;
-            double startX = birdScreenX + cos(startAngle) * birdRadius;
-            double startY = birdScreenY + sin(startAngle) * birdRadius;
-            path.moveTo(startX, startY);
+          // Рисуем рваную шипастую многоконечную звезду с фотографии через Path
+          final auraPath = Path();
+          int spikeCount = 12; // 12 острых шипов по кругу
+          for (int i = 0; i < spikeCount; i++) {
+            double angle = (i * pi * 2) / spikeCount;
+            // Чередуем длинные шипы и короткие впадины, создавая рваный комиксный взрыв с фото!
+            double currentRadius = (i % 2 == 0 ? birdRadius * 2.2 : birdRadius * 1.4) * pulse;
+            
+            double x = cos(angle) * currentRadius;
+            double y = sin(angle) * currentRadius;
+            if (i == 0) auraPath.moveTo(x, y); else auraPath.lineTo(x, y);
+          }
+          auraPath.close();
+          canvas.drawPath(auraPath, auraFill);
+          canvas.drawPath(auraPath, auraBorder);
 
-            double currentX = startX;
-            double currentY = startY;
-            for (int step = 0; step < 3; step++) {
-              currentX += (random.nextDouble() * 20 - 10);
-              currentY += (random.nextDouble() * 20 - 10);
-              path.lineTo(currentX, currentY);
+          // =========================================================================
+          // В) ХАОТИЧНЫЕ СИНИЕ ЭЛЕКТРИЧЕСКИЕ РАЗРЯДЫ ИЗ КОНЧИКОВ ШИПОВ ПОДЛОЖКИ
+          // =========================================================================
+          final sparkPaint = Paint()..color = Colors.white..strokeWidth = 1.8..style = PaintingStyle.stroke;
+          final rand = Random((currentBird!.rageSparkTimer * 80).toInt());
+          for (int i = 0; i < 4; i++) {
+            double sparkAngle = rand.nextDouble() * pi * 2;
+            double startX = cos(sparkAngle) * (birdRadius * 2.2);
+            double startY = sin(sparkAngle) * (birdRadius * 2.2);
+            
+            final sparkPath = Path()..moveTo(startX, startY);
+            double cx = startX; double cy = startY;
+            for (int step = 0; step < 2; step++) {
+              cx += cos(sparkAngle) * 12 + (rand.nextDouble() * 8 - 4);
+              cy += sin(sparkAngle) * 12 + (rand.nextDouble() * 8 - 4);
+              sparkPath.lineTo(cx, cy);
             }
-            canvas.drawPath(path, sparkPaint);
+            canvas.drawPath(sparkPath, sparkPaint);
+          }
+          canvas.restore(); // Закрываем вращение подложки
+
+          // =========================================================================
+          // Г) ВЫЛЕТАЮЩИЕ МАЛЕНЬКИЕ ЖЁЛТЫЕ ЗВЁЗДОЧКИ С КРАЁВ АУРЫ ПО ФОТОГРАФИИ
+          // =========================================================================
+          final starPaint = Paint()..color = const Color(0xFFFFD54F)..style = PaintingStyle.fill;
+          final starBorder = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 0.8;
+          final starRand = Random((currentBird!.rageSparkTimer * 40).toInt());
+          
+          for (int i = 0; i < 3; i++) {
+            // Звёзды вылетают из зоны подложки и плавно смещаются назад против вектора движения
+            double starAngle = starRand.nextDouble() * pi * 2;
+            double distanceFactor = birdRadius * (1.8 + starRand.nextDouble() * 1.5);
+            Offset starPos = Offset(
+              birdScreenX + cos(starAngle) * distanceFactor - (currentBird!.velocity.dx * 40 * starRand.nextDouble()),
+              birdScreenY + sin(starAngle) * distanceFactor + (starRand.nextDouble() * 15 - 7.5),
+            );
+
+            // Рисуем классическую четырехконечную маленькую мультяшную звёздочку с картинки
+            final starPath = Path()
+              ..moveTo(starPos.dx, starPos.dy - 5)
+              ..lineTo(starPos.dx + 1.5, starPos.dy - 1.5)
+              ..lineTo(starPos.dx + 5, starPos.dy)
+              ..lineTo(starPos.dx + 1.5, starPos.dy + 1.5)
+              ..lineTo(starPos.dx, starPos.dy + 5)
+              ..lineTo(starPos.dx - 1.5, starPos.dy + 1.5)
+              ..lineTo(starPos.dx - 5, starPos.dy)
+              ..lineTo(starPos.dx - 1.5, starPos.dy - 1.5)
+              ..close();
+            canvas.drawPath(starPath, starPaint);
+            canvas.drawPath(starPath, starBorder);
           }
         }
 
-        // Отрисовываем птицу в её честном родном масштабе
+        // Отрисовываем саму Ваня-птицу поверх всей этой безумной неоновой дискотеки
         currentBird!.render(canvas, size, bunnySprite);
         canvas.restore();
       }
+
 
 
 
@@ -1281,6 +1382,9 @@ class Bunnyhop {
   bool isInLoopRotation = false; // Летит ли птица сейчас по кругу внутри петли
   double loopAngle = 0.0;        // Текущий угол вращения птицы внутри кольца
   double loopSpeed = 7.5;        // Скорость набора угла (вращения)
+  // Массив хранит прошлые позиции птицы для создания анимированного синего шлейфа
+  final List<Offset> rageTailPositions = [];
+
  
     Offset velocity = Offset.zero;
   double _lifeTimer = 0.0;
@@ -1308,64 +1412,65 @@ class Bunnyhop {
     position = Offset(position.dx + velocity.dx * dt, position.dy + velocity.dy * dt);
 
     if (isInLoopRotation) {
-      // Наращиваем угол вращения через нашу переменную loopSpeed
       loopAngle += loopSpeed * dt;
       
       double loopCenterX = 0.78;
       double loopCenterY = 0.25;
       
-      // Радиус проката чётко по внутренней колее трека
       double loopRadiusY = 0.15 - 0.035; 
-      double loopRadiusX = (0.15 / 1.7) - 0.022; // Коррекция пропорций экрана 16:9
+      double loopRadiusX = (0.15 / 1.7) - 0.022; 
 
-      // Крутим Баннихопа внутри арки по часовой стрелке
       double currentAngle = (pi * 0.5) + loopAngle;
       position = Offset(
         loopCenterX + cos(currentAngle) * loopRadiusX,
         loopCenterY + sin(currentAngle) * loopRadiusY,
       );
 
-      // ИСПРАВЛЕНО: Ваня съедает таблетку строго В УПОР на верхушке свода петли!
+      // ИСПРАВЛЕНО: Функция съедения таблетки строго В УПОР!
       if (loopAngle >= 0.9 * pi && loopAngle <= 1.1 * pi && !isAngryMode) {
-        isAngryMode = true; // Включаем статус ярости и хаотичные синие искры
-        AudioManager.playRage(); // ГАРАНТИРОВАННО запускаем сочный гул таблетки!
+        isAngryMode = true; // Ваня съедает пачку, включается кислота неба и эффекты подложки!
       }
 
-      // Если Баннихоп уже злой — обновляем таймер хаотичных электрических вспышек
       if (isAngryMode) {
         rageSparkTimer += dt;
+        // Копируем текущую позицию Вани в массив шлейфа ярости
+        rageTailPositions.add(position);
+        if (rageTailPositions.length > 8) rageTailPositions.removeAt(0); // лимит длины хвоста
       }
-        
-              // Завершение полного оборота внутри петли на 360 градусов
+
       if (loopAngle >= pi * 2) {
-        isInLoopRotation = false; // Отключаем круговой режим
-        
-        // ИСПРАВЛЕНО: Скорость вылета после таблетки составляет ровно 1.4 раза!
-        double speedMultiplier = isAngryMode ? 1.4 : 1.0;
+        isInLoopRotation = false; 
+        double speedMultiplier = isAngryMode ? 1.4 : 1.0; // Скорость 1.4 по твоей команде!
         velocity = Offset(0.35 * speedMultiplier, 0.15 * (isAngryMode ? 1.35 : 1.0));
       }
-         return; // Блокируем обычную гравитацию, пока идёт внутренний прокат
-      }
-      
-    
+      return; 
+    }
 
-    // ИСПРАВЛЕНО: ВОЗВРАТИЛИ ДВА ЧЁТКИХ ТРИГГЕРА ДЛЯ ЛЕВОЙ И ПРАВОЙ СТОРОН!
+    // ИСПРАВЛЕНО: ЖЕЛЕЗНЫЙ ВЛЁТ И ВЫЗОВ ЗВУКА НА СТАРТЕ ПРАВОГО ЗЕВА!
     if (level == 4 && !isAngryMode && !isInLoopRotation) {
-      
-      // ТРИГГЕР 1: Касание ВНЕШНЕЙ ЛЕВОЙ стороны петли (промах мимо дыры)
+      // Ситуация А: Левый внешний рикошет
       if (position.dx >= 0.64 && position.dx < 0.72 && position.dy >= 0.22 && position.dy <= 0.40) {
-        // Никакого вращения! Птица просто рикошетит и летит дальше на замок
         velocity = Offset(velocity.dx * 0.7, velocity.dy + 0.1); 
         return;
       }
 
-      // ТРИГГЕР 2: Касание ПРАВОЙ стороны — ЧЕСТНЫЙ ВЛЁТ В ЗЕВ ПЕТЛИ СНИЗУ!
-      // Ловим птицу строго в проёме открытого 120-градусного зева
+      // Ситуация Б: Влёт в правый зев
       if (position.dx >= 0.73 && position.dx <= 0.86 && position.dy >= 0.26 && position.dy <= 0.46) {
         isInLoopRotation = true; 
-        loopAngle = 0.0; // Стартуем вращение с нуля
+        loopAngle = 0.0; 
+        
+        // ИСПРАВЛЕНО: Звук бахает СТРОГО на входе в петлю, без задержек и пропусков!
+        AudioManager.playRage(); 
         return;
       }
+    }
+
+    // Обычный полет вне петли под таблеткой продолжает копить синий шлейф
+    if (isAngryMode) {
+      rageSparkTimer += dt;
+      game.acidBackgroundTimer += dt; // Двигаем таймер кислотного неба в инстансе игры
+      rageTailPositions.add(position);
+      if (rageTailPositions.length > 8) rageTailPositions.removeAt(0);
     }
       
     // СТОЛКНОВЕНИЕ С ЗЕМЛЁЙ ОСТРОВА (Птица не пролетает сквозь сушу!)
