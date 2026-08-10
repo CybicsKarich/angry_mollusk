@@ -136,12 +136,20 @@ class GameScreen extends StatelessWidget {
                                 onPressed: () {
                                   game.overlays.remove('VictoryMenu');
                                   
-                               // ИСПРАВЛЕНО: Кнопка на экране победы 3-го уровня теперь честно переносит на 4-й!
-                                if (game.currentLevel < 4) {
-                                  game.currentLevel = game.currentLevel + 1;
-                                } else {
-                                  game.currentLevel = 4; 
-                                }
+                                                                 // ИСПРАВЛЕНО: Умный переход с 3-го уровня на 4-й через комикс!
+                                  if (game.currentLevel == 3) {
+                                    // 1. Закрываем текущий экран боя
+                                    Navigator.pop(context); 
+                                    // 2. Мгновенно открываем экран нашего сюжетного комикса
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => const ComicIntroScreen()),
+                                    );
+                                  } else if (game.currentLevel < 3) {
+                                    // Для 1 и 2 уровней оставляем обычный переход на следующий уровень
+                                    game.currentLevel = game.currentLevel + 1;
+                                  }
+
 
                                   
                                   AngryMolluskGame.score = 0;
@@ -577,9 +585,11 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       // Сбрасываем пачку таблеток на старте уровня
       pillsRemaining = 3;
 
-      targetScore1Star = 500;
-      targetScore2Stars = 650;
-      targetScore3Stars = 800;
+      // ИСПРАВЛЕНО: Новый сбалансированный подсчёт звёзд для 4 уровня!
+      targetScore1Star = 350;
+      targetScore2Stars = 400;
+      targetScore3Stars = 450;
+
 
       // 🏢 ЗДАНИЕ №1: ВЫСОКАЯ УЗКАЯ БАШНЯ ИЗ БРОНЕСТЕКЛА (Спереди на координате 1.22)
       final double bx1 = 1.22;
