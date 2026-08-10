@@ -649,20 +649,27 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     cloudOffset1 += 0.015 * dt;
     cloudOffset2 += 0.008 * dt;
 
-                if (currentBird != null && currentBird!.isLaunched) {
-                        if (currentLevel == 4 && currentBird!.isInLoopRotation && pillsRemaining > 0) {
-          // ИСПРАВЛЕНО: Синхронизировали точечный забор под обновлённую траекторию правой стороны
+              if (currentBird != null && currentBird!.isLaunched) {
+        if (currentLevel == 4 && currentBird!.isInLoopRotation) {
+          // ИСПРАВЛЕНО: Если птица докатилась до верхушки свода петли
           if (currentBird!.loopAngle >= 0.85 * pi && currentBird!.loopAngle <= 1.05 * pi) {
-            pillsRemaining--; 
+            if (pillsRemaining > 0) {
+              pillsRemaining--; // Честно забираем таблетку, если пачка не пуста
+            } else {
+              // ИСПРАВЛЕНО: ЖЕСТКОЕ ПРАВИЛО! Если таблеток не осталось — принудительно 
+              // тушим ярость у птицы! Пролёт по петле станет пустым и ничего не даст.
+              currentBird!.isAngryMode = false; 
+            }
           }
         }
 
-        // ИСПРАВЛЕНО: Сама игра крутит таймер кислоты, если Баннихоп летит в ярости!
+        // Сама игра крутит таймер кислоты, только если Ваня РЕАЛЬНО съел таблетку
         if (currentLevel == 4 && currentBird!.isAngryMode) {
           acidBackgroundTimer += dt;
         }
 
         currentBird!.update(dt, blocks, pigs, groundY, currentLevel);
+
         
         // Если птица отработала заряд или разбилась насмерть — гасим звук ярости на месте
         if (currentBird!.shouldRemove) {
