@@ -922,8 +922,8 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
         ..strokeCap = StrokeCap.round;
 
         final loopRect = Rect.fromCircle(center: loopCenter, radius: loopRadius);
-      canvas.drawArc(loopRect, 0.6 * pi, 1.5 * pi, false, loopPaint);
-      canvas.drawArc(Rect.fromCircle(center: loopCenter, radius: loopRadius - 4), 0.6 * pi, 1.5 * pi, false, trackPaint);
+      canvas.drawArc(loopRect, 0.55 * pi, 1.35 * pi, false, loopPaint);
+      canvas.drawArc(Rect.fromCircle(center: loopCenter, radius: loopRadius - 4), 0.55 * pi, 1.35 * pi, false, trackPaint);
 
       // Отрисовываем 3 таблетки виагры, висящие по внутренней дуге
       if (pillsRemaining > 0) {
