@@ -657,7 +657,10 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
           }
         }
 
-
+        // ИСПРАВЛЕНО: Сама игра крутит таймер кислоты, если Баннихоп летит в ярости!
+        if (currentLevel == 4 && currentBird!.isAngryMode) {
+          acidBackgroundTimer += dt;
+        }
 
         currentBird!.update(dt, blocks, pigs, groundY, currentLevel);
         
@@ -1468,7 +1471,6 @@ class Bunnyhop {
     // Обычный полет вне петли под таблеткой продолжает копить синий шлейф
     if (isAngryMode) {
       rageSparkTimer += dt;
-      game.acidBackgroundTimer += dt; // Двигаем таймер кислотного неба в инстансе игры
       rageTailPositions.add(position);
       if (rageTailPositions.length > 8) rageTailPositions.removeAt(0);
     }
