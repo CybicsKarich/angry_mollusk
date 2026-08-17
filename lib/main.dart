@@ -2029,7 +2029,8 @@ class SheriffComicScreen extends StatelessWidget {
     );
   }
 
-    Widget _buildWoodenTable({required Widget child}) {
+    // Векторный сборщик стола из светлой древесины по твоей фотографии
+  Widget _buildWoodenTable({required Widget child}) {
     return Container(
       width: 85,
       height: 46,
@@ -2037,10 +2038,10 @@ class SheriffComicScreen extends StatelessWidget {
         clipBehavior: Clip.none,
         children: [
           // 4 прочные ножки стола с фото
-          Positioned(bottom: 0, left: 6, child: Container(width: 5, height: 40, color: const Color(0xFFF1D299), decoration: BoxDecoration(border: Border.all(color: const Color(0xFFC6A065), width: 0.5)))),
-          Positioned(bottom: 0, left: 22, child: Container(width: 4, height: 40, color: const Color(0xFFE2C08A))), 
-          Positioned(bottom: 0, right: 26, child: Container(width: 4, height: 40, color: const Color(0xFFE2C08A))), 
-          Positioned(bottom: 0, right: 6, child: Container(width: 5, height: 40, color: const Color(0xFFF1D299), decoration: BoxDecoration(border: Border.all(color: const Color(0xFFC6A065), width: 0.5)))),
+          Positioned(bottom: 0, left: 6, child: Container(width: 5, height: 40, decoration: BoxDecoration(color: const Color(0xFFF1D299), border: Border.all(color: const Color(0xFFC6A065), width: 0.5)))),
+          Positioned(bottom: 0, left: 22, child: Container(width: 4, height: 40, decoration: const BoxDecoration(color: Color(0xFFE2C08A)))), // ИСПРАВЛЕНО: Занесли цвет внутрь BoxDecoration
+          Positioned(bottom: 0, right: 26, child: Container(width: 4, height: 40, decoration: const BoxDecoration(color: Color(0xFFE2C08A)))), // ИСПРАВЛЕНО: Занесли цвет внутрь BoxDecoration
+          Positioned(bottom: 0, right: 6, child: Container(width: 5, height: 40, decoration: BoxDecoration(color: const Color(0xFFF1D299), border: Border.all(color: const Color(0xFFC6A065), width: 0.5)))),
           
           // Массивное подстолье (деревянный каркас под столешницей)
           Positioned(top: 4, left: 4, right: 4, child: Container(height: 8, decoration: BoxDecoration(color: const Color(0xFFE8C384), border: Border.all(color: const Color(0xFFB58F4B), width: 0.5)))),
@@ -2053,6 +2054,7 @@ class SheriffComicScreen extends StatelessWidget {
       ),
     );
   }
+
 
   Widget _buildCharacterSp(String assetPath, double size, {required bool isPig}) {
     return Stack(
