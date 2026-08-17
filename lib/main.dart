@@ -1701,7 +1701,7 @@ class SpeechBubblePainter extends CustomPainter {
 }
 
 // =========================================================================
-// КЛАСС НАЧАЛЬНОГО КОМИКСА ШЕРИФА ВАНЯ-БАННИХОПА (ДЛЯ 1 УРОВНЯ)
+// ПОЛНОСТЬЮ ПЕРЕРАБОТАННЫЙ КОМИКС ШЕРИФА: СТОЛ И СТУЛ ПО ФОТО, КРУЖКА И ШЛЯПА
 // =========================================================================
 class SheriffComicScreen extends StatelessWidget {
   const SheriffComicScreen({super.key});
@@ -1733,53 +1733,65 @@ class SheriffComicScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     
-                    // КАДР 1: ВАНЯ ШЕРИФ СИДИТ ЗА СТОЛОМ (ГРАМОТЫ ПОКА НЕТ!)
+                    // КАДР 1: МИРНОЕ ДЕЖУРСТВО В ДЕРЕВЯННОМ КАБИНЕТЕ (СТОЛ И СТУЛ С ФОТО)
                     Expanded(
                       child: _buildComicFrame(
+                        isRoom: true, // Включает стены и пол кабинета шерифа
                         child: Stack(
                           alignment: Alignment.center,
                           children: [
-                            // Деревянный пол кабинета шерифа
-                            Positioned(bottom: 0, left: 0, right: 0, child: Container(height: 40, color: const Color(0xFF5D4037))),
-                            
-                            // ЗОЛОТАЯ ЗВЕЗДА ШЕРИФА НА СТЕНЕ (Каноничная по ТЗ!)
+                            // 1. Деревянный стул со спинкой из светлого дерева по фотографии
                             Positioned(
-                              top: 60, left: 15,
-                              child: Container(
-                                decoration: const BoxDecoration(shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.amberAccent, blurRadius: 10, spreadRadius: 2)]),
-                                child: const Icon(Icons.star_rounded, color: Colors.amber, size: 34),
-                              ),
+                              bottom: 12, left: 34,
+                              child: _buildWoodenChair(),
                             ),
 
-                            // Рабочий деревянный стол Шерифа Вани
+                            // 2. ВАНЯ БАННИХОП (Птица солидно сидит на деревянном стуле)
                             Positioned(
-                              bottom: 15, left: 35,
-                              child: Container(
-                                width: 75, height: 25,
-                                decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(4), border: Border.all(color: Colors.black, width: 1.5)),
+                              bottom: 22, left: 35,
+                              child: _buildCharacterSp('assets/images/bunnyhop.png', 55, isPig: false),
+                            ),
+
+                            // 3. Деревянный массивный стол из светлой сосны строго по фотографии!
+                            Positioned(
+                              bottom: 2, left: 62,
+                              child: _buildWoodenTable(
                                 child: Stack(
                                   children: [
-                                    // Кружка с горячим дымящимся кофе на столе по ТЗ!
+                                    // Куча разбросанных бумаг и рапортов на столе по ТЗ
                                     Positioned(
-                                      top: -6, left: 12,
-                                      child: const Icon(Icons.coffee_rounded, color: Colors.white70, size: 14),
+                                      top: -6, left: 6,
+                                      child: Transform.rotate(
+                                        angle: -0.2,
+                                        child: Container(width: 16, height: 10, decoration: BoxDecoration(color: Colors.white.withOpacity(0.9), borderRadius: BorderRadius.circular(1), border: Border.all(color: Colors.black45, width: 0.5))),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: -5, left: 16,
+                                      child: Transform.rotate(
+                                        angle: 0.1,
+                                        child: Container(width: 14, height: 11, decoration: BoxDecoration(color: Colors.white.withOpacity(0.85), borderRadius: BorderRadius.circular(1), border: Border.all(color: Colors.black45, width: 0.5))),
+                                      ),
+                                    ),
+                                    // Белая кружка с четкой надписью "ШЕРИФ" по ТЗ
+                                    Positioned(
+                                      top: -12, right: 10,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 1.5, vertical: 0.5),
+                                        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(2), border: Border.all(color: Colors.black, width: 1.0)),
+                                        child: const Text("ШЕРИФ", style: TextStyle(fontSize: 4, fontWeight: FontWeight.w900, color: Colors.black)),
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
                             ),
-
-                            // ВАНЯ БАННИХОП (Птица с лицом Вани солидно сидит за столом, БЕЗ шляпы!)
-                            Positioned(
-                              bottom: 12, left: 45,
-                              child: _buildCharacterSp(r'assets/images/bunnyhop.png', 55, isPig: false),
-                            ),
                             
-                            // Овальное облако мыслей/слов строго над его головой
+                            // Слова над головой Вани
                             Positioned(
                               top: 25, left: 10, right: 10,
                               child: CustomPaint(
-                                painter: ComicBubblePainter(tailX: 0.65),
+                                painter: ComicBubblePainter(tailX: 0.45),
                                 child: const Padding(
                                   padding: EdgeInsets.symmetric(horizontal: 6, vertical: 12),
                                   child: Text(
@@ -1796,37 +1808,38 @@ class SheriffComicScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 12),
 
-                    // КАДР 2: ВЛЕТАЕТ ЗАПЫХАВШИЙСЯ СТИКМАН ИЗ ТВОЕГО РЕФЕРЕНСА
+                    // КАДР 2: ВЛЕТАЕТ ЗАПЫХАВШИЙСЯ СТИКМАН (ОКРУЖЕНИЕ КАБИНЕТА ОСТАЕТСЯ НА МЕСТЕ)
                     Expanded(
                       child: _buildComicFrame(
+                        isRoom: true, // Такое же комнатное окружение без солнца и лужаек!
                         child: Stack(
                           alignment: Alignment.center,
                           children: [
-                            Positioned(bottom: 0, left: 0, right: 0, child: Container(height: 35, color: const Color(0xFF4CAF50))), // Трава окраины
-                            
-                            // Ваня Баннихоп удивленно смотрит со своего места слева
-                            Positioned(bottom: 10, left: 10, child: _buildCharacterSp(r'assets/images/bunnyhop.png', 50, isPig: false)),
+                            // Тот же деревянный стул и стол на месте
+                            Positioned(bottom: 12, left: 18, child: _buildWoodenChair()),
+                            Positioned(bottom: 22, left: 19, child: _buildCharacterSp('assets/images/bunnyhop.png', 50, isPig: false)),
+                            Positioned(bottom: 2, left: 44, child: _buildWoodenTable(child: Container())),
 
-                            // ПОЛОСЫ ВЕТРА СЗАДИ СТИКМАНА (Эффект быстрого бега по ТЗ!)
+                            // Белые полосы бега сзади Стикмана
                             Positioned(
-                              bottom: 22, right: 35,
-                              child: Icon(Icons.blur_linear_rounded, color: Colors.white.withOpacity(0.5), size: 24),
+                              bottom: 25, right: 30,
+                              child: Icon(Icons.blur_linear_rounded, color: Colors.white.withOpacity(0.4), size: 24),
                             ),
 
-                            // ВЕКТОРНЫЙ СТИКМАН С ТВОЕЙ ФОТОГРАФИИ (Без слёз, рука у головы, летят капли пота!)
+                            // Уставший Стикман из твоего референса (Рука у головы, крупные капли пота)
                             Positioned(
-                              bottom: 8, right: 12,
+                              bottom: 4, right: 8,
                               child: CustomPaint(
-                                size: const Size(30, 65),
+                                size: const Size(26, 60),
                                 painter: StickmanSweatPainter(),
                               ),
                             ),
 
-                            // СЛОВА СТИКМАНА СТРОГО НАД ЕГО ГОЛОВОЙ С ПРАВОЙ СТОРОНЫ
+                            // Слова Стикмана строго над его головой
                             Positioned(
-                              top: 20, left: 6, right: 6,
+                              top: 15, left: 4, right: 4,
                               child: CustomPaint(
-                                painter: ComicBubblePainter(tailX: 0.75),
+                                painter: ComicBubblePainter(tailX: 0.8),
                                 child: const Padding(
                                   padding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
                                   child: Text(
@@ -1843,33 +1856,54 @@ class SheriffComicScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 12),
 
-                    // КАДР 3: ВАНЯ НАДЕВАЕТ ШЛЯПУ И БЕРЁТ ТОРБУ!
+                    // КАДР 3: ВАНЯ НАДЕВАЕТ КОВБОЙСКУЮ ШЛЯПУ С ЗОЛОТЫМИ ЗАКЛЁПКАМИ
                     Expanded(
                       child: _buildComicFrame(
+                        isRoom: true,
                         child: Stack(
                           alignment: Alignment.center,
                           children: [
-                            Positioned(bottom: 0, left: 0, right: 0, child: Container(height: 35, color: const Color(0xFF4CAF50))),
-                            
-                            // Ваня Баннихоп КРУПНЫЙ, СУРОВЫЙ и в ШЛЯПЕ ШЕРИФА на голове!
+                            // Ваня Баннихоп крупный, суровый и в ковбойской шляпе
                             Positioned(
-                              bottom: 10, left: 10,
+                              bottom: 10, left: 8,
                               child: Stack(
                                 alignment: Alignment.topCenter,
                                 children: [
                                   Padding(
-                                    padding: const EdgeInsets.only(top: 8),
-                                    child: _buildCharacterSp(r'assets/images/bunnyhop.png', 75, isPig: false),
+                                    padding: const EdgeInsets.only(top: 10),
+                                    child: _buildCharacterSp('assets/images/bunnyhop.png', 75, isPig: false),
                                   ),
-                                  // Коричневая ковбойская шляпа Шерифа на его макушке по ТЗ!
+                                  // ИСПРАВЛЕНО: Ковбойская шляпа Шерифа с золотыми кружочками-заклёпками по ТЗ!
                                   Positioned(
-                                    top: 0,
-                                    child: Container(
-                                      width: 44, height: 14,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFF795548), // Коричневая тулья и поля шляпы
-                                        borderRadius: const BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8), bottomLeft: Radius.circular(3), bottomRight: Radius.circular(3)),
-                                        border: Border.all(color: const Color(0xFF3E2723), width: 1.5),
+                                                                        top: 0,
+                                    child: SizedBox(
+                                      width: 48,
+                                      height: 16,
+                                      child: Stack(
+                                        alignment: Alignment.topCenter,
+                                        children: [
+                                          // Тулья и поля шляпы
+                                          Container(
+                                            width: 44, height: 14,
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFF795548), 
+                                              borderRadius: const BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8), bottomLeft: Radius.circular(3), bottomRight: Radius.circular(3)),
+                                              border: Border.all(color: const Color(0xFF3E2723), width: 1.5),
+                                            ),
+                                          ),
+                                          // Ряд золотых кружочков-заклепок вдоль ленты шляпы
+                                          Positioned(
+                                            bottom: 2,
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: List.generate(4, (i) => Container(
+                                                width: 2.2, height: 2.2,
+                                                margin: const EdgeInsets.symmetric(horizontal: 1.5),
+                                                decoration: const BoxDecoration(color: Colors.amber, shape: BoxShape.circle),
+                                              )),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ),
@@ -1877,26 +1911,46 @@ class SheriffComicScreen extends StatelessWidget {
                               ),
                             ),
 
-                            // ДЕТАЛИЗИРОВАННАЯ КОРИЧНЕВАЯ СУМКА-ТОРБА У ЕГО НОГ
+                            // ИСПРАВЛЕНО: Точь-в-точь наша детализированная кожаная торба из 4 уровня, но чистая!
                             Positioned(
-                                                            bottom: -2, right: 25,
-                              child: Container(
-                                width: 44, height: 38,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF8D4F37),
-                                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(14), topRight: Radius.circular(14), bottomLeft: Radius.circular(10), bottomRight: Radius.circular(10)),
-                                  border: Border.all(color: const Color(0xFF4A2711), width: 2.0),
-                                ),
+                              bottom: -2, right: 18,
+                              child: SizedBox(
+                                width: 50,
+                                height: 50,
                                 child: Stack(
-                                  alignment: Alignment.topCenter,
                                   children: [
-                                    Container(width: 18, height: 4, color: const Color(0xFF6E331B)), // шнурок-завязка мешка
+                                    // Расширяющийся кожаный мешок
+                                    Positioned(
+                                      bottom: 0, left: 4, right: 4,
+                                      child: Container(
+                                        width: 42, height: 40,
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF8D4F37), 
+                                          borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16), bottomLeft: Radius.circular(12), bottomRight: Radius.circular(12)),
+                                          border: Border.all(color: const Color(0xFF4A2711), width: 2.0),
+                                        ),
+                                      ),
+                                    ),
+                                    // Sкладки у горловины
+                                    Positioned(
+                                      top: 10, left: 8, right: 8,
+                                      child: Container(height: 6, decoration: const BoxDecoration(color: Color(0xFF6E331B), borderRadius: BorderRadius.all(Radius.circular(4)))),
+                                    ),
+                                    // Свисающий завязанный кожаный шнурок-затяжка как в комиксе 4 уровня
+                                    Positioned(
+                                      top: 14, left: 22,
+                                      child: Container(width: 2, height: 20, decoration: BoxDecoration(color: const Color(0xFF4A2711), borderRadius: BorderRadius.circular(1))),
+                                    ),
+                                    Positioned(
+                                      top: 31, left: 21,
+                                      child: Container(width: 4, height: 4, decoration: const BoxDecoration(color: Color(0xFF3E1E0A), shape: BoxShape.circle)),
+                                    ),
                                   ],
                                 ),
                               ),
                             ),
 
-                            // СЛОВА ВАНЯ-ШЕРИФА СТРОГО НАД ЕГО ГОЛОВОЙ (Хвостик ведет влево-вниз)
+                            // Слова Шерифа строго над его головой
                             Positioned(
                               top: 25, left: 10, right: 10,
                               child: CustomPaint(
@@ -1933,7 +1987,6 @@ class SheriffComicScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.pop(context); // Закрываем экран сюжета
                   
-                  // Прямой пацанский запуск Первого уровня!
                   GameScreen gameScreenInstance = GameScreen();
                   gameScreenInstance.gameInstance.currentLevel = 1;
                   gameScreenInstance.gameInstance.worldScrollX = 0.0;
@@ -1948,6 +2001,55 @@ class SheriffComicScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // Векторный сборщик стула со спинкой из светлой сосны по твоей фотографии
+  Widget _buildWoodenChair() {
+    return SizedBox(
+      width: 40,
+      height: 50,
+      child: Stack(
+        children: [
+          // Задние ножки переходящие в вертикальные стойки спинки
+          Positioned(bottom: 0, left: 4, child: Container(width: 3, height: 48, color: const Color(0xFFF1D299), decoration: BoxDecoration(border: Border.all(color: const Color(0xFFC6A065), width: 0.5)))),
+          Positioned(bottom: 0, right: 16, child: Container(width: 3, height: 48, color: const Color(0xFFF1D299), decoration: BoxDecoration(border: Border.all(color: const Color(0xFFC6A065), width: 0.5)))),
+          // Верхняя горизонтальная планка спинки стула с фото
+          Positioned(top: 2, left: 4, right: 16, child: Container(height: 12, decoration: BoxDecoration(color: const Color(0xFFE8C384), borderRadius: BorderRadius.circular(1), border: Border.all(color: const Color(0xFFB58F4B), width: 0.8)))),
+          // Передние ножки стула
+          Positioned(bottom: 0, left: 14, child: Container(width: 3.5, height: 24, color: const Color(0xFFF1D299), decoration: BoxDecoration(border: Border.all(color: const Color(0xFFC6A065), width: 0.5)))),
+          Positioned(bottom: 0, right: 6, child: Container(width: 3.5, height: 24, color: const Color(0xFFF1D299), decoration: BoxDecoration(border: Border.all(color: const Color(0xFFC6A065), width: 0.5)))),
+          // Горизонтальное сиденье стула
+          Positioned(bottom: 22, left: 2, right: 4, child: Container(height: 4, decoration: BoxDecoration(color: const Color(0xFFE8C384), borderRadius: BorderRadius.circular(1), border: Border.all(color: const Color(0xFFB58F4B), width: 0.8)))),
+          // Поперечные деревянные перекладины жесткости снизу с фото
+          Positioned(bottom: 8, left: 4, right: 16, child: Container(height: 2.5, color: const Color(0xFFD6B274))),
+        ],
+      ),
+    );
+  }
+
+    Widget _buildWoodenTable({required Widget child}) {
+    return Container(
+      width: 85,
+      height: 46,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // 4 прочные ножки стола с фото
+          Positioned(bottom: 0, left: 6, child: Container(width: 5, height: 40, color: const Color(0xFFF1D299), decoration: BoxDecoration(border: Border.all(color: const Color(0xFFC6A065), width: 0.5)))),
+          Positioned(bottom: 0, left: 22, child: Container(width: 4, height: 40, color: const Color(0xFFE2C08A))), 
+          Positioned(bottom: 0, right: 26, child: Container(width: 4, height: 40, color: const Color(0xFFE2C08A))), 
+          Positioned(bottom: 0, right: 6, child: Container(width: 5, height: 40, color: const Color(0xFFF1D299), decoration: BoxDecoration(border: Border.all(color: const Color(0xFFC6A065), width: 0.5)))),
+          
+          // Массивное подстолье (деревянный каркас под столешницей)
+          Positioned(top: 4, left: 4, right: 4, child: Container(height: 8, decoration: BoxDecoration(color: const Color(0xFFE8C384), border: Border.all(color: const Color(0xFFB58F4B), width: 0.5)))),
+          
+          // Толстая гладкая столешница из светлой сосны по фотографии
+          Positioned(top: 0, left: 0, right: 0, child: Container(height: 5, decoration: BoxDecoration(color: const Color(0xFFEDCD96), borderRadius: BorderRadius.circular(1), border: Border.all(color: const Color(0xFFC6A065), width: 1.0)))),
+          
+          child, // Сюда встают бумаги и кружка "ШЕРИФ"
+        ],
       ),
     );
   }
@@ -1971,10 +2073,11 @@ class SheriffComicScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildComicFrame({required Widget child}) {
+  // Обёртка мультяшного кадра: сплошной уютный комнатный фон из досок
+  Widget _buildComicFrame({required Widget child, required bool isRoom}) {
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.blue.shade300, Colors.lightBlue.shade100]),
+        color: const Color(0xFFD7CCC8), 
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.black, width: 3.5),
         boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 6, offset: Offset(0, 4))],
@@ -1983,15 +2086,21 @@ class SheriffComicScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: Stack(
           children: [
-            Positioned(top: -15, right: -15, child: Container(width: 45, height: 45, decoration: const BoxDecoration(color: Color(0xFFFFF176), shape: BoxShape.circle))),
-            Positioned(top: 15, left: 10, child: Icon(Icons.cloud_rounded, size: 24, color: Colors.white.withOpacity(0.5))),
-            child,
+            Positioned(
+              bottom: 0, left: 0, right: 0,
+              child: Container(height: 16, color: const Color(0xFF8D6E63)),
+            ),
+            child, 
           ],
         ),
       ),
     );
   }
 }
+
+          
+
+
 
 // ВЕКТОРНЫЙ РИСОВАЛЬЩИК СТИКМАНА С ТВОЕЙ КАРТИНКИ (РУКА У ГОЛОВЫ + КРУПНЫЕ КАПЛИ ПОТА!)
 class StickmanSweatPainter extends CustomPainter {
