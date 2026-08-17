@@ -525,6 +525,14 @@ class _LevelsScreenState extends State<LevelsScreen> {
           ),
           child: ElevatedButton(
             onPressed: () {
+              
+              if (levelNumber == '1') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SheriffComicScreen()),
+                );
+                return;
+              }
               // Если игрок нажал на 4 уровень — запускаем наш угарный сюжетный комикс!
               if (levelNumber == '4') {
                 Navigator.push(
@@ -533,7 +541,7 @@ class _LevelsScreenState extends State<LevelsScreen> {
                 );
                 return;
               }
-              
+               
               if (!isActive) return; // 5 уровень пока заблокирован
               
               GameScreen gameScreenInstance = GameScreen();
@@ -1683,6 +1691,377 @@ class SpeechBubblePainter extends CustomPainter {
     path.moveTo(startX - 6, size.height);
     path.lineTo(startX, size.height + 10); // кончик указывает вниз на персонажа
     path.lineTo(startX + 6, size.height);
+
+    canvas.drawPath(path, paint);
+    canvas.drawPath(path, borderPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// =========================================================================
+// КЛАСС НАЧАЛЬНОГО КОМИКСА ШЕРИФА ВАНЯ-БАННИХОПА (ДЛЯ 1 УРОВНЯ)
+// =========================================================================
+class SheriffComicScreen extends StatelessWidget {
+  const SheriffComicScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF0F0F14), // Глубокий темный фон вокруг комикса
+      body: SafeArea(
+        child: Column(
+          children: [
+            const SizedBox(height: 16),
+            const Text(
+              "ИСТОРИЯ ШЕРИФА БАННИХОПА",
+              style: TextStyle(
+                fontSize: 22, 
+                fontWeight: FontWeight.w900, 
+                color: Color(0xFFFF9800), 
+                letterSpacing: 1.5,
+                shadows: [Shadow(color: Colors.black54, blurRadius: 4, offset: Offset(2, 2))],
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // ГЛАВНАЯ СЕТКА КОМИКСА: 3 крупных кадра в один горизонтальный ряд
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Row(
+                  children: [
+                    
+                    // КАДР 1: ВАНЯ ШЕРИФ СИДИТ ЗА СТОЛОМ (ГРАМОТЫ ПОКА НЕТ!)
+                    Expanded(
+                      child: _buildComicFrame(
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            // Деревянный пол кабинета шерифа
+                            Positioned(bottom: 0, left: 0, right: 0, child: Container(height: 40, color: const Color(0xFF5D4037))),
+                            
+                            // ЗОЛОТАЯ ЗВЕЗДА ШЕРИФА НА СТЕНЕ (Каноничная по ТЗ!)
+                            Positioned(
+                              top: 60, left: 15,
+                              child: Container(
+                                decoration: const BoxDecoration(shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.amberAccent, blurRadius: 10, spreadRadius: 2)]),
+                                child: const Icon(Icons.star_rounded, color: Colors.amber, size: 34),
+                              ),
+                            ),
+
+                            // Рабочий деревянный стол Шерифа Вани
+                            Positioned(
+                              bottom: 15, left: 35,
+                              child: Container(
+                                width: 75, height: 25,
+                                decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(4), border: Border.all(color: Colors.black, width: 1.5)),
+                                child: Stack(
+                                  children: [
+                                    // Кружка с горячим дымящимся кофе на столе по ТЗ!
+                                    Positioned(
+                                      top: -6, left: 12,
+                                      child: const Icon(Icons.coffee_rounded, color: Colors.white70, size: 14),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                            // ВАНЯ БАННИХОП (Птица с лицом Вани солидно сидит за столом, БЕЗ шляпы!)
+                            Positioned(
+                              bottom: 12, left: 45,
+                              child: _buildCharacterSp(r'assets/images/bunnyhop.png', 55, isPig: false),
+                            ),
+                            
+                            // Овальное облако мыслей/слов строго над его головой
+                            Positioned(
+                              top: 25, left: 10, right: 10,
+                              child: CustomPaint(
+                                painter: ComicBubblePainter(tailX: 0.65),
+                                child: const Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 12),
+                                  child: Text(
+                                    "Обычное мирное дежурство в округе... Кофе отличный.",
+                                    style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+
+                    // КАДР 2: ВЛЕТАЕТ ЗАПЫХАВШИЙСЯ СТИКМАН ИЗ ТВОЕГО РЕФЕРЕНСА
+                    Expanded(
+                      child: _buildComicFrame(
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Positioned(bottom: 0, left: 0, right: 0, child: Container(height: 35, color: const Color(0xFF4CAF50))), // Трава окраины
+                            
+                            // Ваня Баннихоп удивленно смотрит со своего места слева
+                            Positioned(bottom: 10, left: 10, child: _buildCharacterSp(r'assets/images/bunnyhop.png', 50, isPig: false)),
+
+                            // ПОЛОСЫ ВЕТРА СЗАДИ СТИКМАНА (Эффект быстрого бега по ТЗ!)
+                            Positioned(
+                              bottom: 22, right: 35,
+                              child: Icon(Icons.blur_linear_rounded, color: Colors.white.withOpacity(0.5), size: 24),
+                            ),
+
+                            // ВЕКТОРНЫЙ СТИКМАН С ТВОЕЙ ФОТОГРАФИИ (Без слёз, рука у головы, летят капли пота!)
+                            Positioned(
+                              bottom: 8, right: 12,
+                              child: CustomPaint(
+                                size: const Size(30, 65),
+                                painter: StickmanSweatPainter(),
+                              ),
+                            ),
+
+                            // СЛОВА СТИКМАНА СТРОГО НАД ЕГО ГОЛОВОЙ С ПРАВОЙ СТОРОНЫ
+                            Positioned(
+                              top: 20, left: 6, right: 6,
+                              child: CustomPaint(
+                                painter: ComicBubblePainter(tailX: 0.75),
+                                child: const Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                                  child: Text(
+                                    "Шериф, беда! На окраинах завелись зелёные свиньи под предводительством Дона Молюска! Они грабят наши склады с виагрой!",
+                                    style: TextStyle(fontSize: 8.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+
+                    // КАДР 3: ВАНЯ НАДЕВАЕТ ШЛЯПУ И БЕРЁТ ТОРБУ!
+                    Expanded(
+                      child: _buildComicFrame(
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Positioned(bottom: 0, left: 0, right: 0, child: Container(height: 35, color: const Color(0xFF4CAF50))),
+                            
+                            // Ваня Баннихоп КРУПНЫЙ, СУРОВЫЙ и в ШЛЯПЕ ШЕРИФА на голове!
+                            Positioned(
+                              bottom: 10, left: 10,
+                              child: Stack(
+                                alignment: Alignment.topCenter,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 8),
+                                    child: _buildCharacterSp(r'assets/images/bunnyhop.png', 75, isPig: false),
+                                  ),
+                                  // Коричневая ковбойская шляпа Шерифа на его макушке по ТЗ!
+                                  Positioned(
+                                    top: 0,
+                                    child: Container(
+                                      width: 44, height: 14,
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF795548), // Коричневая тулья и поля шляпы
+                                        borderRadius: const BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8), bottomLeft: Radius.circular(3), bottomRight: Radius.circular(3)),
+                                        border: Border.all(color: const Color(0xFF3E2723), width: 1.5),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            // ДЕТАЛИЗИРОВАННАЯ КОРИЧНЕВАЯ СУМКА-ТОРБА У ЕГО НОГ
+                            Positioned(
+                                                            bottom: -2, right: 25,
+                              child: Container(
+                                width: 44, height: 38,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF8D4F37),
+                                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(14), topRight: Radius.circular(14), bottomLeft: Radius.circular(10), bottomRight: Radius.circular(10)),
+                                  border: Border.all(color: const Color(0xFF4A2711), width: 2.0),
+                                ),
+                                child: Stack(
+                                  alignment: Alignment.topCenter,
+                                  children: [
+                                    Container(width: 18, height: 4, color: const Color(0xFF6E331B)), // шнурок-завязка мешка
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                            // СЛОВА ВАНЯ-ШЕРИФА СТРОГО НАД ЕГО ГОЛОВОЙ (Хвостик ведет влево-вниз)
+                            Positioned(
+                              top: 25, left: 10, right: 10,
+                              child: CustomPaint(
+                                painter: ComicBubblePainter(tailX: 0.35),
+                                child: const Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: Text(
+                                    "Пора расхлебать это дерьмо и проучить этих свиней!",
+                                    style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: Colors.black),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // КНОПКА ПОГНАЛИ СНИЗУ КОМИКСА (ЗАПУСКАЕТ ИГРУ)
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF9800),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 14),
+                  elevation: 5,
+                ),
+                onPressed: () {
+                  Navigator.pop(context); // Закрываем экран сюжета
+                  
+                  // Прямой пацанский запуск Первого уровня!
+                  GameScreen gameScreenInstance = GameScreen();
+                  gameScreenInstance.gameInstance.currentLevel = 1;
+                  gameScreenInstance.gameInstance.worldScrollX = 0.0;
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => gameScreenInstance),
+                  );
+                },
+                child: const Text("ПОГНАЛИ!", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCharacterSp(String assetPath, double size, {required bool isPig}) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Container(
+          width: size, height: size,
+          decoration: BoxDecoration(
+            color: isPig ? const Color(0xFF7CB342) : const Color(0xFFE53935),
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.black, width: 2),
+          ),
+        ),
+        ClipOval(
+          child: Image.asset(assetPath, width: size * 0.85, height: size * 0.85, fit: BoxFit.cover),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildComicFrame({required Widget child}) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.blue.shade300, Colors.lightBlue.shade100]),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.black, width: 3.5),
+        boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 6, offset: Offset(0, 4))],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Stack(
+          children: [
+            Positioned(top: -15, right: -15, child: Container(width: 45, height: 45, decoration: const BoxDecoration(color: Color(0xFFFFF176), shape: BoxShape.circle))),
+            Positioned(top: 15, left: 10, child: Icon(Icons.cloud_rounded, size: 24, color: Colors.white.withOpacity(0.5))),
+            child,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ВЕКТОРНЫЙ РИСОВАЛЬЩИК СТИКМАНА С ТВОЕЙ КАРТИНКИ (РУКА У ГОЛОВЫ + КРУПНЫЕ КАПЛИ ПОТА!)
+class StickmanSweatPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final bodyPaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 2.2;
+    final sweatPaint = Paint()..color = const Color(0xFF00E5FF)..style = PaintingStyle.fill; // Неоново-голубой пот
+
+    // 1. Голова (Овал по твоему фото)
+    canvas.drawOval(Rect.fromLTWH(size.width * 0.1, 0, size.width * 0.8, size.height * 0.28), bodyPaint);
+    // Глаза-кружочки стикмана
+    canvas.drawCircle(Offset(size.width * 0.35, size.height * 0.1), 2.2, bodyPaint);
+    canvas.drawCircle(Offset(size.width * 0.65, size.height * 0.1), 2.2, bodyPaint);
+    // Грустный рот-дуга по фото
+    final mouthPath = Path()..addArc(Rect.fromLTWH(size.width * 0.3, size.height * 0.16, size.width * 0.4, 6), pi, pi);
+    canvas.drawPath(mouthPath, bodyPaint);
+
+    // 2. Позвоночник-линия
+    double neckY = size.height * 0.28;
+    double pelvisY = size.height * 0.65;
+    canvas.drawLine(Offset(size.width * 0.5, neckY), Offset(size.width * 0.5, pelvisY), bodyPaint);
+
+    // 3. Правая рука согнута на боку по фото
+    final rightArm = Path()
+      ..moveTo(size.width * 0.5, neckY + 4)
+      ..lineTo(0, size.height * 0.4)
+      ..lineTo(size.width * 0.35, size.height * 0.5);
+    canvas.drawPath(rightArm, bodyPaint);
+
+    // 4. Левая рука согнута у головы, вытирает пот (Точь-в-точь по твоему фото!)
+    final leftArm = Path()
+      ..moveTo(size.width * 0.5, neckY + 4)
+      ..lineTo(size.width * 0.9, size.height * 0.32)
+      ..lineTo(size.width * 0.72, size.height * 0.15);
+    canvas.drawPath(leftArm, bodyPaint);
+
+    // 5. Ноги стикмана расставлены от усталости
+    canvas.drawLine(Offset(size.width * 0.5, pelvisY), Offset(size.width * 0.2, size.height), bodyPaint); // левая
+    canvas.drawLine(Offset(size.width * 0.5, pelvisY), Offset(size.width * 0.8, size.height), bodyPaint); // правая
+    // Стопы-палочки
+    canvas.drawLine(Offset(size.width * 0.2, size.height), Offset(size.width * 0.05, size.height), bodyPaint);
+    canvas.drawLine(Offset(size.width * 0.8, size.height), Offset(size.width * 0.95, size.height), bodyPaint);
+
+    // 6. КРУПНЫЕ МУЛЬТЯШНЫЕ КАПЛИ ПОТА ЛЕТЯТ С ГОЛОВЫ ПО ТВОЕМУ ТЗ!
+    canvas.drawCircle(Offset(size.width * 0.82, size.height * 0.2), 1.5, sweatPaint);
+    canvas.drawCircle(Offset(size.width * 0.88, size.height * 0.24), 1.2, sweatPaint);
+    canvas.drawCircle(Offset(size.width * 0.12, size.height * 0.22), 1.5, sweatPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// РИСОВАЛЬЩИК РЕЧЕВЫХ ПУЗЫРЕЙ ДЛЯ КОМИКСА ШЕРИФА (С ХВОСТИКАМИ СНИЗУ)
+class ComicBubblePainter extends CustomPainter {
+  final double tailX; // Позиция хвостика по оси X
+  ComicBubblePainter({required this.tailX});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = Colors.white..style = PaintingStyle.fill;
+    final borderPaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.8;
+
+    final path = Path()..addRRect(RRect.fromRectAndRadius(Rect.fromLTWH(0, 0, size.width, size.height), const Radius.circular(10)));
+    
+    // Хвостик облачка указывает строго вниз на макушку говорящего персонажа!
+    double sx = size.width * tailX;
+    path.moveTo(sx - 5, size.height);
+    path.lineTo(sx, size.height + 8);
+    path.lineTo(sx + 5, size.height);
 
     canvas.drawPath(path, paint);
     canvas.drawPath(path, borderPaint);
