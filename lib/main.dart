@@ -2156,21 +2156,25 @@ class SheriffComicScreen extends StatelessWidget {
   }
 
 
-      // Векторный сборщик стола из светлой древесины по твоей фотографии
+    // Векторный сборщик стола из светлой древесины по твоей фотографии
   Widget _buildWoodenTable({required Widget child}) {
     return Container(
       width: 85,
       height: 46,
+      // ИСПРАВЛЕНО: Разрешаем кружке и бумагам свободно вылезать НАД столом, убирая обрезание!
+      clipBehavior: Clip.none, 
+      decoration: const BoxDecoration(), // Чистая обертка для clipBehavior
       child: Stack(
-        clipBehavior: Clip.none,
-                children: [
+        // ИСПРАВЛЕНО: Внутреннему Stack тоже запрещаем обрезать верхнюю часть кружки!
+        clipBehavior: Clip.none, 
+        children: [
           // Ножка 1 
           Positioned(bottom: 0, left: 6, child: Container(width: 5, height: 40, decoration: BoxDecoration(color: const Color(0xFFF1D299), border: Border.all(color: const Color(0xFFC6A065), width: 0.5)))),
           
-          // Ножка 2 (ИСПРАВЛЕНО: Теперь переписано СТРОГО по твоему каноничному стилю!)
+          // Ножка 2 
           Positioned(bottom: 0, left: 22, child: Container(width: 4, height: 40, decoration: BoxDecoration(color: const Color(0xFFE2C08A)))), 
           
-          // Ножка 3 (ИСПРАВЛЕНО: Теперь переписано СТРОГО по твоему каноничному стилю!)
+          // Ножка 3 
           Positioned(bottom: 0, right: 26, child: Container(width: 4, height: 40, decoration: BoxDecoration(color: const Color(0xFFE2C08A)))), 
           
           // Ножка 4 
@@ -2179,23 +2183,15 @@ class SheriffComicScreen extends StatelessWidget {
           // Подстолье 
           Positioned(top: 4, left: 4, right: 4, child: Container(height: 8, decoration: BoxDecoration(color: const Color(0xFFE8C384), border: Border.all(color: const Color(0xFFB58F4B), width: 0.5)))),
           
-          // Столешница 
+          // Толстая гладкая столешница из светлой сосны по фотографии
           Positioned(top: 0, left: 0, right: 0, child: Container(height: 5, decoration: BoxDecoration(color: const Color(0xFFEDCD96), borderRadius: BorderRadius.circular(1), border: Border.all(color: const Color(0xFFC6A065), width: 1.0)))),
           
-          // =========================================================================
-          // ЖЁЛТАЯ КРУЖКА И РАЗБРОСАННЫЕ БУМАГИ НА СТОЛЕ БЕЗ ЕДИНОГО ИЗЪЯНА
-          // =========================================================================
-          // Бумаги рапортов 
-          Positioned(top: -6, left: 6, child: Transform.rotate(angle: -0.2, child: Container(width: 16, height: 10, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.9), borderRadius: BorderRadius.circular(1), border: Border.all(color: Colors.black45, width: 0.5))))),
-          Positioned(top: -5, left: 16, child: Transform.rotate(angle: 0.1, child: Container(width: 14, height: 11, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.85), borderRadius: BorderRadius.circular(1), border: Border.all(color: Colors.black45, width: 0.5))))),
-          
-          
-          
-          child, 
+          child, // Сюда встают бумаги и кружка "ШЕРИФ" из Кадра 1 и Кадра 2
         ],
       ),
     );
   }
+
 
 
 
