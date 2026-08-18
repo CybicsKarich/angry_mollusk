@@ -377,6 +377,10 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   double losePhotoScale = 0.0;     // Размер фотки (растёт от 0.0 до 0.5)
   static int pillsRemaining = 3;
   double acidBackgroundTimer = 0.0;
+  // ИСПРАВЛЕНО: Переменные для интерактивной анимации шляпы шерифа на 1 уровне!
+  double hatAnimTimer = 0.0;     // Общий таймер анимации полёта и сползания
+  bool isHatSplatSoundPlayed = false; // Флаг, чтобы звук шлепка бахнул ровно один раз
+
  
     int currentLevel = 1;
     
@@ -640,7 +644,12 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
 
     @override
   void update(double dt) {
-    if (canvasSize.x == 0 || canvasSize.y == 0) return;
+    // ИСПРАВЛЕНО: На 1 уровне крутим таймер летящей в экран шляпы шерифа
+   if (currentLevel == 1 && hatAnimTimer < 3.5) {
+     hatAnimTimer += dt;
+   }
+      
+      if (canvasSize.x == 0 || canvasSize.y == 0) return;
     super.update(dt);
     if (isPaused) return;
 
@@ -1276,6 +1285,99 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       canvas.restore();
     }
 
+        // =========================================================================
+    // ИСПРАВЛЕНО: ИНТЕРАКТИВНЫЙ ПОЛЁТ ШЛЯПЫ ШЕРИФА ПРЯМО В ЭКРАН ИГРОКА (1 УРОВЕНЬ)
+    // =========================================================================
+    if (currentLevel == 1 && hatAnimTimer < 3.2) {
+      canvas.save();
+
+      double scale = 1.0;
+      double offsetX = size.width * 0.5;
+      double offsetY = size.height * 0.5;
+      double rotation = 0.0;
+      double opacity = 1.0;
+
+      if (hatAnimTimer <= 1.2) {
+        // ФАЗА 1: Шляпа стремительно вылетает из глубины рогатки (летит 1.2 секунды)
+        double progress = hatAnimTimer / 1.2;
+        // Масштаб увеличивается от микроскопического (0.05) до гигантского (3.5), создавая эффект полёта в лицо!
+        scale = 0.05 + (3.45 * progress);
+        // Шляпа летит по плавной дуге от рогатки (левая часть) в центр экрана
+        offsetX = (0.15 * size.width) + ((0.5 * size.width) - (0.15 * size.width)) * progress;
+        offsetY = (0.65 * size.height) - ((0.65 * size.height) - (0.5 * size.height)) * progress;
+        // Шляпа бешено крутится в полёте
+        rotation = progress * pi * 4;
+      } else if (hatAnimTimer > 1.2 && hatAnimTimer <= 2.2) {
+        // ФАЗА 2: Шляпа со смачным звуком прилепилась ровно по центру экрана и висит 1 секунду
+        scale = 3.5;
+        offsetX = size.width * 0.5;
+        offsetY = size.height * 0.5;
+        rotation = 0.0; // Вращение остановилось
+
+        // БРОНЕБОЙНЫЙ ТРИГГЕР ЗВУКА: Бахает ровно в момент соприкосновения со стеклом на 1.2 сек!
+        if (!isHatSplatSoundPlayed) {
+          isHatSplatSoundPlayed = true;
+          AudioManager.playHatSplat();
+        }
+      } else if (hatAnimTimer > 2.2 && hatAnimTimer <= 3.2) {
+        // ФАЗА 3: Шляпа под силой гравитации забавно скатывается по стеклу вниз и исчезает (1 секунда)
+        double slideProgress = (hatAnimTimer - 2.2) / 1.0;
+        scale = 3.5;
+        offsetX = size.width * 0.5;
+        // Координата Y уползает далеко за нижний край экрана телефона
+        offsetY = (size.height * 0.5) + (size.height * 0.6 * slideProgress);
+        rotation = sin(slideProgress * pi * 2) * 0.15; // лёгкое покачивание при сползании
+        opacity = (1.0 - slideProgress).clamp(0.0, 1.0); // плавно тает в самом конце
+      }
+
+      // Смещаем холст в точку анимации шляпы шерифа
+      canvas.translate(offsetX, offsetY);
+      canvas.scale(scale);
+      canvas.rotate(rotation);
+
+      // Рисуем ковбойскую шляпу шерифа стороной со звездой (один в один как в комиксе, но без ошибок color!)
+      final hatPaint = Paint()..color = const Color(0xFF795548).withValues(alpha: opacity);
+      final brimPaint = Paint()..color = const Color(0xFF6D4C41).withValues(alpha: opacity);
+      final strapPaint = Paint()..color = const Color(0xFF212121).withValues(alpha: opacity);
+      final borderPaint = Paint()..color = Colors.black.withValues(alpha: opacity)..style = PaintingStyle.stroke..strokeWidth = 0.6;
+
+      // 1. Коричневая ковбойская тулья
+      final hatRect = Rect.fromLTWH(-8, -12, 16, 11);
+      canvas.drawRRect(RRect.fromRectAndRadius(hatRect, const Radius.circular(3)), hatPaint);
+      canvas.drawRRect(RRect.fromRectAndRadius(hatRect, const Radius.circular(3)), borderPaint);
+
+      // 2. Скругленные ковбойские поля шляпы
+      final brimRect = Rect.fromLTWH(-16, -2, 32, 3);
+      canvas.drawRRect(RRect.fromRectAndRadius(brimRect, const Radius.circular(1.5)), brimPaint);
+      canvas.drawRRect(RRect.fromRectAndRadius(brimRect, const Radius.circular(1.5)), borderPaint);
+
+      // 3. Плетёный чёрный ремешок вдоль полей
+      final strapRect = Rect.fromLTWH(-7.5, -3.5, 15, 1.2);
+      canvas.drawRect(strapRect, strapPaint);
+
+      // 4. СЕРЕБРЯНАЯ ЗВЕЗДА ШЕРИФА С ЗАКЛЁПКАМИ ПО ЦЕНТРУ ТУЛЬИ С КАРТИНКИ
+      final starPaint = Paint()..color = Colors.blueGrey.shade100.withValues(alpha: opacity);
+      final starPath = Path()
+        ..moveTo(0, -11)
+        ..lineTo(1.5, -8)
+        ..lineTo(4.5, -8)
+        ..lineTo(2, -6)
+        ..lineTo(3.5, -3)
+        ..lineTo(0, -5)
+        ..lineTo(-3.5, -3)
+        ..lineTo(-2, -6)
+        ..lineTo(-4.5, -8)
+        ..lineTo(-1.5, -8)
+        ..close();
+      canvas.drawPath(starPath, starPaint);
+      canvas.drawPath(starPath, borderPaint);
+      
+      // Круглая металлическая печать-заклёпка по центру шерифской звезды
+      final centerPaint = Paint()..color = Colors.white.withValues(alpha: opacity);
+      canvas.drawCircle(const Offset(0, -7), 1.0, centerPaint);
+
+      canvas.restore();
+    }
 
     canvas.restore();
     }
