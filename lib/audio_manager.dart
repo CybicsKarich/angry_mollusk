@@ -22,7 +22,16 @@ class AudioManager {
     resetTokensForNextBird(); // Заряжаем жетоны при старте
   }
 
-    // ИСПРАВЛЕНО: Звук ярости на максимальной громкости 1.0 из корня папки audio
+    // =========================================================================
+  // ТОЧЕЧНЫЙ БЛОК ЯРОСТИ ВАНЯ-ПТИЦЫ: ПЕРЕМЕННЫЕ И МЕТОДЫ ВМЕСТЕ!
+  // =========================================================================
+  static AudioPlayer? _ragePlayer;
+  static bool _isRageSoundPlaying = false;
+
+  // Возвращаем статус аудио-замка, чтобы другие методы могли его считывать
+  static bool get isRageSoundPlaying => _isRageSoundPlaying;
+
+  // Звук ярости на максимальной громкости 1.0 из корня папки audio
   static Future<void> playRage() async {
     if (_isRageSoundPlaying) return; // Защита от наложения
     
@@ -42,18 +51,19 @@ class AudioManager {
     });
   }
 
-
+  // Метод мгновенной остановки гула при смерти Вани Баннихопа!
   static Future<void> stopRage() async {
     if (_ragePlayer != null) {
       try {
-        await _ragePlayer!.stop(); 
+        await _ragePlayer!.stop(); // Выключаем звук намертво!
       } catch (e) {
         print("Ошибка остановки звука ярости: $e");
       }
       _ragePlayer = null;
     }
-    _isRageSoundPlaying = false; 
+    _isRageSoundPlaying = false; // Мгновенно открываем аудио-замок для других эффектов
   }
+
 
     
   // МЕТОД ОБНУЛЕНИЯ: Вызывается, когда на рогатку встает НОВАЯ птица
