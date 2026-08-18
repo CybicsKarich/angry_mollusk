@@ -68,6 +68,15 @@ class AudioManager {
     hasMissToken = true;
   }
 
+    // ИСПРАВЛЕНО: Звук сочного мультяшного шлепка шляпы шерифа о стекло экрана!
+  static Future<void> playHatSplat() async {
+    try {
+      await AudioPlayer().play(AssetSource('sounds/hat_splat.mp3'));
+    } catch (e) {
+      print("Ошибка воспроизведения звука шлепка шляпы: $e");
+    }
+  }
+
   // 1. ЗВУК НАТЯЖЕНИЯ РОГАТКИ
   static void playStretch() async {
     if (_isStretching) return;
