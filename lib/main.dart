@@ -1931,19 +1931,38 @@ class SheriffComicScreen extends StatelessWidget {
                                         ),
                                       ),
                                     ),
-                                    // Sкладки у горловины
+                                     // Sкладки у горловины (ИСПРАВЛЕНО: убран внешний const!)
                                     Positioned(
                                       top: 10, left: 8, right: 8,
-                                      child: Container(height: 6, decoration: const BoxDecoration(color: Color(0xFF6E331B), borderRadius: BorderRadius.all(Radius.circular(4)))),
+                                      child: Container(
+                                        height: 6, 
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF6E331B), // const перенесен внутрь к цвету!
+                                          borderRadius: const BorderRadius.all(Radius.circular(4)),
+                                        ),
+                                      ),
                                     ),
-                                    // Свисающий завязанный кожаный шнурок-затяжка как в комиксе 4 уровня
+                                    // Свисающий завязанный кожаный шнурок-затяжка (Изначально ПРАВИЛЬНО)
                                     Positioned(
                                       top: 14, left: 22,
-                                      child: Container(width: 2, height: 20, decoration: BoxDecoration(color: const Color(0xFF4A2711), borderRadius: BorderRadius.circular(1))),
+                                      child: Container(
+                                        width: 2, height: 20, 
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF4A2711), 
+                                          borderRadius: BorderRadius.circular(1),
+                                        ),
+                                      ),
                                     ),
+                                    // Узелок шнурка (ИСПРАВЛЕНО: убран внешний const!)
                                     Positioned(
                                       top: 31, left: 21,
-                                      child: Container(width: 4, height: 4, decoration: const BoxDecoration(color: Color(0xFF3E1E0A), shape: BoxShape.circle)),
+                                      child: Container(
+                                        width: 4, height: 4, 
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF3E1E0A), // const перенесен внутрь к цвету!
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -2005,31 +2024,95 @@ class SheriffComicScreen extends StatelessWidget {
     );
   }
 
-  // Векторный сборщик стула со спинкой из светлой сосны по твоей фотографии
+    // Векторный сборщик стула со спинкой из светлой сосны по твоей фотографии
   Widget _buildWoodenChair() {
     return SizedBox(
       width: 40,
       height: 50,
       child: Stack(
         children: [
-          // Задние ножки переходящие в вертикальные стойки спинки
-          Positioned(bottom: 0, left: 4, child: Container(width: 3, height: 48, color: const Color(0xFFF1D299), decoration: BoxDecoration(border: Border.all(color: const Color(0xFFC6A065), width: 0.5)))),
-          Positioned(bottom: 0, right: 16, child: Container(width: 3, height: 48, color: const Color(0xFFF1D299), decoration: BoxDecoration(border: Border.all(color: const Color(0xFFC6A065), width: 0.5)))),
+          // Задние ножки переходящие в вертикальные стойки спинки (ИСПРАВЛЕНО: Занесли цвет внутрь!)
+          Positioned(
+            bottom: 0, left: 4, 
+            child: Container(
+              width: 3, height: 48, 
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1D299),
+                border: Border.all(color: const Color(0xFFC6A065), width: 0.5),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 0, right: 16, 
+            child: Container(
+              width: 3, height: 48, 
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1D299),
+                border: Border.all(color: const Color(0xFFC6A065), width: 0.5),
+              ),
+            ),
+          ),
+          
           // Верхняя горизонтальная планка спинки стула с фото
-          Positioned(top: 2, left: 4, right: 16, child: Container(height: 12, decoration: BoxDecoration(color: const Color(0xFFE8C384), borderRadius: BorderRadius.circular(1), border: Border.all(color: const Color(0xFFB58F4B), width: 0.8)))),
-          // Передние ножки стула
-          Positioned(bottom: 0, left: 14, child: Container(width: 3.5, height: 24, color: const Color(0xFFF1D299), decoration: BoxDecoration(border: Border.all(color: const Color(0xFFC6A065), width: 0.5)))),
-          Positioned(bottom: 0, right: 6, child: Container(width: 3.5, height: 24, color: const Color(0xFFF1D299), decoration: BoxDecoration(border: Border.all(color: const Color(0xFFC6A065), width: 0.5)))),
-          // Горизонтальное сиденье стула
-          Positioned(bottom: 22, left: 2, right: 4, child: Container(height: 4, decoration: BoxDecoration(color: const Color(0xFFE8C384), borderRadius: BorderRadius.circular(1), border: Border.all(color: const Color(0xFFB58F4B), width: 0.8)))),
-          // Поперечные деревянные перекладины жесткости снизу с фото
-          Positioned(bottom: 8, left: 4, right: 16, child: Container(height: 2.5, color: const Color(0xFFD6B274))),
+          Positioned(
+            top: 2, left: 4, right: 16, 
+            child: Container(
+              height: 12, 
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8C384), 
+                borderRadius: BorderRadius.circular(1), 
+                border: Border.all(color: const Color(0xFFB58F4B), width: 0.8),
+              ),
+            ),
+          ),
+          
+          // Передние ножки стула (ИСПРАВЛЕНО: Занесли цвет внутрь!)
+          Positioned(
+            bottom: 0, left: 14, 
+            child: Container(
+              width: 3.5, height: 24, 
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1D299),
+                border: Border.all(color: const Color(0xFFC6A065), width: 0.5),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 0, right: 6, 
+            child: Container(
+              width: 3.5, height: 24, 
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1D299),
+                border: Border.all(color: const Color(0xFFC6A065), width: 0.5),
+              ),
+            ),
+          ),
+          
+          // Горизонтальное сиденье стула (ИСПРАВЛЕНО: Занесли цвет внутрь!)
+          Positioned(
+            bottom: 22, left: 2, right: 4, 
+            child: Container(
+              height: 4, 
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8C384), 
+                borderRadius: BorderRadius.circular(1), 
+                border: Border.all(color: const Color(0xFFB58F4B), width: 0.8),
+              ),
+            ),
+          ),
+          
+          // Поперечные деревянные перекладины жесткости снизу с фото (Тут был только цвет, оставляем без изменений)
+          Positioned(
+            bottom: 8, left: 4, right: 16, 
+            child: Container(height: 2.5, color: const Color(0xFFD6B274)),
+          ),
         ],
       ),
     );
   }
 
-    // Векторный сборщик стола из светлой древесины по твоей фотографии
+
+      // Векторный сборщик стола из светлой древесины по твоей фотографии
   Widget _buildWoodenTable({required Widget child}) {
     return Container(
       width: 85,
@@ -2049,21 +2132,25 @@ class SheriffComicScreen extends StatelessWidget {
             ),
           ),
           
-          // Ножка 2 (В тени)
+          // Ножка 2 (В тени — ИСПРАВЛЕНО: убран спорный const с декорации, цвет сделан константным)
           Positioned(
             bottom: 0, left: 22, 
             child: Container(
               width: 4, height: 40, 
-              decoration: const BoxDecoration(color: Color(0xFFE2C08A)),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE2C08A),
+              ),
             ),
           ), 
           
-          // Ножка 3 (Дальняя правая)
+          // Ножка 3 (Дальняя правая — ИСПРАВЛЕНО: убран спорный const с декорации, цвет сделан константным)
           Positioned(
             bottom: 0, right: 26, 
             child: Container(
               width: 4, height: 40, 
-              decoration: const BoxDecoration(color: Color(0xFFE2C08A)),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE2C08A),
+              ),
             ),
           ), 
           
@@ -2109,6 +2196,7 @@ class SheriffComicScreen extends StatelessWidget {
       ),
     );
   }
+
 
 
 
