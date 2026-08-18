@@ -2271,39 +2271,38 @@ class ComicBubblePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-  // ИСПРАВЛЕНО: Добавили сочную массивную жёлтую кружку строго по фотографии!
-  Widget _buildSheriffCup() {
+    Widget _buildSheriffCup() {
     return SizedBox(
       width: 22,
       height: 18,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // 1. Большая круглая ручка кружки справа по фотографии
+          // 1. Большая круглая ручка кружки (ИСПРАВЛЕНО: Прижали впритык к корпусу, right: -3)
           Positioned(
-            top: 3, right: -5,
+            top: 3, right: -3,
             child: Container(
-              width: 9, height: 11,
+              width: 7, height: 11,
               decoration: BoxDecoration(
-                color: const Color(0xFFFFEB3B), // Глянцевый ярко-жёлтый цвет
+                color: const Color(0xFFFFEB3B), 
                 borderRadius: const BorderRadius.only(topRight: Radius.circular(5), bottomRight: Radius.circular(5)),
                 border: Border.all(color: Colors.black, width: 0.8),
               ),
             ),
           ),
-          // Прозрачное отверстие внутри ручки, чтобы она не была глухой
+          // Внутреннее отверстие ручки (ИСПРАВЛЕНО: Сдвинули пропорционально, right: -2)
           Positioned(
-            top: 5, right: -3,
+            top: 5, right: -2,
             child: Container(
-              width: 4, height: 7,
+              width: 3, height: 7,
               decoration: const BoxDecoration(
-                color: Color(0xFFD7CCC8), // Цвет стены кабинета для симуляции прозрачности
+                color: Color(0xFFD7CCC8), 
                 borderRadius: BorderRadius.only(topRight: Radius.circular(3), bottomRight: Radius.circular(3)),
               ),
             ),
           ),
 
-          // 2. Цилиндрическое тело жёлтой кружки
+          // 2. Массивное цилиндрическое тело кружки
           Positioned(
             top: 0, left: 0,
             child: Container(
@@ -2316,7 +2315,6 @@ class ComicBubblePainter extends CustomPainter {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Чёрный брутальный принт надписи "Sheriff" ровно как на фото!
                   const Text(
                     "Sheriff", 
                     style: TextStyle(fontSize: 3.5, fontWeight: FontWeight.w900, color: Colors.black, letterSpacing: -0.1),
