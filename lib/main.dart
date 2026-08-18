@@ -1820,11 +1820,6 @@ class SheriffComicScreen extends StatelessWidget {
                             Positioned(bottom: 22, left: 19, child: _buildCharacterSp('assets/images/bunnyhop.png', 50, isPig: false)),
                             Positioned(bottom: 2, left: 44, child: _buildWoodenTable(child: Container())),
 
-                            // Белые полосы бега сзади Стикмана
-                            Positioned(
-                              bottom: 25, right: 30,
-                              child: Icon(Icons.blur_linear_rounded, color: Colors.white.withOpacity(0.4), size: 24),
-                            ),
 
                             // Уставший Стикман из твоего референса (Рука у головы, крупные капли пота)
                             Positioned(
@@ -2167,15 +2162,7 @@ class SheriffComicScreen extends StatelessWidget {
           Positioned(top: -6, left: 6, child: Transform.rotate(angle: -0.2, child: Container(width: 16, height: 10, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.9), borderRadius: BorderRadius.circular(1), border: Border.all(color: Colors.black45, width: 0.5))))),
           Positioned(top: -5, left: 16, child: Transform.rotate(angle: 0.1, child: Container(width: 14, height: 11, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.85), borderRadius: BorderRadius.circular(1), border: Border.all(color: Colors.black45, width: 0.5))))),
           
-          // Жёлтая кружка с надписью ШЕРИФ
-          Positioned(
-            top: -12, right: 10,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 2.5, vertical: 1.0),
-              decoration: BoxDecoration(color: const Color(0xFFFFEB3B), borderRadius: BorderRadius.circular(2), border: Border.all(color: Colors.black, width: 1.0)),
-              child: const Text("ШЕРИФ", style: TextStyle(fontSize: 4.5, fontWeight: FontWeight.w900, color: Colors.black)),
-            ),
-          ),
+          
           
           child, 
         ],
@@ -2307,6 +2294,65 @@ class ComicBubblePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
+  // ИСПРАВЛЕНО: Добавили сочную массивную жёлтую кружку строго по фотографии!
+  Widget _buildSheriffCup() {
+    return SizedBox(
+      width: 22,
+      height: 18,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // 1. Большая круглая ручка кружки справа по фотографии
+          Positioned(
+            top: 3, right: -5,
+            child: Container(
+              width: 9, height: 11,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFEB3B), // Глянцевый ярко-жёлтый цвет
+                borderRadius: const BorderRadius.only(topRight: Radius.circular(5), bottomRight: Radius.circular(5)),
+                border: Border.all(color: Colors.black, width: 0.8),
+              ),
+            ),
+          ),
+          // Прозрачное отверстие внутри ручки, чтобы она не была глухой
+          Positioned(
+            top: 5, right: -3,
+            child: Container(
+              width: 4, height: 7,
+              decoration: const BoxDecoration(
+                color: Color(0xFFD7CCC8), // Цвет стены кабинета для симуляции прозрачности
+                borderRadius: BorderRadius.only(topRight: Radius.circular(3), bottomRight: Radius.circular(3)),
+              ),
+            ),
+          ),
+
+          // 2. Цилиндрическое тело жёлтой кружки
+          Positioned(
+            top: 0, left: 0,
+            child: Container(
+              width: 16, height: 18,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFEB3B), 
+                borderRadius: const BorderRadius.all(Radius.circular(3)),
+                border: Border.all(color: Colors.black, width: 1.0),
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Чёрный брутальный принт надписи "Sheriff" ровно как на фото!
+                  const Text(
+                    "Sheriff", 
+                    style: TextStyle(fontSize: 3.5, fontWeight: FontWeight.w900, color: Colors.black, letterSpacing: -0.1),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
 
 
