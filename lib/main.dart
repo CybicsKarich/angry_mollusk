@@ -1755,33 +1755,7 @@ class SheriffComicScreen extends StatelessWidget {
                             // 3. Деревянный массивный стол из светлой сосны строго по фотографии!
                             Positioned(
                               bottom: 2, left: 62,
-                              child: _buildWoodenTable(
-                                    child: Stack(
-                                  children: [
-                                    // Куча разбросанных бумаг и рапортов на столе по ТЗ (ИСПРАВЛЕНО: безопасный с точки зрения констант скролл!)
-                                    Positioned(
-                                      top: -6, left: 6,
-                                      child: Transform.rotate(
-                                        angle: -0.2,
-                                        child: Container(width: 16, height: 10, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.9), borderRadius: BorderRadius.circular(1), border: Border.all(color: Colors.black45, width: 0.5))),
-                                      ),
-                                    ),
-                                    Positioned(
-                                      top: -5, left: 16,
-                                      child: Transform.rotate(
-                                        angle: 0.1,
-                                        child: Container(width: 14, height: 11, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.85), borderRadius: BorderRadius.circular(1), border: Border.all(color: Colors.black45, width: 0.5))),
-                                      ),
-                                    ),
-                                    
-                                    // ИСПРАВЛЕНО: Заменили старую плоскую белую кружку на нашу новую жёлтую кружку Sheriff по фото с ручкой и принтом!
-                                    Positioned(
-                                      top: -15, right: 10, // Подняли чуть выше столешницы, чтобы ручка встала ровно
-                                      child: _buildSheriffCup(),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                              child: _buildWoodenTable(),
                             ),
                             
                             // Слова над головой Вани
@@ -1818,34 +1792,8 @@ class SheriffComicScreen extends StatelessWidget {
                                                         // ИСПРАВЛЕНО: Жёлтая кружка и бумаги полностью сохранены на столе во втором кадре!
                             Positioned(
                               bottom: 2, left: 44,
-                              child: _buildWoodenTable(
-                                child: Stack(
-                                  children: [
-                                    // Разбросанные бумаги рапортов
-                                    Positioned(
-                                      top: -6, left: 6,
-                                      child: Transform.rotate(
-                                        angle: -0.2,
-                                        child: Container(width: 16, height: 10, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.9), borderRadius: BorderRadius.circular(1), border: Border.all(color: Colors.black45, width: 0.5))),
-                                      ),
-                                    ),
-                                    Positioned(
-                                      top: -5, left: 16,
-                                      child: Transform.rotate(
-                                        angle: 0.1,
-                                        child: Container(width: 14, height: 11, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.85), borderRadius: BorderRadius.circular(1), border: Border.all(color: Colors.black45, width: 0.5))),
-                                      ),
-                                    ),
-                                    // Жёлтая сочная кружка Sheriff по фото с ручкой и принтом
-                                    Positioned(
-                                      top: -15, right: 10, // Идеально на поверхности столешницы
-                                      child: _buildSheriffCup(),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                              child: _buildWoodenTable(),
                             ),
-
 
 
                             // Уставший Стикман из твоего референса (Рука у головы, крупные капли пота)
@@ -2156,41 +2104,47 @@ class SheriffComicScreen extends StatelessWidget {
   }
 
 
-    // Векторный сборщик стола из светлой древесины по твоей фотографии
-  Widget _buildWoodenTable({required Widget child}) {
-    return Container(
+    // ИСПРАВЛЕНО: МОНОЛИТНЫЙ ВЕКТОРНЫЙ СТОЛ ШЕРИФА СО ВСЕМИ БУМАГАМИ И КРУЖКОЙ ВНУТРИ!
+  Widget _buildWoodenTable() {
+    return SizedBox(
       width: 85,
-      height: 46,
-      // ИСПРАВЛЕНО: Разрешаем кружке и бумагам свободно вылезать НАД столом, убирая обрезание!
-      clipBehavior: Clip.none, 
-      decoration: const BoxDecoration(), // Чистая обертка для clipBehavior
+      height: 65, // Увеличили общую высоту контейнера, чтобы кружка Sheriff помещалась во весь рост!
       child: Stack(
-        // ИСПРАВЛЕНО: Внутреннему Stack тоже запрещаем обрезать верхнюю часть кружки!
-        clipBehavior: Clip.none, 
+        clipBehavior: Clip.none,
         children: [
+          // 1. ДЕРЕВЯННЫЕ НОЖКИ СТОЛА (Высота 40, стоят в основании bottom: 0)
           // Ножка 1 
           Positioned(bottom: 0, left: 6, child: Container(width: 5, height: 40, decoration: BoxDecoration(color: const Color(0xFFF1D299), border: Border.all(color: const Color(0xFFC6A065), width: 0.5)))),
-          
-          // Ножка 2 
+          // Ножка 2 (В тени)
           Positioned(bottom: 0, left: 22, child: Container(width: 4, height: 40, decoration: BoxDecoration(color: const Color(0xFFE2C08A)))), 
-          
-          // Ножка 3 
+          // Ножка 3 (Дальняя правая)
           Positioned(bottom: 0, right: 26, child: Container(width: 4, height: 40, decoration: BoxDecoration(color: const Color(0xFFE2C08A)))), 
-          
           // Ножка 4 
           Positioned(bottom: 0, right: 6, child: Container(width: 5, height: 40, decoration: BoxDecoration(color: const Color(0xFFF1D299), border: Border.all(color: const Color(0xFFC6A065), width: 0.5)))),
           
-          // Подстолье 
-          Positioned(top: 4, left: 4, right: 4, child: Container(height: 8, decoration: BoxDecoration(color: const Color(0xFFE8C384), border: Border.all(color: const Color(0xFFB58F4B), width: 0.5)))),
-          
+          // 2. СТОЛЕШНИЦА И ПОДСТОЛЬЕ (Высота от пола до 44 пикселей)
+          // Массивное подстолье 
+          Positioned(bottom: 35, left: 4, right: 4, child: Container(height: 8, decoration: BoxDecoration(color: const Color(0xFFE8C384), border: Border.all(color: const Color(0xFFB58F4B), width: 0.5)))),
           // Толстая гладкая столешница из светлой сосны по фотографии
-          Positioned(top: 0, left: 0, right: 0, child: Container(height: 5, decoration: BoxDecoration(color: const Color(0xFFEDCD96), borderRadius: BorderRadius.circular(1), border: Border.all(color: const Color(0xFFC6A065), width: 1.0)))),
+          Positioned(bottom: 40, left: 0, right: 0, child: Container(height: 5, decoration: BoxDecoration(color: const Color(0xFFEDCD96), borderRadius: BorderRadius.circular(1), border: Border.all(color: const Color(0xFFC6A065), width: 1.0)))),
           
-          child, // Сюда встают бумаги и кружка "ШЕРИФ" из Кадра 1 и Кадра 2
+          // =========================================================================
+          // 3. ПРЕДМЕТЫ НА СТОЛЕ: ЛЕЖАТ СТРОГО НА ПОВЕРХНОСТИ СТОЛЕШНИЦЫ (bottom: 44)
+          // =========================================================================
+          // Разбросанные бумаги рапортов
+          Positioned(bottom: 44, left: 6, child: Transform.rotate(angle: -0.2, child: Container(width: 16, height: 10, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.9), borderRadius: BorderRadius.circular(1), border: Border.all(color: Colors.black45, width: 0.5))))),
+          Positioned(bottom: 45, left: 16, child: Transform.rotate(angle: 0.1, child: Container(width: 14, height: 11, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.85), borderRadius: BorderRadius.circular(1), border: Border.all(color: Colors.black45, width: 0.5))))),
+          
+          // НАША ДЕТАЛИЗИРОВАННАЯ ЖЁЛТАЯ КРУЖКА ШЕРИФА С РУЧКОЙ ПО ФОТОГРАФИИ!
+          Positioned(
+            bottom: 44, right: 10, // Стоит чётко на крышке стола во весь свой рост!
+            child: _buildSheriffCup(),
+          ),
         ],
       ),
     );
   }
+
 
 
 
