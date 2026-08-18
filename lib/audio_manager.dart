@@ -5,6 +5,7 @@ class AudioManager {
   // Плееры для контролируемых звуков
   static final AudioPlayer _stretchPlayer = AudioPlayer();
   static final AudioPlayer _finalMenuPlayer = AudioPlayer();
+  static final AudioPlayer _fxPlayer = AudioPlayer();
   
   static final Random _random = Random();
   static bool _isStretching = false;
@@ -27,13 +28,14 @@ class AudioManager {
 
   static bool get isRageSoundPlaying => _isRageSoundPlaying;
 
-  // ИСПРАВЛЕНО: Путь изменён на чистый корень папки audio!
+  // 2. ИСПРАВЛЕНО: ЗВУК РАЗЪЯРЕНИЯ БАННИХОПА НА МАКСИМАЛЬНОЙ ГРОМКОСТИ Х1.0!
   static Future<void> playRage() async {
     if (_isRageSoundPlaying) return; 
     
     _isRageSoundPlaying = true;
     try {
       _ragePlayer = AudioPlayer();
+      await _ragePlayer!.setVolume(1.0); // Выкручиваем громкость ярости на максимум!
       await _ragePlayer!.play(AssetSource('bunnyhop_rage.mp3'));
     } catch (e) {
       print("Ошибка звука ярости: $e");
@@ -66,10 +68,12 @@ class AudioManager {
     hasMissToken = true;
   }
 
-    // ИСПРАВЛЕНО: Звук шлепка шляпы шерифа (Путь изменён на чистый корень папки audio!)
+  // 1. ИСПРАВЛЕНО: ЗВУК ШЛЕПКА ШЛЯПЫ НА МАКСИМАЛЬНОЙ ГРОМКОСТИ Х1.0!
   static Future<void> playHatSplat() async {
     try {
-      await AudioPlayer().play(AssetSource('hat_splat.mp3'));
+      await _fxPlayer.stop(); // Мгновенно глушим прошлый FX, если он играл
+      await _fxPlayer.setVolume(1.0); // Жестко выкручиваем громкость на 100%!
+      await _fxPlayer.play(AssetSource('hat_splat.mp3'));
     } catch (e) {
       print("Ошибка воспроизведения звука шлепка шляпы: $e");
     }
@@ -215,10 +219,12 @@ class AudioManager {
     }
   } // <--- ЗАКРЫВАЕТ МЕТОД stopAllLevelSounds
 
-  // ИСПРАВЛЕНО: Путь к звуку ачивки изменён на чистый корень папки audio!
+  // 3. ИСПРАВЛЕНО: ЗВУК АЧИВКИ НА МАКСИМАЛЬНОЙ ГРОМКОСТИ Х1.0!
   static Future<void> playAchievement() async {
     try {
-      await AudioPlayer().play(AssetSource('achievement_unlocked.mp3'));
+      await _fxPlayer.stop();
+      await _fxPlayer.setVolume(1.0); // 100% громкости для фанфар!
+      await _fxPlayer.play(AssetSource('achievement_unlocked.mp3'));
     } catch (e) {
       print("Ошибка воспроизведения звука ачивки: $e");
     }
