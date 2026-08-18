@@ -22,34 +22,26 @@ class AudioManager {
     resetTokensForNextBird(); // Заряжаем жетоны при старте
   }
 
-  // 2. ИСПРАВЛЕНО: ЗВУК ЯРОСТИ ВАНЯ-ПТИЦЫ
+    // ИСПРАВЛЕНО: Звук ярости на максимальной громкости 1.0 из корня папки audio
   static Future<void> playRage() async {
-    if (_isRageSoundPlaying) return; 
+    if (_isRageSoundPlaying) return; // Защита от наложения
     
     _isRageSoundPlaying = true;
     try {
       _ragePlayer = AudioPlayer();
-      
-      await _ragePlayer!.setAudioContext(AudioContext(
-        android: const AndroidAudioContext(
-          isSpeakerphoneOn: true,
-          contentType: AndroidContentType.sonification,
-          usageType: AndroidUsageType.game,
-        ),
-        iOS: const AVAudioContext(),
-      ));
-      
-      await _ragePlayer!.setVolume(1.0);
-      await _ragePlayer!.play(AssetSource('bunnyhop_rage.mp3'));
+      await _ragePlayer!.setVolume(1.0); // Выкручиваем громкость ярости на 100%
+      await _ragePlayer!.play(AssetSource('bunnyhop_rage.mp3')); // Чистый путь без папки sounds/
     } catch (e) {
-      print("КРИТИЧЕСКАЯ ОШИБКА ГУЛА ВИАГРЫ: $e");
+      print("Ошибка звука ярости: $e");
     }
 
+    // Автоматический сброс замка через 2.5 секунды, если птица выжила
     Future.delayed(const Duration(milliseconds: 2500), () {
       _isRageSoundPlaying = false;
       _ragePlayer = null;
     });
   }
+
 
   static Future<void> stopRage() async {
     if (_ragePlayer != null) {
@@ -72,31 +64,17 @@ class AudioManager {
     hasMissToken = true;
   }
 
-  // 1. ИСПРАВЛЕНО: ЗВУК ШЛЕПКА ШЛЯПЫ С ПОЛНОЙ КЭШ-ПОДГОТОВКОЙ И ГРОМКОСТЬЮ
+    // ИСПРАВЛЕНО: Звук шлепка шляпы шерифа на максимальной громкости 1.0 из корня папки audio
   static Future<void> playHatSplat() async {
     try {
-      await _fxPlayer.stop(); // Глушим прошлый звук, если он завис
-      
-      // Настраиваем режим аудио-контекста для Андроида (чтобы звук шел через динамик игры, а не уведомлений)
-      await _fxPlayer.setAudioContext(AudioContext(
-        android: const AndroidAudioContext(
-          isSpeakerphoneOn: true,
-          stayAwake: true,
-          contentType: AndroidContentType.sonification,
-          usageType: AndroidUsageType.game,
-        ),
-        iOS: const AVAudioContext(),
-      ));
-      
-      await _fxPlayer.setVolume(1.0); // 100% громкости
-      
-      // Запускаем чистый источник. Убедись, что файл на Гитхабе назван именно маленькими буквами!
-      await _fxPlayer.play(AssetSource('hat_splat.mp3'));
-    } catch (e, stackTrace) {
-      print("КРИТИЧЕСКАЯ ОШИБКА ШЛЕПКА ШЛЯПЫ: $e");
-      print(stackTrace);
+      await _fxPlayer.stop(); // Глушим прошлый звук, если он наложился
+      await _fxPlayer.setVolume(1.0); // Выкручиваем громкость на 100%
+      await _fxPlayer.play(AssetSource('hat_splat.mp3')); // Чистый путь без папки sounds/
+    } catch (e) {
+      print("Ошибка воспроизведения звука шлепка шляпы: $e");
     }
   }
+
 
 
   // 1. ЗВУК НАТЯЖЕНИЯ РОГАТКИ
