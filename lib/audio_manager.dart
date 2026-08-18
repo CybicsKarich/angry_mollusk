@@ -21,44 +21,42 @@ class AudioManager {
     resetTokensForNextBird(); // Заряжаем жетоны при старте
   }
 
-  // ИСПРАВЛЕНО: Сохраняем ссылку на плеер ярости, чтобы им можно было управлять!
+    // ИСПРАВЛЕНО: Свойства плеера ярости сохранены в исходном виде
   static AudioPlayer? _ragePlayer;
   static bool _isRageSoundPlaying = false;
 
-  // Возвращаем статус аудио-замка, чтобы другие методы могли его считывать
   static bool get isRageSoundPlaying => _isRageSoundPlaying;
 
+  // ИСПРАВЛЕНО: Путь изменён на чистый корень папки audio!
   static Future<void> playRage() async {
-    if (_isRageSoundPlaying) return; // Защита от наложения
+    if (_isRageSoundPlaying) return; 
     
     _isRageSoundPlaying = true;
     try {
-      // ИСПРАВЛЕНО: Создаем плеер и сохраняем его в переменную
       _ragePlayer = AudioPlayer();
-      await _ragePlayer!.play(AssetSource('sounds/bunnyhop_rage.mp3'));
+      await _ragePlayer!.play(AssetSource('bunnyhop_rage.mp3'));
     } catch (e) {
       print("Ошибка звука ярости: $e");
     }
 
-    // Автоматический сброс замка через 2.5 секунды, если птица выжила
     Future.delayed(const Duration(milliseconds: 2500), () {
       _isRageSoundPlaying = false;
       _ragePlayer = null;
     });
   }
 
-  // ИСПРАВЛЕНО: Новый метод мгновенной остановки гула при смерти Вани Баннихопа!
   static Future<void> stopRage() async {
     if (_ragePlayer != null) {
       try {
-        await _ragePlayer!.stop(); // Выключаем звук намертво!
+        await _ragePlayer!.stop(); 
       } catch (e) {
         print("Ошибка остановки звука ярости: $e");
       }
       _ragePlayer = null;
     }
-    _isRageSoundPlaying = false; // Мгновенно открываем аудио-замок для других эффектов
+    _isRageSoundPlaying = false; 
   }
+
     
   // МЕТОД ОБНУЛЕНИЯ: Вызывается, когда на рогатку встает НОВАЯ птица
   static void resetTokensForNextBird() {
@@ -68,14 +66,15 @@ class AudioManager {
     hasMissToken = true;
   }
 
-    // ИСПРАВЛЕНО: Звук сочного мультяшного шлепка шляпы шерифа о стекло экрана!
+    // ИСПРАВЛЕНО: Звук шлепка шляпы шерифа (Путь изменён на чистый корень папки audio!)
   static Future<void> playHatSplat() async {
     try {
-      await AudioPlayer().play(AssetSource('sounds/hat_splat.mp3'));
+      await AudioPlayer().play(AssetSource('hat_splat.mp3'));
     } catch (e) {
       print("Ошибка воспроизведения звука шлепка шляпы: $e");
     }
   }
+
 
   // 1. ЗВУК НАТЯЖЕНИЯ РОГАТКИ
   static void playStretch() async {
@@ -107,7 +106,6 @@ class AudioManager {
 
   // 3. ПОПАДАНИЕ ПО СВИНЬЕ (Строго 1 раз за полет птицы)
   static void playPigHit() {
-    if (_isRageSoundPlaying) return;
     if (_isRageSoundPlaying) return;
     if (!hasPigHitToken) return; // Жетон сгорел — приглушаем все следующие повторы!
     hasPigHitToken = false; 
@@ -217,11 +215,10 @@ class AudioManager {
     }
   } // <--- ЗАКРЫВАЕТ МЕТОД stopAllLevelSounds
 
-static Future<void> playAchievement() async {
+  // ИСПРАВЛЕНО: Путь к звуку ачивки изменён на чистый корень папки audio!
+  static Future<void> playAchievement() async {
     try {
-      // Запускаем из папки sounds. Если у тебя используется AudioPlayer, 
-      // код сыграет его поверх фоновой музыки без прерывания уровня!
-      await AudioPlayer().play(AssetSource('sounds/achievement_unlocked.mp3'));
+      await AudioPlayer().play(AssetSource('achievement_unlocked.mp3'));
     } catch (e) {
       print("Ошибка воспроизведения звука ачивки: $e");
     }
