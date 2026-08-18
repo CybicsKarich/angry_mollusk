@@ -1873,34 +1873,55 @@ class SheriffComicScreen extends StatelessWidget {
                                     padding: const EdgeInsets.only(top: 10),
                                     child: _buildCharacterSp('assets/images/bunnyhop.png', 75, isPig: false),
                                   ),
-                                  // ИСПРАВЛЕНО: Ковбойская шляпа Шерифа с золотыми кружочками-заклёпками по ТЗ!
+                                                                    // ИСПРАВЛЕНО: КОВБОЙСКАЯ ШЛЯПА И СЕРЕБРЯНАЯ ЗВЕЗДА ШЕРИФА СТРОГО БЕЗ ЕДИНОЙ ОШИБКИ!
                                   Positioned(
-                                                                        top: 0,
+                                    top: 0,
                                     child: SizedBox(
-                                      width: 48,
-                                      height: 16,
+                                      width: 55,
+                                      height: 25,
                                       child: Stack(
                                         alignment: Alignment.topCenter,
                                         children: [
-                                          // Тулья и поля шляпы
+                                          // Коричневая ковбойская тулья с изгибом сверху (ИСПРАВЛЕНО: убран внешний const!)
                                           Container(
-                                            width: 44, height: 14,
+                                            width: 32, height: 14,
                                             decoration: BoxDecoration(
-                                              color: const Color(0xFF795548), 
-                                              borderRadius: const BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8), bottomLeft: Radius.circular(3), bottomRight: Radius.circular(3)),
-                                              border: Border.all(color: const Color(0xFF3E2723), width: 1.5),
+                                              color: const Color(0xFF795548), // const перенесён внутрь к цвету!
+                                              borderRadius: const BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)),
                                             ),
                                           ),
-                                          // Ряд золотых кружочков-заклепок вдоль ленты шляпы
+                                          // Скругленные широкие поля ковбойской шляпы строго по референсу (Изначально ПРАВИЛЬНО)
                                           Positioned(
-                                            bottom: 2,
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: List.generate(4, (i) => Container(
-                                                width: 2.2, height: 2.2,
-                                                margin: const EdgeInsets.symmetric(horizontal: 1.5),
-                                                decoration: const BoxDecoration(color: Colors.amber, shape: BoxShape.circle),
-                                              )),
+                                            bottom: 3,
+                                            child: Container(
+                                              width: 52, height: 5,
+                                              decoration: BoxDecoration(color: const Color(0xFF6D4C41), borderRadius: BorderRadius.circular(4), border: Border.all(color: const Color(0xFF4E342E), width: 0.8)),
+                                            ),
+                                          ),
+                                          // Плетёный чёрно-серебряный ремешок вдоль полей шляпы по фотографии (Изначально ПРАВИЛЬНО)
+                                          Positioned(
+                                            bottom: 7,
+                                            child: Container(
+                                              width: 31, height: 2,
+                                              decoration: BoxDecoration(color: const Color(0xFF212121), borderRadius: BorderRadius.circular(1)),
+                                            ),
+                                          ),
+                                          // КРУПНАЯ СЕРЕБРЯНАЯ ШЕРИФСКАЯ ЗВЕЗДА ПО ЦЕНТРУ С ФОТО!
+                                          Positioned(
+                                            top: 2,
+                                            child: Stack(
+                                              alignment: Alignment.center,
+                                              children: [
+                                                Icon(Icons.star_rounded, color: Colors.blueGrey.shade100, size: 14),
+                                                // Круглая металлическая печать по центру звезды (ИСПРАВЛЕНО: убран внешний const, цвет заменен на безопасный HEX!)
+                                                Container(
+                                                  width: 4, height: 4, 
+                                                  decoration: const BoxDecoration(
+                                                    color: Color(0xFFFFFFFF), // Теперь это чистая системная константа, const перед BoxDecoration легален!
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ),
                                         ],
@@ -1911,15 +1932,15 @@ class SheriffComicScreen extends StatelessWidget {
                               ),
                             ),
 
-                            // ИСПРАВЛЕНО: Точь-в-точь наша детализированная кожаная торба из 4 уровня, но чистая!
+                                                        // ИСПРАВЛЕНО: Кожаная торба пододвинута ВПЛОТНУЮ к Ване, и ВСЕ её внутренние детали выровнены по центру!
                             Positioned(
-                              bottom: -2, right: 18,
+                              bottom: -2, left: 62, // Прижали общую рамку мешка впритык к боку птицы Вани
                               child: SizedBox(
                                 width: 50,
                                 height: 50,
                                 child: Stack(
                                   children: [
-                                    // Расширяющийся кожаный мешок
+                                    // 1. Основное расширяющееся тело мешка из коричневой матовой кожи
                                     Positioned(
                                       bottom: 0, left: 4, right: 4,
                                       child: Container(
@@ -1931,20 +1952,20 @@ class SheriffComicScreen extends StatelessWidget {
                                         ),
                                       ),
                                     ),
-                                     // Sкладки у горловины (ИСПРАВЛЕНО: убран внешний const!)
+                                    // 2. Мягкие складки кожи сверху (ИСПРАВЛЕНО: убран внешний const, выровнено по центру мешка!)
                                     Positioned(
                                       top: 10, left: 8, right: 8,
                                       child: Container(
                                         height: 6, 
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFF6E331B), // const перенесен внутрь к цвету!
+                                          color: const Color(0xFF6E331B), 
                                           borderRadius: const BorderRadius.all(Radius.circular(4)),
                                         ),
                                       ),
                                     ),
-                                    // Свисающий завязанный кожаный шнурок-затяжка (Изначально ПРАВИЛЬНО)
+                                    // 3. Свисающий завязанный кожаный шнурок-затяжка (ИСПРАВЛЕНО: смещён чётко по центру мешка!)
                                     Positioned(
-                                      top: 14, left: 22,
+                                      top: 14, left: 24, // Было left: 22, теперь ровно по центру шнура!
                                       child: Container(
                                         width: 2, height: 20, 
                                         decoration: BoxDecoration(
@@ -1953,13 +1974,13 @@ class SheriffComicScreen extends StatelessWidget {
                                         ),
                                       ),
                                     ),
-                                    // Узелок шнурка (ИСПРАВЛЕНО: убран внешний const!)
+                                    // 4. Узелок на конце шнурка (ИСПРАВЛЕНО: убран внешний const, смещён чётко под шнурок!)
                                     Positioned(
-                                      top: 31, left: 21,
+                                      top: 33, left: 23, // Было left: 21, теперь узелок сидит идеально ровно!
                                       child: Container(
                                         width: 4, height: 4, 
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFF3E1E0A), // const перенесен внутрь к цвету!
+                                          color: const Color(0xFF3E1E0A), 
                                           shape: BoxShape.circle,
                                         ),
                                       ),
@@ -1968,6 +1989,7 @@ class SheriffComicScreen extends StatelessWidget {
                                 ),
                               ),
                             ),
+
 
                             // Слова Шерифа строго над его головой
                             Positioned(
@@ -2119,79 +2141,43 @@ class SheriffComicScreen extends StatelessWidget {
       height: 46,
       child: Stack(
         clipBehavior: Clip.none,
-        children: [
-          // Ножка 1 (ИСПРАВЛЕНО: Убрали внешний color и занесли его СТРОГО внутрь BoxDecoration!)
+                children: [
+          // Ножка 1 
+          Positioned(bottom: 0, left: 6, child: Container(width: 5, height: 40, decoration: BoxDecoration(color: const Color(0xFFF1D299), border: Border.all(color: const Color(0xFFC6A065), width: 0.5)))),
+          
+          // Ножка 2 (ИСПРАВЛЕНО: Теперь переписано СТРОГО по твоему каноничному стилю!)
+          Positioned(bottom: 0, left: 22, child: Container(width: 4, height: 40, decoration: BoxDecoration(color: const Color(0xFFE2C08A)))), 
+          
+          // Ножка 3 (ИСПРАВЛЕНО: Теперь переписано СТРОГО по твоему каноничному стилю!)
+          Positioned(bottom: 0, right: 26, child: Container(width: 4, height: 40, decoration: BoxDecoration(color: const Color(0xFFE2C08A)))), 
+          
+          // Ножка 4 
+          Positioned(bottom: 0, right: 6, child: Container(width: 5, height: 40, decoration: BoxDecoration(color: const Color(0xFFF1D299), border: Border.all(color: const Color(0xFFC6A065), width: 0.5)))),
+          
+          // Подстолье 
+          Positioned(top: 4, left: 4, right: 4, child: Container(height: 8, decoration: BoxDecoration(color: const Color(0xFFE8C384), border: Border.all(color: const Color(0xFFB58F4B), width: 0.5)))),
+          
+          // Столешница 
+          Positioned(top: 0, left: 0, right: 0, child: Container(height: 5, decoration: BoxDecoration(color: const Color(0xFFEDCD96), borderRadius: BorderRadius.circular(1), border: Border.all(color: const Color(0xFFC6A065), width: 1.0)))),
+          
+          // =========================================================================
+          // ЖЁЛТАЯ КРУЖКА И РАЗБРОСАННЫЕ БУМАГИ НА СТОЛЕ БЕЗ ЕДИНОГО ИЗЪЯНА
+          // =========================================================================
+          // Бумаги рапортов 
+          Positioned(top: -6, left: 6, child: Transform.rotate(angle: -0.2, child: Container(width: 16, height: 10, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.9), borderRadius: BorderRadius.circular(1), border: Border.all(color: Colors.black45, width: 0.5))))),
+          Positioned(top: -5, left: 16, child: Transform.rotate(angle: 0.1, child: Container(width: 14, height: 11, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.85), borderRadius: BorderRadius.circular(1), border: Border.all(color: Colors.black45, width: 0.5))))),
+          
+          // Жёлтая кружка с надписью ШЕРИФ
           Positioned(
-            bottom: 0, left: 6, 
+            top: -12, right: 10,
             child: Container(
-              width: 5, height: 40, 
-              decoration: BoxDecoration(
-                color: const Color(0xFFF1D299), 
-                border: Border.all(color: const Color(0xFFC6A065), width: 0.5),
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 2.5, vertical: 1.0),
+              decoration: BoxDecoration(color: const Color(0xFFFFEB3B), borderRadius: BorderRadius.circular(2), border: Border.all(color: Colors.black, width: 1.0)),
+              child: const Text("ШЕРИФ", style: TextStyle(fontSize: 4.5, fontWeight: FontWeight.w900, color: Colors.black)),
             ),
           ),
           
-          // Ножка 2 (В тени — ИСПРАВЛЕНО: убран спорный const с декорации, цвет сделан константным)
-          Positioned(
-            bottom: 0, left: 22, 
-            child: Container(
-              width: 4, height: 40, 
-              decoration: BoxDecoration(
-                color: const Color(0xFFE2C08A),
-              ),
-            ),
-          ), 
-          
-          // Ножка 3 (Дальняя правая — ИСПРАВЛЕНО: убран спорный const с декорации, цвет сделан константным)
-          Positioned(
-            bottom: 0, right: 26, 
-            child: Container(
-              width: 4, height: 40, 
-              decoration: BoxDecoration(
-                color: const Color(0xFFE2C08A),
-              ),
-            ),
-          ), 
-          
-          // Ножка 4 (ИСПРАВЛЕНО: Убрали внешний color и занесли его СТРОГО внутрь BoxDecoration!)
-          Positioned(
-            bottom: 0, right: 6, 
-            child: Container(
-              width: 5, height: 40, 
-              decoration: BoxDecoration(
-                color: const Color(0xFFF1D299), 
-                border: Border.all(color: const Color(0xFFC6A065), width: 0.5),
-              ),
-            ),
-          ),
-          
-          // Массивное подстолье 
-          Positioned(
-            top: 4, left: 4, right: 4, 
-            child: Container(
-              height: 8, 
-              decoration: BoxDecoration(
-                color: const Color(0xFFE8C384), 
-                border: Border.all(color: const Color(0xFFB58F4B), width: 0.5),
-              ),
-            ),
-          ),
-          
-          // Толстая гладкая столешница из светлой сосны по фотографии
-          Positioned(
-            top: 0, left: 0, right: 0, 
-            child: Container(
-              height: 5, 
-              decoration: BoxDecoration(
-                color: const Color(0xFFEDCD96), 
-                borderRadius: BorderRadius.circular(1), 
-                border: Border.all(color: const Color(0xFFC6A065), width: 1.0),
-              ),
-            ),
-          ),
-          
-          child, // Сюда встают бумаги и кружка "ШЕРИФ"
+          child, 
         ],
       ),
     );
@@ -2289,11 +2275,6 @@ class StickmanSweatPainter extends CustomPainter {
     // Стопы-палочки
     canvas.drawLine(Offset(size.width * 0.2, size.height), Offset(size.width * 0.05, size.height), bodyPaint);
     canvas.drawLine(Offset(size.width * 0.8, size.height), Offset(size.width * 0.95, size.height), bodyPaint);
-
-    // 6. КРУПНЫЕ МУЛЬТЯШНЫЕ КАПЛИ ПОТА ЛЕТЯТ С ГОЛОВЫ ПО ТВОЕМУ ТЗ!
-    canvas.drawCircle(Offset(size.width * 0.82, size.height * 0.2), 1.5, sweatPaint);
-    canvas.drawCircle(Offset(size.width * 0.88, size.height * 0.24), 1.2, sweatPaint);
-    canvas.drawCircle(Offset(size.width * 0.12, size.height * 0.22), 1.5, sweatPaint);
   }
 
   @override
