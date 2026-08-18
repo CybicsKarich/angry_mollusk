@@ -1286,9 +1286,9 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     }
 
         // =========================================================================
-    // ИСПРАВЛЕНО: ИНТЕРАКТИВНЫЙ ПОЛЁТ ШЛЯПЫ ШЕРИФА ПРЯМО В ЭКРАН ИГРОКА (1 УРОВЕНЬ)
+    // ИСПРАВЛЕНО: КРУТОЙ 3D-ВЫЛЕТ ШЛЯПЫ ШЕРИФА СКВОЗЬ ЭКРАН В ЛИЦО ИГРОКУ! (1 УРОВЕНЬ)
     // =========================================================================
-    if (currentLevel == 1 && hatAnimTimer < 3.2) {
+    if (currentLevel == 1 && hatAnimTimer < 2.2) {
       canvas.save();
 
       double scale = 1.0;
@@ -1297,51 +1297,48 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       double rotation = 0.0;
       double opacity = 1.0;
 
-      if (hatAnimTimer <= 1.2) {
-        // ФАЗА 1: Шляпа стремительно вылетает из глубины рогатки (летит 1.2 секунды)
-        double progress = hatAnimTimer / 1.2;
-        // Масштаб увеличивается от микроскопического (0.05) до гигантского (3.5), создавая эффект полёта в лицо!
-        scale = 0.05 + (3.45 * progress);
-        // Шляпа летит по плавной дуге от рогатки (левая часть) в центр экрана
+      if (hatAnimTimer <= 1.0) {
+        // ФАЗА 1: Шляпа стремительно летит из глубины рогатки к центру стекла экрана
+        double progress = hatAnimTimer / 1.0;
+        scale = 0.1 + (3.4 * progress); // Увеличивается до нормального размера
         offsetX = (0.15 * size.width) + ((0.5 * size.width) - (0.15 * size.width)) * progress;
         offsetY = (0.65 * size.height) - ((0.65 * size.height) - (0.5 * size.height)) * progress;
-        // Шляпа бешено крутится в полёте
-        rotation = progress * pi * 4;
-      } else if (hatAnimTimer > 1.2 && hatAnimTimer <= 2.2) {
-        // ФАЗА 2: Шляпа со смачным звуком прилепилась ровно по центру экрана и висит 1 секунду
-        scale = 3.5;
+        rotation = progress * pi * 3; // Крутится в полёте
+      } else if (hatAnimTimer > 1.0 && hatAnimTimer <= 1.4) {
+        // ФАЗА 2: Шляпа с сочным звуком ПРИЛИПАЕТ К СТЕКЛУ изнутри экрана!
+        double progress = (hatAnimTimer - 1.0) / 0.4;
+        scale = 3.5 + (1.5 * progress); // Слегка пружинит на стекле
         offsetX = size.width * 0.5;
         offsetY = size.height * 0.5;
-        rotation = 0.0; // Вращение остановилось
+        rotation = 0.0;
 
-        // БРОНЕБОЙНЫЙ ТРИГГЕР ЗВУКА: Бахает ровно в момент соприкосновения со стеклом на 1.2 сек!
         if (!isHatSplatSoundPlayed) {
           isHatSplatSoundPlayed = true;
-          AudioManager.playHatSplat();
+          AudioManager.playHatSplat(); // Железно бахает шлепок о стекло!
         }
-      } else if (hatAnimTimer > 2.2 && hatAnimTimer <= 3.2) {
-        // ФАЗА 3: Шляпа под силой гравитации забавно скатывается по стеклу вниз и исчезает (1 секунда)
-        double slideProgress = (hatAnimTimer - 2.2) / 1.0;
-        scale = 3.5;
+      } else if (hatAnimTimer > 1.4 && hatAnimTimer <= 2.2) {
+        // ФАЗА 3: Шляпа вылетает ИЗ ЭКРАНА прямо в лицо игроку (пролетая сквозь четвертую стену!)
+        double progress = (hatAnimTimer - 1.4) / 0.8;
+        // Масштаб раздувается до гигантских 22.0 масштабов, пролетая мимо глаз!
+        scale = 5.0 + (17.0 * progress); 
         offsetX = size.width * 0.5;
-        // Координата Y уползает далеко за нижний край экрана телефона
-        offsetY = (size.height * 0.5) + (size.height * 0.6 * slideProgress);
-        rotation = sin(slideProgress * pi * 2) * 0.15; // лёгкое покачивание при сползании
-        opacity = (1.0 - slideProgress).clamp(0.0, 1.0); // плавно тает в самом конце
+        offsetY = size.height * 0.5;
+        rotation = sin(progress * pi) * 0.1; // Легкое покачивание перед лицом
+        opacity = (1.0 - progress).clamp(0.0, 1.0); // Полностью растворяется в воздухе, улетая сквозь экран
       }
 
-      // Смещаем холст в точку анимации шляпы шерифа
+      // Смещаем холст в точку 3D-анимации шляпы
       canvas.translate(offsetX, offsetY);
       canvas.scale(scale);
       canvas.rotate(rotation);
 
-      // Рисуем ковбойскую шляпу шерифа стороной со звездой (один в один как в комиксе, но без ошибок color!)
+      // Рисуем ковбойскую шляпу шерифа стороной со звездой
       final hatPaint = Paint()..color = const Color(0xFF795548).withValues(alpha: opacity);
       final brimPaint = Paint()..color = const Color(0xFF6D4C41).withValues(alpha: opacity);
       final strapPaint = Paint()..color = const Color(0xFF212121).withValues(alpha: opacity);
-      final borderPaint = Paint()..color = Colors.black.withValues(alpha: opacity)..style = PaintingStyle.stroke..strokeWidth = 0.6;
+      final borderPaint = Paint()..color = Colors.black.withValues(alpha: opacity)..style = PaintingStyle.stroke..strokeWidth = 0.5;
 
-      // 1. Коричневая ковбойская тулья
+      // 1. Ковбойская тулья
       final hatRect = Rect.fromLTWH(-8, -12, 16, 11);
       canvas.drawRRect(RRect.fromRectAndRadius(hatRect, const Radius.circular(3)), hatPaint);
       canvas.drawRRect(RRect.fromRectAndRadius(hatRect, const Radius.circular(3)), borderPaint);
@@ -1355,7 +1352,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       final strapRect = Rect.fromLTWH(-7.5, -3.5, 15, 1.2);
       canvas.drawRect(strapRect, strapPaint);
 
-      // 4. СЕРЕБРЯНАЯ ЗВЕЗДА ШЕРИФА С ЗАКЛЁПКАМИ ПО ЦЕНТРУ ТУЛЬИ С КАРТИНКИ
+      // 4. Серебряная звезда шерифа по центру тульи
       final starPaint = Paint()..color = Colors.blueGrey.shade100.withValues(alpha: opacity);
       final starPath = Path()
         ..moveTo(0, -11)
@@ -1372,12 +1369,13 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       canvas.drawPath(starPath, starPaint);
       canvas.drawPath(starPath, borderPaint);
       
-      // Круглая металлическая печать-заклёпка по центру шерифской звезды
-      final centerPaint = Paint()..color = Colors.white.withValues(alpha: opacity);
+      // Металлическая печать-заклёпка по центру шерифской звезды
+      final centerPaint = Paint()..color = const Color(0xFFFFFFFF).withValues(alpha: opacity);
       canvas.drawCircle(const Offset(0, -7), 1.0, centerPaint);
 
       canvas.restore();
     }
+
 
     canvas.restore();
     }
