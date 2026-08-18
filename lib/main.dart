@@ -2037,23 +2037,79 @@ class SheriffComicScreen extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // 4 прочные ножки стола с фото
-          Positioned(bottom: 0, left: 6, child: Container(width: 5, height: 40, decoration: BoxDecoration(color: const Color(0xFFF1D299), border: Border.all(color: const Color(0xFFC6A065), width: 0.5)))),
-          Positioned(bottom: 0, left: 22, child: Container(width: 4, height: 40, decoration: const BoxDecoration(color: Color(0xFFE2C08A)))), // ИСПРАВЛЕНО: Занесли цвет внутрь BoxDecoration
-          Positioned(bottom: 0, right: 26, child: Container(width: 4, height: 40, decoration: const BoxDecoration(color: Color(0xFFE2C08A)))), // ИСПРАВЛЕНО: Занесли цвет внутрь BoxDecoration
-          Positioned(bottom: 0, right: 6, child: Container(width: 5, height: 40, decoration: BoxDecoration(color: const Color(0xFFF1D299), border: Border.all(color: const Color(0xFFC6A065), width: 0.5)))),
+          // Ножка 1 (ИСПРАВЛЕНО: Убрали внешний color и занесли его СТРОГО внутрь BoxDecoration!)
+          Positioned(
+            bottom: 0, left: 6, 
+            child: Container(
+              width: 5, height: 40, 
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1D299), 
+                border: Border.all(color: const Color(0xFFC6A065), width: 0.5),
+              ),
+            ),
+          ),
           
-          // Массивное подстолье (деревянный каркас под столешницей)
-          Positioned(top: 4, left: 4, right: 4, child: Container(height: 8, decoration: BoxDecoration(color: const Color(0xFFE8C384), border: Border.all(color: const Color(0xFFB58F4B), width: 0.5)))),
+          // Ножка 2 (В тени)
+          Positioned(
+            bottom: 0, left: 22, 
+            child: Container(
+              width: 4, height: 40, 
+              decoration: const BoxDecoration(color: Color(0xFFE2C08A)),
+            ),
+          ), 
+          
+          // Ножка 3 (Дальняя правая)
+          Positioned(
+            bottom: 0, right: 26, 
+            child: Container(
+              width: 4, height: 40, 
+              decoration: const BoxDecoration(color: Color(0xFFE2C08A)),
+            ),
+          ), 
+          
+          // Ножка 4 (ИСПРАВЛЕНО: Убрали внешний color и занесли его СТРОГО внутрь BoxDecoration!)
+          Positioned(
+            bottom: 0, right: 6, 
+            child: Container(
+              width: 5, height: 40, 
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1D299), 
+                border: Border.all(color: const Color(0xFFC6A065), width: 0.5),
+              ),
+            ),
+          ),
+          
+          // Массивное подстолье 
+          Positioned(
+            top: 4, left: 4, right: 4, 
+            child: Container(
+              height: 8, 
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8C384), 
+                border: Border.all(color: const Color(0xFFB58F4B), width: 0.5),
+              ),
+            ),
+          ),
           
           // Толстая гладкая столешница из светлой сосны по фотографии
-          Positioned(top: 0, left: 0, right: 0, child: Container(height: 5, decoration: BoxDecoration(color: const Color(0xFFEDCD96), borderRadius: BorderRadius.circular(1), border: Border.all(color: const Color(0xFFC6A065), width: 1.0)))),
+          Positioned(
+            top: 0, left: 0, right: 0, 
+            child: Container(
+              height: 5, 
+              decoration: BoxDecoration(
+                color: const Color(0xFFEDCD96), 
+                borderRadius: BorderRadius.circular(1), 
+                border: Border.all(color: const Color(0xFFC6A065), width: 1.0),
+              ),
+            ),
+          ),
           
           child, // Сюда встают бумаги и кружка "ШЕРИФ"
         ],
       ),
     );
   }
+
 
 
   Widget _buildCharacterSp(String assetPath, double size, {required bool isPig}) {
