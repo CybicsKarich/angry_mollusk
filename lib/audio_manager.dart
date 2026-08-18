@@ -22,23 +22,27 @@ class AudioManager {
     resetTokensForNextBird(); // Заряжаем жетоны при старте
   }
 
-    // ИСПРАВЛЕНО: Свойства плеера ярости сохранены в исходном виде
-  static AudioPlayer? _ragePlayer;
-  static bool _isRageSoundPlaying = false;
-
-  static bool get isRageSoundPlaying => _isRageSoundPlaying;
-
-  // 2. ИСПРАВЛЕНО: ЗВУК РАЗЪЯРЕНИЯ БАННИХОПА НА МАКСИМАЛЬНОЙ ГРОМКОСТИ Х1.0!
+  // 2. ИСПРАВЛЕНО: ЗВУК ЯРОСТИ ВАНЯ-ПТИЦЫ
   static Future<void> playRage() async {
     if (_isRageSoundPlaying) return; 
     
     _isRageSoundPlaying = true;
     try {
       _ragePlayer = AudioPlayer();
-      await _ragePlayer!.setVolume(1.0); // Выкручиваем громкость ярости на максимум!
+      
+      await _ragePlayer!.setAudioContext(AudioContext(
+        android: const AndroidAudioContext(
+          isSpeakerphoneOn: true,
+          contentType: AndroidContentType.sonification,
+          usageType: AndroidUsageType.game,
+        ),
+        iOS: const AVAudioContext(),
+      ));
+      
+      await _ragePlayer!.setVolume(1.0);
       await _ragePlayer!.play(AssetSource('bunnyhop_rage.mp3'));
     } catch (e) {
-      print("Ошибка звука ярости: $e");
+      print("КРИТИЧЕСКАЯ ОШИБКА ГУЛА ВИАГРЫ: $e");
     }
 
     Future.delayed(const Duration(milliseconds: 2500), () {
@@ -68,14 +72,29 @@ class AudioManager {
     hasMissToken = true;
   }
 
-  // 1. ИСПРАВЛЕНО: ЗВУК ШЛЕПКА ШЛЯПЫ НА МАКСИМАЛЬНОЙ ГРОМКОСТИ Х1.0!
+  // 1. ИСПРАВЛЕНО: ЗВУК ШЛЕПКА ШЛЯПЫ С ПОЛНОЙ КЭШ-ПОДГОТОВКОЙ И ГРОМКОСТЬЮ
   static Future<void> playHatSplat() async {
     try {
-      await _fxPlayer.stop(); // Мгновенно глушим прошлый FX, если он играл
-      await _fxPlayer.setVolume(1.0); // Жестко выкручиваем громкость на 100%!
+      await _fxPlayer.stop(); // Глушим прошлый звук, если он завис
+      
+      // Настраиваем режим аудио-контекста для Андроида (чтобы звук шел через динамик игры, а не уведомлений)
+      await _fxPlayer.setAudioContext(AudioContext(
+        android: const AndroidAudioContext(
+          isSpeakerphoneOn: true,
+          stayAwake: true,
+          contentType: AndroidContentType.sonification,
+          usageType: AndroidUsageType.game,
+        ),
+        iOS: const AVAudioContext(),
+      ));
+      
+      await _fxPlayer.setVolume(1.0); // 100% громкости
+      
+      // Запускаем чистый источник. Убедись, что файл на Гитхабе назван именно маленькими буквами!
       await _fxPlayer.play(AssetSource('hat_splat.mp3'));
-    } catch (e) {
-      print("Ошибка воспроизведения звука шлепка шляпы: $e");
+    } catch (e, stackTrace) {
+      print("КРИТИЧЕСКАЯ ОШИБКА ШЛЕПКА ШЛЯПЫ: $e");
+      print(stackTrace);
     }
   }
 
@@ -219,14 +238,14 @@ class AudioManager {
     }
   } // <--- ЗАКРЫВАЕТ МЕТОД stopAllLevelSounds
 
-  // 3. ИСПРАВЛЕНО: ЗВУК АЧИВКИ НА МАКСИМАЛЬНОЙ ГРОМКОСТИ Х1.0!
+  // 3. ИСПРАВЛЕНО: ЗВУК АЧИВКИ МЕДАЛИ
   static Future<void> playAchievement() async {
     try {
       await _fxPlayer.stop();
-      await _fxPlayer.setVolume(1.0); // 100% громкости для фанфар!
+      await _fxPlayer.setVolume(1.0);
       await _fxPlayer.play(AssetSource('achievement_unlocked.mp3'));
     } catch (e) {
-      print("Ошибка воспроизведения звука ачивки: $e");
+      print("КРИТИЧЕСКАЯ ОШИБКА ФАНФАР МЕДАЛИ: $e");
     }
   }
 } // <--- ВОТ ЭТА ОДНА СКОБКА ТЕПЕРЬ САМАЯ ПОСЛЕДНЯЯ В ФАЙЛЕ! Она закрывает весь класс AudioManager.
