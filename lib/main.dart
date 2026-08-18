@@ -2271,16 +2271,16 @@ class ComicBubblePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-    Widget _buildSheriffCup() {
+  Widget _buildSheriffCup() {
     return SizedBox(
       width: 22,
       height: 18,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // 1. Большая круглая ручка кружки (ИСПРАВЛЕНО: Прижали впритык к корпусу, right: -3)
+          // 1. Большая круглая ручка кружки (ИСПРАВЛЕНО: Прижали плотно к правой границе, right: 0)
           Positioned(
-            top: 3, right: -3,
+            top: 3, right: 0,
             child: Container(
               width: 7, height: 11,
               decoration: BoxDecoration(
@@ -2290,9 +2290,9 @@ class ComicBubblePainter extends CustomPainter {
               ),
             ),
           ),
-          // Внутреннее отверстие ручки (ИСПРАВЛЕНО: Сдвинули пропорционально, right: -2)
+          // Внутреннее отверстие ручки (ИСПРАВЛЕНО: Сдвинули влево, right: 1)
           Positioned(
-            top: 5, right: -2,
+            top: 5, right: 1,
             child: Container(
               width: 3, height: 7,
               decoration: const BoxDecoration(
@@ -2328,6 +2328,7 @@ class ComicBubblePainter extends CustomPainter {
       ),
     );
   }
+
 
 
 
