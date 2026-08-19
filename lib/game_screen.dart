@@ -134,32 +134,49 @@ class GameScreen extends StatelessWidget {
                               decoration: const BoxDecoration(color: Color(0xFF4CAF50), shape: BoxShape.circle),
                               child: RawMaterialButton(
                                 shape: const CircleBorder(),
-                                onPressed: () {
-                                  game.overlays.remove('VictoryMenu');
-                                  
-                                                                 // ИСПРАВЛЕНО: Умный переход с 3-го уровня на 4-й через комикс!
-                                  if (game.currentLevel == 3) {
-                                    // 1. Закрываем текущий экран боя
-                                    Navigator.pop(context); 
-                                    // 2. Мгновенно открываем экран нашего сюжетного комикса
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(builder: (context) => ComicIntroScreen()),
-                                    );
-                                  } else if (game.currentLevel < 3) {
-                                    // Для 1 и 2 уровней оставляем обычный переход на следующий уровень
-                                    game.currentLevel = game.currentLevel + 1;
-                                  }
+                               // ЗАМЕНИТЬ ДЕЙСТВИЕ onPressed УМНОЙ СТРЕЛКИ СПРАВА НА ЭТОТ БЛОК:
+                              onPressed: () {
+                              // 1. ПЕРВЫМ ДЕЛОМ СЧИТАЕМ ЗВЁЗДЫ ЗА ТОЛЬКО ЧТО ПРОЙДЕННЫЙ БОЙ
+                              int currentRoundStars = 0;
+                              if (AngryMolluskGame.score >= game.targetScore3Stars) {
+                              currentRoundStars = 3;
+                              } else if (AngryMolluskGame.score >= game.targetScore2Stars) {
+                              currentRoundStars = 2;
+                              } else if (AngryMolluskGame.score >= game.targetScore1Star) {
+                                currentRoundStars = 1;
+                                }
 
+  // 2. ХАРДКОРНАЯ ПРОВЕРКА: Если звёзд меньше 2 — стрелка блокируется!
+  if (currentRoundStars < 2) {
+    // Вместо перехода закрываем оверлей победы и перезапускаем этот же уровень, заставляя переигрывать!
+    game.overlays.remove('VictoryMenu');
+    AngryMolluskGame.score = 0; 
+    game.isVictorySequenceStarted = false;
+    game.levelCleared = false;
+    game.buildLevelStructures(); 
+    return; // Мертвая отсечка, код ниже не выполнится
+  }
 
-                                  
-                                  AngryMolluskGame.score = 0;
-                                  game.worldScrollX = 0.0; // Сбрасываем скролл камеры к рогатке
-                                  
-                                  game.isVictorySequenceStarted = false;
-                                  game.levelCleared = false;
-                                  game.buildLevelStructures(); // Строим замок следующего уровня
-                                },
+  // 3. ЕСЛИ ИГРОК КРАСАВЧИК (НАБРАЛ 2 ИЛИ 3 ЗВЕЗДЫ) — ПУСКАЕМ ДАЛЬШЕ
+  game.overlays.remove('VictoryMenu');
+  
+  if (game.currentLevel == 3) {
+    Navigator.pop(context); 
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ComicIntroScreen()),
+    );
+  } else if (game.currentLevel < 3) {
+    game.currentLevel = game.currentLevel + 1;
+  }
+  
+  AngryMolluskGame.score = 0;
+  game.worldScrollX = 0.0;
+  game.isVictorySequenceStarted = false;
+  game.levelCleared = false;
+  game.buildLevelStructures();
+},
+
                                 child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 32),
                               ),
                             ),
