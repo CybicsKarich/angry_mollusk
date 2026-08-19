@@ -538,36 +538,44 @@ Widget _buildLevelCard(String levelNumber, bool isActive) {
           border: Border.all(color: isActive ? const Color(0xFFE65100) : Colors.grey.shade600, width: 4), 
           boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 5))],
         ),
-        child: ElevatedButton(
-          onPressed: () {
-            if (!isActive) return; // ЖЕСТКАЯ БЛОКИРОВКА КЛИКА СРАЗУ
-            
-            if (levelNumber == '1') {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const SheriffComicScreen()));
-              return;
-            }
-            if (levelNumber == '4') {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const ComicIntroScreen()));
-              return;
-            }
-             
-            GameScreen gameScreenInstance = GameScreen();
-            int targetLevel = int.tryParse(levelNumber) ?? 1;
-            gameScreenInstance.gameInstance.currentLevel = targetLevel;
-            gameScreenInstance.gameInstance.worldScrollX = 0.0;
+        // ЗАМЕНИТЬ ElevatedButton ВНУТРИ _buildLevelCard НА ЭТОТ ВАРИАНТ С ФИКСИРОВАННЫМ ЦЕНТРИРОВАНИЕМ:
+ElevatedButton(
+  onPressed: () {
+    if (!isActive) return; // ЖЕСТКАЯ БЛОКИРОВКА КЛИКА СРАЗУ
+    
+    if (levelNumber == '1') {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const SheriffComicScreen()));
+      return;
+    }
+    if (levelNumber == '4') {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const ComicIntroScreen()));
+      return;
+    }
+     
+    GameScreen gameScreenInstance = GameScreen();
+    int targetLevel = int.tryParse(levelNumber) ?? 1;
+    gameScreenInstance.gameInstance.currentLevel = targetLevel;
+    gameScreenInstance.gameInstance.worldScrollX = 0.0;
 
-            Navigator.push(context, MaterialPageRoute(builder: (context) => gameScreenInstance));
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.transparent,
-            shadowColor: Colors.transparent,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-          ),
-          // Если заблокирован — вешаем иконку замка Lock, иначе пишем номер уровня
-          child: isActive 
-              ? Text(levelNumber, style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Color(0xFFE65100)))
-              : const Icon(Icons.lock_rounded, size: 38, color: Color(0xFF5D4037)),
+    Navigator.push(context, MaterialPageRoute(builder: (context) => gameScreenInstance));
+  },
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.transparent,
+    shadowColor: Colors.transparent,
+    // Сбрасываем внутренние отступы кнопки в ноль, чтобы замок встал ровно по центру контейнера
+    padding: EdgeInsets.zero, 
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+  ),
+  // Оборачиваем иконку в Center, чтобы она встала ровно, без перекосов вбок
+  child: isActive 
+      ? Text(
+          levelNumber, 
+          style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Color(0xFFE65100)),
+        )
+      : const Center(
+          child: Icon(Icons.lock_rounded, size: 38, color: Color(0xFF5D4037)),
         ),
+       ),
       ),
       const SizedBox(height: 8),
              
