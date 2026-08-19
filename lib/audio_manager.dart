@@ -39,7 +39,7 @@ class AudioManager {
     try {
       _ragePlayer = AudioPlayer();
       await _ragePlayer!.setVolume(1.0); // Выкручиваем громкость ярости на 100%
-      await _ragePlayer!.play(AssetSource('bunnyhop_rage.mp3')); // Чистый путь без папки sounds/
+      await _ragePlayer!.play(AssetSource('audio/bunnyhop_rage.mp3')); 
     } catch (e) {
       print("Ошибка звука ярости: $e");
     }
@@ -79,7 +79,7 @@ class AudioManager {
     try {
       await _fxPlayer.stop(); // Глушим прошлый звук, если он наложился
       await _fxPlayer.setVolume(1.0); // Выкручиваем громкость на 100%
-      await _fxPlayer.play(AssetSource('hat_splat.mp3')); // Чистый путь без папки sounds/
+      await _fxPlayer.play(AssetSource('audio/hat_splat.mp3')); 
     } catch (e) {
       print("Ошибка воспроизведения звука шлепка шляпы: $e");
     }
@@ -231,7 +231,7 @@ class AudioManager {
     try {
       await _fxPlayer.stop();
       await _fxPlayer.setVolume(1.0);
-      await _fxPlayer.play(AssetSource('achievement_unlocked.mp3'));
+      await _fxPlayer.play(AssetSource('audio/achievement_unlocked.mp3'));
     } catch (e) {
       print("КРИТИЧЕСКАЯ ОШИБКА ФАНФАР МЕДАЛИ: $e");
     }
