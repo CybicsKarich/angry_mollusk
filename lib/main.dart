@@ -435,7 +435,7 @@ SizedBox(
       prefs.getInt('level_4_stars') ?? 0,
     ]),
     builder: (context, snapshot) {
-      final stars = snapshot.data ??;
+      final stars = snapshot.data ?? [];
       
       // Условия хардкорного открытия уровней (минимум 2 звезды за прошлый)
       final bool isLvl2Open = stars[0] >= 2;
