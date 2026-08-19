@@ -424,43 +424,57 @@ class _LevelsScreenState extends State<LevelsScreen> {
                   
                   const Spacer(),
 
-                  // СВАЙП ПАНЕЛЬ С КАРТОЧКАМИ УРОВНЕЙ
-                  SizedBox(
-                    height: 150, 
-                    child: PageView(
-                      controller: _pageController,
-                      physics: const BouncingScrollPhysics(),
-                      onPageChanged: (index) {
-                        setState(() {
-                          _currentPage = index;
-                        });
-                      },
-                      children: [
-                        
-                        // СТРАНИЦА 1: УРОВНИ 1, 2, 3
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _buildLevelCard('1', true),
-                            const SizedBox(width: 24), 
-                            _buildLevelCard('2', true),
-                            const SizedBox(width: 24),
-                            _buildLevelCard('3', true),
-                          ],
-                        ),
+                  // ЗАМЕНИТЬ СТАРЫЙ SizedBox с PageView НА ЭТОТ КЛАССИЧЕСКИЙ БЛОК:
+SizedBox(
+  height: 150, 
+  child: FutureBuilder<List<int>>(
+    future: SharedPreferences.getInstance().then((prefs) => [
+      prefs.getInt('level_1_stars') ?? 0,
+      prefs.getInt('level_2_stars') ?? 0,
+      prefs.getInt('level_3_stars') ?? 0,
+      prefs.getInt('level_4_stars') ?? 0,
+    ]),
+    builder: (context, snapshot) {
+      final stars = snapshot.data ??;
+      
+      // Условия хардкорного открытия уровней (минимум 2 звезды за прошлый)
+      final bool isLvl2Open = stars[0] >= 2;
+      final bool isLvl3Open = stars[1] >= 2;
+      final bool isLvl4Open = stars[2] >= 2;
+      final bool isLvl5Open = stars[3] >= 2;
 
-                        // СТРАНИЦА 2: ИСПРАВЛЕНО! УРОВНИ 4 И 5 ОРАНЖЕВЫЕ СО ЗВЕЗДАМИ, НО ЗАБЛОКИРОВАННЫЕ
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _buildLevelCard('4', false), // false — пока выключает запуск физики
-                            const SizedBox(width: 30),
-                            _buildLevelCard('5', false), 
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
+      return PageView(
+        controller: _pageController,
+        physics: const BouncingScrollPhysics(),
+        onPageChanged: (index) => setState(() => _currentPage = index),
+        children: [
+          // СТРАНИЦА 1: УРОВНИ 1, 2, 3
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildLevelCard('1', true), // 1 уровень открыт всегда
+              const SizedBox(width: 24), 
+              _buildLevelCard('2', isLvl2Open),
+              const SizedBox(width: 24),
+              _buildLevelCard('3', isLvl3Open),
+            ],
+          ),
+
+          // СТРАНИЦА 2: УРОВНИ 4 И 5
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildLevelCard('4', isLvl4Open), 
+              const SizedBox(width: 30),
+              _buildLevelCard('5', isLvl5Open && false), // 5 уровень заблокирован намертво по ТЗ
+            ],
+          ),
+        ],
+      );
+    },
+  ),
+),
+
 
                   const Spacer(),
 
@@ -509,91 +523,73 @@ class _LevelsScreenState extends State<LevelsScreen> {
     );
   }
 
-  // УНИВЕРСАЛЬНЫЙ МЕТОД КАРТОЧЕК ДЛЯ ВСЕХ 5 УРОВНЕЙ
-  Widget _buildLevelCard(String levelNumber, bool isActive) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 85,
-          height: 85,
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFCC80), 
-            borderRadius: BorderRadius.circular(22), 
-            border: Border.all(color: const Color(0xFFE65100), width: 4), 
-            boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 5))],
-          ),
-          child: ElevatedButton(
-            onPressed: () {
-              
-              if (levelNumber == '1') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SheriffComicScreen()),
-                );
-                return;
-              }
-              // Если игрок нажал на 4 уровень — запускаем наш угарный сюжетный комикс!
-              if (levelNumber == '4') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ComicIntroScreen()),
-                );
-                return;
-              }
-               
-              if (!isActive) return; // 5 уровень пока заблокирован
-              
-              GameScreen gameScreenInstance = GameScreen();
-              int targetLevel = int.tryParse(levelNumber) ?? 1;
-              gameScreenInstance.gameInstance.currentLevel = targetLevel;
-              gameScreenInstance.gameInstance.worldScrollX = 0.0;
-
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => gameScreenInstance),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.transparent,
-              shadowColor: Colors.transparent,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-            ),
-            child: Text(
-              levelNumber,
-              style: const TextStyle(
-                fontSize: 36,
-                fontWeight: FontWeight.w900,
-                color: Color(0xFFE65100), 
-              ),
-            ),
-          ),
+  // ЗАМЕНИТЬ ТЕЛО МЕТОДА _buildLevelCard НА ЭТОТ ВАРИАНТ:
+Widget _buildLevelCard(String levelNumber, bool isActive) {
+  return Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Container(
+        width: 85,
+        height: 85,
+        decoration: BoxDecoration(
+          // Если заблокирован — красим в унылый серый цвет
+          color: isActive ? const Color(0xFFFFCC80) : Colors.grey.shade400, 
+          borderRadius: BorderRadius.circular(22), 
+          border: Border.all(color: isActive ? const Color(0xFFE65100) : Colors.grey.shade600, width: 4), 
+          boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 6, offset: Offset(0, 5))],
         ),
-        const SizedBox(height: 8),
-               
-        // Звёзды теперь честно горят под всеми 5 карточками!
-        FutureBuilder<int>(
-          future: SharedPreferences.getInstance().then((prefs) {
-            return prefs.getInt('level_${levelNumber}_stars') ?? 0;
-          }),
-          builder: (context, snapshot) {
-            final int savedStars = snapshot.data ?? 0;
+        child: ElevatedButton(
+          onPressed: () {
+            if (!isActive) return; // ЖЕСТКАЯ БЛОКИРОВКА КЛИКА СРАЗУ
+            
+            if (levelNumber == '1') {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const SheriffComicScreen()));
+              return;
+            }
+            if (levelNumber == '4') {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const ComicIntroScreen()));
+              return;
+            }
+             
+            GameScreen gameScreenInstance = GameScreen();
+            int targetLevel = int.tryParse(levelNumber) ?? 1;
+            gameScreenInstance.gameInstance.currentLevel = targetLevel;
+            gameScreenInstance.gameInstance.worldScrollX = 0.0;
 
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.star_rounded, size: 22, color: savedStars >= 1 ? const Color(0xFFFFD54F) : Colors.grey),
-                const SizedBox(width: 2),
-                Icon(Icons.star_rounded, size: 26, color: savedStars >= 2 ? const Color(0xFFFFD54F) : Colors.grey), 
-                const SizedBox(width: 2),
-                Icon(Icons.star_rounded, size: 22, color: savedStars >= 3 ? const Color(0xFFFFD54F) : Colors.grey),
-              ],
-            );
+            Navigator.push(context, MaterialPageRoute(builder: (context) => gameScreenInstance));
           },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          ),
+          // Если заблокирован — вешаем иконку замка Lock, иначе пишем номер уровня
+          child: isActive 
+              ? Text(levelNumber, style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Color(0xFFE65100)))
+              : const Icon(Icons.lock_rounded, size: 38, color: Color(0xFF5D4037)),
         ),
-      ],
-    );
-  }
+      ),
+      const SizedBox(height: 8),
+             
+      FutureBuilder<int>(
+        future: SharedPreferences.getInstance().then((prefs) => prefs.getInt('level_${levelNumber}_stars') ?? 0),
+        builder: (context, snapshot) {
+          final int savedStars = snapshot.data ?? 0;
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.star_rounded, size: 22, color: savedStars >= 1 ? const Color(0xFFFFD54F) : Colors.grey),
+              const SizedBox(width: 2),
+              Icon(Icons.star_rounded, size: 26, color: savedStars >= 2 ? const Color(0xFFFFD54F) : Colors.grey), 
+              const SizedBox(width: 2),
+              Icon(Icons.star_rounded, size: 22, color: savedStars >= 3 ? const Color(0xFFFFD54F) : Colors.grey),
+            ],
+          );
+        },
+      ),
+    ],
+  );
+}
 }
 
 // 1. ОБНОВЛЕННЫЙ ЭКРАН "ДОПОЛНИТЕЛЬНО" С ФИРМЕННОЙ ПОДПИСЬЮ ivandrop
