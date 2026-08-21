@@ -2381,7 +2381,7 @@ class WantedPosterPainter {
     // Сумма 1,000,000$
     final cashPainter = TextPainter(
       text: const TextSpan(
-        text: '1, 000, 000$',
+        text: '1, 000, 000\$',
         style: TextStyle(fontFamily: 'serif', fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF1A0A0A)),
       ),
       textDirection: TextDirection.ltr,
