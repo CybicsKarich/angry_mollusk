@@ -2461,11 +2461,11 @@ class WantedPosterPainter {
       }
     }
 
-    // Рассыпаем пулевые ранения по плакату ровно по твоему референсу
-    drawRealBulletHole(rect.left + 25, rect.top + h * 0.25);
-    drawRealBulletHole(rect.left + 18, rect.top + h * 0.65);
-    drawRealBulletHole(rect.right - 28, rect.top + 65);
-    drawRealBulletHole(rect.right - 20, rect.top + h * 0.8);
+    // ЗАМЕНИТЬ НА ЭТОТ КОРРЕКТНЫЙ ВАРИАНТ БЕЗ ПЕРЕМЕННОЙ RECT:
+drawRealBulletHole(-w / 2 + 25, -h / 2 + h * 0.25);
+drawRealBulletHole(-w / 2 + 18, -h / 2 + h * 0.65);
+drawRealBulletHole(w / 2 - 28, -h / 2 + 65);
+drawRealBulletHole(w / 2 - 20, -h / 2 + h * 0.8);
   }
 }
 
