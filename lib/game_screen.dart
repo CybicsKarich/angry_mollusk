@@ -397,6 +397,13 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   // ИСПРАВЛЕНО: Переменные для интерактивной анимации шляпы шерифа на 1 уровне!
   double hatAnimTimer = 0.0;     // Общий таймер анимации полёта и сползания
   bool isHatSplatSoundPlayed = false; // Флаг, чтобы звук шлепка бахнул ровно один раз
+  bool hasWantedPoster = false;       // Сгенерировался ли плакат на уровне
+  bool showWantedBig = false;         // Показывается ли большой плакат на весь экран
+  double wantedPosterX = 0.0;         // Относительная X координата маленькой бумажки
+  double wantedPosterY = 0.0;         // Относительная Y координата маленькой бумажки
+  double wantedAnimTimer = 0.0;       // Таймер анимации вылета и удержания
+  int wantedAttachedBlockIndex = -1;  // Индекс балки, к которой приклеен плакат
+
 
  
     int currentLevel = 1;
@@ -640,6 +647,33 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       pigs.add(MolluskMaksim(bx2 + 0.12, 0.53 - 0.019));  
     }
     
+    // ДОБАВИТЬ В САМЫЙ КОНЕЦ МЕТОДА buildLevelStructures():
+hasWantedPoster = false;
+showWantedBig = false;
+wantedAnimTimer = 0.0;
+wantedAttachedBlockIndex = -1;
+
+if (currentLevel == 2 || currentLevel == 3) {
+  // Жесткие 20% шанса при каждом заходе или рестарте
+  if (Random().nextDouble() < 0.20) {
+    hasWantedPoster = true;
+    
+    // Ищем подходящую балку на уровне
+    for (int i = 0; i < blocks.length; i++) {
+      final b = blocks[i];
+      // На 2 уровне крепим к деревянной вертикальной балке, на 3 — к каменной
+      if (currentLevel == 2 && !b.isStone && b.h > b.w) {
+        wantedAttachedBlockIndex = i;
+        break;
+      }
+      if (currentLevel == 3 && b.isStone && b.h > b.w) {
+        wantedAttachedBlockIndex = i;
+        break;
+      }
+    }
+  }
+}
+
     spawnCompleted = true;
   }
 
@@ -661,7 +695,29 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
 
     @override
   void update(double dt) {
-    // ИСПРАВЛЕНО: На 1 уровне крутим таймер летящей в экран шляпы шерифа
+    
+    // ДОБАВИТЬ В НАЧАЛО МЕТОДА update(double dt):
+if (showWantedBig) {
+  wantedAnimTimer += dt;
+  if (wantedAnimTimer >= 6.0) {
+    showWantedBig = false; // Через 6 секунд плакат улетает насовсем
+  }
+}
+
+// Если балка, на которой висел плакат, зашевелилась или сломалась — плакат падает в воду
+if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
+  final b = blocks[wantedAttachedBlockIndex];
+  if (b.isBroken || b.shouldRemove || !b.isSleeping) {
+    hasWantedPoster = false; // Плакат уничтожен лавиной вместе с домом
+  } else {
+    // Плакат намертво приклеен к координатам балки
+    wantedPosterX = b.x + b.w / 2 - 0.01;
+    wantedPosterY = b.y + b.h / 2 - 0.02;
+  }
+}
+  
+      
+      // ИСПРАВЛЕНО: На 1 уровне крутим таймер летящей в экран шляпы шерифа
    if (currentLevel == 1 && hatAnimTimer < 3.5) {
      hatAnimTimer += dt;
    }
@@ -1124,7 +1180,25 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       pig.render(canvas, size, maksimSprite);
     }
 
-          // ПТИЦА С ТРАЕКТОРИЕЙ! (ИСПРАВЛЕНО: Синий шлейф, шипастая подложка по картинке, звезды и молнии!)
+      // ДОБАВИТЬ СРАЗУ ПОСЛЕ ЦИКЛА ОТРИСОВКИ СВИНЕЙ:
+if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
+  final paperPaint = Paint()..color = const Color(0xFFFFF9C4);
+  final borderPaint = Paint()..color = const Color(0xFF5D4037)..style = PaintingStyle.stroke..strokeWidth = 1.0;
+  
+  final smallRect = Rect.fromLTWH(wantedPosterX * size.width, wantedPosterY * size.height, size.width * 0.02, size.height * 0.05);
+  canvas.drawRect(smallRect, paperPaint);
+  canvas.drawRect(smallRect, borderPaint);
+  
+  // Маленький жирный красный восклицательный знак на листе
+  final tpEx = TextPainter(
+    text: const TextSpan(text: '!', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.red)),
+    textDirection: TextDirection.ltr,
+  )..layout();
+  tpEx.paint(canvas, Offset(smallRect.left + smallRect.width * 0.35, smallRect.top + smallRect.height * 0.1));
+}
+   
+      
+      // ПТИЦА С ТРАЕКТОРИЕЙ! (ИСПРАВЛЕНО: Синий шлейф, шипастая подложка по картинке, звезды и молнии!)
       if (currentBird != null && (!currentBird!.isLaunched || !currentBird!.shouldRemove)) {
         canvas.save();
         
@@ -1393,6 +1467,30 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       canvas.restore();
     }
 
+    // ВСТАВИТЬ ПЕРЕД САМЫМ ПОСЛЕДНИМ canvas.restore() В МЕТОДЕ render():
+if (showWantedBig) {
+  canvas.save();
+  // Переносим начало координат в центр экрана, чтобы плакат вылетал ровно посередине
+  canvas.translate(size.width / 2, size.height / 2);
+  
+  double scale = 1.0;
+  if (wantedAnimTimer < 0.4) {
+    // Фаза сочного вылета: плакат раздувается из нуля
+    scale = (wantedAnimTimer / 0.4) * 1.0;
+  } else if (wantedAnimTimer > 5.5) {
+    // Фаза растворения в конце 6-й секунды
+    scale = 1.0 - ((wantedAnimTimer - 5.5) / 0.5);
+  }
+  canvas.scale(scale);
+
+  // Размеры плаката Wanted по твоему референсу (вертикальный, примерно на треть экрана)
+  final posterSize = Size(size.width * 0.30, size.height * 0.85);
+  
+  // Вызываем нашего продвинутого векторного художника плаката!
+  WantedPosterPainter(animTimer: wantedAnimTimer).paint(canvas, posterSize);
+
+  canvas.restore();
+}
 
     canvas.restore();
     }
@@ -1401,7 +1499,22 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   void onDragStart(DragStartEvent event) {
     super.onDragStart(event);
     
-    // ИСПРАВЛЕНО: Во Flame 1.38+ начальная точка считывается через localPosition!
+    // ДОБАВИТЬ В НАЧАЛО МЕТОДА onDragStart():
+if (hasWantedPoster && !showWantedBig) {
+  // Считаем клик с учетом текущего сдвига камеры worldScrollX
+  double clickX = event.localPosition.x / canvasSize.x - worldScrollX;
+  double clickY = event.localPosition.y / canvasSize.y;
+  
+  if ((clickX - wantedPosterX).abs() < 0.04 && (clickY - wantedPosterY).abs() < 0.06) {
+    hasWantedPoster = false; // Удаляем маленькую бумажку со здания
+    showWantedBig = true;    // Включаем большой плакат на 6 секунд
+    wantedAnimTimer = 0.0;
+    AudioManager.playAchievement(); // Пускаем сочный призовой звук!
+    return; // Выходим, чтобы случайно не запустить птицу при клике на пасхалку
+  }
+}
+
+      // ИСПРАВЛЕНО: Во Flame 1.38+ начальная точка считывается через localPosition!
     double startX = event.localPosition.x / canvasSize.x;
     
     // Если игрок нажал в левой части экрана (в районе рогатки, где x < 0.3)
@@ -2166,6 +2279,167 @@ class CrabClawPainter {
     
     canvas.drawPath(rightHookPath, clawPaint);
     canvas.drawPath(rightHookPath, borderPaint);
+    canvas.restore();
+  }
+}
+
+// ДОБАВИТЬ В САМЫЙ КОНЕЦ ФАЙЛА game_screen.dart:
+
+class WantedPosterPainter {
+  final double animTimer;
+  WantedPosterPainter({required this.animTimer});
+
+  void paint(Canvas canvas, Size size) {
+    final Rect rect = Rect.fromCenter(center: Offset.zero, width: size.width, height: size.height);
+
+    // 1. СТИЛЬНЫЙ СТАРЫЙ ПОЖЕЛТЕВШИЙ ФОН С ПОТЁРТОСТЯМИ ПО РЕФЕРЕНСУ
+    final basePaint = Paint()..color = const Color(0xFFEEDCA5); // Винтажная бумага
+    canvas.drawRect(rect, basePaint);
+
+    // Эффект грязи и обгоревших потемневших краев (Градиент к краям)
+    final shadowPaint = Paint()
+      ..shader = RadialGradient(
+        colors: [Colors.transparent, const Color(0x665D4037), const Color(0xAA3E2723)],
+        stops: const [0.6, 0.85, 1.0],
+      ).createShader(rect);
+    canvas.drawRect(rect, shadowPaint);
+
+    // Двойная черная рамка вокруг плаката как на картинке
+    final borderPaint = Paint()..color = const Color(0xFF212121)..style = PaintingStyle.stroke..strokeWidth = 2.0;
+    canvas.drawRect(rect.deflate(6), borderPaint);
+    borderPaint.strokeWidth = 0.8;
+    canvas.drawRect(rect.deflate(10), borderPaint);
+
+    // 2. ВИНТАЖНЫЙ ШРИФТ "РАЗЫСКИВАЕТСЯ" НАВЕРХУ ПО РЕФЕРЕНСУ
+    final textPainter = TextPainter(
+      text: const TextSpan(
+        text: 'РАЗЫСКИВАЕТСЯ',
+        style: TextStyle(
+          fontFamily: 'serif', // Встроенный газетный шрифт под старину
+          fontSize: 22,
+          fontWeight: FontWeight.w900,
+          color: Color(0xFF1A0A0A),
+          letterSpacing: 3.0,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    textPainter.paint(canvas, Offset(-textPainter.width / 2, rect.top + 16));
+
+    // 3. ФОТОГРАФИЯ СЮЖЕТНОЙ КЛЕШНИ: ПОЛНОСТЬЮ ЧЕРНЫЙ ФОН + ЗЕЛЕНОЕ НЕОНОВОЕ СВЕЧЕНИЕ КРОВИ
+    double photoW = size.width * 0.65;
+    double photoH = size.height * 0.35;
+    final photoRect = Rect.fromCenter(center: Offset(0, rect.top + size.height * 0.36), width: photoW, height: photoH);
+    
+    // Черный фон рамки
+    canvas.drawRect(photoRect, Paint()..color = const Color(0xFF050505));
+    // Тонкая рамка фотки
+    canvas.drawRect(photoRect, Paint()..color = const Color(0xFF212121)..style = PaintingStyle.stroke..strokeWidth = 1.5);
+
+    // НАСТОЯЩАЯ ЗЕЛЁНАЯ СВЕТЯЩАЯСЯ КРОВЬ (Толстый неоновый контур с размытием вокруг клешни)
+    canvas.save();
+    canvas.translate(photoRect.center.dx - 18, photoRect.center.dy - 22);
+    
+    double bloodPulse = sin(animTimer * pi * 2).abs();
+    final bloodPaint = Paint()
+      ..color = const Color(0xFF00FF66).withOpacity(0.8) // Кислотно-зеленый неон
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 7.0 + (bloodPulse * 3.0) // Кровь пульсирует и светится
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6.0); // Эффект свечения ауры!
+
+    // Рисуем контур клешни для ауры крови
+    _drawClawPath(canvas, bloodPaint);
+    
+    // Отрисовываем саму клешню Максима (монолитный зеленый цвет) поверх неонового шлейфа крови
+    final clawPaint = Paint()..color = const Color(0xFF2E6F22);
+    final clawBorder = Paint()..color = const Color(0xFF0D240A)..style = PaintingStyle.stroke..strokeWidth = 1.5;
+    _drawClawPath(canvas, clawPaint);
+    _drawClawPath(canvas, clawBorder);
+    canvas.restore();
+
+    // 4. ТЕКСТ ПОДПИСИ И НАГРАДЫ
+    // Имя Босса
+    final namePainter = TextPainter(
+      text: const TextSpan(
+        text: 'ДОН МОЛЛЮСК',
+        style: TextStyle(fontFamily: 'serif', fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF2D1500), letterSpacing: 1.0),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    namePainter.paint(canvas, Offset(-namePainter.width / 2, photoRect.bottom + 12));
+
+    // Слово "НАГРАДА" из твоего референса
+    final prizePainter = TextPainter(
+      text: const TextSpan(
+        text: 'НАГРАДА',
+        style: TextStyle(fontFamily: 'serif', fontSize: 13, fontWeight: FontWeight.w900, color: Color(0xFF5D4037), letterSpacing: 4.0),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    prizePainter.paint(canvas, Offset(-prizePainter.width / 2, photoRect.bottom + 36));
+
+    // Сумма 1,000,000$
+    final cashPainter = TextPainter(
+      text: const TextSpan(
+        text: '1, 000, 000$',
+        style: TextStyle(fontFamily: 'serif', fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF1A0A0A)),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    cashPainter.paint(canvas, Offset(-cashPainter.width / 2, photoRect.bottom + 54));
+
+    // 5. ДЕКОРАТИВНЫЕ СЛЕДЫ ОТ ПУЛЬ (КРУЖКИ С ТРЕЩИНАМИ ПО РЕФЕРЕНСУ)
+    final bulletPaint = Paint()..color = const Color(0xFF263238);
+    final burnPaint = Paint()..color = const Color(0x773E2723);
+    
+    // Слева пару дырок
+    canvas.drawCircle(Offset(rect.left + 22, rect.top + size.height * 0.3), 3.5, bulletPaint);
+    canvas.drawCircle(Offset(rect.left + 22, rect.top + size.height * 0.3), 7.0, burnPaint..style = PaintingStyle.stroke..strokeWidth = 2);
+    
+    canvas.drawCircle(Offset(rect.left + 15, rect.top + size.height * 0.6), 3.5, bulletPaint);
+    canvas.drawCircle(Offset(rect.left + 15, rect.top + size.height * 0.6), 7.0, burnPaint);
+
+    // Справа вверху как на картинке
+    canvas.drawCircle(Offset(rect.right - 25, rect.top + 75), 3.5, bulletPaint);
+    canvas.drawCircle(Offset(rect.right - 25, rect.top + 75), 8.0, burnPaint);
+    canvas.drawCircle(Offset(rect.right - 18, rect.top + 95), 3.5, bulletPaint);
+    canvas.drawCircle(Offset(rect.right - 18, rect.top + 95), 6.0, burnPaint);
+  }
+
+  // Внутренний метод сборки пути клешни, чтобы не дублировать код для крови и самой клешни
+  void _drawClawPath(Canvas canvas, Paint paint) {
+    const double w = 40;
+    const double h = 50;
+    
+    // Сустав
+    canvas.drawOval(const Rect.fromLTWH(w * 0.25, h * 0.5, w * 0.5, h * 0.4), paint);
+    // Монолитное тело кокона
+    canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(w * 0.15, h * 0.3, w * 0.7, h * 0.35), const Radius.circular(6)), paint);
+
+    // Левая створка крюка
+    canvas.save();
+    canvas.translate(w * 0.25, h * 0.35);
+    canvas.rotate(-0.15); 
+    final leftHook = Path()
+      ..moveTo(0, 0)
+      ..cubicTo(-w * 0.3, -h * 0.2, -w * 0.2, -h * 0.5, w * 0.25, -h * 0.5)
+      ..lineTo(w * 0.2, -h * 0.35)
+      ..cubicTo(w * 0.05, -h * 0.35, -w * 0.05, -h * 0.15, w * 0.1, 0)
+      ..close();
+    canvas.drawPath(leftHook, paint);
+    canvas.restore();
+
+    // Правая створка крюка
+    canvas.save();
+    canvas.translate(w * 0.75, h * 0.35);
+    canvas.rotate(0.15);
+    final rightHook = Path()
+      ..moveTo(0, 0)
+      ..cubicTo(w * 0.2, -h * 0.15, w * 0.1, -h * 0.4, -w * 0.25, -h * 0.45)
+      ..lineTo(-w * 0.15, -h * 0.3)
+      ..cubicTo(-w * 0.05, -h * 0.3, w * 0.02, -h * 0.15, -w * 0.1, 0)
+      ..close();
+    canvas.drawPath(rightHook, paint);
     canvas.restore();
   }
 }
