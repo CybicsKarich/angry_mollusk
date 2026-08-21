@@ -2283,163 +2283,189 @@ class CrabClawPainter {
   }
 }
 
-// ДОБАВИТЬ В САМЫЙ КОНЕЦ ФАЙЛА game_screen.dart:
-
+// ПОЛНОСТЬЮ ЗАМЕНИ СТАРЫЙ КЛАСС WantedPosterPainter НА ЭТОТ КЛАССИЧЕСКИЙ РЕАЛИСТИЧНЫЙ ВАРИАНТ:
 class WantedPosterPainter {
   final double animTimer;
   WantedPosterPainter({required this.animTimer});
 
   void paint(Canvas canvas, Size size) {
-    final Rect rect = Rect.fromCenter(center: Offset.zero, width: size.width, height: size.height);
+    final double w = size.width;
+    final double h = size.height;
 
-    // 1. СТИЛЬНЫЙ СТАРЫЙ ПОЖЕЛТЕВШИЙ ФОН С ПОТЁРТОСТЯМИ ПО РЕФЕРЕНСУ
-    final basePaint = Paint()..color = const Color(0xFFEEDCA5); // Винтажная бумага
-    canvas.drawRect(rect, basePaint);
+    // 1. ГЕНЕРИРУЕМ СЛОЖНЫЙ РВАНЫЙ КОНТУР БУМАГИ (ЭФФЕКТ ОБОРВАННЫХ КРАЕВ)
+    final paperPath = Path();
+    paperPath.moveTo(-w / 2 + 8, -h / 2 + 5);
+    // Верхний рваный край
+    paperPath.lineTo(-w * 0.2, -h / 2 + 2);
+    paperPath.lineTo(-w * 0.1, -h / 2 + 9);
+    paperPath.lineTo(w * 0.1, -h / 2 + 3);
+    paperPath.lineTo(w * 0.3, -h / 2 + 10);
+    paperPath.lineTo(w / 2 - 6, -h / 2 + 4);
+    // Правый рваный край
+    paperPath.lineTo(w / 2 - 2, -h * 0.2);
+    paperPath.lineTo(w / 2 - 12, 0);
+    paperPath.lineTo(w / 2 - 4, h * 0.3);
+    paperPath.lineTo(w / 2 - 8, h / 2 - 6);
+    // Нижний рваный край
+    paperPath.lineTo(w * 0.2, h / 2 - 3);
+    paperPath.lineTo(0, h / 2 - 12);
+    paperPath.lineTo(-w * 0.2, h / 2 - 4);
+    paperPath.lineTo(-w / 2 + 10, h / 2 - 8);
+    // Левый рваный край
+    paperPath.lineTo(-w / 2 + 4, h * 0.2);
+    paperPath.lineTo(-w / 2 + 14, -h * 0.1);
+    paperPath.close();
 
-    // Эффект грязи и обгоревших потемневших краев (Градиент к краям)
+    // Заливаем пожелтевшую текстуру бумаги внутри рваного контура
+    final basePaint = Paint()..color = const Color(0xFFEADAA2);
+    canvas.drawPath(paperPath, basePaint);
+
+    // Обгоревшие и потемневшие рваные края (Мягкое затемнение по контуру)
     final shadowPaint = Paint()
       ..shader = RadialGradient(
-        colors: [Colors.transparent, const Color(0x665D4037), const Color(0xAA3E2723)],
-        stops: const [0.6, 0.85, 1.0],
-      ).createShader(rect);
-    canvas.drawRect(rect, shadowPaint);
+        colors: [Colors.transparent, const Color(0x4D5D4037), const Color(0xD93E2723)],
+        stops: const [0.55, 0.82, 1.0],
+      ).createShader(Rect.fromCenter(center: Offset.zero, width: w, height: h));
+    canvas.drawPath(paperPath, shadowPaint);
 
-    // Двойная черная рамка вокруг плаката как на картинке
-    final borderPaint = Paint()..color = const Color(0xFF212121)..style = PaintingStyle.stroke..strokeWidth = 2.0;
-    canvas.drawRect(rect.deflate(6), borderPaint);
-    borderPaint.strokeWidth = 0.8;
-    canvas.drawRect(rect.deflate(10), borderPaint);
+    // Старая въевшаяся двойная рамка, повторяющая рваную форму листа
+    final borderPaint = Paint()..color = const Color(0xCC212121)..style = PaintingStyle.stroke..strokeWidth = 1.5;
+    canvas.drawPath(paperPath, borderPaint);
 
-    // 2. ВИНТАЖНЫЙ ШРИФТ "РАЗЫСКИВАЕТСЯ" НАВЕРХУ ПО РЕФЕРЕНСУ
-    final textPainter = TextPainter(
-      text: const TextSpan(
-        text: 'РАЗЫСКИВАЕТСЯ',
-        style: TextStyle(
-          fontFamily: 'serif', // Встроенный газетный шрифт под старину
-          fontSize: 22,
-          fontWeight: FontWeight.w900,
-          color: Color(0xFF1A0A0A),
-          letterSpacing: 3.0,
+    // 2. ПОТЁРТЫЙ СТАРЫЙ ГАЗЕТНЫЙ ШРИФТ ДЛЯ ТЕКСТА
+    void drawWornText(String text, double fontSize, Offset offset, {bool isTitle = false}) {
+      final textPainter = TextPainter(
+        text: TextSpan(
+          text: text,
+          style: TextStyle(
+            fontFamily: 'serif',
+            fontSize: fontSize,
+            fontWeight: FontWeight.w900,
+            color: const Color(0xFF1F1206),
+            letterSpacing: isTitle ? 2.5 : 1.0,
+          ),
         ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    textPainter.paint(canvas, Offset(-textPainter.width / 2, rect.top + 16));
+        textDirection: TextDirection.ltr,
+      )..layout();
+      
+      canvas.save();
+      canvas.translate(offset.dx - textPainter.width / 2, offset.dy);
+      textPainter.paint(canvas, Offset.zero);
 
-    // 3. ФОТОГРАФИЯ СЮЖЕТНОЙ КЛЕШНИ: ПОЛНОСТЬЮ ЧЕРНЫЙ ФОН + ЗЕЛЕНОЕ НЕОНОВОЕ СВЕЧЕНИЕ КРОВИ
-    double photoW = size.width * 0.65;
-    double photoH = size.height * 0.35;
-    final photoRect = Rect.fromCenter(center: Offset(0, rect.top + size.height * 0.36), width: photoW, height: photoH);
-    
-    // Черный фон рамки
-    canvas.drawRect(photoRect, Paint()..color = const Color(0xFF050505));
-    // Тонкая рамка фотки
-    canvas.drawRect(photoRect, Paint()..color = const Color(0xFF212121)..style = PaintingStyle.stroke..strokeWidth = 1.5);
+      // ЭФФЕКТ ПОТЁРТОСТИ НА БУКВАХ: накладываем микро-царапины цвета бумаги поверх текста
+      final wearPaint = Paint()..color = const Color(0xFFEADAA2)..strokeWidth = 1.0;
+      final rand = Random(text.length * 7);
+      for (int i = 0; i < text.length * 2; i++) {
+        double px = rand.nextDouble() * textPainter.width;
+        double py = rand.nextDouble() * textPainter.height;
+        canvas.drawLine(Offset(px, py), Offset(px + 3, py + rand.nextDouble() * 2 - 1), wearPaint);
+      }
+      canvas.restore();
+    }
 
-    // НАСТОЯЩАЯ ЗЕЛЁНАЯ СВЕТЯЩАЯСЯ КРОВЬ (Толстый неоновый контур с размытием вокруг клешни)
+    // Печатаем состаренный заголовок
+    drawWornText('WANTED', 26, Offset(0, -h / 2 + 25), isTitle: true);
+
+    // 3. ОРГАНИЧНЫЙ ЧЕРНЫЙ ФОН СЮЖЕТНОЙ ФОТОГРАФИИ (Плавное впекание в лист)
+    double photoW = w * 0.70;
+    double photoH = h * 0.38;
+    final photoRect = Rect.fromCenter(center: Offset(0, -h * 0.1), width: photoW, height: photoH);
+
+    // Размытые, прожжённые края чёрного пятна, чтобы оно органично сидело на бумаге
+    final darkBgPaint = Paint()
+      ..shader = RadialGradient(
+        colors: [const Color(0xFF070705), const Color(0xFF0F0F0B), Colors.transparent],
+        stops: const [0.0, 0.75, 1.0],
+      ).createShader(photoRect);
+    canvas.drawRect(photoRect.inflate(15), darkBgPaint);
+
+    // 4. ЗАГДОЧНАЯ РЕАЛИСТИЧНАЯ ДЛИННАЯ КЛЕШНЯ С ЗЕЛОНОЙ ЖИДКОСТЬЮ
     canvas.save();
-    canvas.translate(photoRect.center.dx - 18, photoRect.center.dy - 22);
+    // Центрируем и слегка разворачиваем её боком на фотографии для атмосферы улик
+    canvas.translate(-15, -h * 0.1 - 25);
     
-    double bloodPulse = sin(animTimer * pi * 2).abs();
-    final bloodPaint = Paint()
-      ..color = const Color(0xFF00FF66).withOpacity(0.8) // Кислотно-зеленый неон
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 7.0 + (bloodPulse * 3.0) // Кровь пульсирует и светится
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6.0); // Эффект свечения ауры!
-
-    // Рисуем контур клешни для ауры крови
-    _drawClawPath(canvas, bloodPaint);
+    // Кисть для монолитной глубокой текстуры клешни (без обводок)
+    final clawPaint = Paint()..color = const Color(0xFF1E4916);
     
-    // Отрисовываем саму клешню Максима (монолитный зеленый цвет) поверх неонового шлейфа крови
-    final clawPaint = Paint()..color = const Color(0xFF2E6F22);
-    final clawBorder = Paint()..color = const Color(0xFF0D240A)..style = PaintingStyle.stroke..strokeWidth = 1.5;
-    _drawClawPath(canvas, clawPaint);
-    _drawClawPath(canvas, clawBorder);
-    canvas.restore();
-
-    // 4. ТЕКСТ ПОДПИСИ И НАГРАДЫ
-    // Имя Босса
-    final namePainter = TextPainter(
-      text: const TextSpan(
-        text: 'ДОН МОЛЛЮСК',
-        style: TextStyle(fontFamily: 'serif', fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF2D1500), letterSpacing: 1.0),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    namePainter.paint(canvas, Offset(-namePainter.width / 2, photoRect.bottom + 12));
-
-    // Слово "НАГРАДА" из твоего референса
-    final prizePainter = TextPainter(
-      text: const TextSpan(
-        text: 'НАГРАДА',
-        style: TextStyle(fontFamily: 'serif', fontSize: 13, fontWeight: FontWeight.w900, color: Color(0xFF5D4037), letterSpacing: 4.0),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    prizePainter.paint(canvas, Offset(-prizePainter.width / 2, photoRect.bottom + 36));
-
-    // Сумма 1,000,000$
-    final cashPainter = TextPainter(
-      text: const TextSpan(
-        text: '1, 000, 000\$',
-        style: TextStyle(fontFamily: 'serif', fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF1A0A0A)),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    cashPainter.paint(canvas, Offset(-cashPainter.width / 2, photoRect.bottom + 54));
-
-    // 5. ДЕКОРАТИВНЫЕ СЛЕДЫ ОТ ПУЛЬ (КРУЖКИ С ТРЕЩИНАМИ ПО РЕФЕРЕНСУ)
-    final bulletPaint = Paint()..color = const Color(0xFF263238);
-    final burnPaint = Paint()..color = const Color(0x773E2723);
+    // Рисуем анатомические удлиненные пропорции
+    const double cw = 45;
+    const double ch = 65; // Клешня стала значительно длиннее
     
-    // Слева пару дырок
-    canvas.drawCircle(Offset(rect.left + 22, rect.top + size.height * 0.3), 3.5, bulletPaint);
-    canvas.drawCircle(Offset(rect.left + 22, rect.top + size.height * 0.3), 7.0, burnPaint..style = PaintingStyle.stroke..strokeWidth = 2);
-    
-    canvas.drawCircle(Offset(rect.left + 15, rect.top + size.height * 0.6), 3.5, bulletPaint);
-    canvas.drawCircle(Offset(rect.left + 15, rect.top + size.height * 0.6), 7.0, burnPaint);
+    // Нижнее основание сустава
+    canvas.drawOval(const Rect.fromLTWH(cw * 0.25, ch * 0.55, cw * 0.5, ch * 0.35), clawPaint);
+    // Центральное вытянутое тело клешни
+    canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(cw * 0.15, ch * 0.35, cw * 0.7, ch * 0.35), const Radius.circular(8)), clawPaint);
 
-    // Справа вверху как на картинке
-    canvas.drawCircle(Offset(rect.right - 25, rect.top + 75), 3.5, bulletPaint);
-    canvas.drawCircle(Offset(rect.right - 25, rect.top + 75), 8.0, burnPaint);
-    canvas.drawCircle(Offset(rect.right - 18, rect.top + 95), 3.5, bulletPaint);
-    canvas.drawCircle(Offset(rect.right - 18, rect.top + 95), 6.0, burnPaint);
-  }
-
-  // Внутренний метод сборки пути клешни, чтобы не дублировать код для крови и самой клешни
-  void _drawClawPath(Canvas canvas, Paint paint) {
-    const double w = 40;
-    const double h = 50;
-    
-    // Сустав
-    canvas.drawOval(const Rect.fromLTWH(w * 0.25, h * 0.5, w * 0.5, h * 0.4), paint);
-    // Монолитное тело кокона
-    canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(w * 0.15, h * 0.3, w * 0.7, h * 0.35), const Radius.circular(6)), paint);
-
-    // Левая створка крюка
+    // Левый длинный хищный крюк (створка щипца)
     canvas.save();
-    canvas.translate(w * 0.25, h * 0.35);
-    canvas.rotate(-0.15); 
+    canvas.translate(cw * 0.25, ch * 0.38);
     final leftHook = Path()
       ..moveTo(0, 0)
-      ..cubicTo(-w * 0.3, -h * 0.2, -w * 0.2, -h * 0.5, w * 0.25, -h * 0.5)
-      ..lineTo(w * 0.2, -h * 0.35)
-      ..cubicTo(w * 0.05, -h * 0.35, -w * 0.05, -h * 0.15, w * 0.1, 0)
+      ..cubicTo(-cw * 0.35, -ch * 0.2, -cw * 0.25, -ch * 0.65, cw * 0.3, -ch * 0.65) // Сделали изгиб длиннее
+      ..lineTo(cw * 0.22, -ch * 0.45)
+      ..cubicTo(cw * 0.05, -ch * 0.45, -cw * 0.05, -ch * 0.2, cw * 0.1, 0)
       ..close();
-    canvas.drawPath(leftHook, paint);
+    canvas.drawPath(leftHook, clawPaint);
     canvas.restore();
 
-    // Правая створка крюка
+    // Правый нижний зажимающий палец
     canvas.save();
-    canvas.translate(w * 0.75, h * 0.35);
-    canvas.rotate(0.15);
+    canvas.translate(cw * 0.75, ch * 0.38);
     final rightHook = Path()
       ..moveTo(0, 0)
-      ..cubicTo(w * 0.2, -h * 0.15, w * 0.1, -h * 0.4, -w * 0.25, -h * 0.45)
-      ..lineTo(-w * 0.15, -h * 0.3)
-      ..cubicTo(-w * 0.05, -h * 0.3, w * 0.02, -h * 0.15, -w * 0.1, 0)
+      ..cubicTo(cw * 0.25, -ch * 0.15, cw * 0.15, -ch * 0.5, -cw * 0.3, -ch * 0.55) // Вытянули длину
+      ..lineTo(-cw * 0.18, -ch * 0.38)
+      ..cubicTo(-cw * 0.05, -ch * 0.38, cw * 0.02, -ch * 0.2, -cw * 0.1, 0)
       ..close();
-    canvas.drawPath(rightHook, paint);
+    canvas.drawPath(rightHook, clawPaint);
     canvas.restore();
+
+    // ДОБАВЛЯЕМ МЯГКИЕ РЕАЛИСТИЧНЫЕ БЛИКИ НА КЛЕШНЕ СВЕРХУ (Эффект влажной панцирной коры)
+    final glarePaint = Paint()..color = Colors.white.withOpacity(0.08)..style = PaintingStyle.fill;
+    canvas.drawOval(const Rect.fromLTWH(cw * 0.4, ch * 0.4, 8, 15), glarePaint);
+
+    // РАЗЛИВАЕМ ГУСТУЮ ЗЕЛОНУЮ ЖИДКОСТЬ НА САМОЙ КЛЕШНЕ И ВОКРУГ НЕЕ
+    final bloodPaint = Paint()..color = const Color(0xDD00E676); // Плотный неоново-зеленый
+    final bloodGlow = Paint()
+      ..color = const Color(0xFF00FF66).withOpacity(0.25)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5.0);
+
+    // Лужица крови под оторванным основанием клешни
+    canvas.drawCircle(const Offset(cw * 0.5, ch * 0.85), 12, bloodGlow);
+    canvas.drawCircle(const Offset(cw * 0.5, ch * 0.85), 8, bloodPaint);
+    canvas.drawCircle(const Offset(cw * 0.3, ch * 0.90), 4, bloodPaint); // Отдельная капля рядом
+
+    // Подтёки жидкости прямо на самом панцире (зелёная кровь стекает по суставам)
+    canvas.drawOval(const Rect.fromLTWH(cw * 0.25, ch * 0.5, 5, 12), bloodPaint);
+    canvas.drawOval(const Rect.fromLTWH(cw * 0.65, ch * 0.45, 4, 10), bloodPaint);
+    
+    canvas.restore();
+
+    // 5. НИЖНИЙ ТЕКСТ ПОДПИСИ И СУММЫ НАГРАДЫ
+    drawWornText('ДОН МОЛЛЮСК', 16, Offset(0, photoRect.bottom + 15));
+    drawWornText('НАГРАДА', 12, Offset(0, photoRect.bottom + 42));
+    drawWornText('1, 000, 000\$', 22, Offset(0, photoRect.bottom + 62));
+
+    // 6. СЛЕДЫ ВРЕМЕНИ И РЕАЛИСТИЧНЫЕ ПУЛЕВЫЕ ОТВЕРСТИЯ С ОПАЛИНАМИ
+    final bulletCenter = Paint()..color = const Color(0xFF1C1D1F);
+    final bulletBurn = Paint()..color = const Color(0x663E2723);
+
+    void drawRealBulletHole(double offsetLinesX, double offsetLinesY) {
+      canvas.drawCircle(Offset(offsetLinesX, offsetLinesY), 3.5, bulletCenter);
+      canvas.drawCircle(Offset(offsetLinesX, offsetLinesY), 8.0, bulletBurn);
+      // Маленькие трещинки от пули по бумаге
+      final crackPaint = Paint()..color = const Color(0x88212121)..strokeWidth = 0.6;
+      for (int i = 0; i < 4; i++) {
+        double angle = i * pi / 2;
+        canvas.drawLine(Offset(offsetLinesX, offsetLinesY), Offset(offsetLinesX + cos(angle) * 14, offsetLinesY + sin(angle) * 14), crackPaint);
+      }
+    }
+
+    // Рассыпаем пулевые ранения по плакату ровно по твоему референсу
+    drawRealBulletHole(rect.left + 25, rect.top + h * 0.25);
+    drawRealBulletHole(rect.left + 18, rect.top + h * 0.65);
+    drawRealBulletHole(rect.right - 28, rect.top + 65);
+    drawRealBulletHole(rect.right - 20, rect.top + h * 0.8);
   }
 }
+
