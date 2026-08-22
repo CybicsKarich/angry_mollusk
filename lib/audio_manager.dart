@@ -85,6 +85,16 @@ class AudioManager {
     }
   }
 
+ // ДОБАВИТЬ В КЛАСС AudioManager В ФАЙЛЕ lib/audio_manager.dart:
+static Future<void> playPaperRustle() async {
+  try {
+    await _fxPlayer.stop(); // Глушим прошлый звук эффектов, чтобы не накладывался
+    await _fxPlayer.setVolume(1.0); // Включаем на полную громкость
+    await _fxPlayer.play(AssetSource('audio/paper_rustle.mp3')); // Чистый путь относительно папки assets/
+  } catch (e) {
+    print("Ошибка воспроизведения звука шелеста бумаги: $e");
+  }
+}
 
 
   // 1. ЗВУК НАТЯЖЕНИЯ РОГАТКИ
