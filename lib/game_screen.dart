@@ -1499,20 +1499,22 @@ if (showWantedBig) {
   void onDragStart(DragStartEvent event) {
     super.onDragStart(event);
     
-    // ДОБАВИТЬ В НАЧАЛО МЕТОДА onDragStart():
+ // ЗАМЕНИТЬ БЛОК КЛИКА ПО БУМАЖКЕ ВНУТРИ МЕТОДА onDragStart НА ЭТОТ ИСПРАВЛЕННЫЙ:
 if (hasWantedPoster && !showWantedBig) {
-  // Считаем клик с учетом текущего сдвига камеры worldScrollX
   double clickX = event.localPosition.x / canvasSize.x - worldScrollX;
   double clickY = event.localPosition.y / canvasSize.y;
   
   if ((clickX - wantedPosterX).abs() < 0.04 && (clickY - wantedPosterY).abs() < 0.06) {
-    hasWantedPoster = false; // Удаляем маленькую бумажку со здания
-    showWantedBig = true;    // Включаем большой плакат на 6 секунд
+    hasWantedPoster = false; 
+    showWantedBig = true;    
     wantedAnimTimer = 0.0;
-    AudioManager.playAchievement(); // Пускаем сочный призовой звук!
-    return; // Выходим, чтобы случайно не запустить птицу при клике на пасхалку
+    
+    // ИСПРАВЛЕНО: Вместо фанфар теперь играет реалистичный шелест разворачивания бумаги!
+    AudioManager.playPaperRustle(); 
+    return; 
   }
 }
+
 
       // ИСПРАВЛЕНО: Во Flame 1.38+ начальная точка считывается через localPosition!
     double startX = event.localPosition.x / canvasSize.x;
@@ -2407,7 +2409,6 @@ class WantedPosterPainter {
 
     // Маленькие капли-спутники вокруг большой лужи
     canvas.drawCircle(Offset(-lr * 0.8, lr * 0.5), 3.5, liquidPaint);
-    canvas.drawCircle(Offset(lr * 0.7, -lr * 0.4), 2.0, liquidPaint);
 
     // Б) ВЫСОКОДЕТАЛИЗИРОВАННАЯ КЛЕШНЯ (СТРОГО ГОРИЗОНТАЛЬНО)
     final clawPaint = Paint()..color = const Color(0xFF2E6F22)..style = PaintingStyle.fill;
