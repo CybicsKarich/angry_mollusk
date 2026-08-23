@@ -1796,7 +1796,8 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
           alignment: Alignment.center,
           children: [
             Positioned(bottom: 12, left: 34, child: _buildWoodenChair()),
-            Positioned(bottom: 22, left: 35, child: _buildCharacterSp('assets/images/bunnyhop.png', 55)),
+            // ЗАМЕНИТЬ ТОЛЬКО ЭТУ СТРОКУ В _buildPage1Frame1:
+            Positioned(bottom: 22, left: 35, child: _buildCharacterSp('assets/images/bunnyhop.png', 55, isPig: false)),
             Positioned(bottom: 2, left: 62, child: _buildWoodenTable()),
             Positioned(
               top: 25, left: 10, right: 10,
@@ -1822,7 +1823,8 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
           alignment: Alignment.center,
           children: [
             Positioned(bottom: 12, left: 18, child: _buildWoodenChair()),
-            Positioned(bottom: 22, left: 19, child: _buildCharacterSp('assets/images/bunnyhop.png', 50)),
+            // ЗАМЕНИТЬ ТОЛЬКО ЭТУ СТРОКУ В _buildPage1Frame2:
+            Positioned(bottom: 22, left: 19, child: _buildCharacterSp('assets/images/bunnyhop.png', 50, isPig: false)),
             Positioned(bottom: 2, left: 44, child: _buildWoodenTable()),
             Positioned(bottom: 4, right: 8, child: CustomPaint(size: const Size(26, 60), painter: StickmanSweatPainter())),
             Positioned(
@@ -1855,7 +1857,8 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(top: 10),
-                    child: _buildCharacterSp('assets/images/bunnyhop.png', 75),
+                    // ЗАМЕНИТЬ ТОЛЬКО ЭТУ СТРОКУ В _buildPage1Frame3:
+                  child: _buildCharacterSp('assets/images/bunnyhop.png', 75, isPig: false),
                   ),
                   // КОВБОЙСКАЯ ШЛЯПА ВШИТА В КОД КАДРА СЕРДЦЕМ СТЕКА
                   Positioned(
@@ -1924,7 +1927,8 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
               child: Stack(
                 alignment: Alignment.topCenter,
                 children: [
-                  Padding(padding: const EdgeInsets.only(top: 10), child: _buildCharacterSp('assets/images/bunnyhop.png', 65)),
+                  // ЗАМЕНИТЬ ТОЛЬКО ЭТУ СТРОКУ В _buildPage2Frame1:
+                  Padding(padding: const EdgeInsets.only(top: 10), child: _buildCharacterSp('assets/images/bunnyhop.png', 65, isPig: false)),
                   // ШЛЯПА ВШИТА В КОД КАДРА СЕРДЦЕМ СТЕКА
                   Positioned(
                     top: 0,
@@ -1980,7 +1984,8 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(top: 10),
-                    child: _buildCharacterSp('assets/images/bunnyhop.png', 52),
+                    // ЗАМЕНИТЬ ТОЛЬКО ЭТУ СТРОКУ В _buildPage2Frame2:
+                   child: _buildCharacterSp('assets/images/bunnyhop.png', 52, isPig: false),
                   ),
                   Positioned(
                     top: 0,
@@ -2092,7 +2097,8 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(top: 10),
-                      child: _buildCharacterSp('assets/images/bunnyhop.png', 68),
+                      // ЗАМЕНИТЬ ТОЛЬКО ЭТУ СТРОКУ В _buildPage2Frame3:
+                      child: _buildCharacterSp('assets/images/bunnyhop.png', 68, isPig: false),
                     ),
                     Positioned(
                       top: 0,
@@ -2181,14 +2187,6 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
     );
   }
 } // <--- ВОТ ЭТА СКОБКА ТЕПЕРЬ СТРОГО ЗАКРЫВАЕТ КЛАСС _SheriffComicScreenState!
-
-
-
-
-
-
-              
-
 
     // Векторный сборщик стула со спинкой из светлой сосны по твоей фотографии
   Widget _buildWoodenChair() {
