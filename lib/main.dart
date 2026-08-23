@@ -2092,58 +2092,58 @@ Positioned(bottom: 54, left: 86, child: Container(width: 26, height: 4, decorati
           alignment: Alignment.center,
           children: [
             // ПОЛНОСТЬЮ ЗАМЕНИТЬ СОДЕРЖИМОЕ Stack ВНУТРИ _buildPage2Frame3 НА ЭТОТ КОРРЕКТНЫЙ ВАРИАНТ:
-// 1. УВЕЛИЧЕННАЯ рукоять рогатки по центру кадра (высота стала 34)
-Positioned(bottom: 20, left: 0, right: 0, child: Center(child: Container(width: 10, height: 34, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(2))))),
-// 2. Левый рожок (увеличен, прижат к стволу)
-Positioned(bottom: 50, left: 0, right: 22, child: Center(child: Transform.rotate(angle: -0.4, child: Container(width: 8, height: 22, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(2)))))),
-// 3. Правый рожок (увеличен, прижат к стволу)
-Positioned(bottom: 50, left: 22, right: 0, child: Center(child: Transform.rotate(angle: 0.4, child: Container(width: 8, height: 22, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(2)))))),
+// 1. КОРИЧНЕВАЯ РОГАТКА СДВИГНУТА ВПРАВО И ВИДНА ПОЛНОСТЬЮ (left: 120)
+// Рукоять рогатки (вертикальный ствол стоит на траве)
+Positioned(bottom: 20, left: 120, child: Container(width: 8, height: 28, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(2)))),
+// Левый рожок (прижат к стволу)
+Positioned(bottom: 44, left: 113, child: Transform.rotate(angle: -0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5))))),
+// Правый рожок (прижат к стволу)
+Positioned(bottom: 44, left: 129, child: Transform.rotate(angle: 0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5))))),
 
-// 4. ДВЕ ТОЛСТЫЕ КРАСНЫЕ РЕЗИНКИ (Идут от вершин рожков ровно к Ване, который сидит в центре!)
-Positioned(bottom: 45, left: 0, right: 28, child: Center(child: Transform.rotate(angle: 0.55, child: Container(width: 5, height: 24, color: const Color(0xFFD32F2F))))),
-// Координаты правой резинки зеркальны
-Positioned(bottom: 45, left: 28, right: 0, child: Center(child: Transform.rotate(angle: -0.55, child: Container(width: 5, height: 24, color: const Color(0xFFD32F2F))))),
+// 2. ДВЕ ДЛИННЫЕ КРАСНЫЕ НИТИ РЕЗИНКИ (Тянутся от рожков вправо НАЛЕВО к оттянутому Ване)
+// Верхняя нить от левого рожка к Ване
+Positioned(bottom: 43, left: 40, child: Transform.rotate(angle: 0.20, child: Container(width: 76, height: 4, color: const Color(0xFFD32F2F)))),
+// Нижняя нить от правого рожка к Ване
+Positioned(bottom: 40, left: 40, child: Transform.rotate(angle: 0.16, child: Container(width: 88, height: 4, color: const Color(0xFFD32F2F)))),
 
-// 5. ВАНЯ БАННИХОП И ШЛЯПА СИДЯТ СТРОГО В ЦЕНТРЕ НА РЕЗИНКЕ (ВЫСОТА bottom: 40)
+// 3. ВАНЯ БАННИХОП И ШЛЯПА СМЕЩЕНЫ ДИКО ВЛЕВО И СИДЯТ НА КРАСНОЙ НИТКЕ (left: 12)
 Positioned(
-  bottom: 40, // Ваня поднят над травой и зафиксирован прямо в седле натянутой рогатки!
-  left: 0, 
-  right: 0,
-  child: Center(
-    child: Stack(
-      alignment: Alignment.topCenter,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 10), 
-          child: _buildCharacterSp('assets/images/bunnyhop.png', 68, isPig: false),
-        ),
-        Positioned(
-          top: 0,
-          child: SizedBox(
-            width: 55, height: 25,
-            child: Stack(
-              alignment: Alignment.topCenter,
-              children: [
-                Container(width: 32, height: 14, decoration: const BoxDecoration(color: Color(0xFF795548), borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)))),
-                Positioned(bottom: 3, child: Container(width: 52, height: 5, decoration: BoxDecoration(color: const Color(0xFF6D4C41), borderRadius: BorderRadius.circular(4), border: Border.all(color: const Color(0xFF4E342E), width: 0.8)))),
-                Positioned(bottom: 7, child: Container(width: 31, height: 2, decoration: BoxDecoration(color: const Color(0xFF212121), borderRadius: BorderRadius.circular(1)))),
-                Positioned(top: 2, child: Stack(alignment: Alignment.center, children: [Icon(Icons.star_rounded, color: Colors.blueGrey.shade100, size: 14), Container(width: 4, height: 4, decoration: const BoxDecoration(color: Color(0xFFFFFFFF), shape: BoxShape.circle))])),
-              ],
-            ),
+  bottom: 24, // Сидит прямо в седле натянутой резинки, чуть приподнятый над травой
+  left: 12,   // Смещён в самый левый край кадра!
+  child: Stack(
+    alignment: Alignment.topCenter,
+    children: [
+      Padding(
+        padding: const EdgeInsets.only(top: 10),
+        child: _buildCharacterSp('assets/images/bunnyhop.png', 62, isPig: false),
+      ),
+      // Ковбойская шляпа шерифа вшита в код кадра
+      Positioned(
+        top: 0,
+        child: SizedBox(
+          width: 55, height: 25,
+          child: Stack(
+            alignment: Alignment.topCenter,
+            children: [
+              Container(width: 32, height: 14, decoration: const BoxDecoration(color: Color(0xFF795548), borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)))),
+              Positioned(bottom: 3, child: Container(width: 52, height: 5, decoration: BoxDecoration(color: const Color(0xFF6D4C41), borderRadius: BorderRadius.circular(4), border: Border.all(color: const Color(0xFF4E342E), width: 0.8)))),
+              Positioned(bottom: 7, child: Container(width: 31, height: 2, decoration: BoxDecoration(color: const Color(0xFF212121), borderRadius: BorderRadius.circular(1)))),
+              Positioned(top: 2, child: Stack(alignment: Alignment.center, children: [Icon(Icons.star_rounded, color: Colors.blueGrey.shade100, size: 14), Container(width: 4, height: 4, decoration: const BoxDecoration(color: Color(0xFFFFFFFF), shape: BoxShape.circle))])),
+            ],
           ),
         ),
-      ],
-    ),
+      ),
+    ],
   ),
 ),
 
-// 6. ОБЛАЧКО ДИАЛОГА РОВНО НАД ГОЛОВОЙ УВЕЛИЧЕННОГО ВАНЯНИ
+// 4. ОБЛАЧКО СЛОВ (Центрировано по кадру, висит красиво над всей этой сценой)
 Positioned(
-  top: 20, // Подняли слова повыше, так как сам Ваня теперь гордо сидит на рогатке!
-  left: 15, 
-  right: 15,
+  top: 20, 
+  left: 10, 
+  right: 10,
   child: CustomPaint(
-    painter: ComicBubblePainter(tailX: 0.5),
+    painter: ComicBubblePainter(tailX: 0.25), // Хвостик указывает левее, прямо на оттянутого Ваню!
     child: const Padding(
       padding: EdgeInsets.all(8.0),
       child: Text(
@@ -2154,6 +2154,7 @@ Positioned(
     ),
   ),
 ),
+
 
 
           ],
