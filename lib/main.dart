@@ -1972,9 +1972,12 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Деревянная рогатка на заднем фоне луга
-            Positioned(bottom: 20, left: 55, child: Container(width: 12, height: 45, color: const Color(0xFF4E342E))),
-            Positioned(bottom: 55, left: 47, child: Container(width: 28, height: 6, color: const Color(0xFF4E342E))),
+            // ЗАМЕНИТЬ ТОЛЬКО СТРОКИ РОГАТКИ ВНУТРИ _buildPage2Frame2 НА ЭТИ:
+// Красивое деревянное основание рогатки с highlight-эффектом по центру кадра (left: 95)
+Positioned(bottom: 20, left: 95, child: Container(width: 10, height: 45, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(2), boxShadow: [BoxShadow(color: const Color(0xFF8D6E63), spreadRadius: -3, blurRadius: 0, offset: const Offset(-2, 0))]))),
+// Рога слингошота
+Positioned(bottom: 53, left: 88, child: Container(width: 24, height: 6, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(2)))),
+
 
             // Ваня в ШЛЯПЕ подходит слева (Шляпа полностью вшита в код кадра)
             Positioned(
@@ -2084,9 +2087,10 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Рогатка по центру кадра с правильным Positioned центрированием
-            Positioned(bottom: 20, left: 0, right: 0, child: Center(child: Container(width: 14, height: 50, color: const Color(0xFF4E342E)))),
-            Positioned(bottom: 60, left: 0, right: 0, child: Center(child: Container(width: 40, height: 7, color: const Color(0xFF4E342E)))),
+            // ЗАМЕНИТЬ ТОЛЬКО СТРОКИ РОГАТКИ ВНУТРИ _buildPage2Frame3 НА ЭТИ:
+Positioned(bottom: 20, left: 0, right: 0, child: Center(child: Container(width: 12, height: 50, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(2), boxShadow: [BoxShadow(color: const Color(0xFF8D6E63), spreadRadius: -4, blurRadius: 0, offset: const Offset(-3, 0))])))),
+Positioned(bottom: 58, left: 0, right: 0, child: Center(child: Container(width: 36, height: 7, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(2))))),
+
 
             // Ваня сидит СТРОГО ВНУТРИ РОГАТКИ в ШЛЯПЕ!
             Positioned(
@@ -2341,29 +2345,42 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
     );
   }
 
-  // Обёртка мультяшного кадра: сплошной уютный комнатный фон из досок
-  Widget _buildComicFrame({required Widget child, required bool isRoom}) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFFD7CCC8), 
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.black, width: 3.5),
-        boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 6, offset: Offset(0, 4))],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Stack(
-          children: [
-            Positioned(
-              bottom: 0, left: 0, right: 0,
-              child: Container(height: 16, color: const Color(0xFF8D6E63)),
-            ),
-            child, 
+  // ПОЛНОСТЬЮ ЗАМЕНИ СТАРЫЙ МЕТОД _buildComicFrame НА ЭТОТ КОРРЕКТНЫЙ:
+Widget _buildComicFrame({required Widget child, required bool isRoom}) {
+  return Container(
+    decoration: BoxDecoration(
+      // Если это кабинет (isRoom = true) — красим в бежевый, если луг (isRoom = false) — в яркое небо
+      color: isRoom ? const Color(0xFFD7CCC8) : Colors.blue.shade300,
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: Colors.black, width: 3.5),
+      boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 6, offset: Offset(0, 4))],
+    ),
+    child: ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Stack(
+        children: [
+          // ЕСЛИ ЭТО ЛУГ (ВТОРАЯ СТРАНИЦА): Отрисовываем солнце, облака и сочную траву луга в основании
+          if (!isRoom) ...[
+            // Яркое круглое солнце в углу кадра
+            Positioned(top: -15, right: -15, child: Container(width: 50, height: 50, decoration: const BoxDecoration(color: Color(0xFFFFF176), shape: BoxShape.circle))),
+            // Облака на небе
+            Positioned(top: 15, left: 10, child: Icon(Icons.cloud_rounded, size: 24, color: Colors.white.withOpacity(0.5))),
+            Positioned(top: 30, right: 35, child: Icon(Icons.cloud_rounded, size: 20, color: Colors.white.withOpacity(0.5))),
+            // Сочный зеленый луг в самом низу кадра
+            Positioned(bottom: 0, left: 0, right: 0, child: Container(height: 35, color: const Color(0xFF4CAF50))),
           ],
-        ),
+          
+          // ЕСЛИ ЭТО КАБИНЕТ (ПЕРВАЯ СТРАНИЦА): Рисуем только коричневый деревянный пол кабинета
+          if (isRoom)
+            Positioned(bottom: 0, left: 0, right: 0, child: Container(height: 16, color: const Color(0xFF8D6E63))),
+            
+          child, // Поверх фона накладываются сами персонажи и диалоги
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
+
 
 
           
