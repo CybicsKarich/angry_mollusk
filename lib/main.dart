@@ -1996,31 +1996,25 @@ Positioned(
       child: _buildComicFrame(
         isRoom: false,
         child: Stack(
-          // ВСТАВИТЬ В САМОЕ НАЧАЛО Stack В МЕТОДЕ _buildPage2Frame2:
-// Еле заметная маленькая тень скрученного щупальца на синем небе рядом с солнцем
-Positioned(
-  top: 10,
-  right: 45, // Рядом с солнцем, которое висит в самом углу
-  child: CustomPaint(
-    size: const Size(25, 35), // Маленький, аккуратный силуэт
-    painter: _TentacleSkyShadowPainter(),
-  ),
-),
-),
           alignment: Alignment.center,
           children: [
-            // ЗАМЕНИТЬ ТОЛЬКО БЛОК РОГАТКИ ВНУТРИ _buildPage2Frame2 НА ЭТОТ:
-// 1. Рукоять рогатки (вертикальный ствол)
-Positioned(bottom: 20, left: 95, child: Container(width: 8, height: 26, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(2)))),
-// 2. Левый рожок (прижат вплотную к рукояти на высоте bottom: 42)
-Positioned(bottom: 42, left: 88, child: Transform.rotate(angle: -0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5))))),
-// 3. Правый рожок (прижат вплотную к рукояти на высоте bottom: 42)
-Positioned(bottom: 42, left: 104, child: Transform.rotate(angle: 0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5))))),
-// 4. Красная толстая нитка-резинка (ровно на вершинах рожков)
-Positioned(bottom: 54, left: 86, child: Container(width: 26, height: 4, decoration: BoxDecoration(color: const Color(0xFFD32F2F), borderRadius: BorderRadius.circular(1)))),
+            // 1. Еле заметная маленькая тень скрученного щупальца на синем небе рядом с солнцем
+            Positioned(
+              top: 10,
+              right: 45, // Рядом с солнцем
+              child: CustomPaint(
+                size: const Size(25, 35),
+                painter: _TentacleSkyShadowPainter(),
+              ),
+            ),
 
+            // 2. Деревянная рогатка на заднем фоне луга
+            Positioned(bottom: 20, left: 95, child: Container(width: 8, height: 26, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(2)))),
+            Positioned(bottom: 42, left: 88, child: Transform.rotate(angle: -0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5))))),
+            Positioned(bottom: 42, left: 104, child: Transform.rotate(angle: 0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5))))),
+            Positioned(bottom: 54, left: 86, child: Container(width: 26, height: 4, decoration: BoxDecoration(color: const Color(0xFFD32F2F), borderRadius: BorderRadius.circular(1)))),
 
-            // Ваня в ШЛЯПЕ подходит слева (Шляпа полностью вшита в код кадра)
+            // 3. Ваня в ШЛЯПЕ подходит слева
             Positioned(
               bottom: 10, left: 6,
               child: Stack(
@@ -2028,51 +2022,19 @@ Positioned(bottom: 54, left: 86, child: Container(width: 26, height: 4, decorati
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(top: 10),
-                    // ЗАМЕНИТЬ ТОЛЬКО ЭТУ СТРОКУ В _buildPage2Frame2:
-                   child: _buildCharacterSp('assets/images/bunnyhop.png', 52, isPig: false),
+                    child: _buildCharacterSp('assets/images/bunnyhop.png', 52, isPig: false),
                   ),
                   Positioned(
                     top: 0,
                     child: SizedBox(
-                      width: 55,
-                      height: 25,
+                      width: 55, height: 25,
                       child: Stack(
                         alignment: Alignment.topCenter,
                         children: [
-                          Container(
-                            width: 32, height: 14,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF795548),
-                              borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)),
-                            ),
-                          ),
-                          Positioned(
-                            bottom: 3,
-                            child: Container(
-                              width: 52, height: 5,
-                              decoration: BoxDecoration(color: const Color(0xFF6D4C41), borderRadius: BorderRadius.circular(4), border: Border.all(color: const Color(0xFF4E342E), width: 0.8)),
-                            ),
-                          ),
-                          Positioned(
-                            bottom: 7,
-                            child: Container(
-                              width: 31, height: 2,
-                              decoration: BoxDecoration(color: const Color(0xFF212121), borderRadius: BorderRadius.circular(1)),
-                            ),
-                          ),
-                          Positioned(
-                            top: 2,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                Icon(Icons.star_rounded, color: Colors.blueGrey.shade100, size: 14),
-                                Container(
-                                  width: 4, height: 4, 
-                                  decoration: const BoxDecoration(color: Color(0xFFFFFFFF), shape: BoxShape.circle),
-                                ),
-                              ],
-                            ),
-                          ),
+                          Container(width: 32, height: 14, decoration: const BoxDecoration(color: Color(0xFF795548), borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)))),
+                          Positioned(bottom: 3, child: Container(width: 52, height: 5, decoration: BoxDecoration(color: const Color(0xFF6D4C41), borderRadius: BorderRadius.circular(4), border: Border.all(color: const Color(0xFF4E342E), width: 0.8)))),
+                          Positioned(bottom: 7, child: Container(width: 31, height: 2, decoration: BoxDecoration(color: const Color(0xFF212121), borderRadius: BorderRadius.circular(1)))),
+                          Positioned(top: 2, child: Stack(alignment: Alignment.center, children: [Icon(Icons.star_rounded, color: Colors.blueGrey.shade100, size: 14), Container(width: 4, height: 4, decoration: const BoxDecoration(color: Color(0xFFFFFFFF), shape: BoxShape.circle))])),
                         ],
                       ),
                     ),
@@ -2081,15 +2043,15 @@ Positioned(bottom: 54, left: 86, child: Container(width: 26, height: 4, decorati
               ),
             ),
 
-            // Две свиньи Максима сидят у рогатки справа
+            // 4. Две свиньи Максима сидят у рогатки справа
             Positioned(bottom: 10, right: 38, child: _buildCharacterSp('assets/images/maksim.png', 44, isPig: true)),
             Positioned(bottom: 10, right: 8, child: _buildCharacterSp('assets/images/maksim.png', 44, isPig: true)),
 
-            // Блистеры виагры на кадре (1 в траве, 2-й лежит строго у ног свиньи)
+            // Блистеры виагры на кадре
             Positioned(bottom: 6, left: 40, child: Transform.rotate(angle: 0.2, child: _buildBlisterWidget())),
             Positioned(bottom: 4, right: 46, child: Transform.rotate(angle: -0.1, child: _buildBlisterWidget())), 
 
-            // Два облака диалогов: Сначала Ваня, потом Свинья
+            // 5. Два облака диалогов
             Positioned(
               top: 15, left: 6, width: 95,
               child: CustomPaint(
@@ -2107,7 +2069,6 @@ Positioned(bottom: 54, left: 86, child: Container(width: 26, height: 4, decorati
                 ),
               ),
             ),
-            // Ответ Вани под облаком свиньи
             Positioned(
               bottom: 60, left: 10, right: 10,
               child: CustomPaint(
@@ -2118,7 +2079,9 @@ Positioned(bottom: 54, left: 86, child: Container(width: 26, height: 4, decorati
           ],
         ),
       ),
+    );
   }
+
 
   Widget _buildPage2Frame3() {
     return Expanded(
