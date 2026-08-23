@@ -1972,12 +1972,15 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // ЗАМЕНИТЬ ТОЛЬКО СТРОКИ РОГАТКИ ВНУТРИ _buildPage2Frame2 НА ЭТИ:
-// Красивое деревянное основание рогатки с highlight-эффектом по центру кадра (left: 95)
-Positioned(bottom: 20, left: 95, child: Container(width: 10, height: 45, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(2), boxShadow: [BoxShadow(color: const Color(0xFF8D6E63), spreadRadius: -3, blurRadius: 0, offset: const Offset(-2, 0))]))),
-// Рога слингошота
-Positioned(bottom: 53, left: 88, child: Container(width: 24, height: 6, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(2)))),
-
+            // ЗАМЕНИТЬ ТОЛЬКО БЛОК РОГАТКИ ВНУТРИ _buildPage2Frame2 НА ЭТОТ:
+// 1. Рукоять рогатки (вертикальный ствол)
+Positioned(bottom: 20, left: 95, child: Container(width: 8, height: 26, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(2)))),
+// 2. Левый рожок (уходит по диагонали влево-вверх)
+Positioned(bottom: 44, left: 88, child: Transform.rotate(angle: -0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5))))),
+// 3. Правый рожок (уходит по диагонали вправо-вверх)
+Positioned(bottom: 44, left: 104, child: Transform.rotate(angle: 0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5))))),
+// 4. Красная толстая нитка-резинка (натянута ровно между верхушками рожков)
+Positioned(bottom: 56, left: 86, child: Container(width: 26, height: 4, decoration: BoxDecoration(color: const Color(0xFFD32F2F), borderRadius: BorderRadius.circular(1)))),
 
             // Ваня в ШЛЯПЕ подходит слева (Шляпа полностью вшита в код кадра)
             Positioned(
@@ -2087,84 +2090,65 @@ Positioned(bottom: 53, left: 88, child: Container(width: 24, height: 6, decorati
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // ЗАМЕНИТЬ ТОЛЬКО СТРОКИ РОГАТКИ ВНУТРИ _buildPage2Frame3 НА ЭТИ:
-Positioned(bottom: 20, left: 0, right: 0, child: Center(child: Container(width: 12, height: 50, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(2), boxShadow: [BoxShadow(color: const Color(0xFF8D6E63), spreadRadius: -4, blurRadius: 0, offset: const Offset(-3, 0))])))),
-Positioned(bottom: 58, left: 0, right: 0, child: Center(child: Container(width: 36, height: 7, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(2))))),
+            // ЗАМЕНИТЬ КОД РОГАТКИ И ПЕРСОНАЖА ВНУТРИ _buildPage2Frame3 НА ЭТОТ ЭПИЧНЫЙ:
+// 1. Рукоять рогатки по центру кадра
+Positioned(bottom: 20, left: 0, right: 0, child: Center(child: Container(width: 8, height: 26, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(2))))),
+// 2. Левый рожок рогатки
+Positioned(bottom: 44, left: 0, right: 16, child: Center(child: Transform.rotate(angle: -0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5)))))),
+// 3. Правый рожок рогатки
+Positioned(bottom: 44, left: 16, right: 0, child: Center(child: Transform.rotate(angle: 0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5)))))),
 
+// 4. ДВЕ КРАСНЫЕ НИТИ НАТЯНУТОЙ РЕЗИНКИ (Тянутся от рожков вниз к отпрянувшему Ване!)
+Positioned(bottom: 34, left: 0, right: 20, child: Center(child: Transform.rotate(angle: 0.6, child: Container(width: 4, height: 25, color: const Color(0xFFD32F2F))))),
+Positioned(bottom: 34, left: 20, right: 0, child: Center(child: Transform.rotate(angle: -0.6, child: Container(width: 4, height: 25, color: const Color(0xFFD32F2F))))),
 
-            // Ваня сидит СТРОГО ВНУТРИ РОГАТКИ в ШЛЯПЕ!
-            Positioned(
-              bottom: 42, left: 0, right: 0,
-              child: Center(
-                child: Stack(
-                  alignment: Alignment.topCenter,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10),
-                      // ЗАМЕНИТЬ ТОЛЬКО ЭТУ СТРОКУ В _buildPage2Frame3:
-                      child: _buildCharacterSp('assets/images/bunnyhop.png', 68, isPig: false),
-                    ),
-                    Positioned(
-                      top: 0,
-                      child: SizedBox(
-                        width: 55,
-                        height: 25,
-                        child: Stack(
-                          alignment: Alignment.topCenter,
-                          children: [
-                            Container(
-                              width: 32, height: 14,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFF795548),
-                                borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)),
-                              ),
-                            ),
-                            Positioned(
-                              bottom: 3,
-                              child: Container(
-                                width: 52, height: 5,
-                                decoration: BoxDecoration(color: const Color(0xFF6D4C41), borderRadius: BorderRadius.circular(4), border: Border.all(color: const Color(0xFF4E342E), width: 0.8)),
-                              ),
-                            ),
-                            Positioned(
-                              bottom: 7,
-                              child: Container(
-                                width: 31, height: 2,
-                                decoration: BoxDecoration(color: const Color(0xFF212121), borderRadius: BorderRadius.circular(1)),
-                              ),
-                            ),
-                            Positioned(
-                              top: 2,
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  Icon(Icons.star_rounded, color: Colors.blueGrey.shade100, size: 14),
-                                  Container(
-                                    width: 4, height: 4, 
-                                    decoration: const BoxDecoration(color: Color(0xFFFFFFFF), shape: BoxShape.circle),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+// 5. ВАНЯ БАННИХОП И ШЛЯПА СДВИГНУТЫ НАЗАД И ВНИЗ (Эффект жесткого натяжения перед пуском!)
+Positioned(
+  bottom: 12, left: 0, right: 0, // Опустили ниже к земле от сильного натяжения
+  child: Center(
+    child: Stack(
+      alignment: Alignment.topCenter,
+      children: [
+        Padding(padding: const EdgeInsets.only(top: 10), child: _buildCharacterSp('assets/images/bunnyhop.png', 68, isPig: false)),
+        Positioned(
+          top: 0,
+          child: SizedBox(
+            width: 55, height: 25,
+            child: Stack(
+              alignment: Alignment.topCenter,
+              children: [
+                Container(width: 32, height: 14, decoration: const BoxDecoration(color: Color(0xFF795548), borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)))),
+                Positioned(bottom: 3, child: Container(width: 52, height: 5, decoration: BoxDecoration(color: const Color(0xFF6D4C41), borderRadius: BorderRadius.circular(4), border: Border.all(color: const Color(0xFF4E342E), width: 0.8)))),
+                Positioned(bottom: 7, child: Container(width: 31, height: 2, decoration: BoxDecoration(color: const Color(0xFF212121), borderRadius: BorderRadius.circular(1)))),
+                Positioned(top: 2, child: Stack(alignment: Alignment.center, children: [Icon(Icons.star_rounded, color: Colors.blueGrey.shade100, size: 14), Container(width: 4, height: 4, decoration: const BoxDecoration(color: Color(0xFFFFFFFF), shape: BoxShape.circle))])),
+              ],
             ),
+          ),
+        ),
+      ],
+    ),
+  ),
+),
 
-            Positioned(
-              top: 25, left: 15, right: 15,
-              child: CustomPaint(
-                painter: ComicBubblePainter(tailX: 0.5),
-                child: const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text("Посмотрим, какую крепость вы построили!", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
-                ),
-              ),
-            ),
+
+            // ЗАМЕНИТЬ ТОЛЬКО БЛОК СЛОВ ВАНЬКИ В САМОМ КОНЦЕ МЕТОДА _buildPage2Frame3:
+Positioned(
+  top: 48, // Опустили облачко со словами пониже, прямо к макушке натянутого Вани!
+  left: 15, 
+  right: 15,
+  child: CustomPaint(
+    painter: ComicBubblePainter(tailX: 0.5),
+    child: const Padding(
+      padding: EdgeInsets.all(8.0),
+      child: Text(
+        "Посмотрим, какую крепость вы построили!", 
+        style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black), 
+        textAlign: TextAlign.center,
+      ),
+    ),
+  ),
+),
+
           ],
         ),
       ),
