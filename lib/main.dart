@@ -2101,10 +2101,11 @@ Positioned(bottom: 44, left: 113, child: Transform.rotate(angle: -0.4, child: Co
 Positioned(bottom: 44, left: 129, child: Transform.rotate(angle: 0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5))))),
 
 // ЗАМЕНИТЬ СТРОГО ЭТИ ДВЕ СТРОКИ РЕЗИНКИ ВНУТРИ _buildPage2Frame3:
-// Верхняя нить тянется от верхушки левого рожка (left: 113, bottom: 54) к Ване
-Positioned(bottom: 40, left: 35, child: Transform.rotate(angle: 0.14, child: Container(width: 82, height: 4, color: const Color(0xFFD32F2F)))),
-// Нижняя нить тянется от верхушки правого рожка (left: 129, bottom: 54) к Ване
-Positioned(bottom: 37, left: 35, child: Transform.rotate(angle: 0.16, child: Container(width: 98, height: 4, color: const Color(0xFFD32F2F)))),
+// Верхняя нить закреплена на самом верху левого рожка (bottom: 54) и тянется к Ване
+Positioned(bottom: 54, left: 35, child: Transform.rotate(angle: 0.28, child: Container(width: 82, height: 4, color: const Color(0xFFD32F2F)))),
+// Нижняя нить закреплена на самом верху правого рожка (bottom: 54) и тянется к Ване
+Positioned(bottom: 54, left: 35, child: Transform.rotate(angle: 0.24, child: Container(width: 98, height: 4, color: const Color(0xFFD32F2F)))),
+
 
 
 // 3. ВАНЯ БАННИХОП И ШЛЯПА СМЕЩЕНЫ ДИКО ВЛЕВО И СИДЯТ НА КРАСНОЙ НИТКЕ (left: 12)
@@ -2155,9 +2156,6 @@ Positioned(
     ),
   ),
 ),
-
-
-
           ],
         ),
       ),
