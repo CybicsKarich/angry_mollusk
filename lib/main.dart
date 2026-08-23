@@ -2504,29 +2504,41 @@ class ComicBubblePainter extends CustomPainter {
     );
   }
 
-  // ДОБАВИТЬ В САМЫЙ КОНЕЦ ФАЙЛА lib/main.dart:
-
+// ПОЛНОСТЬЮ ЗАМЕНИТЬ СТАРЫЙ КЛАСС _SecretMouthShadowPainter НА ЭТОТ:
 class _SecretMouthShadowPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    // Цвет деревянного пола 0xFF8D6E63. Делаем тень еле заметной, чуть темнее пола
-    final shadowPaint = Paint()..color = const Color(0xFF6D4C41)..style = PaintingStyle.fill;
-    
-    // Рисуем микроскопическую дугу улыбки Ardor из крошечных зубиков
-    int teethCount = 5;
-    double toothW = size.width / (teethCount + 1);
-    double toothH = 1.5;
+    // Еле заметный цвет тени (чуть темнее коричневого пола)
+    final shadowPaint = Paint()
+      ..color = const Color(0xFF6D4C41)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.8 // Плотная непрерывная линия
+      ..strokeCap = StrokeCap.round;
 
-    for (int i = 0; i < teethCount; i++) {
-      double offsetX = (size.width - (teethCount * toothW)) / 2 + (i * toothW);
-      double progress = i / (teethCount - 1);
-      double offsetY = size.height * 0.2 + (sin(progress * pi) * (size.height * 0.5));
-      canvas.drawRect(Rect.fromLTWH(offsetX, offsetY, toothW - 0.8, toothH), shadowPaint);
-    }
+    // 1. РИСУЕМ ЗЛОВЕЩИЕ ГЛАЗА ИЗ ТЕНИ (ДВА КРОШЕЧНЫХ КРУГА НАВЕРХУ)
+    final eyePaint = Paint()..color = const Color(0xFF6D4C41)..style = PaintingStyle.fill;
+    canvas.drawCircle(Offset(size.width * 0.30, size.height * 0.25), 1.2, eyePaint); // Левый глаз
+    canvas.drawCircle(Offset(size.width * 0.70, size.height * 0.25), 1.2, eyePaint); // Правый глаз
+
+    // 2. РИСУЕМ НЕПРЕРЫВНУЮ ДУГУ УЛЫБКИ ЧЕРЕЗ PATH
+    final mouthPath = Path();
+    // Стартуем с левого уголка рта
+    mouthPath.moveTo(size.width * 0.15, size.height * 0.55);
+    // Проводим плавную непрерывную дугу оскала к правому уголку через нижнюю точку
+    mouthPath.quadraticBezierTo(
+      size.width * 0.5, 
+      size.height * 0.95, // Самый низ прогиба улыбки
+      size.width * 0.85, 
+      size.height * 0.55,
+    );
+    
+    canvas.drawPath(mouthPath, shadowPaint);
   }
+
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
+
 
 class _TentacleSkyShadowPainter extends CustomPainter {
   @override
