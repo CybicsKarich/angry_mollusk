@@ -1288,12 +1288,26 @@ class ComicIntroScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     
-                    // КАДР 1: ТРИ МАКСИМА ЗАМЫШЛЯЮТ ПЛАН
-                    Expanded(
-                      child: _buildComicFrame(
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
+                    // ЗАМЕНИТЬ НАЧАЛО КАДРА НА ЭТОТ КОРРЕКТНЫЙ ВАРИАНТ:
+Expanded(
+  child: _buildComicFrame(
+    child: Stack(
+      children: [
+        // Еле заметная микро-тень горизонтальной клешни на левом облаке в небе
+        Positioned(
+          top: 21,  // Координаты выровнены ровно под левое облако на небе
+          left: 14, // Положение внутри облака
+          child: CustomPaint(
+            size: const Size(14, 8), // Сверхмаленький размер силуэта
+            painter: _ClawCloudShadowPainter(),
+          ),
+        ),
+        
+        // Твой основной внутренний стек персонажей и диалогов
+        Stack(
+          alignment: Alignment.center,
+          children: [
+
                             // ТРИ КРУПНЫХ МАКСИМА (Зелёные свиньи с лицом Максима Рыбалкина)
                             Positioned(
                               bottom: 10, left: 10,
@@ -1325,6 +1339,8 @@ class ComicIntroScreen extends StatelessWidget {
                             ),
                           ],
                         ),
+                        ]
+                       )
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -1855,6 +1871,17 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
               child: Stack(
                 alignment: Alignment.topCenter,
                 children: [
+                  // ВСТАВИТЬ СТРОГО ПОСЛЕ ОТРИСОВКИ ПОЛА В МЕТОДЕ _buildPage1Frame3:
+// Микро-тень улыбки Ardor Gaming правее ног Вани (наподобие ScaryMouthPainter, но плоская и тёмная)
+Positioned(
+  bottom: 3, 
+  left: 36, // Чуть правее позиции Вани (у него left: 8)
+  child: CustomPaint(
+    size: const Size(20, 8), // Супер-маленький размер
+    painter: _SecretMouthShadowPainter(),
+  ),
+),
+
                   Padding(
                     padding: const EdgeInsets.only(top: 10),
                     // ЗАМЕНИТЬ ТОЛЬКО ЭТУ СТРОКУ В _buildPage1Frame3:
@@ -1970,6 +1997,17 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
       child: _buildComicFrame(
         isRoom: false,
         child: Stack(
+          // ВСТАВИТЬ В САМОЕ НАЧАЛО Stack В МЕТОДЕ _buildPage2Frame2:
+// Еле заметная маленькая тень скрученного щупальца на синем небе рядом с солнцем
+Positioned(
+  top: 10,
+  right: 45, // Рядом с солнцем, которое висит в самом углу
+  child: CustomPaint(
+    size: const Size(25, 35), // Маленький, аккуратный силуэт
+    painter: _TentacleSkyShadowPainter(),
+  ),
+),
+
           alignment: Alignment.center,
           children: [
             // ЗАМЕНИТЬ ТОЛЬКО БЛОК РОГАТКИ ВНУТРИ _buildPage2Frame2 НА ЭТОТ:
@@ -2507,6 +2545,95 @@ class ComicBubblePainter extends CustomPainter {
     );
   }
 
+  // ДОБАВИТЬ В САМЫЙ КОНЕЦ ФАЙЛА lib/main.dart:
+
+class _SecretMouthShadowPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Цвет деревянного пола 0xFF8D6E63. Делаем тень еле заметной, чуть темнее пола
+    final shadowPaint = Paint()..color = const Color(0xFF6D4C41)..style = PaintingStyle.fill;
+    
+    // Рисуем микроскопическую дугу улыбки Ardor из крошечных зубиков
+    int teethCount = 5;
+    double toothW = size.width / (teethCount + 1);
+    double toothH = 1.5;
+
+    for (int i = 0; i < teethCount; i++) {
+      double offsetX = (size.width - (teethCount * toothW)) / 2 + (i * toothW);
+      double progress = i / (teethCount - 1);
+      double offsetY = size.height * 0.2 + (sin(progress * pi) * (size.height * 0.5));
+      canvas.drawRect(Rect.fromLTWH(offsetX, offsetY, toothW - 0.8, toothH), shadowPaint);
+    }
+  }
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _TentacleSkyShadowPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Цвет неба blue.shade300. Делаем тень щупальца еле видимой, чуть темнее лазури
+    final shadowPaint = Paint()
+      ..color = Colors.blue.shade400.withOpacity(0.4)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.5
+      ..strokeCap = StrokeCap.round;
+
+    final path = Path();
+    // Красивый S-образный изгиб скрученного щупальца осьминога по твоему референсу
+    path.moveTo(size.width * 0.5, size.height);
+    path.cubicTo(
+      size.width * 0.1, size.height * 0.7,
+      size.width * 0.9, size.height * 0.4,
+      size.width * 0.5, size.height * 0.1,
+    );
+    path.cubicTo(
+      size.width * 0.3, size.height * 0.0,
+      size.width * 0.1, size.height * 0.2,
+      size.width * 0.3, size.height * 0.3,
+    );
+    canvas.drawPath(path, shadowPaint);
+
+    // Добавляем микроскопические присоски вдоль изгиба
+    final dotPaint = Paint()..color = Colors.blue.shade400.withOpacity(0.3)..style = PaintingStyle.fill;
+    canvas.drawCircle(Offset(size.width * 0.3, size.height * 0.6), 1.2, dotPaint);
+    canvas.drawCircle(Offset(size.width * 0.7, size.height * 0.45), 1.0, dotPaint);
+    canvas.drawCircle(Offset(size.width * 0.4, size.height * 0.2), 0.8, dotPaint);
+  }
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _ClawCloudShadowPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Облако белое полупрозрачное. Тень на нем делаем чуть сероватой для едва заметного контраста
+    final shadowPaint = Paint()..color = const Color(0x22455A64)..style = PaintingStyle.fill;
+    
+    // Рисуем крошечный горизонтальный силуэт клешни медали SECRET
+    double cw = size.width;
+    double ch = size.height;
+    
+    // Тело клешни
+    canvas.drawOval(Rect.fromLTWH(0, ch * 0.2, cw * 0.6, ch * 0.6), shadowPaint);
+    // Длинный верхний щипец, вытянутый вперед горизонтально
+    final topClaw = Path()
+      ..moveTo(cw * 0.5, ch * 0.3)
+      ..cubicTo(cw * 0.7, -ch * 0.2, cw * 0.9, ch * 0.1, cw, ch * 0.3)
+      ..lineTo(cw * 0.7, ch * 0.4)
+      ..close();
+    canvas.drawPath(topClaw, shadowPaint);
+    // Нижний встречный щипец
+    final bottomClaw = Path()
+      ..moveTo(cw * 0.5, ch * 0.7)
+      ..cubicTo(cw * 0.7, ch * 1.2, cw * 0.9, ch * 0.8, cw * 0.95, ch * 0.6)
+      ..lineTo(cw * 0.7, ch * 0.6)
+      ..close();
+    canvas.drawPath(bottomClaw, shadowPaint);
+  }
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
 
 
 
