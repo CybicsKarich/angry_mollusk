@@ -1290,19 +1290,7 @@ class ComicIntroScreen extends StatelessWidget {
                     
                     // ЗАМЕНИТЬ НАЧАЛО КАДРА НА ЭТОТ КОРРЕКТНЫЙ ВАРИАНТ:
 Expanded(
-  child: _buildComicFrame(
-    child: Stack(
-      children: [
-        // Еле заметная микро-тень горизонтальной клешни на левом облаке в небе
-        Positioned(
-          top: 21,  // Координаты выровнены ровно под левое облако на небе
-          left: 14, // Положение внутри облака
-          child: CustomPaint(
-            size: const Size(14, 8), // Сверхмаленький размер силуэта
-            painter: _ClawCloudShadowPainter(),
-          ),
-        ),
-        
+  child: _buildComicFrame( 
         // Твой основной внутренний стек персонажей и диалогов
         Stack(
           alignment: Alignment.center,
@@ -1338,11 +1326,9 @@ Expanded(
                               ),
                             ),
                           ],
-                        ),
-                        ]
-                       )
-                      ),
+                        ),       
                     ),
+                   ),
                     const SizedBox(width: 12),
 
                     // КАДР 2: БАННИХОП ПОДФИГЕВАЕТ ОТ НАГЛОСТИ (ИСПРАВЛЕНО: ТЕПЕРЬ ТУТ 3 СВИНЬИ!)
@@ -1351,6 +1337,19 @@ Expanded(
                         child: Stack(
                           alignment: Alignment.center,
                           children: [
+                            // 1. ВЕРХНИЙ СТЭК ДЛЯ ТЕНИ (Закрывается сразу под ней!)
+        Stack(
+          children: [
+            Positioned(
+              top: 21,  // Координаты чётко под левое облако на небе
+              left: 14, 
+              child: CustomPaint(
+                size: const Size(14, 8), 
+                painter: _ClawCloudShadowPainter(),
+              ),
+            ),
+          ],
+        ),
                             // ВАНЯ БАННИХОП (Птица с перьями и лицом Вани, крупный, слева повернут к нам)
                             Positioned(
                               bottom: 10, left: 12,
