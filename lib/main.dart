@@ -2364,7 +2364,7 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
       ),
     );
   }
-}
+
 
           
 
