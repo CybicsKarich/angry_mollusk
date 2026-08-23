@@ -2100,11 +2100,12 @@ Positioned(bottom: 44, left: 113, child: Transform.rotate(angle: -0.4, child: Co
 // Правый рожок (прижат к стволу)
 Positioned(bottom: 44, left: 129, child: Transform.rotate(angle: 0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5))))),
 
-// 2. ДВЕ ДЛИННЫЕ КРАСНЫЕ НИТИ РЕЗИНКИ (Тянутся от рожков вправо НАЛЕВО к оттянутому Ване)
-// Верхняя нить от левого рожка к Ване
-Positioned(bottom: 43, left: 40, child: Transform.rotate(angle: 0.20, child: Container(width: 76, height: 4, color: const Color(0xFFD32F2F)))),
-// Нижняя нить от правого рожка к Ване
-Positioned(bottom: 40, left: 40, child: Transform.rotate(angle: 0.16, child: Container(width: 88, height: 4, color: const Color(0xFFD32F2F)))),
+// ЗАМЕНИТЬ СТРОГО ЭТИ ДВЕ СТРОКИ РЕЗИНКИ ВНУТРИ _buildPage2Frame3:
+// Верхняя нить тянется от верхушки левого рожка (left: 113, bottom: 54) к Ване
+Positioned(bottom: 40, left: 35, child: Transform.rotate(angle: 0.14, child: Container(width: 82, height: 4, color: const Color(0xFFD32F2F)))),
+// Нижняя нить тянется от верхушки правого рожка (left: 129, bottom: 54) к Ване
+Positioned(bottom: 37, left: 35, child: Transform.rotate(angle: 0.16, child: Container(width: 98, height: 4, color: const Color(0xFFD32F2F)))),
+
 
 // 3. ВАНЯ БАННИХОП И ШЛЯПА СМЕЩЕНЫ ДИКО ВЛЕВО И СИДЯТ НА КРАСНОЙ НИТКЕ (left: 12)
 Positioned(
