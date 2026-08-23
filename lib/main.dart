@@ -1870,16 +1870,17 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
               child: Stack(
                 alignment: Alignment.topCenter,
                 children: [
-                  // ВСТАВИТЬ СТРОГО ПОСЛЕ ОТРИСОВКИ ПОЛА В МЕТОДЕ _buildPage1Frame3:
-// Микро-тень улыбки Ardor Gaming правее ног Вани (наподобие ScaryMouthPainter, но плоская и тёмная)
+                  // ЗАМЕНИТЬ ТОЛЬКО ЭТОТ КУСОЧЕК ВНУТРИ _buildPage1Frame3:
+// Микро-тень улыбки Ardor Gaming смещена НАМНОГО правее сумки и ног Вани
 Positioned(
   bottom: 3, 
-  left: 36, // Чуть правее позиции Вани (у него left: 8)
+  left: 110, // Сдвинули далеко вправо на чистый участок деревянного пола
   child: CustomPaint(
-    size: const Size(20, 8), // Супер-маленький размер
+    size: const Size(20, 8), 
     painter: _SecretMouthShadowPainter(),
   ),
 ),
+
 
                   Padding(
                     padding: const EdgeInsets.only(top: 10),
