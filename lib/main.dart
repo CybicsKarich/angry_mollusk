@@ -1707,23 +1707,30 @@ class SpeechBubblePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// =========================================================================
-// ПОЛНОСТЬЮ ПЕРЕРАБОТАННЫЙ КОМИКС ШЕРИФА: СТОЛ И СТУЛ ПО ФОТО, КРУЖКА И ШЛЯПА
-// =========================================================================
-class SheriffComicScreen extends StatelessWidget {
+// ПОЛНОСТЬЮ ЗАМЕНИ СТАРЫЙ SheriffComicScreen НА ЭТОТ ЦЕЛЬНЫЙ STATEFUL-ВАРИАНТ:
+class SheriffComicScreen extends StatefulWidget {
   const SheriffComicScreen({super.key});
 
   @override
+  State<SheriffComicScreen> createState() => _SheriffComicScreenState();
+}
+
+class _SheriffComicScreenState extends State<SheriffComicScreen> {
+  int _currentComicPage = 0; // 0 - страница в кабинете, 1 - страница на лугу
+
+  @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F14), // Глубокий темный фон вокруг комикса
+      backgroundColor: const Color(0xFF0F0F14),
       body: SafeArea(
         child: Column(
           children: [
             const SizedBox(height: 16),
-            const Text(
-              "ИСТОРИЯ ШЕРИФА БАННИХОПА",
-              style: TextStyle(
+            Text(
+              _currentComicPage == 0 ? "ИСТОРИЯ ШЕРИФА БАННИХОПА" : "ИСТОРИЯ ШЕРИФА: НА ЛУГУ",
+              style: const TextStyle(
                 fontSize: 22, 
                 fontWeight: FontWeight.w900, 
                 color: Color(0xFFFF9800), 
@@ -1733,288 +1740,75 @@ class SheriffComicScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // ГЛАВНАЯ СЕТКА КОМИКСА: 3 крупных кадра в один горизонтальный ряд
+            // ГЛАВНАЯ СЕТКА КОМИКСА (Переключается в зависимости от _currentComicPage)
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Row(
-                  children: [
-                    
-                    // КАДР 1: МИРНОЕ ДЕЖУРСТВО В ДЕРЕВЯННОМ КАБИНЕТЕ (СТОЛ И СТУЛ С ФОТО)
-                    Expanded(
-                      child: _buildComicFrame(
-                        isRoom: true, // Включает стены и пол кабинета шерифа
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            // 1. Деревянный стул со спинкой из светлого дерева по фотографии
-                            Positioned(
-                              bottom: 12, left: 34,
-                              child: _buildWoodenChair(),
-                            ),
-
-                            // 2. ВАНЯ БАННИХОП (Птица солидно сидит на деревянном стуле)
-                            Positioned(
-                              bottom: 22, left: 35,
-                              child: _buildCharacterSp('assets/images/bunnyhop.png', 55, isPig: false),
-                            ),
-
-                            // 3. Деревянный массивный стол из светлой сосны строго по фотографии!
-                            Positioned(
-                              bottom: 2, left: 62,
-                              child: _buildWoodenTable(),
-                            ),
-                            
-                            // Слова над головой Вани
-                            Positioned(
-                              top: 25, left: 10, right: 10,
-                              child: CustomPaint(
-                                painter: ComicBubblePainter(tailX: 0.45),
-                                child: const Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 12),
-                                  child: Text(
-                                    "Обычное мирное дежурство в округе... Кофе отличный.",
-                                    style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-
-                    // КАДР 2: ВЛЕТАЕТ ЗАПЫХАВШИЙСЯ СТИКМАН (ОКРУЖЕНИЕ КАБИНЕТА ОСТАЕТСЯ НА МЕСТЕ)
-                    Expanded(
-                      child: _buildComicFrame(
-                        isRoom: true, // Такое же комнатное окружение без солнца и лужаек!
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            // Тот же деревянный стул и стол на месте
-                            Positioned(bottom: 12, left: 18, child: _buildWoodenChair()),
-                            Positioned(bottom: 22, left: 19, child: _buildCharacterSp('assets/images/bunnyhop.png', 50, isPig: false)),
-                                                        // ИСПРАВЛЕНО: Жёлтая кружка и бумаги полностью сохранены на столе во втором кадре!
-                            Positioned(
-                              bottom: 2, left: 44,
-                              child: _buildWoodenTable(),
-                            ),
-
-
-                            // Уставший Стикман из твоего референса (Рука у головы, крупные капли пота)
-                            Positioned(
-                              bottom: 4, right: 8,
-                              child: CustomPaint(
-                                size: const Size(26, 60),
-                                painter: StickmanSweatPainter(),
-                              ),
-                            ),
-
-                            // Слова Стикмана строго над его головой
-                            Positioned(
-                              top: 15, left: 4, right: 4,
-                              child: CustomPaint(
-                                painter: ComicBubblePainter(tailX: 0.8),
-                                child: const Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-                                  child: Text(
-                                    "Шериф, беда! На окраинах завелись зелёные свиньи под предводительством Дона Молюска! Они грабят наши склады с виагрой!",
-                                    style: TextStyle(fontSize: 8.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-
-                    // КАДР 3: ВАНЯ НАДЕВАЕТ КОВБОЙСКУЮ ШЛЯПУ С ЗОЛОТЫМИ ЗАКЛЁПКАМИ
-                    Expanded(
-                      child: _buildComicFrame(
-                        isRoom: true,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            // Ваня Баннихоп крупный, суровый и в ковбойской шляпе
-                            Positioned(
-                              bottom: 10, left: 8,
-                              child: Stack(
-                                alignment: Alignment.topCenter,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 10),
-                                    child: _buildCharacterSp('assets/images/bunnyhop.png', 75, isPig: false),
-                                  ),
-                                                                    // ИСПРАВЛЕНО: КОВБОЙСКАЯ ШЛЯПА И СЕРЕБРЯНАЯ ЗВЕЗДА ШЕРИФА СТРОГО БЕЗ ЕДИНОЙ ОШИБКИ!
-                                  Positioned(
-                                    top: 0,
-                                    child: SizedBox(
-                                      width: 55,
-                                      height: 25,
-                                      child: Stack(
-                                        alignment: Alignment.topCenter,
-                                        children: [
-                                          // Коричневая ковбойская тулья с изгибом сверху (ИСПРАВЛЕНО: убран внешний const!)
-                                          Container(
-                                            width: 32, height: 14,
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xFF795548), // const перенесён внутрь к цвету!
-                                              borderRadius: const BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)),
-                                            ),
-                                          ),
-                                          // Скругленные широкие поля ковбойской шляпы строго по референсу (Изначально ПРАВИЛЬНО)
-                                          Positioned(
-                                            bottom: 3,
-                                            child: Container(
-                                              width: 52, height: 5,
-                                              decoration: BoxDecoration(color: const Color(0xFF6D4C41), borderRadius: BorderRadius.circular(4), border: Border.all(color: const Color(0xFF4E342E), width: 0.8)),
-                                            ),
-                                          ),
-                                          // Плетёный чёрно-серебряный ремешок вдоль полей шляпы по фотографии (Изначально ПРАВИЛЬНО)
-                                          Positioned(
-                                            bottom: 7,
-                                            child: Container(
-                                              width: 31, height: 2,
-                                              decoration: BoxDecoration(color: const Color(0xFF212121), borderRadius: BorderRadius.circular(1)),
-                                            ),
-                                          ),
-                                          // КРУПНАЯ СЕРЕБРЯНАЯ ШЕРИФСКАЯ ЗВЕЗДА ПО ЦЕНТРУ С ФОТО!
-                                          Positioned(
-                                            top: 2,
-                                            child: Stack(
-                                              alignment: Alignment.center,
-                                              children: [
-                                                Icon(Icons.star_rounded, color: Colors.blueGrey.shade100, size: 14),
-                                                // Круглая металлическая печать по центру звезды (ИСПРАВЛЕНО: убран внешний const, цвет заменен на безопасный HEX!)
-                                                Container(
-                                                  width: 4, height: 4, 
-                                                  decoration: const BoxDecoration(
-                                                    color: Color(0xFFFFFFFF), // Теперь это чистая системная константа, const перед BoxDecoration легален!
-                                                    shape: BoxShape.circle,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                                                        // ИСПРАВЛЕНО: Кожаная торба пододвинута ВПЛОТНУЮ к Ване, и ВСЕ её внутренние детали выровнены по центру!
-                            Positioned(
-                              bottom: -2, left: 62, // Прижали общую рамку мешка впритык к боку птицы Вани
-                              child: SizedBox(
-                                width: 50,
-                                height: 50,
-                                child: Stack(
-                                  children: [
-                                    // 1. Основное расширяющееся тело мешка из коричневой матовой кожи
-                                    Positioned(
-                                      bottom: 0, left: 4, right: 4,
-                                      child: Container(
-                                        width: 42, height: 40,
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFF8D4F37), 
-                                          borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16), bottomLeft: Radius.circular(12), bottomRight: Radius.circular(12)),
-                                          border: Border.all(color: const Color(0xFF4A2711), width: 2.0),
-                                        ),
-                                      ),
-                                    ),
-                                    // 2. Мягкие складки кожи сверху (ИСПРАВЛЕНО: убран внешний const, выровнено по центру мешка!)
-                                    Positioned(
-                                      top: 10, left: 8, right: 8,
-                                      child: Container(
-                                        height: 6, 
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFF6E331B), 
-                                          borderRadius: const BorderRadius.all(Radius.circular(4)),
-                                        ),
-                                      ),
-                                    ),
-                                    // 3. Свисающий завязанный кожаный шнурок-затяжка (ИСПРАВЛЕНО: смещён чётко по центру мешка!)
-                                    Positioned(
-                                      top: 14, left: 24, // Было left: 22, теперь ровно по центру шнура!
-                                      child: Container(
-                                        width: 2, height: 20, 
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFF4A2711), 
-                                          borderRadius: BorderRadius.circular(1),
-                                        ),
-                                      ),
-                                    ),
-                                    // 4. Узелок на конце шнурка (ИСПРАВЛЕНО: убран внешний const, смещён чётко под шнурок!)
-                                    Positioned(
-                                      top: 33, left: 23, // Было left: 21, теперь узелок сидит идеально ровно!
-                                      child: Container(
-                                        width: 4, height: 4, 
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFF3E1E0A), 
-                                          shape: BoxShape.circle,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-
-
-                            // Слова Шерифа строго над его головой
-                            Positioned(
-                              top: 25, left: 10, right: 10,
-                              child: CustomPaint(
-                                painter: ComicBubblePainter(tailX: 0.35),
-                                child: const Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: Text(
-                                    "Пора расхлебать это дерьмо и проучить этих свиней!",
-                                    style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: Colors.black),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                child: _currentComicPage == 0 
+                  ? Row(children: [_buildPage1Frame1(), const SizedBox(width: 12), _buildPage1Frame2(), const SizedBox(width: 12), _buildPage1Frame3()])
+                  : Row(children: [_buildPage2Frame1(), const SizedBox(width: 12), _buildPage2Frame2(), const SizedBox(width: 12), _buildPage2Frame3()]),
               ),
             ),
 
-            // КНОПКА ПОГНАЛИ СНИЗУ КОМИКСА (ЗАПУСКАЕТ ИГРУ)
+            // НИЖНЯЯ ПАНЕЛЬ НАВИГАЦИИ С КНОПКАМИ
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFF9800),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 14),
-                  elevation: 5,
-                ),
-                onPressed: () {
-                  Navigator.pop(context); // Закрываем экран сюжета
-                  
-                  GameScreen gameScreenInstance = GameScreen();
-                  gameScreenInstance.gameInstance.currentLevel = 1;
-                  gameScreenInstance.gameInstance.worldScrollX = 0.0;
+              child: _currentComicPage == 0
+                ? ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFF9800),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+                      elevation: 5,
+                    ),
+                    onPressed: () => setState(() => _currentComicPage = 1), // Вперёд на 2 страницу!
+                    icon: const Text("ВПЕРЁД", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                    label: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 24),
+                  )
+                : ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFFF9800),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 14),
+                      elevation: 5,
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context); // Закрываем комикс
+                      GameScreen gameScreenInstance = GameScreen();
+                      gameScreenInstance.gameInstance.currentLevel = 1;
+                      gameScreenInstance.gameInstance.worldScrollX = 0.0;
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => gameScreenInstance));
+                    },
+                    child: const Text("ПОГНАЛИ!", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => gameScreenInstance),
-                  );
-                },
-                child: const Text("ПОГНАЛИ!", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+  // =========================================================================
+  // КАДРЫ СТРАНИЦЫ 1 (ТВОЙ СТАРЫЙ КАБИНЕТ ШЕРИФА, ОФОРМЛЕННЫЙ МЕТОДАМИ)
+  // =========================================================================
+  Widget _buildPage1Frame1() {
+    return Expanded(
+      child: _buildComicFrame(
+        isRoom: true,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned(bottom: 12, left: 34, child: _buildWoodenChair()),
+            Positioned(bottom: 22, left: 35, child: _buildCharacterSp('assets/images/bunnyhop.png', 55)),
+            Positioned(bottom: 2, left: 62, child: _buildWoodenTable()),
+            Positioned(
+              top: 25, left: 10, right: 10,
+              child: CustomPaint(
+                painter: ComicBubblePainter(tailX: 0.45),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 12),
+                  child: Text("Обычное мирное дежурство в округе... Кофе отличный.", style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
+                ),
               ),
             ),
           ],
@@ -2022,6 +1816,378 @@ class SheriffComicScreen extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildPage1Frame2() {
+    return Expanded(
+      child: _buildComicFrame(
+        isRoom: true,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned(bottom: 12, left: 18, child: _buildWoodenChair()),
+            Positioned(bottom: 22, left: 19, child: _buildCharacterSp('assets/images/bunnyhop.png', 50)),
+            Positioned(bottom: 2, left: 44, child: _buildWoodenTable()),
+            Positioned(bottom: 4, right: 8, child: CustomPaint(size: const Size(26, 60), painter: StickmanSweatPainter())),
+            Positioned(
+              top: 15, left: 4, right: 4,
+              child: CustomPaint(
+                painter: ComicBubblePainter(tailX: 0.8),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                  child: Text("Шериф, беда! На окраинах завелись зелёные свиньи под предводительством Дона Молюска! Они грабят наши склады с виагрой!", style: TextStyle(fontSize: 8.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15), textAlign: TextAlign.center),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPage1Frame3() {
+    return Expanded(
+      child: _buildComicFrame(
+        isRoom: true,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned(
+              bottom: 10, left: 8,
+              child: Stack(
+                alignment: Alignment.topCenter,
+                children: [
+                  Padding(padding: const EdgeInsets.only(top: 10), child: _buildCharacterSp('assets/images/bunnyhop.png', 75)),
+                  Positioned(top: 0, child: _buildHatWidget()),
+                ],
+              ),
+            ),
+            Positioned(bottom: -2, left: 62, child: _buildBagWidget()),
+            Positioned(
+              top: 25, left: 10, right: 10,
+              child: CustomPaint(
+                painter: ComicBubblePainter(tailX: 0.35),
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text("Пора расхлебать это дерьмо и проучить этих свиней!", style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // =========================================================================
+  // НОВАЯ СТРАНИЦА 2: ВАНЯ В ШЛЯПЕ НА ЛУГУ У РОГАТКИ ПО ТВОЕМУ СЦЕНАРИЮ!
+  // =========================================================================
+  Widget _buildPage2Frame1() {
+    return Expanded(
+      child: _buildComicFrame(
+        isRoom: false, // Включает траву, небо и солнце луга
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // Ваня Баннихоп сурово стоит в ШЛЯПЕ
+            Positioned(
+              bottom: 10, left: 25,
+              child: Stack(
+                alignment: Alignment.topCenter,
+                children: [
+                  Padding(padding: const EdgeInsets.only(top: 10), child: _buildCharacterSp('assets/images/bunnyhop.png', 65)),
+                  Positioned(top: 0, child: ScaleTransition(scale: const AlwaysStoppedAnimation(0.85), child: _buildHatWidget())),
+                ],
+              ),
+            ),
+            // Одинокий раскиданный БЛИСТЕР виагры в траве (1 блистер на кадре)
+            Positioned(bottom: 8, right: 35, child: _buildBlisterWidget()),
+            
+            Positioned(
+              top: 25, left: 8, right: 8,
+              child: CustomPaint(
+                painter: ComicBubblePainter(tailX: 0.35),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                  child: Text("Так... Следы ведут на этот луг. Ошмётки упаковок повсюду. Свиньи где-то рядом...", style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15), textAlign: TextAlign.center),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPage2Frame2() {
+    return Expanded(
+      child: _buildComicFrame(
+        isRoom: false,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // Деревянная рогатка на заднем фоне луга
+            Positioned(bottom: 20, left: 55, child: Container(width: 12, height: 45, color: const Color(0xFF4E342E))),
+            Positioned(bottom: 55, left: 47, child: Container(width: 28, height: 6, color: const Color(0xFF4E342E))),
+
+                        // Ваня в ШЛЯПЕ подходит слева
+            Positioned(
+              bottom: 10, left: 6,
+              child: Stack(
+                alignment: Alignment.topCenter,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: _buildCharacterSp('assets/images/bunnyhop.png', 52),
+                  ),
+                  // Ковбойская шляпа прописана прямо в коде кадра
+                  Positioned(
+                    top: 0,
+                    child: SizedBox(
+                      width: 55,
+                      height: 25,
+                      child: Stack(
+                        alignment: Alignment.topCenter,
+                        children: [
+                          Container(
+                            width: 32, height: 14,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF795548),
+                              borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 3,
+                            child: Container(
+                              width: 52, height: 5,
+                              decoration: BoxDecoration(color: const Color(0xFF6D4C41), borderRadius: BorderRadius.circular(4), border: Border.all(color: const Color(0xFF4E342E), width: 0.8)),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 7,
+                            child: Container(
+                              width: 31, height: 2,
+                              decoration: BoxDecoration(color: const Color(0xFF212121), borderRadius: BorderRadius.circular(1)),
+                            ),
+                          ),
+                          Positioned(
+                            top: 2,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Icon(Icons.star_rounded, color: Colors.blueGrey.shade100, size: 14),
+                                Container(
+                                  width: 4, height: 4, 
+                                  decoration: const BoxDecoration(color: Color(0xFFFFFFFF), shape: BoxShape.circle),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Две свиньи Максима сидят у рогатки справа
+            Positioned(bottom: 10, right: 38, child: _buildCharacterSp('assets/images/maksim.png', 44, isPig: true)),
+            Positioned(bottom: 10, right: 8, child: _buildCharacterSp('assets/images/maksim.png', 44, isPig: true)),
+
+            // Блистеры виагры на кадре (1 в траве, 2-й лежит строго у ног свиньи)
+            Positioned(bottom: 6, left: 40, child: Transform.rotate(angle: 0.2, child: _buildBlisterWidget())),
+            Positioned(bottom: 4, right: 46, child: Transform.rotate(angle: -0.1, child: _buildBlisterWidget())), 
+
+            // Два облака диалогов: Сначала Ваня, потом Свинья
+            Positioned(
+              top: 15, left: 6, width: 95,
+              child: CustomPaint(
+                painter: ComicBubblePainter(tailX: 0.25),
+                child: const Padding(padding: EdgeInsets.all(5.0), child: Text("Я нашёл вас!", style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center)),
+              ),
+            ),
+            Positioned(
+              top: 35, right: 6, width: 135,
+              child: CustomPaint(
+                painter: ComicBubblePainter(tailX: 0.8),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 5, vertical: 6),
+                  child: Text("О, Шериф припёрся! Ну что, таблеточки-то тю-тю! Наш босс станет бессмертным, и ты нас ни за что не достанешь - мы построили неприступную крепость!", style: TextStyle(fontSize: 7.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.1), textAlign: TextAlign.center),
+                ),
+              ),
+            ),
+            // Ответ Вани под облаком свиньи
+            Positioned(
+              bottom: 60, left: 10, right: 10,
+              child: CustomPaint(
+                painter: ComicBubblePainter(tailX: 0.2),
+                child: const Padding(padding: EdgeInsets.all(5.0), child: Text("Вы совершили главную ошибку в жизни, зайдя на луг птиц и начав воровать мои таблетки!", style: TextStyle(fontSize: 7.6, fontWeight: FontWeight.bold, color: Colors.red), textAlign: TextAlign.center)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPage2Frame3() {
+    return Expanded(
+      child: _buildComicFrame(
+        isRoom: false,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // Рогатка по центру кадра
+            Positioned(bottom: 20, center: 0, child: Container(width: 14, height: 50, color: const Color(0xFF4E342E))),
+            Positioned(bottom: 60, left: 45, child: Container(width: 40, height: 7, color: const Color(0xFF4E342E))),
+
+            // Ваня сидит СТРОГО ВНУТРИ РОГАТКИ в ШЛЯПЕ!
+            Positioned(
+              bottom: 42, left: 47,
+              child: Stack(
+                alignment: Alignment.topCenter,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: _buildCharacterSp('assets/images/bunnyhop.png', 68),
+                  ),
+                  // Шляпа прописана прямо в коде кадра рогатки
+                  Positioned(
+                    top: 0,
+                    child: SizedBox(
+                      width: 55,
+                      height: 25,
+                      child: Stack(
+                        alignment: Alignment.topCenter,
+                        children: [
+                          Container(
+                            width: 32, height: 14,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF795548),
+                              borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 3,
+                            child: Container(
+                              width: 52, height: 5,
+                              decoration: BoxDecoration(color: const Color(0xFF6D4C41), borderRadius: BorderRadius.circular(4), border: Border.all(color: const Color(0xFF4E342E), width: 0.8)),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 7,
+                            child: Container(
+                              width: 31, height: 2,
+                              decoration: BoxDecoration(color: const Color(0xFF212121), borderRadius: BorderRadius.circular(1)),
+                            ),
+                          ),
+                          Positioned(
+                            top: 2,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Icon(Icons.star_rounded, color: Colors.blueGrey.shade100, size: 14),
+                                Container(
+                                  width: 4, height: 4, 
+                                  decoration: const BoxDecoration(color: Color(0xFFFFFFFF), shape: BoxShape.circle),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            Positioned(
+              top: 25, left: 15, right: 15,
+              child: CustomPaint(
+                painter: ComicBubblePainter(tailX: 0.5),
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text("Посмотрим, какую крепость вы построили!", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // =========================================================================
+  // ВСПОМОГАТЕЛЬНЫЕ ВИДЖЕТЫ ДЛЯ СТРАНИЦЫ НА ЛУГУ
+  // =========================================================================
+  Widget _buildBlisterWidget() {
+    return Container(
+      width: 22, height: 22,
+      decoration: BoxDecoration(
+        color: const Color(0xFFCFD8DC), 
+        borderRadius: BorderRadius.circular(4), 
+        border: Border.all(color: const Color(0xFF78909C), width: 0.8),
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned(top: 2, left: 2, child: Container(width: 5, height: 7, decoration: BoxDecoration(color: const Color(0xFF29B6F6), borderRadius: BorderRadius.circular(2)))),
+          Positioned(top: 2, right: 2, child: Container(width: 5, height: 7, decoration: BoxDecoration(color: const Color(0xFF29B6F6), borderRadius: BorderRadius.circular(2)))),
+          Positioned(bottom: 2, left: 2, child: Container(width: 5, height: 7, decoration: BoxDecoration(color: const Color(0xFF29B6F6), borderRadius: BorderRadius.circular(2)))),
+          Positioned(bottom: 2, right: 2, child: Container(width: 5, height: 7, decoration: BoxDecoration(color: const Color(0xFF29B6F6), borderRadius: BorderRadius.circular(2)))),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCharacterSp(String assetPath, double size, {bool isPig = false}) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Container(
+          width: size, height: size, 
+          decoration: BoxDecoration(
+            color: isPig ? const Color(0xFF7CB342) : const Color(0xFFE53935), 
+            shape: BoxShape.circle, 
+            border: Border.all(color: Colors.black, width: 2),
+          ),
+        ),
+        ClipOval(
+          child: Image.asset(assetPath, width: size * 0.85, height: size * 0.85, fit: BoxFit.cover),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildComicFrame({required Widget child, required bool isRoom}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: isRoom ? const Color(0xFFD7CCC8) : Colors.blue.shade300,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.black, width: 3.5),
+        boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 6, offset: Offset(0, 4))],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Stack(
+          children: [
+            if (!isRoom) ...[
+              Positioned(top: -10, right: -10, child: Container(width: 40, height: 40, decoration: const BoxDecoration(color: Color(0xFFFFF176), shape: BoxShape.circle))),
+              Positioned(top: 10, left: 10, child: Icon(Icons.cloud_rounded, size: 20, color: Colors.white.withValues(alpha: 0.5))),
+            ],
+            Positioned(bottom: 0, left: 0, right: 0, child: Container(height: 20, color: isRoom ? const Color(0xFF8D6E63) : const Color(0xFF4CAF50))),
+            child,
+          ],
+        ),
+      ),
+    );
+  }
+} // <--- Закрывает класс _SheriffComicScreenState
+
+
+              
+
 
     // Векторный сборщик стула со спинкой из светлой сосны по твоей фотографии
   Widget _buildWoodenChair() {
