@@ -1707,7 +1707,6 @@ class SpeechBubblePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// ПОЛНОСТЬЮ ЗАМЕНИ СТАРЫЙ SheriffComicScreen НА ЭТОТ ЦЕЛЬНЫЙ STATEFUL-ВАРИАНТ:
 class SheriffComicScreen extends StatefulWidget {
   const SheriffComicScreen({super.key});
 
@@ -1716,12 +1715,10 @@ class SheriffComicScreen extends StatefulWidget {
 }
 
 class _SheriffComicScreenState extends State<SheriffComicScreen> {
-  int _currentComicPage = 0; // 0 - страница в кабинете, 1 - страница на лугу
+  int _currentComicPage = 0; // 0 - кабинет, 1 - луг
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    
     return Scaffold(
       backgroundColor: const Color(0xFF0F0F14),
       body: SafeArea(
@@ -1740,7 +1737,7 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
             ),
             const SizedBox(height: 16),
 
-            // ГЛАВНАЯ СЕТКА КОМИКСА (Переключается в зависимости от _currentComicPage)
+            // ГЛАВНАЯ СЕТКА КАДРОВ
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -1750,7 +1747,7 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
               ),
             ),
 
-            // НИЖНЯЯ ПАНЕЛЬ НАВИГАЦИИ С КНОПКАМИ
+            // НАВИГАЦИЯ
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: _currentComicPage == 0
@@ -1761,7 +1758,7 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
                       elevation: 5,
                     ),
-                    onPressed: () => setState(() => _currentComicPage = 1), // Вперёд на 2 страницу!
+                    onPressed: () => setState(() => _currentComicPage = 1),
                     icon: const Text("ВПЕРЁД", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
                     label: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 24),
                   )
@@ -1773,7 +1770,7 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
                       elevation: 5,
                     ),
                     onPressed: () {
-                      Navigator.pop(context); // Закрываем комикс
+                      Navigator.pop(context);
                       GameScreen gameScreenInstance = GameScreen();
                       gameScreenInstance.gameInstance.currentLevel = 1;
                       gameScreenInstance.gameInstance.worldScrollX = 0.0;
@@ -1789,7 +1786,7 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
   }
 
   // =========================================================================
-  // КАДРЫ СТРАНИЦЫ 1 (ТВОЙ СТАРЫЙ КАБИНЕТ ШЕРИФА, ОФОРМЛЕННЫЙ МЕТОДАМИ)
+  // КАДРЫ СТРАНИЦЫ 1 (В ДЕРЕВЯННОМ КАБИНЕТЕ)
   // =========================================================================
   Widget _buildPage1Frame1() {
     return Expanded(
@@ -1844,7 +1841,7 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
     );
   }
 
-  Widget _buildPage1Frame3() {
+    Widget _buildPage1Frame3() {
     return Expanded(
       child: _buildComicFrame(
         isRoom: true,
@@ -1856,12 +1853,46 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
               child: Stack(
                 alignment: Alignment.topCenter,
                 children: [
-                  Padding(padding: const EdgeInsets.only(top: 10), child: _buildCharacterSp('assets/images/bunnyhop.png', 75)),
-                  Positioned(top: 0, child: _buildHatWidget()),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: _buildCharacterSp('assets/images/bunnyhop.png', 75),
+                  ),
+                  // КОВБОЙСКАЯ ШЛЯПА ВШИТА В КОД КАДРА СЕРДЦЕМ СТЕКА
+                  Positioned(
+                    top: 0,
+                    child: SizedBox(
+                      width: 55, height: 25,
+                      child: Stack(
+                        alignment: Alignment.topCenter,
+                        children: [
+                          Container(width: 32, height: 14, decoration: const BoxDecoration(color: Color(0xFF795548), borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)))),
+                          Positioned(bottom: 3, child: Container(width: 52, height: 5, decoration: BoxDecoration(color: const Color(0xFF6D4C41), borderRadius: BorderRadius.circular(4), border: Border.all(color: const Color(0xFF4E342E), width: 0.8)))),
+                          Positioned(bottom: 7, child: Container(width: 31, height: 2, decoration: BoxDecoration(color: const Color(0xFF212121), borderRadius: BorderRadius.circular(1)))),
+                          Positioned(top: 2, child: Stack(alignment: Alignment.center, children: [Icon(Icons.star_rounded, color: Colors.blueGrey.shade100, size: 14), Container(width: 4, height: 4, decoration: const BoxDecoration(color: Color(0xFFFFFFFF), shape: BoxShape.circle))])),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
-            Positioned(bottom: -2, left: 62, child: _buildBagWidget()),
+            // КОЖАНАЯ СУМКА ВШИТА В КОД КАДРА СЕРДЦЕМ СТЕКА
+            Positioned(
+              bottom: -2, left: 62,
+              child: SizedBox(
+                width: 50, height: 50,
+                child: Stack(
+                  children: [
+                    Positioned(bottom: 0, left: 4, right: 4, child: Container(width: 42, height: 40, decoration: BoxDecoration(color: const Color(0xFF8D4F37), borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16), bottomLeft: Radius.circular(12), bottomRight: Radius.circular(12)), border: Border.all(color: const Color(0xFF4A2711), width: 2.0)))),
+                    Positioned(bottom: 2, left: 6, child: Container(width: 3, height: 26, color: const Color(0xFF6E331B))),
+                    Positioned(bottom: 2, right: 6, child: Container(width: 3, height: 26, color: const Color(0xFF6E331B))),
+                    Positioned(top: 10, left: 8, right: 8, child: Container(height: 6, decoration: const BoxDecoration(color: Color(0xFF6E331B), borderRadius: BorderRadius.all(Radius.circular(4))))),
+                    Positioned(top: 14, left: 24, child: Container(width: 2, height: 20, decoration: BoxDecoration(color: const Color(0xFF4A2711), borderRadius: BorderRadius.circular(1)))),
+                    Positioned(top: 33, left: 23, child: Container(width: 4, height: 4, decoration: const BoxDecoration(color: Color(0xFF3E1E0A), shape: BoxShape.circle))),
+                  ],
+                ),
+              ),
+            ),
             Positioned(
               top: 25, left: 10, right: 10,
               child: CustomPaint(
@@ -1879,29 +1910,41 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
   }
 
   // =========================================================================
-  // НОВАЯ СТРАНИЦА 2: ВАНЯ В ШЛЯПЕ НА ЛУГУ У РОГАТКИ ПО ТВОЕМУ СЦЕНАРИЮ!
+  // КАДРЫ СТРАНИЦЫ 2 (НА ЗЕЛЁНОМ ЛУГУ)
   // =========================================================================
   Widget _buildPage2Frame1() {
     return Expanded(
       child: _buildComicFrame(
-        isRoom: false, // Включает траву, небо и солнце луга
+        isRoom: false,
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Ваня Баннихоп сурово стоит в ШЛЯПЕ
             Positioned(
               bottom: 10, left: 25,
               child: Stack(
                 alignment: Alignment.topCenter,
                 children: [
                   Padding(padding: const EdgeInsets.only(top: 10), child: _buildCharacterSp('assets/images/bunnyhop.png', 65)),
-                  Positioned(top: 0, child: ScaleTransition(scale: const AlwaysStoppedAnimation(0.85), child: _buildHatWidget())),
+                  // ШЛЯПА ВШИТА В КОД КАДРА СЕРДЦЕМ СТЕКА
+                  Positioned(
+                    top: 0,
+                    child: SizedBox(
+                      width: 55, height: 25,
+                      child: Stack(
+                        alignment: Alignment.topCenter,
+                        children: [
+                          Container(width: 32, height: 14, decoration: const BoxDecoration(color: Color(0xFF795548), borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)))),
+                          Positioned(bottom: 3, child: Container(width: 52, height: 5, decoration: BoxDecoration(color: const Color(0xFF6D4C41), borderRadius: BorderRadius.circular(4), border: Border.all(color: const Color(0xFF4E342E), width: 0.8)))),
+                          Positioned(bottom: 7, child: Container(width: 31, height: 2, decoration: BoxDecoration(color: const Color(0xFF212121), borderRadius: BorderRadius.circular(1)))),
+                          Positioned(top: 2, child: Stack(alignment: Alignment.center, children: [Icon(Icons.star_rounded, color: Colors.blueGrey.shade100, size: 14), Container(width: 4, height: 4, decoration: const BoxDecoration(color: Color(0xFFFFFFFF), shape: BoxShape.circle))])),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
-            // Одинокий раскиданный БЛИСТЕР виагры в траве (1 блистер на кадре)
             Positioned(bottom: 8, right: 35, child: _buildBlisterWidget()),
-            
             Positioned(
               top: 25, left: 8, right: 8,
               child: CustomPaint(
@@ -1918,7 +1961,7 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
     );
   }
 
-  Widget _buildPage2Frame2() {
+    Widget _buildPage2Frame2() {
     return Expanded(
       child: _buildComicFrame(
         isRoom: false,
@@ -1929,7 +1972,7 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
             Positioned(bottom: 20, left: 55, child: Container(width: 12, height: 45, color: const Color(0xFF4E342E))),
             Positioned(bottom: 55, left: 47, child: Container(width: 28, height: 6, color: const Color(0xFF4E342E))),
 
-                        // Ваня в ШЛЯПЕ подходит слева
+            // Ваня в ШЛЯПЕ подходит слева (Шляпа полностью вшита в код кадра)
             Positioned(
               bottom: 10, left: 6,
               child: Stack(
@@ -1939,7 +1982,6 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
                     padding: const EdgeInsets.only(top: 10),
                     child: _buildCharacterSp('assets/images/bunnyhop.png', 52),
                   ),
-                  // Ковбойская шляпа прописана прямо в коде кадра
                   Positioned(
                     top: 0,
                     child: SizedBox(
@@ -2037,68 +2079,69 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Рогатка по центру кадра
-            Positioned(bottom: 20, center: 0, child: Container(width: 14, height: 50, color: const Color(0xFF4E342E))),
-            Positioned(bottom: 60, left: 45, child: Container(width: 40, height: 7, color: const Color(0xFF4E342E))),
+            // Рогатка по центру кадра с правильным Positioned центрированием
+            Positioned(bottom: 20, left: 0, right: 0, child: Center(child: Container(width: 14, height: 50, color: const Color(0xFF4E342E)))),
+            Positioned(bottom: 60, left: 0, right: 0, child: Center(child: Container(width: 40, height: 7, color: const Color(0xFF4E342E)))),
 
             // Ваня сидит СТРОГО ВНУТРИ РОГАТКИ в ШЛЯПЕ!
             Positioned(
-              bottom: 42, left: 47,
-              child: Stack(
-                alignment: Alignment.topCenter,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: _buildCharacterSp('assets/images/bunnyhop.png', 68),
-                  ),
-                  // Шляпа прописана прямо в коде кадра рогатки
-                  Positioned(
-                    top: 0,
-                    child: SizedBox(
-                      width: 55,
-                      height: 25,
-                      child: Stack(
-                        alignment: Alignment.topCenter,
-                        children: [
-                          Container(
-                            width: 32, height: 14,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF795548),
-                              borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)),
+              bottom: 42, left: 0, right: 0,
+              child: Center(
+                child: Stack(
+                  alignment: Alignment.topCenter,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: _buildCharacterSp('assets/images/bunnyhop.png', 68),
+                    ),
+                    Positioned(
+                      top: 0,
+                      child: SizedBox(
+                        width: 55,
+                        height: 25,
+                        child: Stack(
+                          alignment: Alignment.topCenter,
+                          children: [
+                            Container(
+                              width: 32, height: 14,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF795548),
+                                borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)),
+                              ),
                             ),
-                          ),
-                          Positioned(
-                            bottom: 3,
-                            child: Container(
-                              width: 52, height: 5,
-                              decoration: BoxDecoration(color: const Color(0xFF6D4C41), borderRadius: BorderRadius.circular(4), border: Border.all(color: const Color(0xFF4E342E), width: 0.8)),
+                            Positioned(
+                              bottom: 3,
+                              child: Container(
+                                width: 52, height: 5,
+                                decoration: BoxDecoration(color: const Color(0xFF6D4C41), borderRadius: BorderRadius.circular(4), border: Border.all(color: const Color(0xFF4E342E), width: 0.8)),
+                              ),
                             ),
-                          ),
-                          Positioned(
-                            bottom: 7,
-                            child: Container(
-                              width: 31, height: 2,
-                              decoration: BoxDecoration(color: const Color(0xFF212121), borderRadius: BorderRadius.circular(1)),
+                            Positioned(
+                              bottom: 7,
+                              child: Container(
+                                width: 31, height: 2,
+                                decoration: BoxDecoration(color: const Color(0xFF212121), borderRadius: BorderRadius.circular(1)),
+                              ),
                             ),
-                          ),
-                          Positioned(
-                            top: 2,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                Icon(Icons.star_rounded, color: Colors.blueGrey.shade100, size: 14),
-                                Container(
-                                  width: 4, height: 4, 
-                                  decoration: const BoxDecoration(color: Color(0xFFFFFFFF), shape: BoxShape.circle),
-                                ),
-                              ],
+                            Positioned(
+                              top: 2,
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Icon(Icons.star_rounded, color: Colors.blueGrey.shade100, size: 14),
+                                  Container(
+                                    width: 4, height: 4, 
+                                    decoration: const BoxDecoration(color: Color(0xFFFFFFFF), shape: BoxShape.circle),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
 
@@ -2118,10 +2161,7 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
     );
   }
 
-  // =========================================================================
-  // ВСПОМОГАТЕЛЬНЫЕ ВИДЖЕТЫ ДЛЯ СТРАНИЦЫ НА ЛУГУ
-  // =========================================================================
-  Widget _buildBlisterWidget() {
+    Widget _buildBlisterWidget() {
     return Container(
       width: 22, height: 22,
       decoration: BoxDecoration(
@@ -2140,50 +2180,11 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
       ),
     );
   }
+} // <--- ВОТ ЭТА СКОБКА ТЕПЕРЬ СТРОГО ЗАКРЫВАЕТ КЛАСС _SheriffComicScreenState!
 
-  Widget _buildCharacterSp(String assetPath, double size, {bool isPig = false}) {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        Container(
-          width: size, height: size, 
-          decoration: BoxDecoration(
-            color: isPig ? const Color(0xFF7CB342) : const Color(0xFFE53935), 
-            shape: BoxShape.circle, 
-            border: Border.all(color: Colors.black, width: 2),
-          ),
-        ),
-        ClipOval(
-          child: Image.asset(assetPath, width: size * 0.85, height: size * 0.85, fit: BoxFit.cover),
-        ),
-      ],
-    );
-  }
 
-  Widget _buildComicFrame({required Widget child, required bool isRoom}) {
-    return Container(
-      decoration: BoxDecoration(
-        color: isRoom ? const Color(0xFFD7CCC8) : Colors.blue.shade300,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.black, width: 3.5),
-        boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 6, offset: Offset(0, 4))],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Stack(
-          children: [
-            if (!isRoom) ...[
-              Positioned(top: -10, right: -10, child: Container(width: 40, height: 40, decoration: const BoxDecoration(color: Color(0xFFFFF176), shape: BoxShape.circle))),
-              Positioned(top: 10, left: 10, child: Icon(Icons.cloud_rounded, size: 20, color: Colors.white.withValues(alpha: 0.5))),
-            ],
-            Positioned(bottom: 0, left: 0, right: 0, child: Container(height: 20, color: isRoom ? const Color(0xFF8D6E63) : const Color(0xFF4CAF50))),
-            child,
-          ],
-        ),
-      ),
-    );
-  }
-} // <--- Закрывает класс _SheriffComicScreenState
+
+
 
 
               
