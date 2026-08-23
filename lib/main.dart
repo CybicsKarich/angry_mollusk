@@ -1288,48 +1288,48 @@ class ComicIntroScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     
-                    // ЗАМЕНИТЬ НАЧАЛО КАДРА НА ЭТОТ КОРРЕКТНЫЙ ВАРИАНТ:
+                   // ПОЛНОСТЬЮ ЗАМЕНИТЬ КОД КАДРА 1 НА ЭТОТ КОРРЕКТНЫЙ ВАРИАНТ:
+// КАДР 1: ТРИ МАКСИМА ЗАМЫШЛЯЮТ ПЛАН
 Expanded(
-  child: _buildComicFrame( 
-        // Твой основной внутренний стек персонажей и диалогов
-        Stack(
-          alignment: Alignment.center,
-          children: [
+  child: _buildComicFrame(
+    child: Stack(
+      alignment: Alignment.center,
+      children: [
+        // ТРИ КРУПНЫХ МАКСИМА (Зелёные свиньи с лицом Максима Рыбалкина)
+        Positioned(
+          bottom: 10, left: 10,
+          child: _buildCharacterImage('assets/images/maksim.png', 55, isPig: true),
+        ),
+        Positioned(
+          bottom: -5, left: 45,
+          child: _buildCharacterImage('assets/images/maksim.png', 65, isPig: true),
+        ),
+        Positioned(
+          bottom: 12, left: 90,
+          child: _buildCharacterImage('assets/images/maksim.png', 50, isPig: true),
+        ),
+        
+        // Большой объём текста над головами персонажей
+        Positioned(
+          top: 28, left: 6, right: 6,
+          child: CustomPaint(
+            painter: SpeechBubblePainter(tailXFactor: 0.5, tailGoesUp: false),
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+              child: Text(
+                "Баннихоп уже достал, постоянно ломает наши дома. А давай-ка его проучим! Сделаем дом из бронированного стекла. Тогда он точно не сможет его сломать!",
+                style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  ),
+),
+const SizedBox(width: 12),
 
-                            // ТРИ КРУПНЫХ МАКСИМА (Зелёные свиньи с лицом Максима Рыбалкина)
-                            Positioned(
-                              bottom: 10, left: 10,
-                              child: _buildCharacterImage('assets/images/maksim.png', 55, isPig: true),
-                            ),
-                            Positioned(
-                              bottom: -5, left: 45,
-                              child: _buildCharacterImage('assets/images/maksim.png', 65, isPig: true),
-                            ),
-                            Positioned(
-                              bottom: 12, left: 90,
-                              child: _buildCharacterImage('assets/images/maksim.png', 50, isPig: true),
-                            ),
-                            
-                            // Опустили большой объём текста ниже, прямо к головам персонажей!
-                            Positioned(
-                              top: 28, left: 6, right: 6,
-                              child: CustomPaint(
-                                painter: SpeechBubblePainter(tailXFactor: 0.5, tailGoesUp: false),
-                                child: const Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                                  child: Text(
-                                    "Баннихоп уже достал, постоянно ломает наши дома. А давай-ка его проучим! Сделаем дом из бронированного стекла. Тогда он точно не сможет его сломать!",
-                                    style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),       
-                    ),
-                   ),
-                    const SizedBox(width: 12),
 
                     // КАДР 2: БАННИХОП ПОДФИГЕВАЕТ ОТ НАГЛОСТИ (ИСПРАВЛЕНО: ТЕПЕРЬ ТУТ 3 СВИНЬИ!)
                     Expanded(
@@ -2006,7 +2006,7 @@ Positioned(
     painter: _TentacleSkyShadowPainter(),
   ),
 ),
-
+),
           alignment: Alignment.center,
           children: [
             // ЗАМЕНИТЬ ТОЛЬКО БЛОК РОГАТКИ ВНУТРИ _buildPage2Frame2 НА ЭТОТ:
@@ -2118,7 +2118,6 @@ Positioned(bottom: 54, left: 86, child: Container(width: 26, height: 4, decorati
           ],
         ),
       ),
-    );
   }
 
   Widget _buildPage2Frame3() {
