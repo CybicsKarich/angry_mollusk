@@ -1467,30 +1467,36 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
       canvas.restore();
     }
 
-    // ВСТАВИТЬ ПЕРЕД САМЫМ ПОСЛЕДНИМ canvas.restore() В МЕТОДЕ render():
+    // ЗАМЕНИТЬ ОТРЕЗОК ОТРИСОВКИ showWantedBig ВНУТРИ МЕТОДА render() НА ЭТОТ КОРРЕКТНЫЙ ВАРИАНТ:
 if (showWantedBig) {
   canvas.save();
-  // Переносим начало координат в центр экрана, чтобы плакат вылетал ровно посередине
-  canvas.translate(size.width / 2, size.height / 2);
+  
+  // Рассчитываем стартовую координату острова с замком Максимов
+  double islandStart = currentLevel == 1 ? 0.55 : (currentLevel == 2 ? 1.28 : 1.15);
+  
+  // Формула сдвига: на 1 уровне — по центру экрана, на 2 и 3 уровнях — строго с левой стороны здания над водой!
+  double targetX = currentLevel == 1 
+      ? size.width / 2 
+      : (islandStart - 0.20) * size.width; // Сдвигаем на 20% левее постройки, чётко над океаном
+      
+  double targetY = size.height / 2; // Высота остаётся центральной для лучшего обзора
+
+  canvas.translate(targetX, targetY);
   
   double scale = 1.0;
   if (wantedAnimTimer < 0.4) {
-    // Фаза сочного вылета: плакат раздувается из нуля
     scale = (wantedAnimTimer / 0.4) * 1.0;
   } else if (wantedAnimTimer > 5.5) {
-    // Фаза растворения в конце 6-й секунды
     scale = 1.0 - ((wantedAnimTimer - 5.5) / 0.5);
   }
   canvas.scale(scale);
 
-  // Размеры плаката Wanted по твоему референсу (вертикальный, примерно на треть экрана)
   final posterSize = Size(size.width * 0.30, size.height * 0.85);
-  
-  // Вызываем нашего продвинутого векторного художника плаката!
   WantedPosterPainter(animTimer: wantedAnimTimer).paint(canvas, posterSize);
 
   canvas.restore();
 }
+
 
     canvas.restore();
     }
