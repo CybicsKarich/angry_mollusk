@@ -1975,12 +1975,13 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
             // ЗАМЕНИТЬ ТОЛЬКО БЛОК РОГАТКИ ВНУТРИ _buildPage2Frame2 НА ЭТОТ:
 // 1. Рукоять рогатки (вертикальный ствол)
 Positioned(bottom: 20, left: 95, child: Container(width: 8, height: 26, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(2)))),
-// 2. Левый рожок (уходит по диагонали влево-вверх)
-Positioned(bottom: 44, left: 88, child: Transform.rotate(angle: -0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5))))),
-// 3. Правый рожок (уходит по диагонали вправо-вверх)
-Positioned(bottom: 44, left: 104, child: Transform.rotate(angle: 0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5))))),
-// 4. Красная толстая нитка-резинка (натянута ровно между верхушками рожков)
-Positioned(bottom: 56, left: 86, child: Container(width: 26, height: 4, decoration: BoxDecoration(color: const Color(0xFFD32F2F), borderRadius: BorderRadius.circular(1)))),
+// 2. Левый рожок (прижат вплотную к рукояти на высоте bottom: 42)
+Positioned(bottom: 42, left: 88, child: Transform.rotate(angle: -0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5))))),
+// 3. Правый рожок (прижат вплотную к рукояти на высоте bottom: 42)
+Positioned(bottom: 42, left: 104, child: Transform.rotate(angle: 0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5))))),
+// 4. Красная толстая нитка-резинка (ровно на вершинах рожков)
+Positioned(bottom: 54, left: 86, child: Container(width: 26, height: 4, decoration: BoxDecoration(color: const Color(0xFFD32F2F), borderRadius: BorderRadius.circular(1)))),
+
 
             // Ваня в ШЛЯПЕ подходит слева (Шляпа полностью вшита в код кадра)
             Positioned(
@@ -2090,26 +2091,32 @@ Positioned(bottom: 56, left: 86, child: Container(width: 26, height: 4, decorati
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // ЗАМЕНИТЬ КОД РОГАТКИ И ПЕРСОНАЖА ВНУТРИ _buildPage2Frame3 НА ЭТОТ ЭПИЧНЫЙ:
-// 1. Рукоять рогатки по центру кадра
-Positioned(bottom: 20, left: 0, right: 0, child: Center(child: Container(width: 8, height: 26, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(2))))),
-// 2. Левый рожок рогатки
-Positioned(bottom: 44, left: 0, right: 16, child: Center(child: Transform.rotate(angle: -0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5)))))),
-// 3. Правый рожок рогатки
-Positioned(bottom: 44, left: 16, right: 0, child: Center(child: Transform.rotate(angle: 0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5)))))),
+            // ПОЛНОСТЬЮ ЗАМЕНИТЬ СОДЕРЖИМОЕ Stack ВНУТРИ _buildPage2Frame3 НА ЭТОТ КОРРЕКТНЫЙ ВАРИАНТ:
+// 1. УВЕЛИЧЕННАЯ рукоять рогатки по центру кадра (высота стала 34)
+Positioned(bottom: 20, left: 0, right: 0, child: Center(child: Container(width: 10, height: 34, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(2))))),
+// 2. Левый рожок (увеличен, прижат к стволу)
+Positioned(bottom: 50, left: 0, right: 22, child: Center(child: Transform.rotate(angle: -0.4, child: Container(width: 8, height: 22, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(2)))))),
+// 3. Правый рожок (увеличен, прижат к стволу)
+Positioned(bottom: 50, left: 22, right: 0, child: Center(child: Transform.rotate(angle: 0.4, child: Container(width: 8, height: 22, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(2)))))),
 
-// 4. ДВЕ КРАСНЫЕ НИТИ НАТЯНУТОЙ РЕЗИНКИ (Тянутся от рожков вниз к отпрянувшему Ване!)
-Positioned(bottom: 34, left: 0, right: 20, child: Center(child: Transform.rotate(angle: 0.6, child: Container(width: 4, height: 25, color: const Color(0xFFD32F2F))))),
-Positioned(bottom: 34, left: 20, right: 0, child: Center(child: Transform.rotate(angle: -0.6, child: Container(width: 4, height: 25, color: const Color(0xFFD32F2F))))),
+// 4. ДВЕ ТОЛСТЫЕ КРАСНЫЕ РЕЗИНКИ (Идут от вершин рожков ровно к Ване, который сидит в центре!)
+Positioned(bottom: 45, left: 0, right: 28, child: Center(child: Transform.rotate(angle: 0.55, child: Container(width: 5, height: 24, color: const Color(0xFFD32F2F))))),
+// Координаты правой резинки зеркальны
+Positioned(bottom: 45, left: 28, right: 0, child: Center(child: Transform.rotate(angle: -0.55, child: Container(width: 5, height: 24, color: const Color(0xFFD32F2F))))),
 
-// 5. ВАНЯ БАННИХОП И ШЛЯПА СДВИГНУТЫ НАЗАД И ВНИЗ (Эффект жесткого натяжения перед пуском!)
+// 5. ВАНЯ БАННИХОП И ШЛЯПА СИДЯТ СТРОГО В ЦЕНТРЕ НА РЕЗИНКЕ (ВЫСОТА bottom: 40)
 Positioned(
-  bottom: 12, left: 0, right: 0, // Опустили ниже к земле от сильного натяжения
+  bottom: 40, // Ваня поднят над травой и зафиксирован прямо в седле натянутой рогатки!
+  left: 0, 
+  right: 0,
   child: Center(
     child: Stack(
       alignment: Alignment.topCenter,
       children: [
-        Padding(padding: const EdgeInsets.only(top: 10), child: _buildCharacterSp('assets/images/bunnyhop.png', 68, isPig: false)),
+        Padding(
+          padding: const EdgeInsets.only(top: 10), 
+          child: _buildCharacterSp('assets/images/bunnyhop.png', 68, isPig: false),
+        ),
         Positioned(
           top: 0,
           child: SizedBox(
@@ -2130,10 +2137,9 @@ Positioned(
   ),
 ),
 
-
-            // ЗАМЕНИТЬ ТОЛЬКО БЛОК СЛОВ ВАНЬКИ В САМОМ КОНЦЕ МЕТОДА _buildPage2Frame3:
+// 6. ОБЛАЧКО ДИАЛОГА РОВНО НАД ГОЛОВОЙ УВЕЛИЧЕННОГО ВАНЯНИ
 Positioned(
-  top: 48, // Опустили облачко со словами пониже, прямо к макушке натянутого Вани!
+  top: 20, // Подняли слова повыше, так как сам Ваня теперь гордо сидит на рогатке!
   left: 15, 
   right: 15,
   child: CustomPaint(
@@ -2148,6 +2154,7 @@ Positioned(
     ),
   ),
 ),
+
 
           ],
         ),
