@@ -1865,16 +1865,15 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // ВСТАВИТЬ СТРОГО СЮДА (Самым первым элементом большого внешнего Stack!):
-          // Микро-тень улыбки Ardor Gaming лежит на чистом участке деревянного пола справа
-          Positioned(
-            bottom: 4,  // Чуть приподняли над самым низом, чтобы не улетала за экран
-            left: 115, // Сдвинули далеко вправо на чистый пол, подальше от сумки
-            child: CustomPaint(
-              size: const Size(22, 10), // Сделали чуть-чуть крупнее и чётче, чтобы лучше читалась
-              painter: _SecretMouthShadowPainter(),
-            ),
-          ),
+            // ТОЧЕЧНО ЗАМЕНИТЬ КООРДИНАТУ В _buildPage1Frame3:
+Positioned(
+  bottom: 2, // Опустили пониже, ближе к нижнему краю пола
+  left: 115, 
+  child: CustomPaint(
+    size: const Size(22, 10), 
+    painter: _SecretMouthShadowPainter(),
+  ),
+),
             Positioned(
               bottom: 10, left: 8,
               child: Stack(
