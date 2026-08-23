@@ -2505,31 +2505,46 @@ class ComicBubblePainter extends CustomPainter {
   }
 
 
+// ПОЛНОСТЬЮ ЗАМЕНИТЬ СТАРЫЙ КЛАСС _SecretMouthShadowPainter НА ЭТОТ КОРРЕКТНЫЙ:
 class _SecretMouthShadowPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    // Делаем тень экстремально блёклой и прозрачной ( opacity: 0.15 ), чтобы она была еле-еле видна
+    // Еле-еле заметная тень на полу кабинета (прозрачность 15%)
     final shadowPaint = Paint()
       ..color = const Color(0xFF5D4037).withOpacity(0.15)
       ..style = PaintingStyle.fill;
     
-    // 1. КВАДРАТНЫЕ ЗЛОВЕЩИЕ ГЛАЗА (ДВА ПИКСЕЛЬНЫХ КУБИКА)
-    canvas.drawRect(Rect.fromLTWH(size.width * 0.25, size.height * 0.1, 1.8, 1.8), shadowPaint); // Левый
-    canvas.drawRect(Rect.fromLTWH(size.width * 0.65, size.height * 0.1, 1.8, 1.8), shadowPaint); // Правый
+    // 1. ВЫРАЗИТЕЛЬНЫЕ ЗЛОВЕЩИЕ РОМБЫ ГЛАЗ, УХОДЯЩИЕ ВНИЗ В СЕРЕДИНУ (ЭФФЕКТ ЯРОСТИ)
+    // Левый глаз-ромб
+    final leftEyePath = Path();
+    leftEyePath.moveTo(size.width * 0.22, size.height * 0.05); // Верхняя точка
+    leftEyePath.lineTo(size.width * 0.32, size.height * 0.15); // Правый угол
+    leftEyePath.lineTo(size.width * 0.26, size.height * 0.38); // Нижняя точка, уходящая к центру
+    leftEyePath.lineTo(size.width * 0.16, size.height * 0.20); // Левый угол
+    leftEyePath.close();
+    canvas.drawPath(leftEyePath, shadowPaint);
 
-    // 2. УГЛОВАТЫЙ ОСКАЛ ИЗ ЗУБЬЕВ-КВАДРАТИКОВ (ИДУТ СИНУСОИДАЛЬНОЙ ДУГОЙ ВНИЗ)
-    int teethCount = 6; // 6 острых квадратных зубов в ряд
-    double toothSize = 1.4; // Размер каждого кубика зуба
+    // Правый глаз-ромб (зеркальный левому)
+    final rightEyePath = Path();
+    rightEyePath.moveTo(size.width * 0.78, size.height * 0.05); // Верхняя точка
+    rightEyePath.lineTo(size.width * 0.84, size.height * 0.20); // Правый угол
+    rightEyePath.lineTo(size.width * 0.74, size.height * 0.38); // Нижняя точка, уходящая к центру
+    rightEyePath.lineTo(size.width * 0.68, size.height * 0.15); // Левый угол
+    rightEyePath.close();
+    canvas.drawPath(rightEyePath, shadowPaint);
+
+    // 2. ШИРОКАЯ И ПЛОСКАЯ ПИКСЕЛЬНАЯ УЛЫБКА ИЗ КВАДРАТИКОВ (ДУГА ОПУЩЕНА, ОНА СТАЛА ШИРЕ)
+    int teethCount = 7; // Сделали 7 зубов, чтобы растянуть оскал шире во всю горизонталь
+    double toothSize = 1.4; 
 
     for (int i = 0; i < teethCount; i++) {
-      // Рассчитываем горизонтальный шаг для каждого зуба
-      double offsetX = (size.width * 0.15) + (i * (size.width * 0.70 / (teethCount - 1)));
+      // Растягиваем зубы от самого левого до правого края (от 0.08 до 0.92)
+      double offsetX = (size.width * 0.08) + (i * (size.width * 0.84 / (teethCount - 1)));
       
-      // Математический прогиб дуги: крайние зубы выше, центральные опускаются ниже к полу
+      // ИСПРАВЛЕНО: Уменьшили прогиб дуги (умножаем всего на 0.15 вместо 0.35), улыбка стала широкой и плоской
       double progress = i / (teethCount - 1);
-      double offsetY = size.height * 0.45 + (sin(progress * pi) * (size.height * 0.35));
+      double offsetY = size.height * 0.50 + (sin(progress * pi) * (size.height * 0.15));
       
-      // Рисуем каждый зуб как чёткий жесткий квадрат
       canvas.drawRect(Rect.fromLTWH(offsetX, offsetY, toothSize, toothSize), shadowPaint);
     }
   }
@@ -2537,7 +2552,6 @@ class _SecretMouthShadowPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-
 
 
 class _TentacleSkyShadowPainter extends CustomPainter {
