@@ -1848,7 +1848,7 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
                 painter: ComicBubblePainter(tailX: 0.8),
                 child: const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-                  child: Text("Шериф, беда! На окраинах завелись зелёные свиньи под предводительством Дона Молюска! Они грабят наши склады с виагрой!", style: TextStyle(fontSize: 8.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15), textAlign: TextAlign.center),
+                  child: Text("Шериф, беда! На лугах птиц завелись зелёные свиньи под предводительством Дона Молюска! Они грабят наши склады с виагрой!", style: TextStyle(fontSize: 8.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15), textAlign: TextAlign.center),
                 ),
               ),
             ),
