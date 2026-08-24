@@ -1317,7 +1317,7 @@ Expanded(
             child: const Padding(
               padding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
               child: Text(
-                "Баннихоп уже близко к замку нашего босса. Надо что-то придумать! Сделаем дом из бронированного стекла. Тогда он точно не сможет его сломать!",
+                "Баннихоп уже близко к замку нашего босса. Надо что-то придумать! Сделаем крепость из бронированного стекла. Тогда он точно не сможет её сломать!",
                 style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
                 textAlign: TextAlign.center,
               ),
