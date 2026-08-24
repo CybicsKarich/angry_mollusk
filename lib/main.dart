@@ -1317,7 +1317,7 @@ Expanded(
             child: const Padding(
               padding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
               child: Text(
-                "Баннихоп уже достал, постоянно ломает наши дома. А давай-ка его проучим! Сделаем дом из бронированного стекла. Тогда он точно не сможет его сломать!",
+                "Баннихоп уже близко к замку нашего босса. Надо что-то придумать! Сделаем дом из бронированного стекла. Тогда он точно не сможет его сломать!",
                 style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
                 textAlign: TextAlign.center,
               ),
@@ -1389,7 +1389,7 @@ const SizedBox(width: 12),
                                 painter: SpeechBubblePainter(tailXFactor: 0.25, tailGoesUp: false),
                                 child: const Padding(
                                   padding: EdgeInsets.all(8.0),
-                                  child: Text("Ах проучить меня решили?", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
+                                  child: Text("Ах вот вы что задумали!", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
                                 ),
                               ),
                             ),
@@ -1979,7 +1979,7 @@ Positioned(
                 painter: ComicBubblePainter(tailX: 0.35),
                 child: const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-                  child: Text("Так... Следы ведут на этот луг. Ошмётки упаковок повсюду. Свиньи где-то рядом...", style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15), textAlign: TextAlign.center),
+                  child: Text("Так... Следы ведут сюда. Ошмётки упаковок повсюду. Свиньи где-то рядом...", style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15), textAlign: TextAlign.center),
                 ),
               ),
             ),
