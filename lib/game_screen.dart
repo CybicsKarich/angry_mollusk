@@ -2350,76 +2350,76 @@ class WantedPosterPainter {
       }
     }
 
-        // ПОЛНОСТЬЮ ЗАМЕНИТЬ ПРЕДЫДУЩИЙ КОД ПЯТНА-КЛЕШНИ НА ЭТОТ ВАРИАНТ ПО СХЕМЕ:
-    // Въевшееся кофейное пятно в виде массивной анатомической клешни Дона Моллюска
+            // ПОЛНОСТЬЮ ЗАМЕНИТЬ ПРЕДЫДУЩИЙ БЛОК ПЯТНА-КЛЕШНИ НА ЭТОТ МИНИАТЮРНЫЙ ВАРИАНТ:
+    // Пасхальное мини-пятно в виде анатомической клешни Дона Моллюска
     final secretSpotPaint = Paint()
       ..color = const Color(0xFF5D4037).withOpacity(0.12) // Блёклый цвет грязи
-      ..style = PaintingStyle.fill; // Заливка блоков
+      ..style = PaintingStyle.fill;
 
     canvas.save();
-    // Позиционируем в левом нижнем углу плаката WANTED
-    canvas.translate(-w * 0.36, h * 0.38);
+    // Позиционируем в левом нижнем углу плаката WANTED (координаты X и Y подогнаны)
+    canvas.translate(-w * 0.38, h * 0.40);
     
-    // 1. МАССИВНЫЙ КУЛАК (Широкое основание клешни из горизонтальных линий внизу)
-    // Координаты: drawRect(Rect.fromLTWH(относительный_X, относительный_Y, ширина, высота))
-    canvas.drawRect(const Rect.fromLTWH(-11, 24, 22, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(-13, 21.5, 26, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(-15, 19, 30, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(-17, 16.5, 34, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(-20, 14, 40, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(-21, 11.5, 42, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(-23, 9, 46, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(-24, 6.5, 48, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(-24, 4, 48, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(-25, 1.5, 50, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(-26, -1, 52, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(-26, -3.5, 52, 2.5), secretSpotPaint);
+    // 1. МАССИВНЫЙ КУЛАК (Уменьшенное основание)
+    canvas.drawRect(const Rect.fromLTWH(-4.4, 9.6, 8.8, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(-5.2, 8.6, 10.4, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(-6.0, 7.6, 12.0, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(-6.8, 6.6, 13.6, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(-8.0, 5.6, 16.0, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(-8.4, 4.6, 16.8, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(-9.2, 3.6, 18.4, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(-9.6, 2.6, 19.2, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(-9.6, 1.6, 19.2, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(-10.0, 0.6, 20.0, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(-10.4, -0.4, 20.8, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(-10.4, -1.4, 20.8, 1.0), secretSpotPaint);
 
-    // Внутренние зазубрины под начало общего просвета (у основания усов)
-    canvas.drawRect(const Rect.fromLTWH(-27, -6, 20, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(7, -6, 20, 2.5), secretSpotPaint);
+    // Внутренние зазубрины под начало просвета
+    canvas.drawRect(const Rect.fromLTWH(-10.8, -2.4, 8.0, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(2.8, -2.4, 8.0, 1.0), secretSpotPaint);
 
-    // 2. ЛЕВЫЙ ГЛАДКИЙ КРАЙ ЩИПЦА (Идёт плотной ровной дугой вверх)
-    canvas.drawRect(const Rect.fromLTWH(-28, -8.5, 14, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(-29, -11, 12, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(-30, -13.5, 11, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(-30, -16, 10, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(-31, -18.5, 9, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(-31, -21, 9, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(-31, -23.5, 9, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(-31, -26, 9, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(-31, -28.5, 9, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(-30, -31, 9, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(-30, -33.5, 10, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(-29, -36, 11, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(-27, -38.5, 12, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(-25, -41, 14, 2.5), secretSpotPaint);
+    // 2. ЛЕВЫЙ ГЛАДКИЙ КРАЙ ЩИПЦА
+    canvas.drawRect(const Rect.fromLTWH(-11.2, -3.4, 5.6, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(-11.6, -4.4, 4.8, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(-12.0, -5.4, 4.4, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(-12.0, -6.4, 4.0, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(-12.4, -7.4, 3.6, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(-12.4, -8.4, 3.6, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(-12.4, -9.4, 3.6, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(-12.4, -10.4, 3.6, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(-12.4, -11.4, 3.6, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(-12.0, -12.4, 3.6, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(-12.0, -13.4, 4.0, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(-11.6, -14.4, 4.4, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(-10.8, -15.4, 4.8, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(-10.0, -16.4, 5.6, 1.0), secretSpotPaint);
 
-    // 3. ПРАВЫЙ КРАЙ С МЕЛКИМИ БУГОРКАМИ (Идёт ступенчатыми зазубринами вверх по схеме)
-    canvas.drawRect(const Rect.fromLTWH(14, -8.5, 14, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(17, -11, 12, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(19, -13.5, 11, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(20, -16, 10, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(22, -18.5, 9, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(22, -21, 9, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(22, -23.5, 9, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(21, -26, 10, 2.5), secretSpotPaint); // Бугорок наружу
-    canvas.drawRect(const Rect.fromLTWH(22, -28.5, 9, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(21, -31, 9, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(20, -33.5, 10, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(18, -36, 11, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(15, -38.5, 12, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(11, -41, 14, 2.5), secretSpotPaint);
+    // 3. ПРАВЫЙ КРАЙ С МЕЛКИМИ БУГОРКАМИ
+    canvas.drawRect(const Rect.fromLTWH(5.6, -3.4, 5.6, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(6.8, -4.4, 4.8, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(7.6, -5.4, 4.4, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(8.0, -6.4, 4.0, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(8.8, -7.4, 3.6, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(8.8, -8.4, 3.6, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(8.8, -9.4, 3.6, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(8.4, -10.4, 4.0, 1.0), secretSpotPaint); // Бугорок наружу
+    canvas.drawRect(const Rect.fromLTWH(8.8, -11.4, 3.6, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(8.4, -12.4, 3.6, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(8.0, -13.4, 4.0, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(7.2, -14.4, 4.4, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(6.0, -15.4, 4.8, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(4.4, -16.4, 5.6, 1.0), secretSpotPaint);
 
-    // 4. ШИРОКИЕ "ЛОЖКОВИДНЫЕ" КОНЦЫ (Плоское ровное смыкание с разрывом по центру сверху)
-    // Левый кончик-ложка
-    canvas.drawRect(const Rect.fromLTWH(-22, -43.5, 18, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(-18, -46, 14, 2.5), secretSpotPaint);
-    // Правый кончик-ложка (оставляем чёткий зазор [ОБЩИЙ ПРОСВЕТ] между ними на оси X от -4 до 4)
-    canvas.drawRect(const Rect.fromLTWH(4, -43.5, 18, 2.5), secretSpotPaint);
-    canvas.drawRect(const Rect.fromLTWH(4, -46, 14, 2.5), secretSpotPaint);
+    // 4. ШИРОКИЕ "ЛОЖКОВИДНЫЕ" КОНЦЫ (С зазором по центру)
+    // Левый кончик
+    canvas.drawRect(const Rect.fromLTWH(-8.8, -17.4, 7.2, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(-7.2, -18.4, 5.6, 1.0), secretSpotPaint);
+    // Правый кончик (зазор сохранен)
+    canvas.drawRect(const Rect.fromLTWH(1.6, -17.4, 7.2, 1.0), secretSpotPaint);
+    canvas.drawRect(const Rect.fromLTWH(1.6, -18.4, 5.6, 1.0), secretSpotPaint);
 
     canvas.restore();
+
 
 
       // =========================================================================
