@@ -2350,7 +2350,39 @@ class WantedPosterPainter {
       }
     }
 
-    // =========================================================================
+        // ТОЧЕЧНО ДОБАВИТЬ СЮДА (ВНУТРЬ БЛОКА ПЯТЕН КЛАССА WantedPosterPainter):
+    // Пасхальное въевшееся кофейное пятно в виде раскрытой клешни Дона Моллюска
+    final secretSpotPaint = Paint()
+      ..color = const Color(0xFF5D4037).withOpacity(0.12) // Тот же блёклый цвет грязи
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 5.0 // Хорошая, чёткая толщина дуг
+      ..strokeCap = StrokeCap.round;
+
+    canvas.save();
+    // Сдвигаем в левый нижний угол плаката на пожелтевшую бумагу
+    canvas.translate(-w * 0.35, h * 0.38);
+    canvas.rotate(-pi / 4); // Слегка разворачиваем для естественности пятна
+
+    // ДВА ТОЛСТЫХ ПОЛУКРУГА, КОТОРЫЕ НЕ СОСТЫКУЮТСЯ ДРУГ С ДРУГОМ:
+    // 1. Верхняя дуга раскрытого щипца
+    canvas.drawArc(
+      Rect.fromCircle(center: Offset.zero, radius: 10),
+      1.1 * pi, // Углы подобраны так, чтобы концы не касались друг друга
+      0.8 * pi,
+      false,
+      secretSpotPaint,
+    );
+    // 2. Нижняя зеркальная дуга щипца
+    canvas.drawArc(
+      Rect.fromCircle(center: Offset.zero, radius: 10),
+      0.1 * pi,
+      0.8 * pi,
+      false,
+      secretSpotPaint,
+    );
+    canvas.restore();
+
+      // =========================================================================
     // 4. СТРОГИЙ КОНТРАСТНЫЙ ТЕКСТ
     // =========================================================================
     void drawCleanText(String text, double fontSize, double offsetY, {bool isTitle = false}) {
