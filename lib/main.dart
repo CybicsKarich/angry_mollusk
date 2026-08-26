@@ -2952,110 +2952,107 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
     );
   }
 
-    // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОД _buildCastleBlock НА ЭТОТ ВЕЛИЧЕСТВЕННЫЙ АРХИТЕКТУРНЫЙ КОМПЛЕКС:
-  Widget _buildCastleBlock() {
-    return SizedBox(
-      width: 95, 
-      height: 120, // Увеличили высоту для монументальности
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          // 1. ЗАДНИЙ ПЛАН: ЦЕНТРАЛЬНАЯ МАССИВНАЯ ЦИТАДЕЛЬ
-          Positioned(
-            bottom: 0, left: 15, right: 15,
-            child: Container(
-              height: 90,
-              decoration: BoxDecoration(
-                color: const Color(0xFF263238), // Самый тёмный, грозовой камень
-                border: Border.all(color: const Color(0xFF101418), width: 2),
-              ),
-              child: Stack(
-                children: [
-                  Positioned(top: 20, left: 22, child: Container(width: 16, height: 35, decoration: BoxDecoration(color: const Color(0xFF111116), borderRadius: const BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)), border: Border.all(color: const Color(0xFF37474F), width: 1.5)))),
-                  // Внутренняя решётка окна
-                  Positioned(top: 35, left: 29, child: Container(width: 2, height: 20, color: const Color(0xFF263238))),
-                ],
-              ),
+  // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОД _buildCastleBlock НА ЭТОТ (ОПУЩЕННЫЙ НА ЗЕМЛЮ):
+Widget _buildCastleBlock() {
+  return SizedBox(
+    width: 95, 
+    height: 120, 
+    child: Stack(
+      clipBehavior: Clip.none,
+      children: [
+        // 1. ЗАДНИЙ ПЛАН: ЦЕНТРАЛЬНАЯ МАССИВНАЯ ЦИТАДЕЛЬ (ОПУЩЕНА ДО bottom: 16)
+        Positioned(
+          bottom: 16, left: 15, right: 15,
+          child: Container(
+            height: 90,
+            decoration: BoxDecoration(
+              color: const Color(0xFF263238),
+              border: Border.all(color: const Color(0xFF101418), width: 2),
+            ),
+            child: Stack(
+              children: [
+                Positioned(top: 20, left: 22, child: Container(width: 16, height: 35, decoration: BoxDecoration(color: const Color(0xFF111116), borderRadius: const BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)), border: Border.all(color: const Color(0xFF37474F), width: 1.5)))),
+                Positioned(top: 35, left: 29, child: Container(width: 2, height: 20, color: const Color(0xFF263238))),
+              ],
             ),
           ),
+        ),
 
-          // 2. ВЕРХУШКА ЦЕНТРАЛЬНОЙ БАШНИ: ЗУБЧАТЫЙ СЕГМЕНТ (КРЕПОСТНОЙ ВАЛ)
-          Positioned(
-            bottom: 90, left: 11, right: 11,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: List.generate(4, (index) => Container(width: 14, height: 10, decoration: BoxDecoration(color: const Color(0xFF37474F), border: Border.all(color: const Color(0xFF101418), width: 1.5), borderRadius: const BorderRadius.only(topLeft: Radius.circular(2), topRight: Radius.circular(2))))),
-            ),
+        // 2. ВЕРХУШКА ЦЕНТРАЛЬНОЙ БАШНИ: ЗУБЦЫ (СДВИГНУТЫ СООТВЕТСТВЕННО НА bottom: 106)
+        Positioned(
+          bottom: 106, left: 11, right: 11,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: List.generate(4, (index) => Container(width: 14, height: 10, decoration: BoxDecoration(color: const Color(0xFF37474F), border: Border.all(color: const Color(0xFF101418), width: 1.5), borderRadius: const BorderRadius.only(topLeft: Radius.circular(2), topRight: Radius.circular(2))))),
           ),
-          
-          // Левая фланговая башня
-          Positioned(
-            bottom: 0, left: 0,
-            child: Container(
-              width: 22, height: 95,
-              decoration: BoxDecoration(
-                color: const Color(0xFF37474F), // Чуть светлее, выдвинута вперёд
-                border: Border.all(color: const Color(0xFF101418), width: 2),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.35), blurRadius: 4, offset: const Offset(-2, 0))],
-              ),
-              child: Stack(
-                children: [
-                  Positioned(top: 15, left: 6, child: Container(width: 6, height: 14, decoration: BoxDecoration(color: const Color(0xFF111116), borderRadius: BorderRadius.circular(1)))),
-                  Positioned(top: 45, left: 6, child: Container(width: 6, height: 14, decoration: BoxDecoration(color: const Color(0xFF111116), borderRadius: BorderRadius.circular(1)))),
-                ],
-              ),
-            ),
-          ),
-          // Правая фланговая башня
-          Positioned(
-            bottom: 0, right: 0,
-            child: Container(
-              width: 22, height: 95,
-              decoration: BoxDecoration(
-                color: const Color(0xFF37474F),
-                border: Border.all(color: const Color(0xFF101418), width: 2),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.35), blurRadius: 4, offset: const Offset(2, 0))],
-              ),
-              child: Stack(
-                children: [
-                  Positioned(top: 15, right: 6, child: Container(width: 6, height: 14, decoration: BoxDecoration(color: const Color(0xFF111116), borderRadius: BorderRadius.circular(1)))),
-                  Positioned(top: 45, right: 6, child: Container(width: 6, height: 14, decoration: BoxDecoration(color: const Color(0xFF111116), borderRadius: BorderRadius.circular(1)))),
-                ],
-              ),
-            ),
-          ),
+        ),
 
-          // 4. ОСТРОКОНЕЧНЫЕ КРЫШИ-ШПИЛИ ДЛЯ ОБОИХ БАШЕН (СЛОЖНАЯ ГЕОМЕТРИЯ)
-          // Левый конус крыши
-          Positioned(
-            bottom: 93, left: -2,
-            child: CustomPaint(
-              size: const Size(26, 30),
-              painter: _CastleSpirePainter(color: const Color(0xFF1A237E)), // Глубокий тёмно-синий шпиль цитадели
+        // 3. ПЕРЕДНИЙ ПЛАН: БАШНИ (ОПУЩЕНЫ ДО bottom: 16, СТОЯТ ЧЁТКО НА ТРАВЕ)
+        Positioned(
+          bottom: 16, left: 0,
+          child: Container(
+            width: 22, height: 95,
+            decoration: BoxDecoration(
+              color: const Color(0xFF37474F),
+              border: Border.all(color: const Color(0xFF101418), width: 2),
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.35), blurRadius: 4, offset: const Offset(-2, 0))],
+            ),
+            child: Stack(
+              children: [
+                Positioned(top: 15, left: 6, child: Container(width: 6, height: 14, decoration: BoxDecoration(color: const Color(0xFF111116), borderRadius: BorderRadius.circular(1)))),
+                Positioned(top: 45, left: 6, child: Container(width: 6, height: 14, decoration: BoxDecoration(color: const Color(0xFF111116), borderRadius: BorderRadius.circular(1)))),
+              ],
             ),
           ),
-          // Правый конус крыши
-          Positioned(
-            bottom: 93, right: -2,
-            child: CustomPaint(
-              size: const Size(26, 30),
-              painter: _CastleSpirePainter(color: const Color(0xFF1A237E)),
+        ),
+        Positioned(
+          bottom: 16, right: 0,
+          child: Container(
+            width: 22, height: 95,
+            decoration: BoxDecoration(
+              color: const Color(0xFF37474F),
+              border: Border.all(color: const Color(0xFF101418), width: 2),
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.35), blurRadius: 4, offset: const Offset(2, 0))],
+            ),
+            child: Stack(
+              children: [
+                Positioned(top: 15, right: 6, child: Container(width: 6, height: 14, decoration: BoxDecoration(color: const Color(0xFF111116), borderRadius: BorderRadius.circular(1)))),
+                Positioned(top: 45, right: 6, child: Container(width: 6, height: 14, decoration: BoxDecoration(color: const Color(0xFF111116), borderRadius: BorderRadius.circular(1)))),
+              ],
             ),
           ),
+        ),
 
-          // ФЛАГШТОК НА ВЕРШИНЕ ЛЕВОГО ШПИЛЯ
-          Positioned(
-            bottom: 121, left: 10,
-            child: Container(width: 2, height: 12, color: const Color(0xFF455A64)),
+        // 4. ОСТРОКОНЕЧНЫЕ КРЫШИ-ШПИЛИ (СДВИГНУТЫ НА bottom: 109)
+        Positioned(
+          bottom: 109, left: -2,
+          child: CustomPaint(
+            size: const Size(26, 30),
+            painter: _CastleSpirePainter(color: const Color(0xFF1A237E)),
           ),
-          Positioned(
-            bottom: 127, left: 12,
-            child: Container(width: 10, height: 6, decoration: const BoxDecoration(color: Color(0xFFB71C1C), borderRadius: BorderRadius.only(topRight: Radius.circular(2), bottomRight: Radius.circular(2)))),
+        ),
+        Positioned(
+          bottom: 109, right: -2,
+          child: CustomPaint(
+            size: const Size(26, 30),
+            painter: _CastleSpirePainter(color: const Color(0xFF1A237E)),
           ),
-        ],
-      ),
-    );
-  }
+        ),
+
+        // ФЛАГШТОК (СДВИГНУТ НА НАДЛЕЖАЩУЮ ВЫСОТУ bottom: 137)
+        Positioned(
+          bottom: 137, left: 10,
+          child: Container(width: 2, height: 12, color: const Color(0xFF455A64)),
+        ),
+        Positioned(
+          bottom: 143, left: 12,
+          child: Container(width: 10, height: 6, decoration: const BoxDecoration(color: Color(0xFFB71C1C), borderRadius: BorderRadius.only(topRight: Radius.circular(2), bottomRight: Radius.circular(2)))),
+        ),
+      ],
+    ),
+  );
+}
+
 
 
   Widget _buildSvinomatkinCharacter(double size) {
@@ -3138,29 +3135,69 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
   }
 } // <--- ВОТ ЭТА СКОБКА ТЕПЕРЬ СТРОГО ЗАКРЫВАЕТ КЛАСС _SvinomatkinComicScreenState!
 
+// ПОЛНОСТЬЮ ЗАМЕНИТЬ КЛАСС _BeardPainter НА ЭТОТ КОРРЕКТНЫЙ (ПО ФОТОГРАФИИ):
 class _BeardPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = const Color(0xFFB0BEC5)..style = PaintingStyle.fill;
-    final border = Paint()..color = const Color(0xFF37474F)..style = PaintingStyle.stroke..strokeWidth = 1.2;
+    final w = size.width;
+    final h = size.height;
 
+    // Плотная меланжевая серая основа бороды по фотографии
+    final basePaint = Paint()..color = const Color(0xFF90A4AE)..style = PaintingStyle.fill;
+    final borderPaint = Paint()..color = const Color(0xFF455A64)..style = PaintingStyle.stroke..strokeWidth = 1.0;
+
+    // СТРУКТУРА БОРОДЫ С ВЫРЕЗОМ ДЛЯ РТА ПО ЦЕНТРУ СВЕРХУ
     final path = Path();
+    // Начинаем с верхнего левого угла бороды
     path.moveTo(0, 0);
-    path.lineTo(size.width * 0.15, size.height * 0.5);
-    path.lineTo(size.width * 0.30, size.height * 0.3);
-    path.lineTo(size.width * 0.50, size.height * 1.0); 
-    path.lineTo(size.width * 0.70, size.height * 0.3);
-    path.lineTo(size.width * 0.85, size.height * 0.5);
-    path.lineTo(size.width, 0);
-    path.quadraticBezierTo(size.width * 0.5, size.height * 0.4, 0, 0);
+    // Идём к центру сверху и делаем аккуратный вырез для рта, как на фото
+    path.lineTo(w * 0.35, 0);
+    path.lineTo(w * 0.44, h * 0.35); // Срез выреза вниз
+    path.lineTo(w * 0.56, h * 0.35); // Дно выреза
+    path.lineTo(w * 0.65, 0);        // Срез выреза вверх на правые усы
+    path.lineTo(w, 0);               // Верхний правый край
+    
+    // Закруглённые пышные боковые стороны бороды по фотографии
+    path.quadraticBezierTo(w * 1.05, h * 0.4, w * 0.90, h * 0.85);
+    // Нижняя часть бороды с тонкими рваными ворсинками шерсти
+    path.lineTo(w * 0.70, h * 0.95);
+    path.lineTo(w * 0.50, h * 1.0);  // Центральная свисающая прядь
+    path.lineTo(w * 0.30, h * 0.95);
+    path.quadraticBezierTo(-w * 0.05, h * 0.4, 0, 0);
     path.close();
 
-    canvas.drawPath(path, paint);
-    canvas.drawPath(path, border);
+    canvas.drawPath(path, basePaint);
+    canvas.drawPath(path, borderPaint);
+
+    // НАНОСИМ МНОЖЕСТВО ОТДЕЛЬНЫХ СЕРЫХ И БЕЛЫХ ВОЛОКОН-ШТРИХОВ ДЛЯ РЕАЛИЗМА ШЕРСТИ
+    final hairPaint = Paint()..style = PaintingStyle.stroke..strokeWidth = 0.8;
+    final rand = Random(12345); // Фиксированный сид во избежание мерцания шерсти
+
+    for (int i = 0; i < 45; i++) {
+      // Подбираем цвет волосков: чередуем тёмно-серые и светло-белые ворсинки
+      hairPaint.color = i % 2 == 0 
+          ? const Color(0xFFCFD8DC).withOpacity(0.5) 
+          : const Color(0xFF37474F).withOpacity(0.3);
+
+      double startX = rand.nextDouble() * w;
+      // Волоски растут от верхней части вниз, огибая вырез для рта
+      double startY = rand.nextDouble() * (h * 0.4);
+      if (startX > w * 0.35 && startX < w * 0.65 && startY < h * 0.35) {
+        startY = h * 0.35 + 2; // Сдвигаем ворс ниже выреза рта
+      }
+      
+      double endX = startX + (rand.nextDouble() * 4 - 2);
+      double endY = startY + (rand.nextDouble() * (h * 0.5) + 10);
+      if (endY > h) endY = h - 2;
+
+      canvas.drawLine(Offset(startX, startY), Offset(endX, endY), hairPaint);
+    }
   }
+
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
+
 
 // ДОБАВИТЬ В САМЫЙ КОНЕЦ ФАЙЛА lib/main.dart:
 class _CastleSpirePainter extends CustomPainter {
