@@ -2638,7 +2638,7 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
 
   @override
   void initState() {
-    super.override.initState();
+    super.initState();
     // Контроллер для непрерывной анимации живого дождя
     _rainController = AnimationController(vsync: this, duration: const Duration(seconds: 1))..repeat();
     _rainController.addListener(() {
@@ -2727,7 +2727,7 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
                     onPressed: () {
                       // ИСПРАВЛЕНО: Кнопка "В БОЙ!" по ТЗ пока не работает (заглушка)
                     },
-                    child: const Text("В БОЙ!", style: TextStyle(fontSize: 20, fontWeight: FontWeight.black, color: Colors.white, letterSpacing: 1.2)),
+                     child: const Text("В БОЙ!", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.2)),
                   ),
             ),
           ],
@@ -2820,7 +2820,7 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
             Positioned(
               bottom: 54, left: 10, right: 10,
               child: CustomPaint(
-                painter: ComicBubblePainter(tailX: 0.85, tailGoesUp: true),
+                painter: ComicBubblePainter(tailX: 0.85),
                 child: const Padding(
                   padding: EdgeInsets.all(5.0),
                   child: Text("О да, я помню твоего деда! Он был силён, но слишком доверчив! Без Тотема Гнева ваш род навсегда потерял способность парить в небесах. Вы упали на землю и стали бессильными! А наш босс забрал тотем себе!", style: TextStyle(fontSize: 6.2, fontWeight: FontWeight.bold, color: Colors.red, height: 1.1), textAlign: TextAlign.center),
@@ -2964,8 +2964,7 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
               ),
               child: Stack(
                 children: [
-                  // Огромное готическое окно-вираж по центру
-                  Positioned(top: 20, left: 22, child: Container(width: 16, height: 35, decoration: const BoxDecoration(color: Color(0xFF111116), borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)), border: Border.all(color: Color(0xFF37474F), width: 1.5)))),
+                  Positioned(top: 20, left: 22, child: Container(width: 16, height: 35, decoration: BoxDecoration(color: const Color(0xFF111116), borderRadius: const BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)), border: Border.all(color: const Color(0xFF37474F), width: 1.5)))),
                   // Внутренняя решётка окна
                   Positioned(top: 35, left: 29, child: Container(width: 2, height: 20, color: const Color(0xFF263238))),
                 ],
@@ -2981,8 +2980,7 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
               children: List.generate(4, (index) => Container(width: 14, height: 10, decoration: BoxDecoration(color: const Color(0xFF37474F), border: Border.all(color: const Color(0xFF101418), width: 1.5), borderRadius: const BorderRadius.only(topLeft: Radius.circular(2), topRight: Radius.circular(2))))),
             ),
           ),
-
-          // 3. ПЕРЕДНИЙ ПЛАН: СЛЕВА И СПРАВА ДВЕ ВЫСОКИЕ ОСТРОКОНЕЧНЫЕ БАШНИ
+          
           // Левая фланговая башня
           Positioned(
             bottom: 0, left: 0,
@@ -2991,7 +2989,7 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
               decoration: BoxDecoration(
                 color: const Color(0xFF37474F), // Чуть светлее, выдвинута вперёд
                 border: Border.all(color: const Color(0xFF101418), width: 2),
-                boxShadow: const [BoxShadow(color: Colors.black35, blurRadius: 4, offset: Offset(-2, 0))],
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.35), blurRadius: 4, offset: const Offset(-2, 0))],
               ),
               child: Stack(
                 children: [
@@ -3009,7 +3007,7 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
               decoration: BoxDecoration(
                 color: const Color(0xFF37474F),
                 border: Border.all(color: const Color(0xFF101418), width: 2),
-                boxShadow: const [BoxShadow(color: Colors.black35, blurRadius: 4, offset: Offset(2, 0))],
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.35), blurRadius: 4, offset: const Offset(2, 0))],
               ),
               child: Stack(
                 children: [
