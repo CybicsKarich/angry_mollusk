@@ -2952,7 +2952,7 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
     );
   }
 
-    // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОД _buildCastleBlock НА ЭТОТ (ОПУЩЕННЫЙ В САМЫЙ НИЗ):
+    // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОД _buildCastleBlock НА ЭТОТ ВАРИАНТ (ЕЩЁ НИЖЕ В ТРАВУ):
   Widget _buildCastleBlock() {
     return SizedBox(
       width: 95, 
@@ -2960,9 +2960,9 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // 1. ЦЕНТРАЛЬНАЯ МАССИВНАЯ ЦИТАДЕЛЬ (Прижата в самый низ — bottom: 0)
+          // 1. ЦЕНТРАЛЬНАЯ МАССИВНАЯ ЦИТАДЕЛЬ (Опущена ниже — bottom: -16)
           Positioned(
-            bottom: 0, left: 15, right: 15,
+            bottom: -16, left: 15, right: 15,
             child: Container(
               height: 90,
               decoration: BoxDecoration(
@@ -2978,24 +2978,24 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
             ),
           ),
 
-          // 2. ВЕРХУШКА ЦЕНТРАЛЬНОЙ БАШНИ: ЗУБЦЫ (bottom: 90)
+          // 2. ВЕРХУШКА ЦЕНТРАЛЬНОЙ БАШНИ: ЗУБЦЫ (bottom: 74)
           Positioned(
-            bottom: 90, left: 11, right: 11,
+            bottom: 74, left: 11, right: 11,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: List.generate(4, (index) => Container(width: 14, height: 10, decoration: BoxDecoration(color: const Color(0xFF37474F), border: Border.all(color: const Color(0xFF101418), width: 1.5), borderRadius: const BorderRadius.only(topLeft: Radius.circular(2), topRight: Radius.circular(2))))),
             ),
           ),
 
-          // 3. БАШНИ СЛЕВА И СПРАВА (Прижаты в самый низ — bottom: 0)
+          // 3. БАШНИ СЛЕВА И СПРАВА (Опущены ниже — bottom: -16)
           Positioned(
-            bottom: 0, left: 0,
+            bottom: -16, left: 0,
             child: Container(
               width: 22, height: 95,
               decoration: BoxDecoration(
                 color: const Color(0xFF37474F),
                 border: Border.all(color: const Color(0xFF101418), width: 2),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.35), blurRadius: 4, offset: const Offset(-2, 0))],
+                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.35), blurRadius: 4, offset: const Offset(-2, 0))],
               ),
               child: Stack(
                 children: [
@@ -3006,13 +3006,13 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
             ),
           ),
           Positioned(
-            bottom: 0, right: 0,
+            bottom: -16, right: 0,
             child: Container(
               width: 22, height: 95,
               decoration: BoxDecoration(
                 color: const Color(0xFF37474F),
                 border: Border.all(color: const Color(0xFF101418), width: 2),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.35), blurRadius: 4, offset: const Offset(2, 0))],
+                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.35), blurRadius: 4, offset: const Offset(2, 0))],
               ),
               child: Stack(
                 children: [
@@ -3023,35 +3023,36 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
             ),
           ),
 
-          // 4. ОСТРОКОНЕЧНЫЕ КРЫШИ-ШПИЛИ (bottom: 93)
+          // 4. ОСТРОКОНЕЧНЫЕ КРЫШИ-ШПИЛИ (bottom: 77)
           Positioned(
-            bottom: 93, left: -2,
+            bottom: 77, left: -2,
             child: CustomPaint(
               size: const Size(26, 30),
               painter: _CastleSpirePainter(color: const Color(0xFF1A237E)),
             ),
           ),
           Positioned(
-            bottom: 93, right: -2,
+            bottom: 77, right: -2,
             child: CustomPaint(
               size: const Size(26, 30),
               painter: _CastleSpirePainter(color: const Color(0xFF1A237E)),
             ),
           ),
 
-          // ФЛАГШТОК (bottom: 121)
+          // ФЛАГШТОК (bottom: 105)
           Positioned(
-            bottom: 121, left: 10,
+            bottom: 105, left: 10,
             child: Container(width: 2, height: 12, color: const Color(0xFF455A64)),
           ),
           Positioned(
-            bottom: 127, left: 12,
+            bottom: 111, left: 12,
             child: Container(width: 10, height: 6, decoration: const BoxDecoration(color: Color(0xFFB71C1C), borderRadius: BorderRadius.only(topRight: Radius.circular(2), bottomRight: Radius.circular(2)))),
           ),
         ],
       ),
     );
   }
+
 
 
 
@@ -3129,6 +3130,7 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
       ],
     );
   }
+
 
 
 
