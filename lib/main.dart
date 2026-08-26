@@ -466,7 +466,8 @@ SizedBox(
             children: [
               _buildLevelCard('4', isLvl4Open), 
               const SizedBox(width: 30),
-              _buildLevelCard('5', isLvl5Open && false), // 5 уровень заблокирован намертво по ТЗ
+              // ЗАМЕНИТЬ НА ЭТУ СТРОКУ:
+               _buildLevelCard('5', isLvl5Open),
             ],
           ),
         ],
@@ -555,6 +556,12 @@ Widget _buildLevelCard(String levelNumber, bool isActive) {
               return;
             }
              
+            // ДОБАВИТЬ СРАЗУ ПОСЛЕ ПРОВЕРКИ НА levelNumber == '4':
+            if (levelNumber == '5') {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const SvinomatkinComicScreen()));
+              return;
+            }
+
             GameScreen gameScreenInstance = GameScreen();
             int targetLevel = int.tryParse(levelNumber) ?? 1;
             gameScreenInstance.gameInstance.currentLevel = targetLevel;
