@@ -160,16 +160,26 @@ class GameScreen extends StatelessWidget {
   // 3. ЕСЛИ ИГРОК КРАСАВЧИК (НАБРАЛ 2 ИЛИ 3 ЗВЕЗДЫ) — ПУСКАЕМ ДАЛЬШЕ
   game.overlays.remove('VictoryMenu');
   
-  if (game.currentLevel == 3) {
-    Navigator.pop(context); 
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const ComicIntroScreen()),
-    );
-  } else if (game.currentLevel < 3) {
-    game.currentLevel = game.currentLevel + 1;
-  }
-  
+  // ПОЛНОСТЬЮ ЗАМЕНИ СВОЙ ОТРЕЗОК КОДА НА ЭТОТ КОРРЕКТНЫЙ ВАРИАНТ:
+if (game.currentLevel == 3) {
+  Navigator.pop(context); 
+  Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => const ComicIntroScreen()),
+  );
+} else if (game.currentLevel == 4) {
+  // ИСПРАВЛЕНО: Теперь после прохождения 4 уровня стрелка перекинет на комикс Свиноматкина!
+  Navigator.pop(context); 
+  Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => const SvinomatkinComicScreen()),
+  );
+} else if (game.currentLevel < 4) {
+  // Теперь обычное прибавление уровня работает для 1 и 2 уровней
+  game.currentLevel = game.currentLevel + 1;
+}
+
+
   AngryMolluskGame.score = 0;
   game.worldScrollX = 0.0;
   game.isVictorySequenceStarted = false;
