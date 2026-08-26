@@ -2781,7 +2781,8 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
             Positioned(bottom: 25, right: 12, child: _buildCastleBlock()),
             Positioned(bottom: 12, left: 6, child: _buildCharacterBase('assets/images/bunnyhop.png', 50)),
             // Появление Генерала Свиноматкина (В шлеме и с серой бородой!)
-            Positioned(bottom: 12, right: 16, child: _buildSvinomatkinCharacter(48)),
+            // ТОЧЕЧНО ЗАМЕНИТЬ СТРОКУ В _buildFrame2:
+            Positioned(bottom: 12, right: 110, child: _buildSvinomatkinCharacter(48)),
             Positioned(
               top: 10, left: 4, width: 105,
               child: CustomPaint(
@@ -2813,7 +2814,7 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
           children: [
             Positioned(bottom: 25, right: 12, child: _buildCastleBlock()),
             Positioned(bottom: 12, left: 6, child: _buildCharacterBase('assets/images/bunnyhop.png', 50)),
-            Positioned(bottom: 12, right: 16, child: _buildSvinomatkinCharacter(48)),
+            Positioned(bottom: 12, right: 110, child: _buildSvinomatkinCharacter(48)),
             Positioned(
               top: 10, left: 4, right: 4,
               child: CustomPaint(
@@ -2851,7 +2852,7 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
           children: [
             Positioned(bottom: 25, right: 12, child: _buildCastleBlock()),
             Positioned(bottom: 12, left: 6, child: _buildCharacterBase('assets/images/bunnyhop.png', 50)),
-            Positioned(bottom: 12, right: 16, child: _buildSvinomatkinCharacter(48)),
+            Positioned(bottom: 12, right: 110, child: _buildSvinomatkinCharacter(48)),
             Positioned(
               top: 15, left: 6, width: 110,
               child: CustomPaint(
@@ -2891,7 +2892,8 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
 
             Positioned(bottom: 18, right: 10, child: _buildCastleBlock()),
             Positioned(bottom: 8, left: 4, child: _buildCharacterBase('assets/images/bunnyhop.png', 46)),
-            Positioned(bottom: 8, right: 48, child: _buildSvinomatkinCharacter(44)),
+            Positioned(bottom: 8, right: 95, child: _buildSvinomatkinCharacter(44)),
+
 
             Positioned(
               top: 15, left: 4, width: 115,
@@ -3117,16 +3119,16 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
           ),
         ),
 
-        // ИСПРАВЛЕНО: БОРОДА СТАЛА НАМНОГО БОЛЬШЕ И МАССИВНЕЕ (ВЫЛЕЗАЕТ ЗА ГРАНИЦЫ МОДЕЛЕК)
-        Positioned(
-          bottom: -ch(size, 16), // Опустили пониже, так как она крупнее
-          child: Image.asset(
-            'assets/images/beard.png', 
-            width: size * 1.25, // Увеличили ширину (выходит за края круга свиньи для пышности!)
-            height: size * 0.72, // Существенно увеличили высоту бороды по фото
-            fit: BoxFit.contain,
-          ),
-        ),
+        // ЗАМЕНИТЬ ТОЛЬКО БЛОК БОРОДЫ ВНУТРИ _buildSvinomatkinCharacter НА ЭТОТ:
+Positioned(
+  bottom: -ch(size, 18), // Ещё немного опустили под возросшую ширину
+  child: Image.asset(
+    'assets/images/beard.png', 
+    width: size * 1.55, // МАКСИМАЛЬНАЯ ШИРИНА: борода станет ультра-широкой и окладистой, как на фото!
+    height: size * 0.78, 
+    fit: BoxFit.contain,
+  ),
+),
       ],
     );
   }
