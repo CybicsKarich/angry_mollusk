@@ -3056,7 +3056,7 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
 
 
 
-    // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОД _buildSvinomatkinCharacter НА ЭТОТ ВАРИАНТ С КАРТИНКОЙ:
+      // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОД _buildSvinomatkinCharacter НА ЭТОТ ВАРИАНТ С БОЛЬШОЙ БОРОДОЙ И РЕАЛИСТИЧНЫМ ШЛЕМOМ:
   Widget _buildSvinomatkinCharacter(double size) {
     return Stack(
       alignment: Alignment.center,
@@ -3066,35 +3066,70 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
         Container(width: size, height: size, decoration: BoxDecoration(color: const Color(0xFF7CB342), shape: BoxShape.circle, border: Border.all(color: Colors.black, width: 2))),
         ClipOval(child: Image.asset('assets/images/maksim.png', width: size * 0.85, height: size * 0.85, fit: BoxFit.cover)),
         
-        // Железный шлем на голове
+        // РЕАЛИСТИЧНЫЙ ТЯЖЁЛЫЙ ШЛЕМ С КОЗЫРЬКОМ И НАНОСНИКОМ
         Positioned(
-          top: -ch(size, 6),
-          child: Container(
-            width: size * 0.88, height: size * 0.38,
-            decoration: BoxDecoration(
-              color: const Color(0xFF90A4AE), 
-              borderRadius: const BorderRadius.only(topLeft: Radius.circular(14), topRight: Radius.circular(14)),
-              border: Border.all(color: const Color(0xFF37474F), width: 1.5),
-            ),
-            child: Center(
-              child: Container(width: size * 0.6, height: 2, color: const Color(0xFF455A64)), 
-            ),
+          top: -ch(size, 8),
+          child: Stack(
+            alignment: Alignment.topCenter,
+            clipBehavior: Clip.none,
+            children: [
+              // Основание шлема (сферический купол)
+              Container(
+                width: size * 0.94, 
+                height: size * 0.42,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF78909C), // Стальной потемневший металл
+                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16)),
+                  border: Border.all(color: const Color(0xFF263238), width: 1.8),
+                ),
+              ),
+              // Выпуклый закруглённый обод/козырёк шлема для 3D-объёма
+              Positioned(
+                bottom: 0,
+                child: Container(
+                  width: size * 1.02, 
+                  height: size * 0.12,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF546E7A), // Тёмная сталь обода
+                    borderRadius: BorderRadius.circular(3),
+                    border: Border.all(color: const Color(0xFF263238), width: 1.5),
+                  ),
+                ),
+              ),
+              // Суровый вертикальный наносник по центру (защита носа)
+              Positioned(
+                bottom: -ch(size, 8),
+                child: Container(
+                  width: size * 0.14, 
+                  height: size * 0.24,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF455A64),
+                    borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(2), bottomRight: Radius.circular(2)),
+                    border: Border.all(color: const Color(0xFF263238), width: 1.2),
+                  ),
+                ),
+              ),
+              // Заклёпки шлема (левая и правая точки)
+              Positioned(top: 8, left: size * 0.18, child: Container(width: 4, height: 4, decoration: const BoxDecoration(color: Color(0xFFB0BEC5), shape: BoxShape.circle))),
+              Positioned(top: 8, right: size * 0.18, child: Container(width: 4, height: 4, decoration: const BoxDecoration(color: Color(0xFFB0BEC5), shape: BoxShape.circle))),
+            ],
           ),
         ),
 
-        // ИСПРАВЛЕНО: ТВОЯ ГОТОВАЯ БОРОДА ИЗ ASSETS ТOЧНЕЙШЕ ПОДГOНАНА ПОД РАЗМЕР СВИНЬИ
+        // ИСПРАВЛЕНО: БОРОДА СТАЛА НАМНОГО БОЛЬШЕ И МАССИВНЕЕ (ВЫЛЕЗАЕТ ЗА ГРАНИЦЫ МОДЕЛЕК)
         Positioned(
-          bottom: -ch(size, 10), // Сдвинута слегка вниз, перекрывая рот и пятачок
+          bottom: -ch(size, 16), // Опустили пониже, так как она крупнее
           child: Image.asset(
             'assets/images/beard.png', 
-            width: size * 0.92, // Уменьшили ширину, чтобы она идеально подходила под границы круга свиньи
-            height: size * 0.52, // Точный масштаб высоты бороды по фото
+            width: size * 1.25, // Увеличили ширину (выходит за края круга свиньи для пышности!)
+            height: size * 0.72, // Существенно увеличили высоту бороды по фото
             fit: BoxFit.contain,
           ),
         ),
       ],
     );
   }
+
 
 
     Widget _buildCharacterBase(String assetPath, double size) {
