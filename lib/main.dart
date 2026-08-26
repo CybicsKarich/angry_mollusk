@@ -2620,5 +2620,567 @@ class _ClawCloudShadowPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
+// =========================================================================
+// НАЧАЛЬНЫЙ КОМИКС 5 УРОВНЯ: ГЕНЕРАЛ СВИНOМАТКИН И ГРОЗОВАЯ ЦИТАДЕЛЬ
+// =========================================================================
+class SvinomatkinComicScreen extends StatefulWidget {
+  const SvinomatkinComicScreen({super.key});
+
+  @override
+  State<SvinomatkinComicScreen> createState() => _SvinomatkinComicScreenState();
+}
+
+class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with SingleTickerProviderStateMixin {
+  int _currentPage = 0; // 0 - Страница 1, 1 - Страница 2
+  late AnimationController _rainController;
+  final List<Offset> _rainDrops = [];
+  final Random _rand = Random();
+
+  @override
+  void initState() {
+    super.override.initState();
+    // Контроллер для непрерывной анимации живого дождя
+    _rainController = AnimationController(vsync: this, duration: const Duration(seconds: 1))..repeat();
+    _rainController.addListener(() {
+      if (mounted) setState(() {});
+    });
+
+    // Генерируем начальные капли дождя
+    for (int i = 0; i < 40; i++) {
+      _rainDrops.add(Offset(_rand.nextDouble() * 260, _rand.nextDouble() * 120 + 20));
+    }
+  }
+
+  @override
+  void dispose() {
+    _rainController.dispose();
+    super.dispose();
+  }
+
+  void _updateRain() {
+    // Двигаем капли сверху вниз по диагонали (косой ливень)
+    for (int i = 0; i < _rainDrops.length; i++) {
+      double x = _rainDrops[i].dx + 1.2;
+      double y = _rainDrops[i].dy + 4.5;
+      // Если капля упала ниже травы (высота фрейма около 150), возвращаем её к тучам (top: 20-35)
+      if (y > 140 || x > 260) {
+        x = _rand.nextDouble() * 260;
+        y = _rand.nextDouble() * 15 + 20; // Спавн строго под тучами
+      }
+      _rainDrops[i] = Offset(x, y);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _updateRain();
+    return Scaffold(
+      backgroundColor: const Color(0xFF0A0A10), // Тёмная мистическая подложка экрана
+      body: SafeArea(
+        child: Column(
+          children: [
+            const SizedBox(height: 16),
+            Text(
+              _currentPage == 0 ? "ГЛАВА V: ПОДСТУПЫ К ЦИТАДЕЛИ" : "ГЛАВА V: ПОСЛЕДНИЙ РУБЕЖ",
+              style: const TextStyle(
+                fontSize: 20, 
+                fontWeight: FontWeight.w900, 
+                color: Color(0xFF7E57C2), // Фиолетовый оттенок под грозовое небо
+                letterSpacing: 2.0,
+                shadows: [Shadow(color: Colors.black, blurRadius: 4, offset: Offset(2, 2))],
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // СЕТКА КАДРОВ (3 кадра в ряд)
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: _currentPage == 0 
+                  ? Row(children: [_buildFrame1(), const SizedBox(width: 12), _buildFrame2(), const SizedBox(width: 12), _buildFrame3()])
+                  : Row(children: [_buildPage2Frame1(), const SizedBox(width: 12), _buildPage2Frame2(), const SizedBox(width: 12), _buildPage2Frame3()]),
+              ),
+            ),
+
+            // НИЖНЯЯ ПАНЕЛЬ С КНОПКАМИ И СТРЕЛОЧКОЙ
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: _currentPage == 0
+                ? ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF5E35B1), // Тёмно-фиолетовая кнопка
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+                      elevation: 6,
+                    ),
+                    onPressed: () => setState(() => _currentPage = 1), // Вперёд на Стр 2
+                    icon: const Text("ВПЕРЁД", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                    label: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 24),
+                  )
+                : ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFB71C1C), // Боевой кроваво-красный цвет
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 14),
+                      elevation: 8,
+                    ),
+                    onPressed: () {
+                      // ИСПРАВЛЕНО: Кнопка "В БОЙ!" по ТЗ пока не работает (заглушка)
+                    },
+                    child: const Text("В БОЙ!", style: TextStyle(fontSize: 20, fontWeight: FontWeight.black, color: Colors.white, letterSpacing: 1.2)),
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // =========================================================================
+  // КАДРЫ СТРАНИЦЫ 1
+  // =========================================================================
+  Widget _buildFrame1() {
+    return Expanded(
+      child: _buildStormFrame(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // Величественный монолитный замок Дона Моллюска на самом дальнем плане
+            Positioned(bottom: 25, right: 12, child: _buildCastleBlock()),
+            // Ваня Баннихоп стоит ОДИН (без шляпы и без сумки по ТЗ!)
+            Positioned(bottom: 12, left: 16, child: _buildCharacterBase('assets/images/bunnyhop.png', 60)),
+            Positioned(
+              top: 25, left: 8, right: 8,
+              child: CustomPaint(
+                painter: ComicBubblePainter(tailX: 0.25),
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text("Вот я и дошёл до замка Дона Молюска!", style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFrame2() {
+    return Expanded(
+      child: _buildStormFrame(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned(bottom: 25, right: 12, child: _buildCastleBlock()),
+            Positioned(bottom: 12, left: 6, child: _buildCharacterBase('assets/images/bunnyhop.png', 50)),
+            // Появление Генерала Свиноматкина (В шлеме и с серой бородой!)
+            Positioned(bottom: 12, right: 16, child: _buildSvinomatkinCharacter(48)),
+            Positioned(
+              top: 10, left: 4, width: 105,
+              child: CustomPaint(
+                painter: ComicBubblePainter(tailX: 0.2),
+                child: const Padding(padding: EdgeInsets.all(5.0), child: Text("Все твои братья разбиты! Ты остался один! Уйди с дороги, я иду к твоему боссу!", style: TextStyle(fontSize: 7.8, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center)),
+              ),
+            ),
+            Positioned(
+              top: 30, right: 4, width: 125,
+              child: CustomPaint(
+                painter: ComicBubblePainter(tailX: 0.85),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 5, vertical: 6),
+                  child: Text("Хрю-ха-ха! Шериф-младший, ты слишком далеко зашёл, но здесь твой путь закончится! Дон Молюск доверил мне охранять подступы к его замку, и я не сделаю ни шагу назад!", style: TextStyle(fontSize: 6.8, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15), textAlign: TextAlign.center),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFrame3() {
+    return Expanded(
+      child: _buildStormFrame(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned(bottom: 25, right: 12, child: _buildCastleBlock()),
+            Positioned(bottom: 12, left: 6, child: _buildCharacterBase('assets/images/bunnyhop.png', 50)),
+            Positioned(bottom: 12, right: 16, child: _buildSvinomatkinCharacter(48)),
+            Positioned(
+              top: 10, left: 4, right: 4,
+              child: CustomPaint(
+                painter: ComicBubblePainter(tailX: 0.2),
+                child: const Padding(
+                  padding: EdgeInsets.all(6.0),
+                  child: Text("Стоп, шериф-младший? Погоди-ка, кого-то ты мне напоминаешь... Ах, это ты Генерал Свиноматкин! Это ты, сорок лет назад обманул моего деда - великого шерифа-старшего! Ты ослепил его дымовой завесой и выкрал Древний Тотем Гнева, как же я мог забыть про это, ну ничего я сегодня заберу тотем у свиней и освобожу луг птиц!", style: TextStyle(fontSize: 6.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.1), textAlign: TextAlign.center),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 54, left: 10, right: 10,
+              child: CustomPaint(
+                painter: ComicBubblePainter(tailX: 0.85, tailGoesUp: true),
+                child: const Padding(
+                  padding: EdgeInsets.all(5.0),
+                  child: Text("О да, я помню твоего деда! Он был силён, но слишком доверчив! Без Тотема Гнева ваш род навсегда потерял способность парить в небесах. Вы упали на землю и стали бессильными! А наш босс забрал тотем себе!", style: TextStyle(fontSize: 6.2, fontWeight: FontWeight.bold, color: Colors.red, height: 1.1), textAlign: TextAlign.center),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+    // =========================================================================
+  // КАДРЫ СТРАНИЦЫ 2
+  // =========================================================================
+  Widget _buildPage2Frame1() {
+    return Expanded(
+      child: _buildStormFrame(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned(bottom: 25, right: 12, child: _buildCastleBlock()),
+            Positioned(bottom: 12, left: 6, child: _buildCharacterBase('assets/images/bunnyhop.png', 50)),
+            Positioned(bottom: 12, right: 16, child: _buildSvinomatkinCharacter(48)),
+            Positioned(
+              top: 15, left: 6, width: 110,
+              child: CustomPaint(
+                painter: ComicBubblePainter(tailX: 0.25),
+                child: const Padding(padding: EdgeInsets.all(5.0), child: Text("Сегодня тотем вернётся обратно к птицам, и все свиньи в страхе сбегут с луга птиц!", style: TextStyle(fontSize: 7.8, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center)),
+              ),
+            ),
+            Positioned(
+              top: 35, right: 6, width: 110,
+              child: CustomPaint(
+                painter: ComicBubblePainter(tailX: 0.8),
+                child: const Padding(
+                  padding: EdgeInsets.all(5.0), child: Text("Вот это у тебя фантазии, постоянно повторяешь про луг и тотем! Что осталась детская травма? Хрю-ха-ха!", style: TextStyle(fontSize: 7.5, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPage2Frame2() {
+    return Expanded(
+      child: _buildComicFrame(
+        isRoom: false,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // Мрачный фон с замком
+            Positioned.fill(child: Container(decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFF2A1B4E), Color(0xFF120A2A)])))),
+            // Прорисовка туч на небе
+            Positioned(top: -5, left: -10, right: -10, child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Icon(Icons.cloud_rounded, size: 45, color: Colors.grey.shade700), Icon(Icons.cloud_rounded, size: 55, color: Colors.grey.shade800), Icon(Icons.cloud_rounded, size: 40, color: Colors.grey.shade700)])),
+            // Отрисовка живых летящих капель дождя из туч
+            ..._rainDrops.map((pos) => Positioned(left: pos.dx, top: pos.dy, child: Container(width: 1.0, height: 8, color: Colors.blue.shade100.withOpacity(0.4)))),
+            Positioned(bottom: 0, left: 0, right: 0, child: Container(height: 20, color: const Color(0xFF2E7D32))), // Земля
+
+            Positioned(bottom: 18, right: 10, child: _buildCastleBlock()),
+            Positioned(bottom: 8, left: 4, child: _buildCharacterBase('assets/images/bunnyhop.png', 46)),
+            Positioned(bottom: 8, right: 48, child: _buildSvinomatkinCharacter(44)),
+
+            Positioned(
+              top: 15, left: 4, width: 115,
+              child: CustomPaint(
+                painter: ComicBubblePainter(tailX: 0.2),
+                child: const Padding(padding: EdgeInsets.all(4.0), child: Text("Свиноматкин, ты уже прожил своё, я сейчас разнесу твою крепость в щепки, и про травмы ты будешь говорить служа птицам!", style: TextStyle(fontSize: 7.0, fontWeight: FontWeight.bold, color: Colors.red), textAlign: TextAlign.center)),
+              ),
+            ),
+            Positioned(
+              top: 42, right: 4, width: 110,
+              child: CustomPaint(
+                painter: ComicBubblePainter(tailX: 0.65),
+                child: const Padding(padding: EdgeInsets.all(5.0), child: Text("Я построил крепость из двойного камня, ты ни за что её не сломаешь!", style: TextStyle(fontSize: 7.6, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPage2Frame3() {
+    return Expanded(
+      child: _buildComicFrame(
+        isRoom: false,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned.fill(child: Container(decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFF2A1B4E), Color(0xFF120A2A)])))),
+            Positioned(top: -5, left: -10, right: -10, child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Icon(Icons.cloud_rounded, size: 45, color: Colors.grey.shade700), Icon(Icons.cloud_rounded, size: 55, color: Colors.grey.shade800), Icon(Icons.cloud_rounded, size: 40, color: Colors.grey.shade700)])),
+            ..._rainDrops.map((pos) => Positioned(left: pos.dx, top: pos.dy, child: Container(width: 1.0, height: 8, color: Colors.blue.shade100.withOpacity(0.4)))),
+            Positioned(bottom: 0, left: 0, right: 0, child: Container(height: 20, color: const Color(0xFF2E7D32))),
+
+            // Рогатка стоит справа в полный рост, а Замка рядом НЕТ по ТЗ!
+            Positioned(bottom: 20, left: 120, child: Container(width: 8, height: 28, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(2)))),
+            Positioned(bottom: 44, left: 113, child: Transform.rotate(angle: -0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5))))),
+            Positioned(bottom: 44, left: 129, child: Transform.rotate(angle: 0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5))))),
+
+            Positioned(bottom: 58, left: 35, child: Transform.rotate(angle: 0.32, child: Container(width: 82, height: 4, color: const Color(0xFFD32F2F)))),
+            Positioned(bottom: 58, left: 45, child: Transform.rotate(angle: -0.28, child: Container(width: 84, height: 4, color: const Color(0xFFD32F2F)))),
+
+            // Ваня Баннихоп сидит ОДИН в оттянутой рогатке (Слева, left: 12)
+            Positioned(
+              bottom: 24, left: 12,
+              child: _buildCharacterBase('assets/images/bunnyhop.png', 62),
+            ),
+
+            Positioned(
+              top: 20, left: 10, right: 10,
+              child: CustomPaint(
+                painter: ComicBubblePainter(tailX: 0.25),
+                child: const Padding(padding: EdgeInsets.all(8.0), child: Text("Настало время последнего боя!", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+    // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОД _buildCastleBlock НА ЭТОТ ВЕЛИЧЕСТВЕННЫЙ АРХИТЕКТУРНЫЙ КОМПЛЕКС:
+  Widget _buildCastleBlock() {
+    return SizedBox(
+      width: 95, 
+      height: 120, // Увеличили высоту для монументальности
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // 1. ЗАДНИЙ ПЛАН: ЦЕНТРАЛЬНАЯ МАССИВНАЯ ЦИТАДЕЛЬ
+          Positioned(
+            bottom: 0, left: 15, right: 15,
+            child: Container(
+              height: 90,
+              decoration: BoxDecoration(
+                color: const Color(0xFF263238), // Самый тёмный, грозовой камень
+                border: Border.all(color: const Color(0xFF101418), width: 2),
+              ),
+              child: Stack(
+                children: [
+                  // Огромное готическое окно-вираж по центру
+                  Positioned(top: 20, left: 22, child: Container(width: 16, height: 35, decoration: const BoxDecoration(color: Color(0xFF111116), borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)), border: Border.all(color: Color(0xFF37474F), width: 1.5)))),
+                  // Внутренняя решётка окна
+                  Positioned(top: 35, left: 29, child: Container(width: 2, height: 20, color: const Color(0xFF263238))),
+                ],
+              ),
+            ),
+          ),
+
+          // 2. ВЕРХУШКА ЦЕНТРАЛЬНОЙ БАШНИ: ЗУБЧАТЫЙ СЕГМЕНТ (КРЕПОСТНОЙ ВАЛ)
+          Positioned(
+            bottom: 90, left: 11, right: 11,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: List.generate(4, (index) => Container(width: 14, height: 10, decoration: BoxDecoration(color: const Color(0xFF37474F), border: Border.all(color: const Color(0xFF101418), width: 1.5), borderRadius: const BorderRadius.only(topLeft: Radius.circular(2), topRight: Radius.circular(2))))),
+            ),
+          ),
+
+          // 3. ПЕРЕДНИЙ ПЛАН: СЛЕВА И СПРАВА ДВЕ ВЫСОКИЕ ОСТРОКОНЕЧНЫЕ БАШНИ
+          // Левая фланговая башня
+          Positioned(
+            bottom: 0, left: 0,
+            child: Container(
+              width: 22, height: 95,
+              decoration: BoxDecoration(
+                color: const Color(0xFF37474F), // Чуть светлее, выдвинута вперёд
+                border: Border.all(color: const Color(0xFF101418), width: 2),
+                boxShadow: const [BoxShadow(color: Colors.black35, blurRadius: 4, offset: Offset(-2, 0))],
+              ),
+              child: Stack(
+                children: [
+                  Positioned(top: 15, left: 6, child: Container(width: 6, height: 14, decoration: BoxDecoration(color: const Color(0xFF111116), borderRadius: BorderRadius.circular(1)))),
+                  Positioned(top: 45, left: 6, child: Container(width: 6, height: 14, decoration: BoxDecoration(color: const Color(0xFF111116), borderRadius: BorderRadius.circular(1)))),
+                ],
+              ),
+            ),
+          ),
+          // Правая фланговая башня
+          Positioned(
+            bottom: 0, right: 0,
+            child: Container(
+              width: 22, height: 95,
+              decoration: BoxDecoration(
+                color: const Color(0xFF37474F),
+                border: Border.all(color: const Color(0xFF101418), width: 2),
+                boxShadow: const [BoxShadow(color: Colors.black35, blurRadius: 4, offset: Offset(2, 0))],
+              ),
+              child: Stack(
+                children: [
+                  Positioned(top: 15, right: 6, child: Container(width: 6, height: 14, decoration: BoxDecoration(color: const Color(0xFF111116), borderRadius: BorderRadius.circular(1)))),
+                  Positioned(top: 45, right: 6, child: Container(width: 6, height: 14, decoration: BoxDecoration(color: const Color(0xFF111116), borderRadius: BorderRadius.circular(1)))),
+                ],
+              ),
+            ),
+          ),
+
+          // 4. ОСТРОКОНЕЧНЫЕ КРЫШИ-ШПИЛИ ДЛЯ ОБОИХ БАШЕН (СЛОЖНАЯ ГЕОМЕТРИЯ)
+          // Левый конус крыши
+          Positioned(
+            bottom: 93, left: -2,
+            child: CustomPaint(
+              size: const Size(26, 30),
+              painter: _CastleSpirePainter(color: const Color(0xFF1A237E)), // Глубокий тёмно-синий шпиль цитадели
+            ),
+          ),
+          // Правый конус крыши
+          Positioned(
+            bottom: 93, right: -2,
+            child: CustomPaint(
+              size: const Size(26, 30),
+              painter: _CastleSpirePainter(color: const Color(0xFF1A237E)),
+            ),
+          ),
+
+          // ФЛАГШТОК НА ВЕРШИНЕ ЛЕВОГО ШПИЛЯ
+          Positioned(
+            bottom: 121, left: 10,
+            child: Container(width: 2, height: 12, color: const Color(0xFF455A64)),
+          ),
+          Positioned(
+            bottom: 127, left: 12,
+            child: Container(width: 10, height: 6, decoration: const BoxDecoration(color: Color(0xFFB71C1C), borderRadius: BorderRadius.only(topRight: Radius.circular(2), bottomRight: Radius.circular(2)))),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  Widget _buildSvinomatkinCharacter(double size) {
+    return Stack(
+      alignment: Alignment.center,
+      clipBehavior: Clip.none,
+      children: [
+        Container(width: size, height: size, decoration: BoxDecoration(color: const Color(0xFF7CB342), shape: BoxShape.circle, border: Border.all(color: Colors.black, width: 2))),
+        ClipOval(child: Image.asset('assets/images/maksim.png', width: size * 0.85, height: size * 0.85, fit: BoxFit.cover)),
+        
+        Positioned(
+          top: -ch(size, 6),
+          child: Container(
+            width: size * 0.88, height: size * 0.38,
+            decoration: BoxDecoration(
+              color: const Color(0xFF90A4AE), 
+              borderRadius: const BorderRadius.only(topLeft: Radius.circular(14), topRight: Radius.circular(14)),
+              border: Border.all(color: const Color(0xFF37474F), width: 1.5),
+            ),
+            child: Center(
+              child: Container(width: size * 0.6, height: 2, color: const Color(0xFF455A64)), 
+            ),
+          ),
+        ),
+
+        Positioned(
+          bottom: -ch(size, 8),
+          child: CustomPaint(
+            size: Size(size * 0.90, size * 0.40),
+            painter: _BeardPainter(),
+          ),
+        ),
+      ],
+    );
+  }
+
+    Widget _buildCharacterBase(String assetPath, double size) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Container(
+          width: size, height: size, 
+          decoration: BoxDecoration(
+            color: const Color(0xFFE53935), 
+            shape: BoxShape.circle, 
+            border: Border.all(color: Colors.black, width: 2),
+          ),
+        ),
+        ClipOval(
+          child: Image.asset(assetPath, width: size * 0.85, height: size * 0.85, fit: BoxFit.cover),
+        ),
+      ],
+    );
+  }
+
+  double ch(double size, double base) => (size / 50) * base;
+
+  Widget _buildStormFrame({required Widget child}) {
+    return Expanded(
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.black, width: 3.5),
+          boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 6, offset: Offset(0, 4))],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Stack(
+            children: [
+              Positioned.fill(child: Container(decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFF2A1B4E), Color(0xFF120A2A)])))),
+              Positioned(top: -5, left: -10, right: -10, child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Icon(Icons.cloud_rounded, size: 45, color: Colors.grey.shade700), Icon(Icons.cloud_rounded, size: 55, color: Colors.grey.shade800), Icon(Icons.cloud_rounded, size: 40, color: Colors.grey.shade700)])),
+              ..._rainDrops.map((pos) => Positioned(left: pos.dx, top: pos.dy, child: Container(width: 1.0, height: 8, color: Colors.blue.shade100.withOpacity(0.35)))),
+              Positioned(bottom: 0, left: 0, right: 0, child: Container(height: 20, color: const Color(0xFF2E7D32))),
+              child,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+} // <--- ВОТ ЭТА СКОБКА ТЕПЕРЬ СТРОГО ЗАКРЫВАЕТ КЛАСС _SvinomatkinComicScreenState!
+
+class _BeardPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = const Color(0xFFB0BEC5)..style = PaintingStyle.fill;
+    final border = Paint()..color = const Color(0xFF37474F)..style = PaintingStyle.stroke..strokeWidth = 1.2;
+
+    final path = Path();
+    path.moveTo(0, 0);
+    path.lineTo(size.width * 0.15, size.height * 0.5);
+    path.lineTo(size.width * 0.30, size.height * 0.3);
+    path.lineTo(size.width * 0.50, size.height * 1.0); 
+    path.lineTo(size.width * 0.70, size.height * 0.3);
+    path.lineTo(size.width * 0.85, size.height * 0.5);
+    path.lineTo(size.width, 0);
+    path.quadraticBezierTo(size.width * 0.5, size.height * 0.4, 0, 0);
+    path.close();
+
+    canvas.drawPath(path, paint);
+    canvas.drawPath(path, border);
+  }
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// ДОБАВИТЬ В САМЫЙ КОНЕЦ ФАЙЛА lib/main.dart:
+class _CastleSpirePainter extends CustomPainter {
+  final Color color;
+  _CastleSpirePainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = color..style = PaintingStyle.fill;
+    final border = Paint()..color = const Color(0xFF101418)..style = PaintingStyle.stroke..strokeWidth = 2.0;
+
+    final path = Path();
+    // Рисуем высокий готический треугольник крыши башни
+    path.moveTo(size.width / 2, 0); // Пик шпиля
+    path.lineTo(size.width, size.height); // Правое основание
+    path.lineTo(0, size.height); // Левое основание
+    path.close();
+
+    canvas.drawPath(path, paint);
+    canvas.drawPath(path, border);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
 
 
