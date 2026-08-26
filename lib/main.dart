@@ -2830,11 +2830,11 @@ Positioned(
                 ),
               ),
             ),
-            // ЗАМЕНИТЬ ТОЛЬКО НИЖНЕЕ ОБЛАКО ГЕНЕРАЛА ВНУТРИ _buildFrame3:
+            // ЗАМЕНИТЬ ТОЛЬКО ЭТОТ БЛОК ВНУТРИ _buildFrame3 НА КОРРЕКТНЫЙ:
 Positioned(
   bottom: 54, left: 10, right: 10,
   child: CustomPaint(
-    painter: ComicBubblePainter(tailX: 0.45, tailGoesUp: true), // Направлен вверх на смещённого Генерала
+    painter: ComicBubblePainter(tailX: 0.45), // ИСПРАВЛЕНО: Убран лишний параметр!
     child: const Padding(
       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       child: Text(
