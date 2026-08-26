@@ -2790,16 +2790,21 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
                 child: const Padding(padding: EdgeInsets.all(5.0), child: Text("Все твои братья разбиты! Ты остался один! Уйди с дороги, я иду к твоему боссу!", style: TextStyle(fontSize: 7.8, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center)),
               ),
             ),
-            Positioned(
-              top: 30, right: 4, width: 125,
-              child: CustomPaint(
-                painter: ComicBubblePainter(tailX: 0.85),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 5, vertical: 6),
-                  child: Text("Хрю-ха-ха! Шериф-младший, ты слишком далеко зашёл, но здесь твой путь закончится! Дон Молюск доверил мне охранять подступы к его замку, и я не сделаю ни шагу назад!", style: TextStyle(fontSize: 6.8, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15), textAlign: TextAlign.center),
-                ),
-              ),
-            ),
+            // ЗАМЕНИТЬ ТОЛЬКО ОБЛАКО ГЕНЕРАЛА ВНУТРИ _buildFrame2:
+Positioned(
+  top: 42, right: 14, width: 100, // Сделали компактнее и квадратнее
+  child: CustomPaint(
+    painter: ComicBubblePainter(tailX: 0.3), // Хвостик указывает левее, на Генерала!
+    child: const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+      child: Text(
+        "Хрю-ха-ха! Шериф-младший, ты слишком далеко зашёл, но здесь твой путь закончится! Дон Молюск доверил мне охранять подступы к его замку, и я не сделаю ни шагу назад!", 
+        style: TextStyle(fontSize: 6.8, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15), 
+        textAlign: TextAlign.center,
+      ),
+    ),
+  ),
+),
           ],
         ),
       ),
@@ -2825,16 +2830,21 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
                 ),
               ),
             ),
-            Positioned(
-              bottom: 54, left: 10, right: 10,
-              child: CustomPaint(
-                painter: ComicBubblePainter(tailX: 0.85),
-                child: const Padding(
-                  padding: EdgeInsets.all(5.0),
-                  child: Text("О да, я помню твоего деда! Он был силён, но слишком доверчив! Без Тотема Гнева ваш род навсегда потерял способность парить в небесах. Вы упали на землю и стали бессильными! А наш босс забрал тотем себе!", style: TextStyle(fontSize: 6.2, fontWeight: FontWeight.bold, color: Colors.red, height: 1.1), textAlign: TextAlign.center),
-                ),
-              ),
-            ),
+            // ЗАМЕНИТЬ ТОЛЬКО НИЖНЕЕ ОБЛАКО ГЕНЕРАЛА ВНУТРИ _buildFrame3:
+Positioned(
+  bottom: 54, left: 10, right: 10,
+  child: CustomPaint(
+    painter: ComicBubblePainter(tailX: 0.45, tailGoesUp: true), // Направлен вверх на смещённого Генерала
+    child: const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      child: Text(
+        "О да, я помню твоего деда! Он был силён, но слишком доверчив! Без Тотема Гнева ваш род навсегда потерял способность парить в небесах. Вы упали на землю и стали бессильными! А наш босс забрал тотем себе!", 
+        style: TextStyle(fontSize: 6.2, fontWeight: FontWeight.bold, color: Colors.red, height: 1.1), 
+        textAlign: TextAlign.center,
+      ),
+    ),
+  ),
+),
           ],
         ),
       ),
@@ -2860,15 +2870,21 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
                 child: const Padding(padding: EdgeInsets.all(5.0), child: Text("Сегодня тотем вернётся обратно к птицам, и все свиньи в страхе сбегут с луга птиц!", style: TextStyle(fontSize: 7.8, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center)),
               ),
             ),
-            Positioned(
-              top: 35, right: 6, width: 110,
-              child: CustomPaint(
-                painter: ComicBubblePainter(tailX: 0.8),
-                child: const Padding(
-                  padding: EdgeInsets.all(5.0), child: Text("Вот это у тебя фантазии, постоянно повторяешь про луг и тотем! Что осталась детская травма? Хрю-ха-ха!", style: TextStyle(fontSize: 7.5, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
-                ),
-              ),
-            ),
+            // ЗАМЕНИТЬ ТОЛЬКО ОБЛАКО ГЕНЕРАЛА ВНУТРИ _buildPage2Frame1:
+Positioned(
+  top: 35, right: 12, width: 100, // Квадратная форма
+  child: CustomPaint(
+    painter: ComicBubblePainter(tailX: 0.35), // Указывает на Свиноматкина
+    child: const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 8), 
+      child: Text(
+        "Вот это у тебя фантазии, постоянно повторяешь про луг и тотем! Что осталась детская травма? Хрю-ха-ха!", 
+        style: TextStyle(fontSize: 7.5, fontWeight: FontWeight.bold, color: Colors.black), 
+        textAlign: TextAlign.center,
+      ),
+    ),
+  ),
+),
           ],
         ),
       ),
@@ -2902,13 +2918,21 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
                 child: const Padding(padding: EdgeInsets.all(4.0), child: Text("Свиноматкин, ты уже прожил своё, я сейчас разнесу твою крепость в щепки, и про травмы ты будешь говорить служа птицам!", style: TextStyle(fontSize: 7.0, fontWeight: FontWeight.bold, color: Colors.red), textAlign: TextAlign.center)),
               ),
             ),
-            Positioned(
-              top: 42, right: 4, width: 110,
-              child: CustomPaint(
-                painter: ComicBubblePainter(tailX: 0.65),
-                child: const Padding(padding: EdgeInsets.all(5.0), child: Text("Я построил крепость из двойного камня, ты ни за что её не сломаешь!", style: TextStyle(fontSize: 7.6, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center)),
-              ),
-            ),
+            // ЗАМЕНИТЬ ТОЛЬКО ОБЛАКО ГЕНЕРАЛА ВНУТРИ _buildPage2Frame2:
+Positioned(
+  top: 42, right: 10, width: 105, // Квадратная форма
+  child: CustomPaint(
+    painter: ComicBubblePainter(tailX: 0.25), // Сдвинут под новые координаты
+    child: const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 8), 
+      child: Text(
+        "Я построил крепость из двойного камня, ты ни за что её не сломаешь!", 
+        style: TextStyle(fontSize: 7.6, fontWeight: FontWeight.bold, color: Colors.black), 
+        textAlign: TextAlign.center,
+      ),
+    ),
+  ),
+),
           ],
         ),
       ),
@@ -2932,8 +2956,12 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
             Positioned(bottom: 44, left: 113, child: Transform.rotate(angle: -0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5))))),
             Positioned(bottom: 44, left: 129, child: Transform.rotate(angle: 0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5))))),
 
-            Positioned(bottom: 58, left: 35, child: Transform.rotate(angle: 0.32, child: Container(width: 82, height: 4, color: const Color(0xFFD32F2F)))),
-            Positioned(bottom: 58, left: 45, child: Transform.rotate(angle: -0.28, child: Container(width: 84, height: 4, color: const Color(0xFFD32F2F)))),
+            // ЗАМЕНИТЬ СТРОГО ЭТИ ДВЕ СТРОКИ РЕЗИНКИ ВНУТРИ _buildPage2Frame3:
+// Нитка 1: Идёт из левого рога (left: 113) к оттянутому Ване
+Positioned(bottom: 45, left: 30, child: Transform.rotate(angle: 0.18, child: Container(width: 86, height: 3.5, color: const Color(0xFFD32F2F)))),
+// Нитка 2: Идёт из правого рога (left: 129) к оттянутому Ване
+Positioned(bottom: 35, left: 32, child: Transform.rotate(angle: -0.10, child: Container(width: 100, height: 3.5, color: const Color(0xFFD32F2F)))),
+
 
             // Ваня Баннихоп сидит ОДИН в оттянутой рогатке (Слева, left: 12)
             Positioned(
@@ -3059,47 +3087,41 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
 
 
 
-      // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОД _buildSvinomatkinCharacter НА ЭТОТ ВАРИАНТ С БОЛЬШОЙ БОРОДОЙ И РЕАЛИСТИЧНЫМ ШЛЕМOМ:
-  Widget _buildSvinomatkinCharacter(double size) {
+    Widget _buildSvinomatkinCharacter(double size) {
     return Stack(
       alignment: Alignment.center,
       clipBehavior: Clip.none,
       children: [
-        // Базовая круглая модель свиньи Максима
         Container(width: size, height: size, decoration: BoxDecoration(color: const Color(0xFF7CB342), shape: BoxShape.circle, border: Border.all(color: Colors.black, width: 2))),
         ClipOval(child: Image.asset('assets/images/maksim.png', width: size * 0.85, height: size * 0.85, fit: BoxFit.cover)),
         
-        // РЕАЛИСТИЧНЫЙ ТЯЖЁЛЫЙ ШЛЕМ С КОЗЫРЬКОМ И НАНОСНИКОМ
         Positioned(
           top: -ch(size, 8),
           child: Stack(
             alignment: Alignment.topCenter,
             clipBehavior: Clip.none,
             children: [
-              // Основание шлема (сферический купол)
               Container(
                 width: size * 0.94, 
                 height: size * 0.42,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF78909C), // Стальной потемневший металл
+                  color: const Color(0xFF78909C), 
                   borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16)),
                   border: Border.all(color: const Color(0xFF263238), width: 1.8),
                 ),
               ),
-              // Выпуклый закруглённый обод/козырёк шлема для 3D-объёма
               Positioned(
                 bottom: 0,
                 child: Container(
                   width: size * 1.02, 
                   height: size * 0.12,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF546E7A), // Тёмная сталь обода
+                    color: const Color(0xFF546E7A), 
                     borderRadius: BorderRadius.circular(3),
                     border: Border.all(color: const Color(0xFF263238), width: 1.5),
                   ),
                 ),
               ),
-              // Суровый вертикальный наносник по центру (защита носа)
               Positioned(
                 bottom: -ch(size, 8),
                 child: Container(
@@ -3112,26 +3134,26 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
                   ),
                 ),
               ),
-              // Заклёпки шлема (левая и правая точки)
               Positioned(top: 8, left: size * 0.18, child: Container(width: 4, height: 4, decoration: const BoxDecoration(color: Color(0xFFB0BEC5), shape: BoxShape.circle))),
               Positioned(top: 8, right: size * 0.18, child: Container(width: 4, height: 4, decoration: const BoxDecoration(color: Color(0xFFB0BEC5), shape: BoxShape.circle))),
             ],
           ),
         ),
 
-        // ЗАМЕНИТЬ ТОЛЬКО БЛОК БОРОДЫ ВНУТРИ _buildSvinomatkinCharacter НА ЭТОТ:
-Positioned(
-  bottom: -ch(size, 18), // Ещё немного опустили под возросшую ширину
-  child: Image.asset(
-    'assets/images/beard.png', 
-    width: size * 1.55, // МАКСИМАЛЬНАЯ ШИРИНА: борода станет ультра-широкой и окладистой, как на фото!
-    height: size * 0.78, 
-    fit: BoxFit.contain,
-  ),
-),
+        // ИСПРАВЛЕНО: БОРОДА ПОДНЯТА ДО ГЛАЗ И ДИКО УВЕЛИЧЕНА ПО ШИРИНЕ
+        Positioned(
+          bottom: -ch(size, 4), // Подняли значительно выше, прямо к глазам!
+          child: Image.asset(
+            'assets/images/beard.png', 
+            width: size * 1.85, // Огромная, ультра-широкая борода по новому фото!
+            height: size * 0.90, 
+            fit: BoxFit.contain,
+          ),
+        ),
       ],
     );
   }
+
 
 
 
