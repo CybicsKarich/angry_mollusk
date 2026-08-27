@@ -2724,22 +2724,29 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
                     icon: const Text("ВПЕРЁД", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
                     label: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 24),
                   )
-                : ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFB71C1C), // Боевой кроваво-красный цвет
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                      padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 14),
-                      elevation: 8,
-                    ),
-                    // ЗАМЕНИТЬ НАЖАТИЕ КНОПКИ "В БОЙ!" В КОМИКСЕ НА РЕАЛЬНЫЙ НАВИГАТОР:
-onPressed: () {
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(builder: (context) => const Level5Screen()),
-  );
-},
-                     child: const Text("В БОЙ!", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.2)),
-                  ),
+                : // ПОЛНОСТЬЮ ЗАМЕНИТЬ КНОПКУ "В БОЙ!" ВНИЗУ SvinomatkinComicScreen НА ЭТУ:
+ElevatedButton(
+  style: ElevatedButton.styleFrom(
+    backgroundColor: const Color(0xFFB71C1C), // Боевой кроваво-красный цвет
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+    padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 14),
+    elevation: 8,
+  ),
+  onPressed: () {
+    Navigator.pop(context); // Закрываем экран комикса
+
+    // ОФИЦИАЛЬНЫЙ СТАРТ ПЯТОГО УРОВНЯ ОДИН В ОДИН ПО ТВОЕМУ МЕТОДУ:
+    GameScreen gameScreenInstance = GameScreen();
+    gameScreenInstance.gameInstance.currentLevel = 5; // Запускаем 5 уровень!
+    gameScreenInstance.gameInstance.worldScrollX = 0.0;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => gameScreenInstance),
+    );
+  },
+  child: const Text("В БОЙ!", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.2)),
+),
             ),
           ],
         ),
