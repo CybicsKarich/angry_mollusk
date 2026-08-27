@@ -3241,45 +3241,67 @@ class _CastleSpirePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// ПОЛНОСТЬЮ ЗАМЕНИТЬ КЛАСС _WindowTentacleShadowPainter НА ВАРИАНТ С КЛЕШНЕЙ:
+// ПОЛНОСТЬЮ ЗАМЕНИТЬ КЛАСС _WindowTentacleShadowPainter НА ЭТОТ РЕАЛИСТИЧНЫЙ ВАРИАНТ ПО ФОТО:
 class _WindowTentacleShadowPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final w = size.width;
     final h = size.height;
 
-    // Светло-чёрная блёклая краска тени (22% видимости)
+    // Очень блёклый, полупрозрачный чёрный цвет тени (20% видимости)
     final shadowPaint = Paint()
-      ..color = Colors.black.withOpacity(0.22)
+      ..color = Colors.black.withValues(alpha: 0.20)
+      ..style = PaintingStyle.fill; // Будем заливать всё тело для массивности
+
+    final outlinePaint = Paint()
+      ..color = Colors.black.withValues(alpha: 0.25)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.2 // Плотная, массивная клешня
-      ..strokeCap = StrokeCap.round;
+      ..strokeWidth = 1.0;
 
-    // 1. ОСНОВНОЕ ТЕЛО КЛЕШНИ: ИДЁТ СТРОГО ВВЕРХ И ЗАКРУЧИВАЕТСЯ ПО КРУГУ
-    final path = Path();
-    path.moveTo(w * 0.45, h); // Выходит из самого низа окна
+    // 1. ОТРИСОВКА МАССИВНОГО СТВОЛА ЩУПАЛЬЦА С КРУТЫМ ЗАВИТКОМ НА КОНЦЕ
+    final bodyPath = Path();
+    bodyPath.moveTo(w * 0.10, h); // Левый край основания
     
-    // Плавная, мощная дуга устремляется вверх без извиваний
-    path.quadraticBezierTo(w * 0.30, h * 0.50, w * 0.50, h * 0.20);
+    // Плавный S-образный изгиб левой стороны тела
+    bodyPath.cubicTo(w * 0.40, h * 0.70, w * 0.05, h * 0.40, w * 0.50, h * 0.15);
+    // Закручивание кончика в спираль-улитку на самой макушке
+    bodyPath.cubicTo(w * 0.75, h * 0.05, w * 0.85, h * 0.18, w * 0.65, h * 0.22);
+    bodyPath.cubicTo(w * 0.55, h * 0.24, w * 0.50, h * 0.14, w * 0.60, h * 0.10);
+    bodyPath.cubicTo(w * 0.70, h * 0.08, w * 0.68, h * 0.16, w * 0.62, h * 0.16); // Центр улитки
     
-    // Закручивание по кругу вовнутрь на вершине (формируем верхний щипец)
-    path.cubicTo(w * 0.70, h * 0.05, w * 0.95, h * 0.15, w * 0.80, h * 0.35);
-    path.cubicTo(w * 0.65, h * 0.45, w * 0.45, h * 0.30, w * 0.55, h * 0.22);
-    
-    canvas.drawPath(path, shadowPaint);
+    // Идём обратно, формируя толщину правой стороны
+    bodyPath.cubicTo(w * 0.35, h * 0.32, w * 0.65, h * 0.65, w * 0.55, h); // Правый край основания
+    bodyPath.close();
 
-    // 2. НИЖНИЙ ВСТРЕЧНЫЙ ЩИПЕЦ КЛЕШНИ (Дополняет круглую форму клешни)
-    final bottomClawPath = Path();
-    bottomClawPath.moveTo(w * 0.42, h * 0.38);
-    bottomClawPath.quadraticBezierTo(w * 0.25, h * 0.25, w * 0.45, h * 0.15);
-    
-    canvas.drawPath(bottomClawPath, shadowPaint);
+    canvas.drawPath(bodyPath, shadowPaint);
+    canvas.drawPath(bodyPath, outlinePaint);
 
-    // Маленькие бугорки-зазубрины на внутреннем хвате крабьей клешни для устрашения
-    final bumpPaint = Paint()..color = Colors.black.withOpacity(0.18)..style = PaintingStyle.fill;
-    canvas.drawCircle(Offset(w * 0.50, h * 0.30), 0.8, bumpPaint);
-    canvas.drawCircle(Offset(w * 0.42, h * 0.25), 0.7, bumpPaint);
-    canvas.drawCircle(Offset(w * 0.55, h * 0.16), 0.8, bumpPaint);
+    // 2. ОТРИСОВКА ВЫСТУПАЮЩИХ ПРИСОСОК ПО ВСЕМУ КОНТУРУ (КАК НА КАРТИНКЕ)
+    // Метод рисует круглую присоску, слегка вылезающую за правый край тела
+    void drawSuction(double cx, double cy, double radius) {
+      canvas.drawCircle(Offset(cx, cy), radius, shadowPaint);
+      canvas.drawCircle(Offset(cx, cy), radius, outlinePaint);
+      // Внутреннее отверстие присоски (для узнаваемости текстуры с фото)
+      canvas.drawCircle(
+        Offset(cx, cy), 
+        radius * 0.4, 
+        Paint()..color = const Color(0xFF111116)..style = PaintingStyle.fill,
+      );
+    }
+
+    // Расставляем присоски по ходу роста щупальца снизу вверх
+    drawSuction(w * 0.55, h * 0.90, 2.5); // Крупная внизу
+    drawSuction(w * 0.58, h * 0.76, 2.4);
+    drawSuction(w * 0.54, h * 0.64, 2.2);
+    drawSuction(w * 0.44, h * 0.52, 2.0);
+    drawSuction(w * 0.36, h * 0.42, 1.8);
+    drawSuction(w * 0.44, h * 0.32, 1.6);
+    drawSuction(w * 0.55, h * 0.24, 1.4);
+    
+    // Мелкие присоски на самом завитковом кончике
+    drawSuction(w * 0.68, h * 0.19, 1.1);
+    drawSuction(w * 0.72, h * 0.12, 0.9);
+    drawSuction(w * 0.65, h * 0.07, 0.7);
   }
 
   @override
