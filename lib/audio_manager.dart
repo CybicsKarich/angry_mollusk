@@ -6,7 +6,6 @@ class AudioManager {
   static final AudioPlayer _stretchPlayer = AudioPlayer();
   static final AudioPlayer _finalMenuPlayer = AudioPlayer();
   static final AudioPlayer _fxPlayer = AudioPlayer();
-  static final AudioPlayer _weatherPlayer = AudioPlayer();
   
   
   static final Random _random = Random();
@@ -248,25 +247,4 @@ static Future<void> playPaperRustle() async {
       print("КРИТИЧЕСКАЯ ОШИБКА ФАНФАР МЕДАЛИ: $e");
     }
   }
-  // ДОБАВИТЬ В САМЫЙ КОНЕЦ КЛАССА AudioManager:
-static void startLevel5Rain() {
-  // 1. Принудительно останавливаем фоновую музыку, чтобы она не мешала грозе
-  _bgmPlayer.stop(); // Если твой плеер музыки называется по-другому, подставь его имя
-
-  // 2. Включаем бесконечный зацикленный ливень на отдельном погодном плеере
-  _weatherPlayer.setReleaseMode(ReleaseMode.loop);
-  _weatherPlayer.setVolume(0.20); // Делаем дождь тихим, фоновым по ТЗ
-  _weatherPlayer.play(AssetSource('audio/rain_ambient.mp3'));
-}
-
-static void stopLevel5Rain() {
-  // Метод для выключения ливня при выходе с уровня или проигрыше
-  _weatherPlayer.stop();
-}
-
-static void playLightningStrike() {
-  // Звук молнии по ТЗ делаем громким. Воспроизводим через fxPlayer,
-  // чтобы он наложился поверх тихого дождя, не прерывая его!
-  _fxPlayer.play(AssetSource('audio/lightning_strike.mp3'), volume: 0.85);
-}
 } // <--- ВОТ ЭТА ОДНА СКОБКА ТЕПЕРЬ САМАЯ ПОСЛЕДНЯЯ В ФАЙЛЕ! Она закрывает весь класс AudioManager.
