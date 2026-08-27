@@ -3001,8 +3001,35 @@ Positioned(bottom: 58, left: 45, child: Transform.rotate(angle: 0.26, child: Con
               ),
               child: Stack(
                 children: [
-                  Positioned(top: 20, left: 22, child: Container(width: 16, height: 35, decoration: BoxDecoration(color: const Color(0xFF111116), borderRadius: const BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)), border: Border.all(color: const Color(0xFF37474F), width: 1.5)))),
-                  Positioned(top: 35, left: 29, child: Container(width: 2, height: 20, color: const Color(0xFF263238))),
+                 Positioned(
+                    top: 20, left: 22, 
+                    child: Container(
+                      width: 16, height: 35, 
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF111116), 
+                        borderRadius: const BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)), 
+                        border: Border.all(color: const Color(0xFF37474F), width: 1.5),
+                      ),
+                      child: Stack(
+                        children: [
+                          if (() {
+                            final now = DateTime.now().millisecondsSinceEpoch;
+                            final periodProgress = now % 5000; 
+                            final isTimeToShow = periodProgress < 1500;
+                            final current5SecId = now ~/ 5000;
+                            final hasChance = Random(current5SecId).nextBool(); 
+                            
+                            return isTimeToShow && hasChance;
+                          }())
+                            Positioned.fill(
+                              child: CustomPaint(
+                                painter: _WindowTentacleShadowPainter(), 
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -3147,7 +3174,7 @@ Positioned(bottom: 58, left: 45, child: Transform.rotate(angle: 0.26, child: Con
       ),
     );
   }
-    // ИСПРАВЛЕНО: БОРОДА СЛЕВА, КАСКА-ПОЛУКРУГ С ЧЁРНЫМИ ПОЛОСКАМИ-ВМЯТИНАМИ
+    // ЗАМЕНИТЬ СТРОГО НА ЭТОТ ВАРИАНТ (БЕЗ ПОЛОСОК):
   Widget _buildSvinomatkinEquipment(double size) {
     return Positioned.fill(
       child: Stack(
@@ -3171,17 +3198,7 @@ Positioned(bottom: 58, left: 45, child: Transform.rotate(angle: 0.26, child: Con
             ),
           ),
 
-          // 2. ЧЁРНЫЕ ПОЛОСКИ БОЕВОЙ ВМЯТИНЫ (Рисуются прямо поверх каски слева вверху)
-          Positioned(
-            top: -ch(size, 2),
-            left: size * 0.12,
-            child: CustomPaint(
-              size: Size(size * 0.25, size * 0.15),
-              painter: _HelmetDentLinesPainter(),
-            ),
-          ),
-
-          // 3. МАССИВНАЯ БОРОДА СДВИHУТА КОРРЕКТНО ЛЕВЕЕ
+          // 2. МАССИВНАЯ БОРОДА СДВИHУТА КОРРЕКТНО ЛЕВЕЕ
           Positioned(
             bottom: -ch(size, 16),
             left: -size * 0.42, 
@@ -3224,25 +3241,35 @@ class _CastleSpirePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// ДОБАВИТЬ В САМЫЙ КОНЕЦ ФАЙЛА lib/main.dart (ВЗАМЕН _HelmetWithDentClipper):
-class _HelmetDentLinesPainter extends CustomPainter {
+// ДОБАВИТЬ В САМЫЙ КОНЕЦ ФАЙЛА lib/main.dart:
+class _WindowTentacleShadowPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    // Чёрные суровые полоски трещин шлема
-    final paint = Paint()
-      ..color = const Color(0xFF263238)
+    // Еле-еле заметный светло-чёрный силуэт (черный цвет с экстремально низкой прозрачностью)
+    final shadowPaint = Paint()
+      ..color = Colors.black.withOpacity(0.25)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.4
+      ..strokeWidth = 2.5
       ..strokeCap = StrokeCap.round;
 
-    // Две перекрещивающиеся маленькие трещины, формирующие вмятину от удара птицы
-    canvas.drawLine(Offset(0, size.height * 0.2), Offset(size.width * 0.8, size.height * 0.8), paint);
-    canvas.drawLine(Offset(size.width * 0.2, size.height * 0.8), Offset(size.width * 0.9, size.height * 0.3), paint);
-    canvas.drawLine(Offset(size.width * 0.4, size.height * 0.1), Offset(size.width * 0.5, size.height * 0.9), paint);
+    final path = Path();
+    // Извивающийся S-образный силуэт щупальца, поднимающийся из темноты окна замка
+    path.moveTo(size.width * 0.3, size.height);
+    path.cubicTo(
+      size.width * 0.8, size.height * 0.7,
+      size.width * 0.1, size.height * 0.4,
+      size.width * 0.6, size.height * 0.1,
+    );
+    canvas.drawPath(path, shadowPaint);
+
+    // Микроскопические присоски, уходящие вглубь окна
+    final suctionPaint = Paint()..color = Colors.black.withOpacity(0.18)..style = PaintingStyle.fill;
+    canvas.drawCircle(Offset(size.width * 0.62, size.height * 0.65), 0.8, suctionPaint);
+    canvas.drawCircle(Offset(size.width * 0.35, size.height * 0.45), 0.7, suctionPaint);
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true; // Перерисовываем для динамики
 }
 
 
