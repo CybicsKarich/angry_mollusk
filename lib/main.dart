@@ -2731,9 +2731,13 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
                       padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 14),
                       elevation: 8,
                     ),
-                    onPressed: () {
-                      // ИСПРАВЛЕНО: Кнопка "В БОЙ!" по ТЗ пока не работает (заглушка)
-                    },
+                    // ЗАМЕНИТЬ НАЖАТИЕ КНОПКИ "В БОЙ!" В КОМИКСЕ НА РЕАЛЬНЫЙ НАВИГАТОР:
+onPressed: () {
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => const Level5Screen()),
+  );
+},
                      child: const Text("В БОЙ!", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.2)),
                   ),
             ),
@@ -3013,11 +3017,13 @@ Positioned(bottom: 58, left: 45, child: Transform.rotate(angle: 0.26, child: Con
                       child: Stack(
                         children: [
                           if (() {
-                            final now = DateTime.now().millisecondsSinceEpoch;
-                            final periodProgress = now % 5000; 
-                            final isTimeToShow = periodProgress < 1500;
-                            final current5SecId = now ~/ 5000;
-                            final hasChance = Random(current5SecId).nextBool(); 
+                            // ТОЧЕЧНО ЗАМЕНИТЬ БЛОК ТАЙМЕРА ЩУПАЛЬЦА ВНУТРИ _buildCastleBlock НА ЭТОТ (4 СЕКУНДЫ):
+final now = DateTime.now().millisecondsSinceEpoch;
+final periodProgress = now % 4000; // Цикл изменён на 4 секунды по ТЗ
+final isTimeToShow = periodProgress < 1200; 
+final current4SecId = now ~/ 4000;
+final hasChance = Random(current4SecId).nextBool(); // Шанс 50%
+ 
                             
                             return isTimeToShow && hasChance;
                           }())
