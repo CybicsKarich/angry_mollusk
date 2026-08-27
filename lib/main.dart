@@ -3224,6 +3224,26 @@ class _CastleSpirePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
+// ДОБАВИТЬ В САМЫЙ КОНЕЦ ФАЙЛА lib/main.dart (ВЗАМЕН _HelmetWithDentClipper):
+class _HelmetDentLinesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Чёрные суровые полоски трещин шлема
+    final paint = Paint()
+      ..color = const Color(0xFF263238)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.4
+      ..strokeCap = StrokeCap.round;
+
+    // Две перекрещивающиеся маленькие трещины, формирующие вмятину от удара птицы
+    canvas.drawLine(Offset(0, size.height * 0.2), Offset(size.width * 0.8, size.height * 0.8), paint);
+    canvas.drawLine(Offset(size.width * 0.2, size.height * 0.8), Offset(size.width * 0.9, size.height * 0.3), paint);
+    canvas.drawLine(Offset(size.width * 0.4, size.height * 0.1), Offset(size.width * 0.5, size.height * 0.9), paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
 
 
 
