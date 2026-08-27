@@ -2792,7 +2792,7 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
             ),
             // ЗАМЕНИТЬ ТОЛЬКО ОБЛАКО ГЕНЕРАЛА ВНУТРИ _buildFrame2:
 Positioned(
-  top: 48, right: 32, width: 100, // Сдвинули еще правее, прямо к голове
+  top: 56, right: 48, width: 100, // Опустили пониже и сдвинули левее к центру
   child: CustomPaint(
     painter: ComicBubblePainter(tailX: 0.25), // Хвостик чётко бьёт в Генерала
     child: const Padding(
@@ -2872,7 +2872,7 @@ Positioned(
             ),
             // ЗАМЕНИТЬ ТОЛЬКО ОБЛАКО ГЕНЕРАЛА ВНУТРИ _buildPage2Frame1:
 Positioned(
-  top: 42, right: 34, width: 100, // Придвинули в упор к свинье
+  top: 48, right: 48, width: 100, // Опустили и сдвинули левее вглубь кадра
   child: CustomPaint(
     painter: ComicBubblePainter(tailX: 0.3), 
     child: const Padding(
@@ -3147,40 +3147,47 @@ Positioned(bottom: 58, left: 45, child: Transform.rotate(angle: 0.26, child: Con
       ),
     );
   }
-  // НОВЫЙ МЕТОД: ГЕНЕРАЛЬСКАЯ СНАРЯГА (БОРОДА СДВИHУТА ЛЕВЕЕ, ШЛЕМ С ВМЯТИНОЙ)
+    // ИСПРАВЛЕНО: БОРОДА СЛЕВА, КАСКА-ПОЛУКРУГ С ЧЁРНЫМИ ПОЛОСКАМИ-ВМЯТИНАМИ
   Widget _buildSvinomatkinEquipment(double size) {
     return Positioned.fill(
       child: Stack(
         alignment: Alignment.center,
         clipBehavior: Clip.none,
         children: [
-          // 1. КАСКА-ПОЛУКРУГ С ВМЯТИНОЙ СЛЕВА ВВЕРХУ (ЧЕРЕЗ CLIPPATH)
+          // 1. Каноничная круглая каска-полукруг свиней
           Positioned(
             top: -ch(size, 4.5),
-            child: ClipPath(
-              clipper: _HelmetWithDentClipper(),
-              child: Container(
-                width: size * 0.96,
-                height: size * 0.44,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF78909C), // Стальной цвет каски
-                  border: Border.all(color: const Color(0xFF263238), width: 1.8),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    topRight: Radius.circular(24),
-                  ),
+            child: Container(
+              width: size * 0.96,
+              height: size * 0.44,
+              decoration: BoxDecoration(
+                color: const Color(0xFF78909C), 
+                border: Border.all(color: const Color(0xFF263238), width: 1.8),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(24),
+                  topRight: Radius.circular(24),
                 ),
               ),
             ),
           ),
 
-          // 2. МАССИВНАЯ БOРОДА, СДВИHУТАЯ ЧУТЬ ЛЕВЕЕ (left: -size * 0.42 вместо симметрии)
+          // 2. ЧЁРНЫЕ ПОЛОСКИ БОЕВОЙ ВМЯТИНЫ (Рисуются прямо поверх каски слева вверху)
+          Positioned(
+            top: -ch(size, 2),
+            left: size * 0.12,
+            child: CustomPaint(
+              size: Size(size * 0.25, size * 0.15),
+              painter: _HelmetDentLinesPainter(),
+            ),
+          ),
+
+          // 3. МАССИВНАЯ БОРОДА СДВИHУТА КОРРЕКТНО ЛЕВЕЕ
           Positioned(
             bottom: -ch(size, 16),
-            left: -size * 0.42, // Сдвиг влево, чтобы сидела как влитая по твоему ТЗ!
+            left: -size * 0.42, 
             child: Image.asset(
               'assets/images/beard.png',
-              width: size * 1.65, // Пышная и широкая
+              width: size * 1.65,
               height: size * 0.78,
               fit: BoxFit.contain,
             ),
@@ -3217,25 +3224,6 @@ class _CastleSpirePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// ДОБАВИТЬ В САМЫЙ КОНЕЦ ФАЙЛА lib/main.dart:
-class _HelmetWithDentClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    final path = Path();
-    path.moveTo(0, size.height);
-    // Идём вверх по левому краю
-    path.lineTo(0, size.height * 0.4);
-    // ДЕЛАЕМ БОЕВУЮ ВМЯТИНУ (Рваный внутренний скос на левой верхней части каски)
-    path.lineTo(size.width * 0.15, size.height * 0.22);
-    path.lineTo(size.width * 0.32, size.height * 0.08);
-    // Возвращаемся на идеальную окружность купола к правому краю
-    path.quadraticBezierTo(size.width * 0.65, -size.height * 0.05, size.width, size.height * 0.4);
-    path.lineTo(size.width, size.height);
-    path.close();
-    return path;
-  }
-  @override
-  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
-}
+
 
 
