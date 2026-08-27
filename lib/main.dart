@@ -3241,35 +3241,69 @@ class _CastleSpirePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// ДОБАВИТЬ В САМЫЙ КОНЕЦ ФАЙЛА lib/main.dart:
+// ПОЛНОСТЬЮ ЗАМЕНИТЬ КЛАСС _WindowTentacleShadowPainter НА ЭТОТ КОРРЕКТНЫЙ (ПО ФОТО):
 class _WindowTentacleShadowPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    // Еле-еле заметный светло-чёрный силуэт (черный цвет с экстремально низкой прозрачностью)
+    final w = size.width;
+    final h = size.height;
+
+    // Светло-чёрный силуэт, еле-еле заметный в темноте окна (22% видимости)
     final shadowPaint = Paint()
-      ..color = Colors.black.withOpacity(0.25)
+      ..color = Colors.black.withOpacity(0.22)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.5
+      ..strokeWidth = 3.0 // Сделали тело щупальца более плотным и мясистым, как на фото
       ..strokeCap = StrokeCap.round;
 
     final path = Path();
-    // Извивающийся S-образный силуэт щупальца, поднимающийся из темноты окна замка
-    path.moveTo(size.width * 0.3, size.height);
-    path.cubicTo(
-      size.width * 0.8, size.height * 0.7,
-      size.width * 0.1, size.height * 0.4,
-      size.width * 0.6, size.height * 0.1,
-    );
+    // ИДЕАЛЬНАЯ СИНУСОИДА С КРУТЫМ ЗАВИТКОМ НА ВЕРШИНЕ ПО ТВОЕМУ ФOТО
+    path.moveTo(w * 0.35, h); // Выходит снизу окна
+    // Красивый плавный S-образный подъем
+    path.cubicTo(w * 0.95, h * 0.75, w * 0.05, h * 0.45, w * 0.65, h * 0.22);
+    // Крутой, закручивающийся внутрь спиральный кончик на самой верхушке
+    path.cubicTo(w * 0.95, h * 0.12, w * 0.70, h * 0.02, w * 0.52, h * 0.06);
+    path.cubicTo(w * 0.42, h * 0.09, w * 0.46, h * 0.18, w * 0.54, h * 0.16);
+    
     canvas.drawPath(path, shadowPaint);
 
-    // Микроскопические присоски, уходящие вглубь окна
-    final suctionPaint = Paint()..color = Colors.black.withOpacity(0.18)..style = PaintingStyle.fill;
-    canvas.drawCircle(Offset(size.width * 0.62, size.height * 0.65), 0.8, suctionPaint);
-    canvas.drawCircle(Offset(size.width * 0.35, size.height * 0.45), 0.7, suctionPaint);
+    // ДВА ПАРАЛЛЕЛЬНЫХ РЯДА КРУПНЫХ ОБЪЁМНЫХ ПРИСОСОК ВДОЛЬ ВСЕГО ТЕЛА ЩУПАЛЬЦА
+    final suctionPaint = Paint()
+      ..color = Colors.black.withOpacity(0.16)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.8;
+      
+    final suctionFill = Paint()
+      ..color = Colors.black.withOpacity(0.08)
+      ..style = PaintingStyle.fill;
+
+    // Метод для быстрой отрисовки полой круглой присоски (кольца) с фото
+    void drawSuction(double x, double y, double r) {
+      canvas.drawCircle(Offset(x, y), r, suctionFill);
+      canvas.drawCircle(Offset(x, y), r, suctionPaint);
+    }
+
+    // РЯД 1: Внутренние крупные присоски (идут по основному вектору изгиба)
+    drawSuction(w * 0.48, h * 0.85, 1.4);
+    drawSuction(w * 0.62, h * 0.72, 1.3);
+    drawSuction(w * 0.55, h * 0.58, 1.2);
+    drawSuction(w * 0.36, h * 0.44, 1.1);
+    drawSuction(w * 0.42, h * 0.32, 1.0);
+    drawSuction(w * 0.58, h * 0.22, 0.9);
+    
+    // РЯД 2: Внешние дублирующие присоски, создающие 3D-массивность
+    drawSuction(w * 0.58, h * 0.88, 1.2);
+    drawSuction(w * 0.72, h * 0.76, 1.1);
+    drawSuction(w * 0.64, h * 0.62, 1.0);
+    drawSuction(w * 0.44, h * 0.48, 0.9);
+    drawSuction(w * 0.48, h * 0.36, 0.8);
+    
+    // Мелкие закручивающиеся присоски на самом спиральном кончике
+    drawSuction(w * 0.66, h * 0.12, 0.6);
+    drawSuction(w * 0.58, h * 0.09, 0.5);
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true; // Перерисовываем для динамики
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
 
