@@ -2792,7 +2792,7 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
             ),
             // ЗАМЕНИТЬ ТОЛЬКО ОБЛАКО ГЕНЕРАЛА ВНУТРИ _buildFrame2:
 Positioned(
-  top: 48, right: 20, width: 100, // Опустили пониже и прижали правее к свинье
+  top: 48, right: 32, width: 100, // Сдвинули еще правее, прямо к голове
   child: CustomPaint(
     painter: ComicBubblePainter(tailX: 0.25), // Хвостик чётко бьёт в Генерала
     child: const Padding(
@@ -2872,7 +2872,7 @@ Positioned(
             ),
             // ЗАМЕНИТЬ ТОЛЬКО ОБЛАКО ГЕНЕРАЛА ВНУТРИ _buildPage2Frame1:
 Positioned(
-  top: 42, right: 22, width: 100, // Опустили пониже и сдвинули вправо к персонажу
+  top: 42, right: 34, width: 100, // Придвинули в упор к свинье
   child: CustomPaint(
     painter: ComicBubblePainter(tailX: 0.3), 
     child: const Padding(
@@ -3084,7 +3084,7 @@ Positioned(bottom: 58, left: 45, child: Transform.rotate(angle: 0.26, child: Con
   }
 
 
-    // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОД _buildSvinomatkinCharacter НА ЭТОТ КЛАССИЧЕСКИЙ ВАРИАНТ:
+    // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОД _buildSvinomatkinCharacter НА ЭТОТ КОРРЕКТНЫЙ:
   Widget _buildSvinomatkinCharacter(double size) {
     return Stack(
       alignment: Alignment.center,
@@ -3094,33 +3094,13 @@ Positioned(bottom: 58, left: 45, child: Transform.rotate(angle: 0.26, child: Con
         Container(width: size, height: size, decoration: BoxDecoration(color: const Color(0xFF7CB342), shape: BoxShape.circle, border: Border.all(color: Colors.black, width: 2))),
         ClipOval(child: Image.asset('assets/images/maksim.png', width: size * 0.85, height: size * 0.85, fit: BoxFit.cover)),
         
-        // КЛАССИЧЕСКАЯ ЖЕЛЕЗНАЯ КАСКА-ПОЛУКРУГ (КАК В ОРИГИНАЛЬНЫХ ANGRY BIRDS)
-        Positioned(
-          top: -ch(size, 4),
-          child: Container(
-            width: size * 0.96, 
-            height: size * 0.44,
-            decoration: BoxDecoration(
-              color: const Color(0xFF78909C), // Плотный серый оружейный металл
-              borderRadius: const BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24)),
-              border: Border.all(color: const Color(0xFF263238), width: 1.8),
-            ),
-          ),
-        ),
-
-        // ИСПРАВЛЕНО: БОРОДА ОПУЩЕНА ПОНИЖЕ, НО ОСТАЛАСЬ ШИРОКОЙ И МАССИВНОЙ
-        Positioned(
-          bottom: -ch(size, 16), // Опустили пониже по ТЗ, чтобы открыть лицо
-          child: Image.asset(
-            'assets/images/beard.png', 
-            width: size * 1.60, // Широкая, окладистая форма
-            height: size * 0.75, 
-            fit: BoxFit.contain,
-          ),
-        ),
+        // Накатываем сверху шлем с вмятиной и сдвинутую бороду через наш метод
+        _buildSvinomatkinEquipment(size),
       ],
     );
   }
+
+  
 
 
     Widget _buildCharacterBase(String assetPath, double size) {
@@ -3167,6 +3147,48 @@ Positioned(bottom: 58, left: 45, child: Transform.rotate(angle: 0.26, child: Con
       ),
     );
   }
+  // НОВЫЙ МЕТОД: ГЕНЕРАЛЬСКАЯ СНАРЯГА (БОРОДА СДВИHУТА ЛЕВЕЕ, ШЛЕМ С ВМЯТИНОЙ)
+  Widget _buildSvinomatkinEquipment(double size) {
+    return Positioned.fill(
+      child: Stack(
+        alignment: Alignment.center,
+        clipBehavior: Clip.none,
+        children: [
+          // 1. КАСКА-ПОЛУКРУГ С ВМЯТИНОЙ СЛЕВА ВВЕРХУ (ЧЕРЕЗ CLIPPATH)
+          Positioned(
+            top: -ch(size, 4.5),
+            child: ClipPath(
+              clipper: _HelmetWithDentClipper(),
+              child: Container(
+                width: size * 0.96,
+                height: size * 0.44,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF78909C), // Стальной цвет каски
+                  border: Border.all(color: const Color(0xFF263238), width: 1.8),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // 2. МАССИВНАЯ БOРОДА, СДВИHУТАЯ ЧУТЬ ЛЕВЕЕ (left: -size * 0.42 вместо симметрии)
+          Positioned(
+            bottom: -ch(size, 16),
+            left: -size * 0.42, // Сдвиг влево, чтобы сидела как влитая по твоему ТЗ!
+            child: Image.asset(
+              'assets/images/beard.png',
+              width: size * 1.65, // Пышная и широкая
+              height: size * 0.78,
+              fit: BoxFit.contain,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 } // <--- ВОТ ЭТА СКОБКА ТЕПЕРЬ СТРОГО ЗАКРЫВАЕТ КЛАСС _SvinomatkinComicScreenState!
 
 
@@ -3195,5 +3217,25 @@ class _CastleSpirePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
+// ДОБАВИТЬ В САМЫЙ КОНЕЦ ФАЙЛА lib/main.dart:
+class _HelmetWithDentClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    path.moveTo(0, size.height);
+    // Идём вверх по левому краю
+    path.lineTo(0, size.height * 0.4);
+    // ДЕЛАЕМ БОЕВУЮ ВМЯТИНУ (Рваный внутренний скос на левой верхней части каски)
+    path.lineTo(size.width * 0.15, size.height * 0.22);
+    path.lineTo(size.width * 0.32, size.height * 0.08);
+    // Возвращаемся на идеальную окружность купола к правому краю
+    path.quadraticBezierTo(size.width * 0.65, -size.height * 0.05, size.width, size.height * 0.4);
+    path.lineTo(size.width, size.height);
+    path.close();
+    return path;
+  }
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
+}
 
 
