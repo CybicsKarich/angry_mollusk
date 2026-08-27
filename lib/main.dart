@@ -2792,11 +2792,11 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
             ),
             // ЗАМЕНИТЬ ТОЛЬКО ОБЛАКО ГЕНЕРАЛА ВНУТРИ _buildFrame2:
 Positioned(
-  top: 42, right: 14, width: 100, // Сделали компактнее и квадратнее
+  top: 48, right: 20, width: 100, // Опустили пониже и прижали правее к свинье
   child: CustomPaint(
-    painter: ComicBubblePainter(tailX: 0.3), // Хвостик указывает левее, на Генерала!
+    painter: ComicBubblePainter(tailX: 0.25), // Хвостик чётко бьёт в Генерала
     child: const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+      padding: EdgeInsets.all(6.0),
       child: Text(
         "Хрю-ха-ха! Шериф-младший, ты слишком далеко зашёл, но здесь твой путь закончится! Дон Молюск доверил мне охранять подступы к его замку, и я не сделаю ни шагу назад!", 
         style: TextStyle(fontSize: 6.8, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15), 
@@ -2872,11 +2872,11 @@ Positioned(
             ),
             // ЗАМЕНИТЬ ТОЛЬКО ОБЛАКО ГЕНЕРАЛА ВНУТРИ _buildPage2Frame1:
 Positioned(
-  top: 35, right: 12, width: 100, // Квадратная форма
+  top: 42, right: 22, width: 100, // Опустили пониже и сдвинули вправо к персонажу
   child: CustomPaint(
-    painter: ComicBubblePainter(tailX: 0.35), // Указывает на Свиноматкина
+    painter: ComicBubblePainter(tailX: 0.3), 
     child: const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 8), 
+      padding: EdgeInsets.all(6.0), 
       child: Text(
         "Вот это у тебя фантазии, постоянно повторяешь про луг и тотем! Что осталась детская травма? Хрю-ха-ха!", 
         style: TextStyle(fontSize: 7.5, fontWeight: FontWeight.bold, color: Colors.black), 
@@ -2920,11 +2920,11 @@ Positioned(
             ),
             // ЗАМЕНИТЬ ТОЛЬКО ОБЛАКО ГЕНЕРАЛА ВНУТРИ _buildPage2Frame2:
 Positioned(
-  top: 42, right: 10, width: 105, // Квадратная форма
+  top: 48, right: 26, width: 105, // Опустили и приблизили к свинье
   child: CustomPaint(
-    painter: ComicBubblePainter(tailX: 0.25), // Сдвинут под новые координаты
+    painter: ComicBubblePainter(tailX: 0.2), 
     child: const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 8), 
+      padding: EdgeInsets.all(6.0), 
       child: Text(
         "Я построил крепость из двойного камня, ты ни за что её не сломаешь!", 
         style: TextStyle(fontSize: 7.6, fontWeight: FontWeight.bold, color: Colors.black), 
@@ -2957,10 +2957,10 @@ Positioned(
             Positioned(bottom: 44, left: 129, child: Transform.rotate(angle: 0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5))))),
 
             // ЗАМЕНИТЬ СТРОГО ЭТИ ДВЕ СТРОКИ РЕЗИНКИ ВНУТРИ _buildPage2Frame3:
-// Нитка 1: Идёт из левого рога (left: 113) к оттянутому Ване
-Positioned(bottom: 45, left: 30, child: Transform.rotate(angle: 0.18, child: Container(width: 86, height: 3.5, color: const Color(0xFFD32F2F)))),
-// Нитка 2: Идёт из правого рога (left: 129) к оттянутому Ване
-Positioned(bottom: 35, left: 32, child: Transform.rotate(angle: -0.10, child: Container(width: 100, height: 3.5, color: const Color(0xFFD32F2F)))),
+// Нитка 1: Закреплена на самом верху левого рожка (bottom: 58)
+Positioned(bottom: 58, left: 30, child: Transform.rotate(angle: 0.32, child: Container(width: 86, height: 3.5, color: const Color(0xFFD32F2F)))),
+// Нитка 2: Закреплена на самом верху правого рожка (bottom: 58)
+Positioned(bottom: 58, left: 45, child: Transform.rotate(angle: 0.26, child: Container(width: 84, height: 3.5, color: const Color(0xFFD32F2F)))),
 
 
             // Ваня Баннихоп сидит ОДИН в оттянутой рогатке (Слева, left: 12)
@@ -3084,78 +3084,43 @@ Positioned(bottom: 35, left: 32, child: Transform.rotate(angle: -0.10, child: Co
   }
 
 
-
-
-
-    Widget _buildSvinomatkinCharacter(double size) {
+    // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОД _buildSvinomatkinCharacter НА ЭТОТ КЛАССИЧЕСКИЙ ВАРИАНТ:
+  Widget _buildSvinomatkinCharacter(double size) {
     return Stack(
       alignment: Alignment.center,
       clipBehavior: Clip.none,
       children: [
+        // Базовая круглая модель свиньи Максима
         Container(width: size, height: size, decoration: BoxDecoration(color: const Color(0xFF7CB342), shape: BoxShape.circle, border: Border.all(color: Colors.black, width: 2))),
         ClipOval(child: Image.asset('assets/images/maksim.png', width: size * 0.85, height: size * 0.85, fit: BoxFit.cover)),
         
+        // КЛАССИЧЕСКАЯ ЖЕЛЕЗНАЯ КАСКА-ПОЛУКРУГ (КАК В ОРИГИНАЛЬНЫХ ANGRY BIRDS)
         Positioned(
-          top: -ch(size, 8),
-          child: Stack(
-            alignment: Alignment.topCenter,
-            clipBehavior: Clip.none,
-            children: [
-              Container(
-                width: size * 0.94, 
-                height: size * 0.42,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF78909C), 
-                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16)),
-                  border: Border.all(color: const Color(0xFF263238), width: 1.8),
-                ),
-              ),
-              Positioned(
-                bottom: 0,
-                child: Container(
-                  width: size * 1.02, 
-                  height: size * 0.12,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF546E7A), 
-                    borderRadius: BorderRadius.circular(3),
-                    border: Border.all(color: const Color(0xFF263238), width: 1.5),
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: -ch(size, 8),
-                child: Container(
-                  width: size * 0.14, 
-                  height: size * 0.24,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF455A64),
-                    borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(2), bottomRight: Radius.circular(2)),
-                    border: Border.all(color: const Color(0xFF263238), width: 1.2),
-                  ),
-                ),
-              ),
-              Positioned(top: 8, left: size * 0.18, child: Container(width: 4, height: 4, decoration: const BoxDecoration(color: Color(0xFFB0BEC5), shape: BoxShape.circle))),
-              Positioned(top: 8, right: size * 0.18, child: Container(width: 4, height: 4, decoration: const BoxDecoration(color: Color(0xFFB0BEC5), shape: BoxShape.circle))),
-            ],
+          top: -ch(size, 4),
+          child: Container(
+            width: size * 0.96, 
+            height: size * 0.44,
+            decoration: BoxDecoration(
+              color: const Color(0xFF78909C), // Плотный серый оружейный металл
+              borderRadius: const BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24)),
+              border: Border.all(color: const Color(0xFF263238), width: 1.8),
+            ),
           ),
         ),
 
-        // ИСПРАВЛЕНО: БОРОДА ПОДНЯТА ДО ГЛАЗ И ДИКО УВЕЛИЧЕНА ПО ШИРИНЕ
+        // ИСПРАВЛЕНО: БОРОДА ОПУЩЕНА ПОНИЖЕ, НО ОСТАЛАСЬ ШИРОКОЙ И МАССИВНОЙ
         Positioned(
-          bottom: -ch(size, 4), // Подняли значительно выше, прямо к глазам!
+          bottom: -ch(size, 16), // Опустили пониже по ТЗ, чтобы открыть лицо
           child: Image.asset(
             'assets/images/beard.png', 
-            width: size * 1.85, // Огромная, ультра-широкая борода по новому фото!
-            height: size * 0.90, 
+            width: size * 1.60, // Широкая, окладистая форма
+            height: size * 0.75, 
             fit: BoxFit.contain,
           ),
         ),
       ],
     );
   }
-
-
-
 
 
     Widget _buildCharacterBase(String assetPath, double size) {
