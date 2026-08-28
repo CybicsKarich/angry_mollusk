@@ -413,6 +413,8 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   double wantedPosterY = 0.0;         // Относительная Y координата маленькой бумажки
   double wantedAnimTimer = 0.0;       // Таймер анимации вылета и удержания
   int wantedAttachedBlockIndex = -1;  // Индекс балки, к которой приклеен плакат
+  double _lightningTimer = 0.0;     // Таймер для отсчета 3 секунд между молниями
+  bool _showLightningFlash = false; // Флаг, включающий белую вспышку на экране
 
 
  
@@ -657,7 +659,49 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       pigs.add(MolluskMaksim(bx2 + 0.12, 0.53 - 0.019));  
     }
     
-    // ДОБАВИТЬ В САМЫЙ КОНЕЦ МЕТОДА buildLevelStructures():
+        // =========================================================================
+    // ГЕОМЕТРИЯ УРОВНЯ 5 (ФИНАЛЬНЫЙ РУБЕЖ: ЦИТАДЕЛЬ ГЕНЕРАЛА СВИНОМАТКИНА)
+    // =========================================================================
+    else if (currentLevel == 5) {
+      targetScore1Star = 400;
+      targetScore2Stars = 500;
+      targetScore3Stars = 600;
+
+      // Сразу при генерации уровня запускаем бесконечный фоновый ливень!
+      AudioManager.startLevel5Rain();
+
+      // Остров с цитаделью находится на расстоянии 1.15 (как на 3 и 4 уровнях)
+      final double bx = 1.25; 
+
+      // 🏢 КАМЕННЫЙ ЩИТ ИЗ 3 УРОВНЯ, НО С ДВОЙНЫМИ СТЕНАМИ (Толщина х2)
+      // 1 этаж (Двойные левая и правая опорные стены)
+      blocks.add(GameBlock(bx + 0.00, 0.55, 0.03, 0.18, true)); // Левая стена (слой 1)
+      blocks.add(GameBlock(bx + 0.03, 0.55, 0.03, 0.18, true)); // Левая стена (слой 2)
+      
+      blocks.add(GameBlock(bx + 0.13, 0.55, 0.03, 0.18, true)); // Правая стена (слой 1)
+      blocks.add(GameBlock(bx + 0.16, 0.55, 0.03, 0.18, true)); // Правая стена (слой 2)
+      
+      blocks.add(GameBlock(bx - 0.01, 0.53, 0.21, 0.02, true)); // Тяжёлое каменное перекрытие
+      
+      // 2 этаж (Двойные внутренние стены)
+      blocks.add(GameBlock(bx + 0.04, 0.37, 0.03, 0.16, true)); // Внутренняя стена 1
+      blocks.add(GameBlock(bx + 0.07, 0.37, 0.03, 0.16, true)); // Внутренняя стена 2
+      
+      blocks.add(GameBlock(bx + 0.03, 0.35, 0.13, 0.02, true)); // Верхняя крыша щита
+
+      // 🐷 ГЕНЕРАЛ СВИНОМАТКИН СИДИТ СТРОГО ВНУТРИ КРЕПОСТИ (НА 1 ЭТАЖЕ МЕЖДУ СТЕНАМИ)
+      // Мы спавним одну свинью. Движок игры сам поймет по номеру уровня, что нужно нарисовать Генерала!
+      pigs.add(MolluskMaksim(bx + 0.08, 0.53 - 0.019));
+
+      // 🏯 СЗАДИ СТOИТ НЕУЯЗВИМЫЙ ЗАМОК-МОНОЛИТ (Спец-блок)
+      // Координаты X сдвинуты за крепость (1.52). Высота большая, как в комиксе.
+      final castleBlock = GameBlock(bx + 0.27, 0.15, 0.28, 0.58, true)
+        ..isSleeping = true; // Он всегда спит и не падает
+      blocks.add(castleBlock);
+    }
+
+        
+        // ДОБАВИТЬ В САМЫЙ КОНЕЦ МЕТОДА buildLevelStructures():
 hasWantedPoster = false;
 showWantedBig = false;
 wantedAnimTimer = 0.0;
@@ -706,7 +750,25 @@ if (currentLevel == 2 || currentLevel == 3) {
     @override
   void update(double dt) {
     
-    // ДОБАВИТЬ В НАЧАЛО МЕТОДА update(double dt):
+    // ХАК ДЛЯ МОЛНИЙ НА 5 УРОВНЕ
+    if (currentLevel == 5) {
+      _lightningTimer += dt;
+      
+      // Каждые 3 секунды бьет молния
+      if (_lightningTimer >= 3.0) {
+        _lightningTimer = 0.0;
+        _showLightningFlash = true; // Включаем вспышку
+        AudioManager.playThunderStrike(); // Запускаем звук грома поверх дождя
+        
+        // Выключаем вспышку обратно через 120 миллисекунд для эффекта мерцания
+        Future.delayed(const Duration(milliseconds: 120), () {
+          _showLightningFlash = false;
+        });
+      }
+    }
+
+      
+      // ДОБАВИТЬ В НАЧАЛО МЕТОДА update(double dt):
 if (showWantedBig) {
   wantedAnimTimer += dt;
   if (wantedAnimTimer >= 6.0) {
@@ -873,7 +935,35 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
         // LINE: 33
     // ЧЕСТНАЯ ПОБЕДА: Свиньи уничтожены, и ВСЕ блоки/осколки полностью затихли!
     if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictorySequenceStarted && !isAnythingMoving) {
-      isVictorySequenceStarted = true;
+      
+     // ИСПРАВЛЕНО ДЛЯ УРОВНЯ 5: Птица должна физически долететь до двери замка-монолита!
+      if (currentLevel == 5) {
+        if (currentBird != null && currentBird!.isLaunched) {
+          double bx = 1.25;
+          // Проверяем, попал ли Ваня в нижнюю часть замка (зона двери: X > bx + 0.27, Y > 0.5)
+          if (currentBird!.position.dx >= (bx + 0.27) && currentBird!.position.dy >= 0.50) {
+            // Ура, прорыв совершен! Глушим ливень и пускаем к финалу
+            AudioManager.stopLevel5Rain();
+          } else {
+            return; // Птица еще летит или упала мимо двери — ждем точного попадания!
+          }
+        } else if (currentBird == null && birdsQueue.isEmpty) {
+          // Если свинья убита, все затихло, а птиц больше нет и в дверь никто не попал — это поражение!
+          levelFailed = true;
+          AudioManager.playGameOver();
+          overlays.add('GameOverMenu');
+          return;
+        } else {
+          return; // Ждем следующего выстрела игрока
+        }
+      } else {
+        // На обычных уровнях 1-4 при уничтожении свиней музыка глушится стандартно
+        if (currentBird != null && currentBird!.isLaunched && currentBird!.isAngryMode) {
+          AudioManager.stopRage();
+        }
+      }   
+    
+        isVictorySequenceStarted = true;
       
       int remainingBirds = birdsQueue.length;
 
@@ -957,8 +1047,16 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
           end: Alignment.bottomCenter,
           colors: [colorTop, colorBottom],
         ).createShader(Rect.fromLTWH(0, 0, size.width * worldWidthFactor, size.height));
+    } else if (currentLevel == 5) {
+      // ИСПРАВЛЕНО ДЛЯ УРОВНЯ 5: Грозовое темно-синее мистическое небо из комикса
+      skyPaint = Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [const Color(0xFF1A1235), const Color(0xFF0F0822)],
+        ).createShader(Rect.fromLTWH(0, 0, size.width * worldWidthFactor, size.height));
     } else {
-      // Обычное красивое мультяшное небо для остальных уровней
+      // Обычное красивое мультяшное небо
       skyPaint = Paint()
         ..shader = LinearGradient(
           begin: Alignment.topCenter,
@@ -968,6 +1066,13 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
     }
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width * worldWidthFactor, size.height), skyPaint);
 
+    // =========================================================================
+    // ОРИГИНАЛЬНАЯ МЕХАНИКА: ОСЛЕПЛЯЮЩАЯ СВЕTОВАЯ ВСПЫШКА МОЛНИИ НА ВЕСЬ ЭКРАН!
+    // =========================================================================
+    if (currentLevel == 5 && _showLightningFlash) {
+      final lightningOverlayPaint = Paint()..color = Colors.white.withOpacity(0.88);
+      canvas.drawRect(Rect.fromLTWH(0, 0, size.width * worldWidthFactor, size.height), lightningOverlayPaint);
+    }  
     // ИСПРАВЛЕНО: СВЕТОВЫЕ БЛИКИ НА НЕБЕ ДЛЯ ТРЭШ-ЭФФЕКТА ТАБЛЕТКИ
     if (currentLevel == 4 && currentBird != null && currentBird!.isAngryMode) {
       final glarePaint = Paint()..color = Colors.white.withOpacity(0.15)..style = PaintingStyle.fill;
@@ -997,13 +1102,34 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
       canvas.drawLine(Offset(sunRadius + 5, 0), Offset(sunRadius + 20, 0), rayPaint);
     }
     canvas.restore();
+      
+        if (currentLevel == 5) {
+      // РИСУЕМ ТЁМНЫЕ ТУЧИ ИЗ КОМИКСА ГЕНЕРАЛА
+      final stormCloudPaint = Paint()..color = const Color(0xFF37474F).withOpacity(0.9);
+      double stormX = (size.width * 0.1 + cloudOffset1 * size.width) % (size.width * worldWidthFactor + 200) - 100;
+      canvas.drawCircle(Offset(stormX, size.height * 0.12), 40, stormCloudPaint);
+      canvas.drawCircle(Offset(stormX + 45, size.height * 0.09), 55, stormCloudPaint);
+      canvas.drawCircle(Offset(stormX + 95, size.height * 0.12), 42, stormCloudPaint);
 
-    // Облака летают по всей ширине фона
-    final cloudPaint = Paint()..color = Colors.white.withOpacity(0.85);
-    double c1X = (size.width * 0.3 + cloudOffset1 * size.width) % (size.width * worldWidthFactor + 200) - 100;
-    canvas.drawCircle(Offset(c1X, size.height * 0.15), 30, cloudPaint);
-    canvas.drawCircle(Offset(c1X + 35, size.height * 0.12), 42, cloudPaint);
-    canvas.drawCircle(Offset(c1X + 75, size.height * 0.15), 32, cloudPaint);
+      // НЕПРЕРЫВНЫЙ ЛИВЕНЬ: Рисуем косые нити дождя, бегущие по экрану
+      final rainPaint = Paint()
+        ..color = Colors.blue.shade100.withOpacity(0.25)
+        ..strokeWidth = 1.2;
+      final randRain = Random(13); // Сид фиксирован, чтобы капли не дергались хаотично
+      for (int i = 0; i < 60; i++) {
+        double rx = randRain.nextDouble() * size.width * worldWidthFactor;
+        double ry = randRain.nextDouble() * size.height * 0.83;
+        canvas.drawLine(Offset(rx, ry), Offset(rx + 8, ry + 25), rainPaint); // Косые капли ливня
+      }
+    } else {
+      // Обычные мультяшные облака для 1-4 уровней
+      final cloudPaint = Paint()..color = Colors.white.withOpacity(0.85);
+      double c1X = (size.width * 0.3 + cloudOffset1 * size.width) % (size.width * worldWidthFactor + 200) - 100;
+      canvas.drawCircle(Offset(c1X, size.height * 0.15), 30, cloudPaint);
+      canvas.drawCircle(Offset(c1X + 35, size.height * 0.12), 42, cloudPaint);
+      canvas.drawCircle(Offset(c1X + 75, size.height * 0.15), 32, cloudPaint);
+    }
+
 
     // Вода и океан тянутся до самого края фона уровня
     canvas.drawRect(Rect.fromLTWH(0, size.height * 0.83, size.width * worldWidthFactor, size.height * 0.02), Paint()..color = const Color(0xFF29B6F6));
@@ -1012,14 +1138,17 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
     // Острова суши встают на свои места
     _renderIsland(canvas, size, 0.0, 0.25); // Островок рогатки
     
-    if (currentLevel == 1) {
+        if (currentLevel == 1) {
       _renderIsland(canvas, size, 0.55, 1.0); 
     } else if (currentLevel == 2) {
       _renderIsland(canvas, size, 1.28, 1.75); 
     } else if (currentLevel == 3 || currentLevel == 4) {
-      // ИСПРАВЛЕНО: На 4 уровне земля и трава второго острова теперь отрисовываются на 100%!
       _renderIsland(canvas, size, 1.15, 1.95); 
+    } else if (currentLevel == 5) {
+      // На 5 уровне правый остров увеличен (до 2.2), чтобы замок-монолит крепко стоял на земле
+      _renderIsland(canvas, size, 1.15, 2.20); 
     }
+
 
 
     // 6. КРАСНАЯ РЕЗИНКА РОГАТКИ (Отрисовывается ВСЕГДА до выстрела)
@@ -1097,7 +1226,29 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
       
       // 8. ИСПРАВЛЕНО: ОТРИСОВКА ВСЕХ ОБЪЕКТОВ С УМНОЙ ПРОВЕРКОЙ НА СУНДУК, ЖЕЛЕЗО И БРОНЕСТЕКЛО
     for (var block in blocks) {
-      if (block.isSecretChest) {
+       // ИСПРАВЛЕНО ДЛЯ УРОВНЯ 5: КРАСИВЫЙ ЗАМОК-МОНОЛИТ С ДВЕРЬЮ СКВОЗЬ ЧЕТВЕРТУЮ СТЕНУ
+      if (currentLevel == 5 && block.x >= 1.50) {
+        final castleRect = Rect.fromLTWH(block.x * size.width, block.y * size.height, block.w * size.width, block.h * size.height);
+        
+        // Отрисовка темных массивных стен цитадели
+        canvas.drawRect(castleRect, Paint()..color = const Color(0xFF21272A));
+        canvas.drawRect(castleRect, Paint()..color = const Color(0xFF101416)..style = PaintingStyle.stroke..strokeWidth = 3.5);
+
+        // Рисуем арку-проход (Дверь проникновения) внизу замка
+        final doorPaint = Paint()..color = const Color(0xFF090B0C);
+        final doorRect = Rect.fromLTWH(
+          castleRect.left + 15, 
+          castleRect.bottom - (size.height * 0.18), 
+          size.width * 0.07, 
+          size.height * 0.18
+        );
+        canvas.drawRect(doorRect, doorPaint);
+        canvas.drawRect(doorRect, Paint()..color = const Color(0xFF37474F)..style = PaintingStyle.stroke..strokeWidth = 2.0);
+        
+        // Золотая ручка на двери цитадели
+        canvas.drawCircle(Offset(doorRect.right - 8, doorRect.top + doorRect.height / 2), 2.5, Paint()..color = const Color(0xFFFFD54F));
+      }
+        if (block.isSecretChest) {
         // Отрисовка кастомного сундука с твоей картинки (с замком и открыванием!)
         final boxRect = Rect.fromLTWH(block.x * size.width, block.y * size.height, block.w * size.width, block.h * size.height);
         final woodPaint = Paint()..color = const Color(0xFFD84315);
@@ -1777,7 +1928,13 @@ class Bunnyhop {
           return; 
         }
 
-        // Хак для железа
+        // ИСПРАВЛЕНО ДЛЯ УРОВНЯ 5: ЗАМОК-МОНОЛИТ НЕУЯЗВИМ!
+        if (currentLevel == 5 && block.x >= 1.50) {
+          // Ваня врезается в стену замка, отскакивает назад и падает вниз к двери
+          velocity = Offset(-velocity.dx * 0.15, 0.25); 
+          continue; 
+        }
+            // Хак для железа
         if (block.isIronShield) {
           velocity = Offset(-velocity.dx * 0.2, 0.1); 
           return;
@@ -1962,6 +2119,45 @@ class MolluskMaksim {
       sprite.render(canvas, position: Vector2(screenPos.dx - radius, screenPos.dy - radius), size: Vector2(radius * 2, radius * 2));
     }
 
+    // ИСПРАВЛЕНО ДЛЯ УРОВНЯ 5: РЕНДЕРИМ СНАРЯЖЕНИЕ ГЕНЕРАЛА СВИНOМАТКИНА ПОВЕРХ КРУГА!
+    if (AngryMolluskGame.score >= 0 && AngryMolluskGame.score != -999) { // Простая обертка для доступа к контексту игры
+      // Проверяем, идет ли сейчас Пятый уровень приложения
+      // Поскольку внутри MolluskMaksim нет прямой переменной currentLevel, мы можем отрисовать шлем, если свинья всего одна (это канонично для 5 уровня!)
+          // ИСПРАВЛЕНО ДЛЯ УРОВНЯ 5: РЕНДЕРИМ СНАРЯЖЕНИЕ ГЕНЕРАЛА СВИНOМАТКИНА ПОВЕРХ КРУГА!
+    if (radius > 0) { 
+      // 🪖 А) Военная каска-полукруг свиней из Angry Birds
+      final helmetPaint = Paint()..color = const Color(0xFF78909C);
+      final helmetBorder = Paint()..color = const Color(0xFF263238)..style = PaintingStyle.stroke..strokeWidth = 1.5;
+      
+      final helmetRect = Rect.fromLTWH(screenPos.dx - radius * 1.02, screenPos.dy - radius * 1.15, radius * 2.04, radius * 0.9);
+      canvas.drawOval(helmetRect, helmetPaint);
+      canvas.drawOval(helmetRect, helmetBorder);
+
+      // 🧔 Б) НАКЛАДЫВАЕМ ГОТОВУЮ КАРТИНКУ БОРОДЫ СДВИHУТОЙ КОРРЕКТНО ЛЕВЕЕ
+      try {
+        // Достаем картинку бороды, которая у нас гарантированно загружена в кэш Flame
+        final beardImage = game.images.fromCache('beard.png');
+        
+        // Задаем сочные размеры для бороды Генерала, чтобы она сидела идеально
+        double beardW = radius * 3.3;
+        double beardH = radius * 1.56;
+        
+        final srcRect = Rect.fromLTWH(0, 0, beardImage.width.toDouble(), beardImage.height.toDouble());
+        // Смещаем бороду чуть ниже центра лица и левее, точно воссоздавая пропорции из комикса
+        final dstRect = Rect.fromLTWH(
+          screenPos.dx - radius * 1.65, 
+          screenPos.dy + radius * 0.2, 
+          beardW, 
+          beardH
+        );
+        
+        canvas.drawImageRect(beardImage, srcRect, dstRect, Paint()..filterQuality = FilterQuality.high);
+      } catch (e) {
+        print("Ошибка отрисовки ассета бороды на 5 уровне: $e");
+      }
+    }
+    }
+    
     // 3. Зеленые свиные уши поверх лица
     final earPaint = Paint()..color = const Color(0xFF4CAF50)..style = PaintingStyle.fill;
     final earBorderPaint = Paint()..color = const Color(0xFF2E7D32)..style = PaintingStyle.stroke..strokeWidth = 1.2;
