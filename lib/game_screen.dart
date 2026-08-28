@@ -1039,7 +1039,7 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
         final double worldWidthFactor = currentLevel == 1 ? 1.0 : (currentLevel == 2 ? 1.8 : 2.0);
 
     // ИСПРАВЛЕНО: КИСЛОТНОЕ НЕБО С БЛИКАМИ ПРИ АКТИВАЦИИ ТАБЛЕТКИ!
-    Paint skyPaint;
+    Paint skyPaint = Paint();
     if (currentLevel == 4 && currentBird != null && currentBird!.isAngryMode) {
       // Генерируем сумасшедшие неоновые поп-арт цвета на основе синуса времени
       double hueFactor = (sin(acidBackgroundTimer * 6.0) + 1.0) / 2.0; 
@@ -1365,7 +1365,7 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
 
     // СВИНЬИ! (Они нарисуются поверх островов и блоков)
     for (var pig in pigs) {
-      pig.render(canvas, size, maksimSprite);
+      pig.render(canvas, size, maksimSprite, currentLevel);
     }
 
       // ДОБАВИТЬ СРАЗУ ПОСЛЕ ЦИКЛА ОТРИСОВКИ СВИНЕЙ:
@@ -2134,16 +2134,15 @@ class MolluskMaksim {
   }
 
 
-      void render(Canvas canvas, Size size, Sprite? sprite) {
+        // Обновили заголовок метода — теперь он принимает уровень напрямую!
+  void render(Canvas canvas, Size size, Sprite? sprite, int currentLevel) {
     final screenPos = Offset(size.width * x, size.height * y);
     final radius = size.width * 0.022; // Сочный размер свиньи
 
-    // Проверяем, идет ли сейчас 5 уровень игры, чтобы понять, это Генерал или обычная свинья
-    // Достаем левелы через синглтон игры
-    final AngryMolluskGame game = FlameGame.currentActiveGame as AngryMolluskGame;
-    final bool isGeneral = game.currentLevel == 5;
+    // Жестко проверяем уровень без всяких сложных геттеров Flame
+    final bool isGeneral = currentLevel == 5;
 
-    // 1. Базовый круг тела свиньи (у Генерала каноничный защитный цвет 0xFF7CB342)
+    // 1. Базовый круг тела свиньи (у General каноничный защитный цвет 0xFF7CB342)
     canvas.drawCircle(screenPos, radius, Paint()..color = isGeneral ? const Color(0xFF7CB342) : const Color(0xFF4CAF50));
 
     // 2. Накладываем лицо Максима Рыбалкина
