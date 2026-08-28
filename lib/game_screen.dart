@@ -1263,7 +1263,7 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
     for (var block in blocks) {
        if (currentLevel == 5 && block.x >= 1.50) {
         // =========================================================================
-        // РЕНДЕРИМ НАСТОЯЩИЙ ДЕТАЛИЗИРОВАННЫЙ ЗАМОК ИЗ КОМИКСА (БЕЗ ТЕНИ)
+        // РЕНДЕРИМ НАСТОЯЩИЙ ДЕТАЛИЗИРОВАННЫЙ ЗАМОК ИЗ КОМИКСА (БЕЗ ТЕНЕЙ И ОШИБОК)
         // =========================================================================
         canvas.save();
         
@@ -1272,27 +1272,20 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
         double cW = block.w * size.width;
         double cH = block.h * size.height;
 
-        // 1. ЦЕНТРАЛЬНАЯ МАССИВНАЯ ЦИТАДЕЛЬ
+        // Кисти для камня и обводки
         final bodyPaint = Paint()..color = const Color(0xFF263238);
+        final sideTowerPaint = Paint()..color = const Color(0xFF37474F);
         final strokePaint = Paint()..color = const Color(0xFF101418)..style = PaintingStyle.stroke..strokeWidth = 2.0;
-        
+
+        // 1. ЦЕНТРАЛЬНАЯ МАССИВНАЯ ЦИТАДЕЛЬ
         final centralRect = Rect.fromLTWH(cX + cW * 0.15, cY + cH * 0.2, cW * 0.7, cH * 0.8);
         canvas.drawRect(centralRect, bodyPaint);
         canvas.drawRect(centralRect, strokePaint);
 
-        // Внутреннее окно цитадели (откуда раз в 4 секунды вылезает щупальце)
+        // Внутреннее окно цитадели (ТЕНЬ УБРАНА, теперь это просто темная бойница)
         final windowRect = Rect.fromLTWH(centralRect.left + centralRect.width * 0.35, centralRect.top + 20, centralRect.width * 0.3, 35);
         canvas.drawRect(windowRect, Paint()..color = const Color(0xFF111116));
         canvas.drawRect(windowRect, strokePaint..strokeWidth = 1.5);
-        
-        // Механика живого щупальца Дона Моллюска из main.dart
-        final int now = DateTime.now().millisecondsSinceEpoch;
-        if ((now % 4000) < 1200 && Random(now ~/ 4000).nextBool()) {
-          canvas.save();
-          canvas.translate(windowRect.left, windowRect.top);
-          _WindowTentacleShadowPainter().paint(canvas, Size(windowRect.width, windowRect.height));
-          canvas.restore();
-        }
 
         // 2. ВЕРХУШКА ЦЕНТРАЛЬНОЙ БАШНИ: ЗУБЦЫ
         double zW = centralRect.width / 7;
@@ -1304,7 +1297,6 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
         }
 
         // 3. БАШНИ СЛЕВА И СПРАВА
-        final sideTowerPaint = Paint()..color = const Color(0xFF37474F);
         final leftTower = Rect.fromLTWH(cX, cY + cH * 0.15, cW * 0.22, cH * 0.85);
         final rightTower = Rect.fromLTWH(cX + cW * 0.78, cY + cH * 0.15, cW * 0.22, cH * 0.85);
         
@@ -1317,16 +1309,26 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
         canvas.drawRect(Rect.fromLTWH(leftTower.left + 6, leftTower.top + 15, 6, 14), Paint()..color = const Color(0xFF111116));
         canvas.drawRect(Rect.fromLTWH(rightTower.left + 8, rightTower.top + 15, 6, 14), Paint()..color = const Color(0xFF111116));
 
-        // 4. ОСТРОКОНЕЧНЫЕ КРЫШИ-ШПИЛИ БАШЕН
-        canvas.save();
-        canvas.translate(leftTower.left, leftTower.top - 30);
-        _CastleSpirePainter(color: const Color(0xFF1A237E)).paint(canvas, Size(leftTower.width, 30));
-        canvas.restore();
+        // 4. ОСТРОКОНЕЧНЫЕ КРЫШИ-ШПИЛИ БАШЕН (РИСУЕМ НАПРЯМУЮ ЧЕРЕЗ PATH БЕЗ СТOРОННИХ КЛАССОВ!)
+        final spirePaint = Paint()..color = const Color(0xFF1A237E)..style = PaintingStyle.fill;
+        
+        // Левый шпиль
+        final leftSpirePath = Path()
+          ..moveTo(leftTower.left + leftTower.width / 2, leftTower.top - 30) // Пик шпиля
+          ..lineTo(leftTower.right, leftTower.top) // Правое основание
+          ..lineTo(leftTower.left, leftTower.top) // Левое основание
+          ..close();
+        canvas.drawPath(leftSpirePath, spirePaint);
+        canvas.drawPath(leftSpirePath, strokePaint);
 
-        canvas.save();
-        canvas.translate(rightTower.left, rightTower.top - 30);
-        _CastleSpirePainter(color: const Color(0xFF1A237E)).paint(canvas, Size(rightTower.width, 30));
-        canvas.restore();
+        // Правый шпиль
+        final rightSpirePath = Path()
+          ..moveTo(rightTower.left + rightTower.width / 2, rightTower.top - 30) // Пик шпиля
+          ..lineTo(rightTower.right, rightTower.top) // Правое основание
+          ..lineTo(rightTower.left, rightTower.top) // Левое основание
+          ..close();
+        canvas.drawPath(rightSpirePath, spirePaint);
+        canvas.drawPath(rightSpirePath, strokePaint);
 
         // 5. АРКА-ДВЕРЬ ПРОРЫВА В САМОМ НИЗУ
         final doorRect = Rect.fromLTWH(centralRect.left + centralRect.width * 0.25, centralRect.bottom - 45, centralRect.width * 0.5, 45);
