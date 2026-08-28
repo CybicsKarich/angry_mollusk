@@ -1,3 +1,4 @@
+import 'package:flame/flame.dart';
 import 'main.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
@@ -2135,8 +2136,7 @@ class MolluskMaksim {
 
       // 🧔 Б) НАКЛАДЫВАЕМ ГОТОВУЮ КАРТИНКУ БОРОДЫ СДВИHУТОЙ КОРРЕКТНО ЛЕВЕЕ
       try {
-        // Достаем картинку бороды, которая у нас гарантированно загружена в кэш Flame
-        final beardImage = FlameImages().fromCache('beard.png'); 
+        final beardImage = Flame.images.fromCache('beard.png'); 
         
         // Задаем сочные размеры для бороды Генерала, чтобы она сидела идеально
         double beardW = radius * 3.3;
