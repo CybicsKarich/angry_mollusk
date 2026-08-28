@@ -2245,12 +2245,11 @@ class MolluskMaksim {
 
         // 3. ЕСЛИ ЭТО 5 УРОВЕНЬ — СНАРЯЖАЕМ ГЕНЕРАЛА КАСКОЙ И НАСТОЯЩЕЙ БОРОДОЙ
     if (isGeneral) {
-      // 🪖 А) ИСПРАВЛЕНО: КАНОНИЧНАЯ КАСКА-ПОЛУКРУГ (Обрезанный снизу купол!)
+      // 🪖 А) Военная каска-полукруг из Angry Birds
       final helmetPaint = Paint()..color = const Color(0xFF78909C);
-      final helmetBorder = Paint()..color = const Color(0xFF263238)..style = PaintingStyle.stroke..strokeWidth = 1.8;
+      final helmetBorder = Paint()..color = const Color(0xFF263238)..style = PaintingStyle.stroke..strokeWidth = 1.5;
       
       final helmetPath = Path();
-      // Строим идеальный сферический купол полукруга над головой Максима
       helmetPath.moveTo(screenPos.dx - radius * 1.05, screenPos.dy - radius * 0.25);
       helmetPath.arcToPoint(
         Offset(screenPos.dx + radius * 1.05, screenPos.dy - radius * 0.25),
@@ -2265,18 +2264,26 @@ class MolluskMaksim {
 
       // 🧔 Б) НАКЛАДЫВАЕМ АССЕТ КАРТИНКИ БОРОДЫ ПРЯМО НА ЗЕЛЁНЫЙ КРУГ ТЕЛА
       try {
-        final beardImage = Flame.images.fromCache('beard.png');
-        double beardW = radius * 3.2;
-        double beardH = radius * 1.6;
+        // Вызываем загруженное изображение из кэша картинок игры
+        final beardImage = images.fromCache('beard.png');
+        
+        double beardW = radius * 3.0; // Слегка уменьшили, чтобы сидела аккуратно по контуру круга
+        double beardH = radius * 1.5;
         
         final srcRect = Rect.fromLTWH(0, 0, beardImage.width.toDouble(), beardImage.height.toDouble());
-        final dstRect = Rect.fromLTWH(screenPos.dx - radius * 1.6, screenPos.dy + radius * 0.2, beardW, beardH);
+        final dstRect = Rect.fromLTWH(
+          screenPos.dx - radius * 1.5, 
+          screenPos.dy + radius * 0.15, 
+          beardW, 
+          beardH
+        );
         
         canvas.drawImageRect(beardImage, srcRect, dstRect, Paint()..filterQuality = FilterQuality.high);
       } catch (e) {
         print("Ошибка наложения бороды: $e");
       }
     }
+
     // 4. ЕСЛИ ЭТО ОБЫЧНЫЕ УРОВНИ 1-4 — РИСУЕМ КЛАССИЧЕСКИЕ СВИНЫЕ УШКИ ПО БОКАМ
     else {
       final earPaint = Paint()..color = const Color(0xFF4CAF50)..style = PaintingStyle.fill;
