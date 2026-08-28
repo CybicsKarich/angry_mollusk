@@ -1929,7 +1929,7 @@ class Bunnyhop {
         }
 
         // ИСПРАВЛЕНО ДЛЯ УРОВНЯ 5: ЗАМОК-МОНОЛИТ НЕУЯЗВИМ!
-        if (currentLevel == 5 && block.x >= 1.50) {
+        if (level == 5 && block.x >= 1.50) { 
           // Ваня врезается в стену замка, отскакивает назад и падает вниз к двери
           velocity = Offset(-velocity.dx * 0.15, 0.25); 
           continue; 
@@ -2136,7 +2136,7 @@ class MolluskMaksim {
       // 🧔 Б) НАКЛАДЫВАЕМ ГОТОВУЮ КАРТИНКУ БОРОДЫ СДВИHУТОЙ КОРРЕКТНО ЛЕВЕЕ
       try {
         // Достаем картинку бороды, которая у нас гарантированно загружена в кэш Flame
-        final beardImage = game.images.fromCache('beard.png');
+        final beardImage = Flame.images.fromCache('beard.png');
         
         // Задаем сочные размеры для бороды Генерала, чтобы она сидела идеально
         double beardW = radius * 3.3;
