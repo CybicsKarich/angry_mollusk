@@ -2264,8 +2264,7 @@ class MolluskMaksim {
 
       // 🧔 Б) НАКЛАДЫВАЕМ АССЕТ КАРТИНКИ БОРОДЫ ПРЯМО НА ЗЕЛЁНЫЙ КРУГ ТЕЛА
       try {
-        // Вызываем загруженное изображение из кэша картинок игры
-        final beardImage = images.fromCache('beard.png');
+        final beardImage = Flame.images.fromCache('beard.png'); 
         
         double beardW = radius * 3.0; // Слегка уменьшили, чтобы сидела аккуратно по контуру круга
         double beardH = radius * 1.5;
