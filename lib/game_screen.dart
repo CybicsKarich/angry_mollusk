@@ -1038,39 +1038,56 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
 
         final double worldWidthFactor = currentLevel == 1 ? 1.0 : (currentLevel == 2 ? 1.8 : 2.0);
 
-    // ИСПРАВЛЕНО: КИСЛОТНОЕ НЕБО С БЛИКАМИ ПРИ АКТИВАЦИИ ТАБЛЕТКИ!
-    Paint skyPaint = Paint();
+        Paint skyPaint = Paint(); 
     if (currentLevel == 4 && currentBird != null && currentBird!.isAngryMode) {
-      // Генерируем сумасшедшие неоновые поп-арт цвета на основе синуса времени
+      // ВОЗВРАЩАЕМ ЦВЕТА: Бешено меняющийся поп-арт фон таблетки (кислота)
       double hueFactor = (sin(acidBackgroundTimer * 6.0) + 1.0) / 2.0; 
-      Color colorTop = Color.lerp(const Color(0xFFD500F9), const Color(0xFF00E676), hueFactor)!; // Ярко-фиолетовый в кислотно-зеленый
-      Color colorBottom = Color.lerp(const Color(0xFFFF1744), const Color(0xFF2979FF), hueFactor)!; // Бешеный розовый в неоново-синий
+      Color colorTop = Color.lerp(const Color(0xFFD500F9), const Color(0xFF00E676), hueFactor)!; 
+      Color colorBottom = Color.lerp(const Color(0xFFFF1744), const Color(0xFF2979FF), hueFactor)!; 
 
-      skyPaint = Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [colorTop, colorBottom],
-        ).createShader(Rect.fromLTWH(0, 0, size.width * worldWidthFactor, size.height));
-    }     if (currentLevel == 5) {
-      // Рисуем грозовые тучи
+      skyPaint.shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [colorTop, colorBottom],
+      ).createShader(Rect.fromLTWH(0, 0, size.width * worldWidthFactor, size.height));
+    } else if (currentLevel == 5) {
+      // Мрачное грозовое небо
+      skyPaint.shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [const Color(0xFF1A1235), const Color(0xFF0F0822)],
+      ).createShader(Rect.fromLTWH(0, 0, size.width * worldWidthFactor, size.height));
+    } else {
+      // Обычное небо
+      skyPaint.shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Colors.blue.shade300, Colors.lightBlue.shade100],
+      ).createShader(Rect.fromLTWH(0, 0, size.width * worldWidthFactor, size.height));
+    }
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width * worldWidthFactor, size.height), skyPaint);
+
+    // [Ниже идет твой оригинальный код солнца, облаков и т.д.]
+
+    // ИСПРАВЛЕННЫЙ ЖИВОЙ ЛЕТЯЩИЙ ЛИВЕНЬ НА 5 УРОВНЕ (Анимация привязана к бегущему таймеру sunRotation!)
+    if (currentLevel == 5) {
       final stormCloudPaint = Paint()..color = const Color(0xFF37474F).withOpacity(0.9);
       double stormX = (size.width * 0.1 + cloudOffset1 * size.width) % (size.width * worldWidthFactor + 200) - 100;
       canvas.drawCircle(Offset(stormX, size.height * 0.12), 40, stormCloudPaint);
       canvas.drawCircle(Offset(stormX + 45, size.height * 0.09), 55, stormCloudPaint);
       canvas.drawCircle(Offset(stormX + 95, size.height * 0.12), 42, stormCloudPaint);
 
-      // ЖИВОЙ, РЕАЛЬНО ЛЬЮЩИЙСЯ КОСОЙ ДОЖДЬ ИЗ КОМИКСА (Анимирован через sunRotation)
       final rainPaint = Paint()
         ..color = Colors.blue.shade100.withOpacity(0.35)
-        ..strokeWidth = 1.5;
+        ..strokeWidth = 1.4;
         
+      final randRain = Random(77); 
       for (int i = 0; i < 50; i++) {
-        // Используем остаток от деления, чтобы капли бесконечно бежали по диагонали вниз
-        double seedX = (i * 45.0) % (size.width * worldWidthFactor);
-        double seedY = (i * 15.0 + sunRotation * 550) % (size.height * 0.83);
+        // МЕХАНИКА ДВИЖЕНИЯ: Смещение по Y привязано к sunRotation * 750, линии летят вниз как бешеные!
+        double seedX = (randRain.nextDouble() * size.width * worldWidthFactor + sunRotation * 120) % (size.width * worldWidthFactor);
+        double seedY = (randRain.nextDouble() * size.height * 0.83 + sunRotation * 780) % (size.height * 0.83);
         
-        canvas.drawLine(Offset(seedX, seedY), Offset(seedX + 8, seedY + 22), rainPaint);
+        canvas.drawLine(Offset(seedX, seedY), Offset(seedX + 6, seedY + 20), rainPaint);
       }
     }
       else {
@@ -1245,36 +1262,80 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
       // 8. ИСПРАВЛЕНО: ОТРИСОВКА ВСЕХ ОБЪЕКТОВ С УМНОЙ ПРОВЕРКОЙ НА СУНДУК, ЖЕЛЕЗО И БРОНЕСТЕКЛО
     for (var block in blocks) {
        if (currentLevel == 5 && block.x >= 1.50) {
-        // РЕНДЕРИМ НАСТОЯЩИЙ КРАСИВЫЙ ЗАМОК ИЗ КОМИКСА
-        final castleRect = Rect.fromLTWH(block.x * size.width, block.y * size.height, block.w * size.width, block.h * size.height);
+        // =========================================================================
+        // РЕНДЕРИМ НАСТОЯЩИЙ ДЕТАЛИЗИРОВАННЫЙ ЗАМОК ИЗ КОМИКСА (БЕЗ ТЕНИ)
+        // =========================================================================
+        canvas.save();
         
-        // Рисуем стены цитадели (темный готический камень)
-        canvas.drawRect(castleRect, Paint()..color = const Color(0xFF263238));
-        canvas.drawRect(castleRect, Paint()..color = const Color(0xFF101418)..style = PaintingStyle.stroke..strokeWidth = 2.5);
+        double cX = block.x * size.width;
+        double cY = block.y * size.height;
+        double cW = block.w * size.width;
+        double cH = block.h * size.height;
 
-        // Зубцы на вершине замка
-        final stonePaint = Paint()..color = const Color(0xFF37474F);
-        final borderPaint = Paint()..color = const Color(0xFF101418)..style = PaintingStyle.stroke..strokeWidth = 1.5;
-        for (int i = 0; i < 4; i++) {
-          double zW = castleRect.width / 7;
-          double zX = castleRect.left + (i * zW * 2);
-          canvas.drawRect(Rect.fromLTWH(zX, castleRect.top - 10, zW, 10), stonePaint);
-          canvas.drawRect(Rect.fromLTWH(zX, castleRect.top - 10, zW, 10), borderPaint);
+        // 1. ЦЕНТРАЛЬНАЯ МАССИВНАЯ ЦИТАДЕЛЬ
+        final bodyPaint = Paint()..color = const Color(0xFF263238);
+        final strokePaint = Paint()..color = const Color(0xFF101418)..style = PaintingStyle.stroke..strokeWidth = 2.0;
+        
+        final centralRect = Rect.fromLTWH(cX + cW * 0.15, cY + cH * 0.2, cW * 0.7, cH * 0.8);
+        canvas.drawRect(centralRect, bodyPaint);
+        canvas.drawRect(centralRect, strokePaint);
+
+        // Внутреннее окно цитадели (откуда раз в 4 секунды вылезает щупальце)
+        final windowRect = Rect.fromLTWH(centralRect.left + centralRect.width * 0.35, centralRect.top + 20, centralRect.width * 0.3, 35);
+        canvas.drawRect(windowRect, Paint()..color = const Color(0xFF111116));
+        canvas.drawRect(windowRect, strokePaint..strokeWidth = 1.5);
+        
+        // Механика живого щупальца Дона Моллюска из main.dart
+        final int now = DateTime.now().millisecondsSinceEpoch;
+        if ((now % 4000) < 1200 && Random(now ~/ 4000).nextBool()) {
+          canvas.save();
+          canvas.translate(windowRect.left, windowRect.top);
+          _WindowTentacleShadowPainter().paint(canvas, Size(windowRect.width, windowRect.height));
+          canvas.restore();
         }
 
-        // Рисуем арку-дверь прорыва в самом низу замка
-        final doorPaint = Paint()..color = const Color(0xFF111116);
-        final doorRect = Rect.fromLTWH(
-          castleRect.left + 20, 
-          castleRect.bottom - 45, 
-          35, 
-          45
-        );
-        canvas.drawRect(doorRect, doorPaint);
-        canvas.drawRect(doorRect, Paint()..color = const Color(0xFF37474F)..style = PaintingStyle.stroke..strokeWidth = 2.0);
-        // Золотая ручка на двери
+        // 2. ВЕРХУШКА ЦЕНТРАЛЬНОЙ БАШНИ: ЗУБЦЫ
+        double zW = centralRect.width / 7;
+        for (int i = 0; i < 4; i++) {
+          double zX = centralRect.left + (i * zW * 2);
+          final zRect = Rect.fromLTWH(zX, centralRect.top - 10, zW, 10);
+          canvas.drawRect(zRect, Paint()..color = const Color(0xFF37474F));
+          canvas.drawRect(zRect, strokePaint..strokeWidth = 1.5);
+        }
+
+        // 3. БАШНИ СЛЕВА И СПРАВА
+        final sideTowerPaint = Paint()..color = const Color(0xFF37474F);
+        final leftTower = Rect.fromLTWH(cX, cY + cH * 0.15, cW * 0.22, cH * 0.85);
+        final rightTower = Rect.fromLTWH(cX + cW * 0.78, cY + cH * 0.15, cW * 0.22, cH * 0.85);
+        
+        canvas.drawRect(leftTower, sideTowerPaint);
+        canvas.drawRect(leftTower, strokePaint);
+        canvas.drawRect(rightTower, sideTowerPaint);
+        canvas.drawRect(rightTower, strokePaint);
+
+        // Бойницы на боковых башнях
+        canvas.drawRect(Rect.fromLTWH(leftTower.left + 6, leftTower.top + 15, 6, 14), Paint()..color = const Color(0xFF111116));
+        canvas.drawRect(Rect.fromLTWH(rightTower.left + 8, rightTower.top + 15, 6, 14), Paint()..color = const Color(0xFF111116));
+
+        // 4. ОСТРОКОНЕЧНЫЕ КРЫШИ-ШПИЛИ БАШЕН
+        canvas.save();
+        canvas.translate(leftTower.left, leftTower.top - 30);
+        _CastleSpirePainter(color: const Color(0xFF1A237E)).paint(canvas, Size(leftTower.width, 30));
+        canvas.restore();
+
+        canvas.save();
+        canvas.translate(rightTower.left, rightTower.top - 30);
+        _CastleSpirePainter(color: const Color(0xFF1A237E)).paint(canvas, Size(rightTower.width, 30));
+        canvas.restore();
+
+        // 5. АРКА-ДВЕРЬ ПРОРЫВА В САМОМ НИЗУ
+        final doorRect = Rect.fromLTWH(centralRect.left + centralRect.width * 0.25, centralRect.bottom - 45, centralRect.width * 0.5, 45);
+        canvas.drawRect(doorRect, Paint()..color = const Color(0xFF111116));
+        canvas.drawRect(doorRect, strokePaint..strokeWidth = 2.0);
         canvas.drawCircle(Offset(doorRect.right - 8, doorRect.top + 22), 2.5, Paint()..color = const Color(0xFFFFD54F));
-      }
+
+        canvas.restore();
+      } 
         if (block.isSecretChest) {
         // Отрисовка кастомного сундука с твоей картинки (с замком и открыванием!)
         final boxRect = Rect.fromLTWH(block.x * size.width, block.y * size.height, block.w * size.width, block.h * size.height);
@@ -2150,36 +2211,40 @@ class MolluskMaksim {
       sprite.render(canvas, position: Vector2(screenPos.dx - radius, screenPos.dy - radius), size: Vector2(radius * 2, radius * 2));
     }
 
-    // 3. ЕСЛИ ЭТО 5 УРОВЕНЬ — СНАРЯЖАЕМ ГЕНЕРАЛА КАСКОЙ И НАСТОЯЩЕЙ БОРОДОЙ
+        // 3. ЕСЛИ ЭТО 5 УРОВЕНЬ — СНАРЯЖАЕМ ГЕНЕРАЛА КАСКОЙ И НАСТОЯЩЕЙ БОРОДОЙ
     if (isGeneral) {
-      // 🪖 А) Военная каска-полукруг из Angry Birds
+      // 🪖 А) ИСПРАВЛЕНО: КАНОНИЧНАЯ КАСКА-ПОЛУКРУГ (Обрезанный снизу купол!)
       final helmetPaint = Paint()..color = const Color(0xFF78909C);
-      final helmetBorder = Paint()..color = const Color(0xFF263238)..style = PaintingStyle.stroke..strokeWidth = 1.5;
+      final helmetBorder = Paint()..color = const Color(0xFF263238)..style = PaintingStyle.stroke..strokeWidth = 1.8;
       
-      final helmetRect = Rect.fromLTWH(screenPos.dx - radius * 1.02, screenPos.dy - radius * 1.15, radius * 2.04, radius * 0.9);
-      canvas.drawOval(helmetRect, helmetPaint);
-      canvas.drawOval(helmetRect, helmetBorder);
+      final helmetPath = Path();
+      // Строим идеальный сферический купол полукруга над головой Максима
+      helmetPath.moveTo(screenPos.dx - radius * 1.05, screenPos.dy - radius * 0.25);
+      helmetPath.arcToPoint(
+        Offset(screenPos.dx + radius * 1.05, screenPos.dy - radius * 0.25),
+        radius: Radius.circular(radius * 1.1),
+        clockwise: true,
+      );
+      helmetPath.lineTo(screenPos.dx + radius * 1.05, screenPos.dy - radius * 0.25);
+      helmetPath.close();
+      
+      canvas.drawPath(helmetPath, helmetPaint);
+      canvas.drawPath(helmetPath, helmetBorder);
 
       // 🧔 Б) НАКЛАДЫВАЕМ АССЕТ КАРТИНКИ БОРОДЫ ПРЯМО НА ЗЕЛЁНЫЙ КРУГ ТЕЛА
       try {
         final beardImage = Flame.images.fromCache('beard.png');
-        
         double beardW = radius * 3.2;
         double beardH = radius * 1.6;
         
         final srcRect = Rect.fromLTWH(0, 0, beardImage.width.toDouble(), beardImage.height.toDouble());
-        final dstRect = Rect.fromLTWH(
-          screenPos.dx - radius * 1.6, 
-          screenPos.dy + radius * 0.2, 
-          beardW, 
-          beardH
-        );
+        final dstRect = Rect.fromLTWH(screenPos.dx - radius * 1.6, screenPos.dy + radius * 0.2, beardW, beardH);
         
         canvas.drawImageRect(beardImage, srcRect, dstRect, Paint()..filterQuality = FilterQuality.high);
       } catch (e) {
         print("Ошибка наложения бороды: $e");
       }
-    } 
+    }
     // 4. ЕСЛИ ЭТО ОБЫЧНЫЕ УРОВНИ 1-4 — РИСУЕМ КЛАССИЧЕСКИЕ СВИНЫЕ УШКИ ПО БОКАМ
     else {
       final earPaint = Paint()..color = const Color(0xFF4CAF50)..style = PaintingStyle.fill;
