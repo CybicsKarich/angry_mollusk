@@ -6,6 +6,7 @@ class AudioManager {
   static final AudioPlayer _stretchPlayer = AudioPlayer();
   static final AudioPlayer _finalMenuPlayer = AudioPlayer();
   static final AudioPlayer _fxPlayer = AudioPlayer();
+  static final AudioPlayer _rainPlayer = AudioPlayer();
   
   
   static final Random _random = Random();
@@ -219,13 +220,54 @@ static Future<void> playPaperRustle() async {
     }
   } // <--- ЗАКРЫВАЕТ МЕТОД _playSingleEffect
 
-  // ИСПРАВЛЕНО: Теперь этот метод стоит СТРОГО ВНУТРИ класса AudioManager!
-  static void stopAllLevelSounds() async {
+    // =========================================================================
+  // БЛОК ГРОЗЫ И ЛИВНЯ ДЛЯ ЭПИЧНОГО 5 УРОВНЯ
+  // =========================================================================
+
+  // 1. Запуск цикличного дождя, который глушит обычную фоновую музыку
+  static Future<void> startLevel5Rain() async {
+    try {
+      await _rainPlayer.stop(); // Подстраховка от наложения
+      await _rainPlayer.setVolume(0.4); // Делаем дождь фоновым и тихим
+      await _rainPlayer.setReleaseMode(ReleaseMode.loop); // Бесконечный цикл
+      await _rainPlayer.play(AssetSource('music/rain_ambient.mp3'));
+    } catch (e) {
+      print("Ошибка запуска эмбиента дождя: $e");
+    }
+  }
+
+  // 2. Мгновенная остановка дождя при выходе из 5 уровня
+  static Future<void> stopLevel5Rain() async {
+    try {
+      await _rainPlayer.stop();
+    } catch (e) {
+      print("Ошибка остановки дождя: $e");
+    }
+  }
+
+  // 3. Сочный раскат грома, который накладывается поверх дождя (вызывается вместе с молнией)
+  static Future<void> playThunderStrike() async {
+    try {
+      // Создаем отдельный временный плеер, чтобы звук грома накладывался на дождь
+      final AudioPlayer thunderPlayer = AudioPlayer();
+      await thunderPlayer.setReleaseMode(ReleaseMode.release);
+      await thunderPlayer.setVolume(0.85); // Делаем гром достаточно мощным
+      await thunderPlayer.play(AssetSource('audio/thunder_strike.mp3'), mode: PlayerMode.lowLatency);
+      
+      // Сами чистим память после окончания раската
+      thunderPlayer.onPlayerComplete.listen((_) {
+        thunderPlayer.dispose();
+      });
+    } catch (e) {
+      print("Ошибка звука молнии: $e");
+    }
+  }
+
+    static void stopAllLevelSounds() async {
     _isStretching = false;
+    await stopLevel5Rain(); // ГАРАНТИРОВАННО тушим дождь при любом выходе из уровня!
     try {
       await _stretchPlayer.stop();
-      // Если у тебя в коде используется _snortPlayer, раскомментируй строку ниже:
-      // await _snortPlayer.stop();
       await _finalMenuPlayer.stop();
       
       // Запускаем фоновую музыку меню обратно на чистом канале
@@ -235,7 +277,8 @@ static Future<void> playPaperRustle() async {
     } catch (e) {
       print("Ошибка при полной остановке звуков: $e");
     }
-  } // <--- ЗАКРЫВАЕТ МЕТОД stopAllLevelSounds
+  }
+
 
   // 3. ИСПРАВЛЕНО: ЗВУК АЧИВКИ МЕДАЛИ
   static Future<void> playAchievement() async {
