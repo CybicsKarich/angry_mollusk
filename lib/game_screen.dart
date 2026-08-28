@@ -457,6 +457,8 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     bunnySprite = await loadSprite('bunnyhop.png');
     maksimSprite = await loadSprite('maksim.png');
     await images.load('bunnyhop_lose.png');
+    await images.load('beard.png');
+      
     
     add(BackgroundDecoration());
     buildLevelStructures(); // Вызываем чистую постройку
@@ -696,7 +698,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
 
       // 🏯 НЕУЯЗВИМЫЙ ЗАМОК-МОНОЛИТ (Сдвинут чётко за крепость на остров)
       // Мы делаем специальный GameBlock-замок, который защитим от пробития птицей
-      final castleBlock = GameBlock(bx + 0.26, 0.15, 0.32, 0.58, true)
+      final castleBlock = GameBlock(bx + 0.19, 0.15, 0.25, 0.58, true)
         ..isSleeping = true; 
       blocks.add(castleBlock);
     }
@@ -1038,9 +1040,12 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
 
         final double worldWidthFactor = currentLevel == 1 ? 1.0 : (currentLevel == 2 ? 1.8 : 2.0);
 
-        Paint skyPaint = Paint(); 
+    // НАСТОЯЩИЙ ИСПРАВЛЕННЫЙ КИСЛОТНЫЙ ФОН И ГРОЗОВОЕ НЕБО
+    Paint skyPaint = Paint();
+    final Rect skyRect = Rect.fromLTWH(0, 0, size.width * worldWidthFactor, size.height);
+
     if (currentLevel == 4 && currentBird != null && currentBird!.isAngryMode) {
-      // ВОЗВРАЩАЕМ ЦВЕТА: Бешено меняющийся поп-арт фон таблетки (кислота)
+      // КИСЛОТНЫЙ РЕЖИМ ТАБЛЕТКИ: Бешено переливающиеся неоновые цвета
       double hueFactor = (sin(acidBackgroundTimer * 6.0) + 1.0) / 2.0; 
       Color colorTop = Color.lerp(const Color(0xFFD500F9), const Color(0xFF00E676), hueFactor)!; 
       Color colorBottom = Color.lerp(const Color(0xFFFF1744), const Color(0xFF2979FF), hueFactor)!; 
@@ -1049,25 +1054,28 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [colorTop, colorBottom],
-      ).createShader(Rect.fromLTWH(0, 0, size.width * worldWidthFactor, size.height));
+      ).createShader(skyRect);
     } else if (currentLevel == 5) {
-      // Мрачное грозовое небо
+      // Мрачное грозовое небо 5 уровня
       skyPaint.shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [const Color(0xFF1A1235), const Color(0xFF0F0822)],
-      ).createShader(Rect.fromLTWH(0, 0, size.width * worldWidthFactor, size.height));
+      ).createShader(skyRect);
     } else {
-      // Обычное небо
+      // Обычное мультяшное небо
       skyPaint.shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [Colors.blue.shade300, Colors.lightBlue.shade100],
-      ).createShader(Rect.fromLTWH(0, 0, size.width * worldWidthFactor, size.height));
+      ).createShader(skyRect);
     }
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width * worldWidthFactor, size.height), skyPaint);
+    canvas.drawRect(skyRect, skyPaint);
 
-    // [Ниже идет твой оригинальный код солнца, облаков и т.д.]
+    // Если идет 5 уровень — вызываем наш новый метод анимированного ЖИВОГО ливня
+    if (currentLevel == 5) {
+      _renderLiveFallingRain(canvas, size, worldWidthFactor);
+    }
 
     // ИСПРАВЛЕННЫЙ ЖИВОЙ ЛЕТЯЩИЙ ЛИВЕНЬ НА 5 УРОВНЕ (Анимация привязана к бегущему таймеру sunRotation!)
     if (currentLevel == 5) {
@@ -1261,9 +1269,9 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
       
       // 8. ИСПРАВЛЕНО: ОТРИСОВКА ВСЕХ ОБЪЕКТОВ С УМНОЙ ПРОВЕРКОЙ НА СУНДУК, ЖЕЛЕЗО И БРОНЕСТЕКЛО
     for (var block in blocks) {
-       if (currentLevel == 5 && block.x >= 1.50) {
+       if (currentLevel == 5 && block.x >= 1.40) {
         // =========================================================================
-        // РЕНДЕРИМ НАСТОЯЩИЙ ДЕТАЛИЗИРОВАННЫЙ ЗАМОК ИЗ КОМИКСА (БЕЗ ТЕНЕЙ И ОШИБОК)
+        // РЕНДЕРИМ ДЕТАЛИЗИРОВАННЫЙ ЗАМОК СЗАДИ КРЕПОСТИ (БЕЗ ТЕНЕЙ И БЕЗ БАГОВ)
         // =========================================================================
         canvas.save();
         
@@ -1272,18 +1280,20 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
         double cW = block.w * size.width;
         double cH = block.h * size.height;
 
-        // Кисти для камня и обводки
         final bodyPaint = Paint()..color = const Color(0xFF263238);
         final sideTowerPaint = Paint()..color = const Color(0xFF37474F);
-        final strokePaint = Paint()..color = const Color(0xFF101418)..style = PaintingStyle.stroke..strokeWidth = 2.0;
+        final strokePaint = Paint()..color = const Color(0xFF101418)..style = PaintingStyle.stroke..strokeWidth = 2.2;
+
+        // ПОДЛОЖКА: Глухая заливка тела замка, чтобы сквозь него не было видно небо
+        canvas.drawRect(Rect.fromLTWH(cX, cY, cW, cH), Paint()..color = const Color(0xFF1A1D20));
 
         // 1. ЦЕНТРАЛЬНАЯ МАССИВНАЯ ЦИТАДЕЛЬ
-        final centralRect = Rect.fromLTWH(cX + cW * 0.15, cY + cH * 0.2, cW * 0.7, cH * 0.8);
+        final centralRect = Rect.fromLTWH(cX + cW * 0.10, cY + cH * 0.15, cW * 0.8, cH * 0.85);
         canvas.drawRect(centralRect, bodyPaint);
         canvas.drawRect(centralRect, strokePaint);
 
-        // Внутреннее окно цитадели (ТЕНЬ УБРАНА, теперь это просто темная бойница)
-        final windowRect = Rect.fromLTWH(centralRect.left + centralRect.width * 0.35, centralRect.top + 20, centralRect.width * 0.3, 35);
+        // Внутреннее окно цитадели (Просто темная бойница замка)
+        final windowRect = Rect.fromLTWH(centralRect.left + centralRect.width * 0.35, centralRect.top + 20, centralRect.width * 0.3, 30);
         canvas.drawRect(windowRect, Paint()..color = const Color(0xFF111116));
         canvas.drawRect(windowRect, strokePaint..strokeWidth = 1.5);
 
@@ -1297,40 +1307,33 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
         }
 
         // 3. БАШНИ СЛЕВА И СПРАВА
-        final leftTower = Rect.fromLTWH(cX, cY + cH * 0.15, cW * 0.22, cH * 0.85);
-        final rightTower = Rect.fromLTWH(cX + cW * 0.78, cY + cH * 0.15, cW * 0.22, cH * 0.85);
+        final leftTower = Rect.fromLTWH(cX, cY + cH * 0.2, cW * 0.22, cH * 0.8);
+        final rightTower = Rect.fromLTWH(cX + cW * 0.78, cY + cH * 0.2, cW * 0.22, cH * 0.8);
         
         canvas.drawRect(leftTower, sideTowerPaint);
         canvas.drawRect(leftTower, strokePaint);
         canvas.drawRect(rightTower, sideTowerPaint);
         canvas.drawRect(rightTower, strokePaint);
 
-        // Бойницы на боковых башнях
-        canvas.drawRect(Rect.fromLTWH(leftTower.left + 6, leftTower.top + 15, 6, 14), Paint()..color = const Color(0xFF111116));
-        canvas.drawRect(Rect.fromLTWH(rightTower.left + 8, rightTower.top + 15, 6, 14), Paint()..color = const Color(0xFF111116));
-
-        // 4. ОСТРОКОНЕЧНЫЕ КРЫШИ-ШПИЛИ БАШЕН (РИСУЕМ НАПРЯМУЮ ЧЕРЕЗ PATH БЕЗ СТOРОННИХ КЛАССОВ!)
+        // Остроконечные крыши-шпили башен, нарисованные прямо через Path
         final spirePaint = Paint()..color = const Color(0xFF1A237E)..style = PaintingStyle.fill;
-        
-        // Левый шпиль
         final leftSpirePath = Path()
-          ..moveTo(leftTower.left + leftTower.width / 2, leftTower.top - 30) // Пик шпиля
-          ..lineTo(leftTower.right, leftTower.top) // Правое основание
-          ..lineTo(leftTower.left, leftTower.top) // Левое основание
+          ..moveTo(leftTower.left + leftTower.width / 2, leftTower.top - 25)
+          ..lineTo(leftTower.right, leftTower.top)
+          ..lineTo(leftTower.left, leftTower.top)
           ..close();
         canvas.drawPath(leftSpirePath, spirePaint);
         canvas.drawPath(leftSpirePath, strokePaint);
 
-        // Правый шпиль
         final rightSpirePath = Path()
-          ..moveTo(rightTower.left + rightTower.width / 2, rightTower.top - 30) // Пик шпиля
-          ..lineTo(rightTower.right, rightTower.top) // Правое основание
-          ..lineTo(rightTower.left, rightTower.top) // Левое основание
+          ..moveTo(rightTower.left + rightTower.width / 2, rightTower.top - 25)
+          ..lineTo(rightTower.right, rightTower.top)
+          ..lineTo(rightTower.left, rightTower.top)
           ..close();
         canvas.drawPath(rightSpirePath, spirePaint);
         canvas.drawPath(rightSpirePath, strokePaint);
 
-        // 5. АРКА-ДВЕРЬ ПРОРЫВА В САМОМ НИЗУ
+        // 4. АРКА-ДВЕРЬ ПРОРЫВА В САМОМ НИЗУ
         final doorRect = Rect.fromLTWH(centralRect.left + centralRect.width * 0.25, centralRect.bottom - 45, centralRect.width * 0.5, 45);
         canvas.drawRect(doorRect, Paint()..color = const Color(0xFF111116));
         canvas.drawRect(doorRect, strokePaint..strokeWidth = 2.0);
@@ -1867,6 +1870,33 @@ if (hasWantedPoster && !showWantedBig) {
       grassPath.lineTo(x + 10, topY + 11);
     }
     canvas.drawPath(grassPath, grassPaint);
+  }
+  // МЕТОД ДЛЯ АНИМАЦИИ НАСТОЯЩЕГО ЖИВОГО КОСОГО ЛИВНЯ
+  void _renderLiveFallingRain(Canvas canvas, Size size, double worldWidthFactor) {
+    // 1. Отрисовка грозовых туч на фоне
+    final stormCloudPaint = Paint()..color = const Color(0xFF37474F).withOpacity(0.9);
+    double stormX = (size.width * 0.1 + cloudOffset1 * size.width) % (size.width * worldWidthFactor + 200) - 100;
+    canvas.drawCircle(Offset(stormX, size.height * 0.12), 40, stormCloudPaint);
+    canvas.drawCircle(Offset(stormX + 45, size.height * 0.09), 55, stormCloudPaint);
+    canvas.drawCircle(Offset(stormX + 95, size.height * 0.12), 42, stormCloudPaint);
+
+    // 2. Генерация бегущих капель ливня
+    final rainPaint = Paint()
+      ..color = Colors.blue.shade100.withOpacity(0.4)
+      ..strokeWidth = 1.6;
+      
+    final randRain = Random(99); // Фиксированный сид, чтобы сетка была плотной
+    for (int i = 0; i < 65; i++) {
+      // Координаты X и Y плавно сдвигаются от времени sunRotation, создавая эффект ливня
+      double baseX = randRain.nextDouble() * size.width * worldWidthFactor;
+      double baseY = randRain.nextDouble() * size.height * 0.83;
+      
+      // Хак движения: капли непрерывно скользят вниз-вправо и циклично возвращаются наверх
+      double liveX = (baseX + sunRotation * 150) % (size.width * worldWidthFactor);
+      double liveY = (baseY + sunRotation * 850) % (size.height * 0.83);
+      
+      canvas.drawLine(Offset(liveX, liveY), Offset(liveX + 6, liveY + 18), rainPaint);
+    }
   }
 }
     // ДЕТАЛИЗИРОВАННЫЙ КЛАСС ПТИЦЫ БАННИХОПА
