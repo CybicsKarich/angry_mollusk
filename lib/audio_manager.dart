@@ -205,9 +205,12 @@ static Future<void> playPaperRustle() async {
     }
   }
 
-    // Твой последний рабочий метод эффектов (оставляем без изменений)
+  // 2. ИСПРАВЛЕННЫЙ МЕТОД ЭФФЕКТОВ (Защищаем плеер дождя от глушения!)
   static void _playSingleEffect(String assetPath) async {
     try {
+      // ВАЖНО: Глушим только эффекты (_fxPlayer), но _rainPlayer НИ В КОЕМ СЛУЧАЕ НЕ ТРОГАЕМ!
+      await _fxPlayer.stop(); 
+      
       final AudioPlayer temporaryPlayer = AudioPlayer();
       await temporaryPlayer.setReleaseMode(ReleaseMode.release);
       await temporaryPlayer.play(AssetSource(assetPath), mode: PlayerMode.lowLatency);
@@ -218,19 +221,21 @@ static Future<void> playPaperRustle() async {
     } catch (e) {
       print("Ошибка звука: $e");
     }
-  } // <--- ЗАКРЫВАЕТ МЕТОД _playSingleEffect
+  }
 
     // =========================================================================
   // БЛОК ГРОЗЫ И ЛИВНЯ ДЛЯ ЭПИЧНОГО 5 УРОВНЯ
   // =========================================================================
 
-  // 1. Запуск цикличного дождя, который глушит обычную фоновую музыку
+  // 1. ПОЛНОСТЬЮ ЗАМЕНИ МЕТОД ЗАПУСКА ДОЖДЯ (Выставляем самый высокий приоритет)
   static Future<void> startLevel5Rain() async {
     try {
-      await _rainPlayer.stop(); // Подстраховка от наложения
-      await _rainPlayer.setVolume(0.4); // Делаем дождь фоновым и тихим
-      await _rainPlayer.setReleaseMode(ReleaseMode.loop); // Бесконечный цикл
-      await _rainPlayer.play(AssetSource('music/rain_ambient.mp3'));
+      // Плеер дождя работает изолированно, его методы эффектов не имеют права трогать!
+      await _rainPlayer.stop(); 
+      await _rainPlayer.setVolume(0.45); 
+      await _rainPlayer.setReleaseMode(ReleaseMode.loop); 
+      // Режим lowLatency гарантирует стабильное фоновое удержание потока Android/iOS
+      await _rainPlayer.play(AssetSource('music/rain_ambient.mp3'), mode: PlayerMode.lowLatency);
     } catch (e) {
       print("Ошибка запуска эмбиента дождя: $e");
     }
