@@ -946,20 +946,20 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
       }
     }
 
-        // LINE: 33
     // ЧЕСТНАЯ ПОБЕДА: Свиньи уничтожены, и ВСЕ блоки/осколки полностью затихли!
     if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictorySequenceStarted && !isAnythingMoving) {
+      isVictorySequenceStarted = true;
       
-     // ИСПРАВЛЕНО ДЛЯ УРОВНЯ 5: Победа сразу при уничтожении Генерала!
+      // ИСПРАВЛЕНО ДЛЯ УРОВНЯ 5: Глушим ливень ровно в секунду фиксации победы, 
+      // когда игровой процесс полностью остановился!
       if (currentLevel == 5) {
-        AudioManager.stopLevel5Rain(); // Тушим ливень при триумфе
+        AudioManager.stopLevel5Rain(); 
       } else {
         if (currentBird != null && currentBird!.isLaunched && currentBird!.isAngryMode) {
           AudioManager.stopRage();
         }
-      }   
-    
-      isVictorySequenceStarted = true;    
+      }
+
       int remainingBirds = birdsQueue.length;
       
         // ИСПРАВЛЕНО: ВСТАВИЛИ ТРИГГЕР МЕДАЛИ "СНАЙПЕР" СТРОГО СЮДА!
@@ -1232,33 +1232,31 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
     for (var block in blocks) {
        if (currentLevel == 5 && block.x >= 1.40) {
         // =========================================================================
-        // ИСПРАВЛЕНО: ОТРИСОВКА ОГРОМНОГО ЦЕЛЬНОГО ФОТО ЗАМКА ИЗ КЭША IMAGES
+        // ИСПРАВЛЕНО: ОТРИСОВКА ОДНОГО БОЛЬШОГО ФОТО ЗАМКА СДВИHУТОГО ВПРАВО И ВНИЗ
         // =========================================================================
         canvas.save();
         
-        // Берем физические координаты нашего неуязвимого блока-препятствия
-        double cX = block.x * size.width;
-        double cY = block.y * size.height;
-        double cW = block.w * size.width;
-        double cH = block.h * size.height;
+        // СМЕЩЕНИЕ: Увеличиваем координату X (+ 60 пикселей вправо), чтобы замок встал чётко сзади крепости
+        double cX = (block.x * size.width) + 60;
+        
+        // Высоту cH увеличиваем, а cY опускаем вниз прямо к травяному покрову скалы острова!
+        double cW = block.w * size.width * 1.1; 
+        double cH = size.height * 0.58; 
+        double cY = (size.height * groundY) - cH; // Жесткая привязка основания замка к линии травы
 
         try {
-          // Достаем картинку замка напрямую из памяти Flame
           final castleImage = images.fromCache('castle_monolith.png');
-          
           final srcRect = Rect.fromLTWH(0, 0, castleImage.width.toDouble(), castleImage.height.toDouble());
-          final dstRect = Rect.fromLTWH(cX, cY, cW, cH); // Растягиваем фото во весь размер блока
+          final dstRect = Rect.fromLTWH(cX, cY, cW, cH);
           
-          // Рисуем непрозрачное фото замка чётко сзади здания Генерала Свиноматкина
           canvas.drawImageRect(castleImage, srcRect, dstRect, Paint()..filterQuality = FilterQuality.high);
         } catch (e) {
-          // Подстраховка: если фото забыли закинуть в папку, нарисуется темный силуэт, чтобы игра не вылетела
           canvas.drawRect(Rect.fromLTWH(cX, cY, cW, cH), Paint()..color = const Color(0xFF21272A));
         }
 
         canvas.restore();
-        continue; // Жестко пропускаем дефолтный рендерер, чтобы серый кирпич не перекрывал наше красивое фото!
-      }   
+        continue; // ГАРАНТИЯ: Убирает любые дубликаты и маленькие замки с экрана на 100%!
+      }    
         
         if (block.isSecretChest) {
         // Отрисовка кастомного сундука с твоей картинки (с замком и открыванием!)
