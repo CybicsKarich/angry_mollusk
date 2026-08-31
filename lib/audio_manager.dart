@@ -17,7 +17,6 @@ class AudioManager {
   static bool hasWoodToken = true;
   static bool hasPigHitToken = true;
   static bool hasMissToken = true;
-  static bool get isRainPlaying => _rainPlayer.state == PlayerState.playing;
 
   static Future<void> init() async {
     _stretchPlayer.setReleaseMode(ReleaseMode.loop);
