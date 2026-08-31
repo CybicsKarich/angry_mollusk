@@ -761,7 +761,10 @@ if (currentLevel == 2 || currentLevel == 3) {
     if (currentLevel == 5) {
       _lightningTimer += dt;
       
-      // Каждые 5 секунд бьет ослепляющая молния
+      if (!AudioManager.isRainPlaying && !levelCleared && !levelFailed) {
+        AudioManager.startLevel5Rain();
+      }
+        // Каждые 5 секунд бьет ослепляющая молния
       if (_lightningTimer >= 5.0) {
         _lightningTimer = 0.0;
         _showLightningFlash = true; // Включаем вспышку
@@ -946,28 +949,30 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
     // ЧЕСТНАЯ ПОБЕДА: Свиньи уничтожены, и ВСЕ блоки/осколки полностью затихли!
     if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictorySequenceStarted && !isAnythingMoving) {
       
-     // ИСПРАВЛЕНО ДЛЯ УРОВНЯ 5: Птица должна физически долететь до двери замка-монолита!
+     // ИСПРАВЛЕНО ДЛЯ УРОВНЯ 5: Ваня должен ювелирно влететь в створку маленькой двери!
       if (currentLevel == 5) {
         if (currentBird != null && currentBird!.isLaunched) {
           double bx = 1.25;
-          // Проверяем, попал ли Ваня в нижнюю часть замка (зона двери: X > bx + 0.27, Y > 0.5)
-          if (currentBird!.position.dx >= (bx + 0.27) && currentBird!.position.dy >= 0.50) {
-            // Ура, прорыв совершен! Глушим ливень и пускаем к финалу
+          // Координаты X и Y двери переведены в относительный вид (X в районе замка, Y у земли)
+          double doorMinX = bx + 0.19 + 0.08; 
+          double doorMaxX = bx + 0.19 + 0.18;
+
+          if (currentBird!.position.dx >= doorMinX && currentBird!.position.dx <= doorMaxX && currentBird!.position.dy >= 0.58) {
+            // Ура, дверь пробита! Тушим ливень
             AudioManager.stopLevel5Rain();
           } else {
-            return; // Птица еще летит или упала мимо двери — ждем точного попадания!
+            return; // Пролетел мимо двери или бьется о стену — победу не даем, ждем падения!
           }
         } else if (currentBird == null && birdsQueue.isEmpty) {
-          // Если свинья убита, все затихло, а птиц больше нет и в дверь никто не попал — это поражение!
+          // Если птиц больше нет, а в дверь так никто и не попал — засчитываем фейл штурма цитадели
           levelFailed = true;
           AudioManager.playGameOver();
           overlays.add('GameOverMenu');
           return;
         } else {
-          return; // Ждем следующего выстрела игрока
+          return; // Ждем следующего выстрела игрока из рогатки
         }
       } else {
-        // На обычных уровнях 1-4 при уничтожении свиней музыка глушится стандартно
         if (currentBird != null && currentBird!.isLaunched && currentBird!.isAngryMode) {
           AudioManager.stopRage();
         }
@@ -1314,14 +1319,25 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
         canvas.drawPath(rightSpirePath, spirePaint);
         canvas.drawPath(rightSpirePath, strokePaint);
 
-        // 5. АРКА-ДВЕРЬ ПРОРЫВА В САМОМ НИЗУ
-        final doorRect = Rect.fromLTWH(centralRect.left + centralRect.width * 0.25, centralRect.bottom - 45, centralRect.width * 0.5, 45);
-        canvas.drawRect(doorRect, Paint()..color = const Color(0xFF111116));
-        canvas.drawRect(doorRect, strokePaint..strokeWidth = 2.0);
-        canvas.drawCircle(Offset(doorRect.right - 8, doorRect.top + 22), 2.5, Paint()..color = const Color(0xFFFFD54F));
+        // 5. ИСПРАВЛЕНО: РЕНДЕРИМ СТРОГО ОДНУ МАЛЕНЬКУЮ АРКУ-ДВЕРЬ ПО ЦЕНТРУ ЗАМКА
+        final doorPaint = Paint()..color = const Color(0xFF111116);
+        final doorStroke = Paint()..color = const Color(0xFF37474F)..style = PaintingStyle.stroke..strokeWidth = 2.0;
+        
+        // Сузили дверь: ширина теперь всего 18 пикселей, и она стоит строго по центру центральной цитадели!
+        final doorRect = Rect.fromLTWH(
+          centralRect.left + (centralRect.width / 2) - 9, 
+          centralRect.bottom - 32, 
+          18, 
+          32
+        );
+        canvas.drawRect(doorRect, doorPaint);
+        canvas.drawRect(doorRect, doorStroke);
+        
+        // Маленькая золотая ручка на одной двери
+        canvas.drawCircle(Offset(doorRect.right - 4, doorRect.top + 16), 1.5, Paint()..color = const Color(0xFFFFD54F));
 
         canvas.restore();
-        continue; // КРИТИЧЕСКИЙ ФИКС: Пропускаем этот блок, чтобы дефолтный рендерер его НЕ перекрывал!
+        continue;
       } 
         if (block.isSecretChest) {
         // Отрисовка кастомного сундука с твоей картинки (с замком и открыванием!)
