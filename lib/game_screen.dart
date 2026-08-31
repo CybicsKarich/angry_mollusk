@@ -975,7 +975,7 @@ if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictor
     final prefs = await SharedPreferences.getInstance();
     
  // 1. ИСПРАВЛЕНО: Безопасный триггер медали "СНАЙПЕР" 
-    int unusedBirdsCount = birdsQueue.lenght;
+    int unusedBirdsCount = birdsQueue.length;
 
 
     if (unusedBirdsCount >= 2) {
