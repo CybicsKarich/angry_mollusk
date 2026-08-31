@@ -459,6 +459,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     maksimSprite = await loadSprite('maksim.png');
     await images.load('bunnyhop_lose.png');
     await images.load('beard.png');
+    await images.load('castle_monolith.png');
       
     
     add(BackgroundDecoration());
@@ -949,40 +950,19 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
     // ЧЕСТНАЯ ПОБЕДА: Свиньи уничтожены, и ВСЕ блоки/осколки полностью затихли!
     if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictorySequenceStarted && !isAnythingMoving) {
       
-     // ИСПРАВЛЕНО ДЛЯ УРОВНЯ 5: Ваня должен ювелирно влететь в створку маленькой двери!
+     // ИСПРАВЛЕНО ДЛЯ УРОВНЯ 5: Победа сразу при уничтожении Генерала!
       if (currentLevel == 5) {
-        if (currentBird != null && currentBird!.isLaunched) {
-          double bx = 1.25;
-          // Координаты X и Y двери переведены в относительный вид (X в районе замка, Y у земли)
-          double doorMinX = bx + 0.19 + 0.08; 
-          double doorMaxX = bx + 0.19 + 0.18;
-
-          if (currentBird!.position.dx >= doorMinX && currentBird!.position.dx <= doorMaxX && currentBird!.position.dy >= 0.58) {
-            // Ура, дверь пробита! Тушим ливень
-            AudioManager.stopLevel5Rain();
-          } else {
-            return; // Пролетел мимо двери или бьется о стену — победу не даем, ждем падения!
-          }
-        } else if (currentBird == null && birdsQueue.isEmpty) {
-          // Если птиц больше нет, а в дверь так никто и не попал — засчитываем фейл штурма цитадели
-          levelFailed = true;
-          AudioManager.playGameOver();
-          overlays.add('GameOverMenu');
-          return;
-        } else {
-          return; // Ждем следующего выстрела игрока из рогатки
-        }
+        AudioManager.stopLevel5Rain(); // Тушим ливень при триумфе
       } else {
         if (currentBird != null && currentBird!.isLaunched && currentBird!.isAngryMode) {
           AudioManager.stopRage();
         }
       }   
     
-        isVictorySequenceStarted = true;
-      
+      isVictorySequenceStarted = true;    
       int remainingBirds = birdsQueue.length;
-
-      // ИСПРАВЛЕНО: ВСТАВИЛИ ТРИГГЕР МЕДАЛИ "СНАЙПЕР" СТРОГО СЮДА!
+      
+        // ИСПРАВЛЕНО: ВСТАВИЛИ ТРИГГЕР МЕДАЛИ "СНАЙПЕР" СТРОГО СЮДА!
       // Проверяем в момент триумфа: если в очереди осталось ровно 2 птицы, значит потрачена всего одна!
       if (remainingBirds == 2) {
         SharedPreferences.getInstance().then((prefs) async {
@@ -1247,115 +1227,39 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
 
 
 
-      int castleRenderCount = 0;
+      
       // 8. ИСПРАВЛЕНО: ОТРИСОВКА ВСЕХ ОБЪЕКТОВ С УМНОЙ ПРОВЕРКОЙ НА СУНДУК, ЖЕЛЕЗО И БРОНЕСТЕКЛО
     for (var block in blocks) {
        if (currentLevel == 5 && block.x >= 1.40) {
-        castleRenderCount++; // Считаем блоки цитадели
-        
+        // =========================================================================
+        // ИСПРАВЛЕНО: ОТРИСОВКА ОГРОМНОГО ЦЕЛЬНОГО ФОТО ЗАМКА ИЗ КЭША IMAGES
+        // =========================================================================
         canvas.save();
         
+        // Берем физические координаты нашего неуязвимого блока-препятствия
         double cX = block.x * size.width;
         double cY = block.y * size.height;
         double cW = block.w * size.width;
         double cH = block.h * size.height;
 
-        final bodyPaint = Paint()..color = const Color(0xFF263238);
-        final sideTowerPaint = Paint()..color = const Color(0xFF37474F);
-        final strokePaint = Paint()..color = const Color(0xFF101418)..style = PaintingStyle.stroke..strokeWidth = 2.0;
-
-        // ПОДЛОЖКА СТЕНЫ ЦИТАДЕЛИ (Заливаем наглухо, чтобы не просвечивало небо)
-        canvas.drawRect(Rect.fromLTWH(cX, cY, cW, cH), Paint()..color = const Color(0xFF1A1D20));
-
-        // 1. ЦЕНТРАЛЬНАЯ МАССИВНАЯ ЦИТАДЕЛЬ
-        final centralRect = Rect.fromLTWH(cX + cW * 0.10, cY + cH * 0.15, cW * 0.8, cH * 0.85);
-        canvas.drawRect(centralRect, bodyPaint);
-        canvas.drawRect(centralRect, strokePaint);
-
-        // Внутреннее окно цитадели (темная бойница)
-        final windowRect = Rect.fromLTWH(centralRect.left + centralRect.width * 0.35, centralRect.top + 20, centralRect.width * 0.3, 30);
-        canvas.drawRect(windowRect, Paint()..color = const Color(0xFF111116));
-        canvas.drawRect(windowRect, strokePaint..strokeWidth = 1.5);
-
-        // 2. ВЕРХУШКА ЦЕНТРАЛЬНОЙ БАШНИ: ЗУБЦЫ
-        double zW = centralRect.width / 7;
-        for (int i = 0; i < 4; i++) {
-          double zX = centralRect.left + (i * zW * 2);
-          final zRect = Rect.fromLTWH(zX, centralRect.top - 10, zW, 10);
-          canvas.drawRect(zRect, Paint()..color = const Color(0xFF37474F));
-          canvas.drawRect(zRect, strokePaint..strokeWidth = 1.5);
-        }
-
-        // 3. БАШНИ СЛЕВА И СПРАВА
-        final leftTower = Rect.fromLTWH(cX, cY + cH * 0.2, cW * 0.22, cH * 0.8);
-        final rightTower = Rect.fromLTWH(cX + cW * 0.78, cY + cH * 0.2, cW * 0.22, cH * 0.8);
-        
-        canvas.drawRect(leftTower, sideTowerPaint);
-        canvas.drawRect(leftTower, strokePaint);
-        canvas.drawRect(rightTower, sideTowerPaint);
-        canvas.drawRect(rightTower, strokePaint);
-
-        // Бойницы на боковых башнях
-        canvas.drawRect(Rect.fromLTWH(leftTower.left + 6, leftTower.top + 15, 6, 14), Paint()..color = const Color(0xFF111116));
-        canvas.drawRect(Rect.fromLTWH(rightTower.left + 8, rightTower.top + 15, 6, 14), Paint()..color = const Color(0xFF111116));
-
-        // 4. ОСТРОКОНЕЧНЫЕ КРЫШИ-ШПИЛИ БАШЕН
-        final spirePaint = Paint()..color = const Color(0xFF1A237E)..style = PaintingStyle.fill;
-        
-        final leftSpirePath = Path()
-          ..moveTo(leftTower.left + leftTower.width / 2, leftTower.top - 25) 
-          ..lineTo(leftTower.right, leftTower.top) 
-          ..lineTo(leftTower.left, leftTower.top) 
-          ..close();
-        canvas.drawPath(leftSpirePath, spirePaint);
-        canvas.drawPath(leftSpirePath, strokePaint);
-
-        final rightSpirePath = Path()
-          ..moveTo(rightTower.left + rightTower.width / 2, rightTower.top - 25) 
-          ..lineTo(rightTower.right, rightTower.top) 
-          ..lineTo(rightTower.left, rightTower.top) 
-          ..close();
-        canvas.drawPath(rightSpirePath, spirePaint);
-        canvas.drawPath(rightSpirePath, strokePaint);
-
-        double spirePeakX = leftTower.left + leftTower.width / 2;
-        double spirePeakY = leftTower.top - 25;
-
-        // Серый металлический флагшток вверх от пика шпиля
-        final flagpolePaint = Paint()..color = const Color(0xFF455A64)..strokeWidth = 1.5;
-        canvas.drawLine(Offset(spirePeakX, spirePeakY), Offset(spirePeakX, spirePeakY - 14), flagpolePaint);
-
-        // Полотнище красного флага, направленное вправо (треугольник)
-        final flagPaint = Paint()..color = const Color(0xFFB71C1C)..style = PaintingStyle.fill;
-        final flagPath = Path()
-          ..moveTo(spirePeakX, spirePeakY - 14)       // Верхняя точка крепления на флагштоке
-          ..lineTo(spirePeakX + 12, spirePeakY - 9)   // Острый кончик флага справа
-          ..lineTo(spirePeakX, spirePeakY - 4)        // Нижняя точка крепления на флагштоке
-          ..close();
-        canvas.drawPath(flagPath, flagPaint);
-        canvas.drawPath(flagPath, strokePaint..strokeWidth = 0.8); // Тонкий черный контур флага
-        // 5. АРКА-ДВЕРЬ ПРОРЫВА В САМОМ НИЗУ (РИСУЕМ СТРОГО ОДИН РАЗ НА ПЕРВОМ БЛОКЕ ЗАМКА!)
-        if (castleRenderCount == 1) {
-          final doorPaint = Paint()..color = const Color(0xFF111116);
-          final doorStroke = Paint()..color = const Color(0xFF37474F)..style = PaintingStyle.stroke..strokeWidth = 2.0;
+        try {
+          // Достаем картинку замка напрямую из памяти Flame
+          final castleImage = images.fromCache('castle_monolith.png');
           
-          // Привязываем маленькую дверь строго по центру цитадели первого замка
-          final doorRect = Rect.fromLTWH(
-            centralRect.left + (centralRect.width / 2) - 9, 
-            centralRect.bottom - 32, 
-            18, 
-            32
-          );
-          canvas.drawRect(doorRect, doorPaint);
-          canvas.drawRect(doorRect, doorStroke);
+          final srcRect = Rect.fromLTWH(0, 0, castleImage.width.toDouble(), castleImage.height.toDouble());
+          final dstRect = Rect.fromLTWH(cX, cY, cW, cH); // Растягиваем фото во весь размер блока
           
-          // Маленькая золотая ручка
-          canvas.drawCircle(Offset(doorRect.right - 4, doorRect.top + 16), 1.5, Paint()..color = const Color(0xFFFFD54F));
+          // Рисуем непрозрачное фото замка чётко сзади здания Генерала Свиноматкина
+          canvas.drawImageRect(castleImage, srcRect, dstRect, Paint()..filterQuality = FilterQuality.high);
+        } catch (e) {
+          // Подстраховка: если фото забыли закинуть в папку, нарисуется темный силуэт, чтобы игра не вылетела
+          canvas.drawRect(Rect.fromLTWH(cX, cY, cW, cH), Paint()..color = const Color(0xFF21272A));
         }
 
         canvas.restore();
-        continue; // Пропускаем стандартный рендерер блоков камня
-      }  
+        continue; // Жестко пропускаем дефолтный рендерер, чтобы серый кирпич не перекрывал наше красивое фото!
+      }   
+        
         if (block.isSecretChest) {
         // Отрисовка кастомного сундука с твоей картинки (с замком и открыванием!)
         final boxRect = Rect.fromLTWH(block.x * size.width, block.y * size.height, block.w * size.width, block.h * size.height);
@@ -2284,9 +2188,9 @@ class MolluskMaksim {
         
         final srcRect = Rect.fromLTWH(0, 0, beardImage.width.toDouble(), beardImage.height.toDouble());
         
-        // Сместили левее (минус radius * 1.45 вместо прежних 1.1)
+        // Изменено: уменьшили вычитание до - radius * 0.95 (борода сдвинулась правее, чётко под лицо)
         final dstRect = Rect.fromLTWH(
-          screenPos.dx - radius * 1.45, 
+          screenPos.dx - radius * 0.95, 
           screenPos.dy + radius * 0.20, 
           beardW, 
           beardH
