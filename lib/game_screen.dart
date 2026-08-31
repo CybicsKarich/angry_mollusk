@@ -668,9 +668,9 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     // ГЕОМЕТРИЯ УРОВНЯ 5 (ЦИТАДЕЛЬ ГЕНЕРАЛА СВИНОМАТКИНА — ИСПРАВЛЕННАЯ)
     // =========================================================================
     else if (currentLevel == 5) {
-      targetScore1Star = 400;
-      targetScore2Stars = 500;
-      targetScore3Stars = 600;
+      targetScore1Star = 350;
+      targetScore2Stars = 400;
+      targetScore3Stars = 450;
 
       // Включаем фоновый ливень
       AudioManager.startLevel5Rain();
@@ -697,7 +697,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
 
       // 🐷 ИСПРАВЛЕНО: ПЕРЕМЕСТИЛИ ГЕНЕРАЛА В САМЫЙ КОНЕЦ ДОМА (В УПОР К ПРАВОЙ ОПОРЕ)
       // Теперь до него сложнее добраться, пока игрок не разнесет перекрытия!
-      pigs.add(MolluskMaksim(bx + 0.11, 0.57 - 0.019));
+      pigs.add(MolluskMaksim(bx + 0.155, 0.43));
 
       // 🏯 ОДИН ЕДИНСТВЕННЫЙ ЗАМОК-БЛОК (СДВИHУТ ЕЩЁ ПРАВЕЕ, ЧТОБЫ УБРАТЬ ЛИШНИЙ ХЛАМ)
       // Координата X изменена на bx + 0.22, чтобы он стоял впритирку к дому
@@ -886,35 +886,38 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
 
 
      
-    // 3. ИСПРАВЛЕНО: ТРИУМФ (Если прямо сейчас игрок победил и потенциально набрал 9 звёзд)
-    if (spawnCompleted && pigs.isEmpty && !levelFailed && !levelCleared && !isVictorySequenceStarted) {
-      // Считаем текущие звёзды за этот раунд ДО сохранения
-      int currentRoundStars = 0;
-      if (AngryMolluskGame.score >= targetScore3Stars) currentRoundStars = 3;
-      else if (AngryMolluskGame.score >= targetScore2Stars) currentRoundStars = 2;
-      else if (AngryMolluskGame.score >= targetScore1Star) currentRoundStars = 1;
+    // 3. ИСПРАВЛЕНО: ТРИУМФ (Для получения медали нужно пройти 5 уровней на 3 звезды)
+if (spawnCompleted && pigs.isEmpty && !levelFailed && !levelCleared && !isVictorySequenceStarted) {
+  // Считаем текущие звёзды за этот раунд ДО сохранения
+  int currentRoundStars = 0;
+  if (AngryMolluskGame.score >= targetScore3Stars) currentRoundStars = 3;
+  else if (AngryMolluskGame.score >= targetScore2Stars) currentRoundStars = 2;
+  else if (AngryMolluskGame.score >= targetScore1Star) currentRoundStars = 1;
 
-      SharedPreferences.getInstance().then((prefs) async {
-        // Читаем старые рекорды остальных уровней
-        int s1 = currentLevel == 1 ? currentRoundStars : (prefs.getInt('level_1_stars') ?? 0);
-        int s2 = currentLevel == 2 ? currentRoundStars : (prefs.getInt('level_2_stars') ?? 0);
-        int s3 = currentLevel == 3 ? currentRoundStars : (prefs.getInt('level_3_stars') ?? 0);
+  SharedPreferences.getInstance().then((prefs) async {
+    // Читаем рекорды для всех 5 уровней (если уровень текущий — берем максимум между старым рекордом и текущим раундом)
+    int s1 = currentLevel == 1 ? currentRoundStars : (prefs.getInt('level_1_stars') ?? 0);
+    int s2 = currentLevel == 2 ? currentRoundStars : (prefs.getInt('level_2_stars') ?? 0);
+    int s3 = currentLevel == 3 ? currentRoundStars : (prefs.getInt('level_3_stars') ?? 0);
+    int s4 = currentLevel == 4 ? currentRoundStars : (prefs.getInt('level_4_stars') ?? 0);
+    int s5 = currentLevel == 5 ? currentRoundStars : (prefs.getInt('level_5_stars') ?? 0);
+    
+    // Проверяем, что ВСЕ 5 уровней пройдены строго на 3 звезды
+    if (s1 == 3 && s2 == 3 && s3 == 3 && s4 == 3 && s5 == 3) {
+      final alreadyUnlocked = prefs.getBool('achievement_triumph') ?? false;
+      if (!alreadyUnlocked) {
+        await prefs.setBool('achievement_triumph', true);
+        AudioManager.playAchievement(); // Победный дзынь!
+        overlays.add('AchievementToast'); // Глянцевая плашка наверх
         
-        // Если суммарно набралось 9 звёзд
-        if ((s1 + s2 + s3) >= 9) {
-          final alreadyUnlocked = prefs.getBool('achievement_triumph') ?? false;
-          if (!alreadyUnlocked) {
-            await prefs.setBool('achievement_triumph', true);
-            AudioManager.playAchievement(); // Победный дзынь!
-            overlays.add('AchievementToast'); // Глянцевая плашка наверх
-            
-            Future.delayed(const Duration(seconds: 5), () {
-              overlays.remove('AchievementToast');
-            });
-          }
-        }
-      });
+        Future.delayed(const Duration(seconds: 5), () {
+          overlays.remove('AchievementToast');
+        });
+      }
     }
+  });
+}
+
       
       // Живая атмосфера (звуки свиней раз в 9 секунд)
     if (pigs.isNotEmpty && !levelCleared && !levelFailed) {
@@ -971,18 +974,18 @@ if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictor
   () async {
     final prefs = await SharedPreferences.getInstance();
     
-    // 1. ИСПРАВЛЕНО: Безопасный триггер медали "СНАЙПЕР"
-    if (remainingBirds == 2) {
+ // 1. ИСПРАВЛЕНО: Безопасный триггер медали "СНАЙПЕР" 
+    // Считаем птиц, которые вообще НЕ запускались игроком (остались в очереди/рогатке)
+    int unusedBirdsCount = birds.where((bird) => !bird.wasLaunched).length; 
+
+    if (unusedBirdsCount >= 2) {
       final alreadyUnlocked = prefs.getBool('achievement_sniper') ?? false;
       if (!alreadyUnlocked) {
         await prefs.setBool('achievement_sniper', true);
         AudioManager.playAchievement(); // Звук фанфар
         
-        // Проверяем, активна ли еще игра (компонент не удален)
         if (isMounted) {
           overlays.add('AchievementToast'); // Вылетает синяя плашка
-          
-          // Безопасное удаление плашки через 5 секунд
           Future.delayed(const Duration(seconds: 5), () {
             if (isMounted && overlays.isActive('AchievementToast')) {
               overlays.remove('AchievementToast');
@@ -991,6 +994,7 @@ if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictor
         }
       }
     }
+
 
     // 2. Безопасное динамическое сохранение рекорда звезд
     int savedStars = prefs.getInt('level_${currentLevel}_stars') ?? 0;
