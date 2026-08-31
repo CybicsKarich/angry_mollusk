@@ -949,7 +949,6 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
 
     // ЧЕСТНАЯ ПОБЕДА: Свиньи уничтожены, и ВСЕ блоки/осколки полностью затихли!
 if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictorySequenceStarted && !isAnythingMoving) {
-  isVictorySequenceStarted = true;
   
   // ИСПРАВЛЕНО ДЛЯ УРОВНЯ 5: Глушим ливень ровно в секунду фиксации победы
   if (currentLevel == 5) {
