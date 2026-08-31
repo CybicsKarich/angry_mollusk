@@ -241,7 +241,7 @@ static Future<void> playPaperRustle() async {
     } catch (e) {
       print("Критическая ошибка запуска неуязвимого дождя: $e");
     }
-
+  }
   // 2. Мгновенная остановка дождя при выходе из 5 уровня
   static Future<void> stopLevel5Rain() async {
     try {
