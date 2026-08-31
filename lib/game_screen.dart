@@ -664,43 +664,44 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       pigs.add(MolluskMaksim(bx2 + 0.12, 0.53 - 0.019));  
     }
     
-        // =========================================================================
-    // ГЕОМЕТРИЯ УРОВНЯ 5 (ФИНАЛЬНЫЙ РУБЕЖ: ЦИТАДЕЛЬ ГЕНЕРАЛА СВИНОМАТКИНА)
+    // =========================================================================
+    // ГЕОМЕТРИЯ УРОВНЯ 5 (ЦИТАДЕЛЬ ГЕНЕРАЛА СВИНОМАТКИНА — ИСПРАВЛЕННАЯ)
     // =========================================================================
     else if (currentLevel == 5) {
       targetScore1Star = 400;
       targetScore2Stars = 500;
       targetScore3Stars = 600;
 
-      // Запускаем бесконечный фоновый ливень
+      // Включаем фоновый ливень
       AudioManager.startLevel5Rain();
 
       final double bx = 1.25; // Стартовая точка крепости
 
-      // --- 1 ЯРУС КРЕПОСТИ (Двойной камень) ---
-      blocks.add(GameBlock(bx + 0.00, 0.59, 0.025, 0.14, true)); // Слева блок 1
-      blocks.add(GameBlock(bx + 0.03, 0.59, 0.025, 0.14, true)); // Слева блок 2
+      // --- 1 ЯРУС КРЕПОСТИ (ИСПРАВЛЕНО: СДЕЛАЛИ ДВЕ ПОЛНОЦЕННЫЕ ДВОЙНЫЕ ОПОРЫ!) ---
+      blocks.add(GameBlock(bx + 0.00, 0.59, 0.025, 0.14, true)); // Левая опора (слой 1)
+      blocks.add(GameBlock(bx + 0.03, 0.59, 0.025, 0.14, true)); // Левая опора (слой 2)
       
-      blocks.add(GameBlock(bx + 0.15, 0.59, 0.025, 0.14, true)); // Сзади блок 1
-      blocks.add(GameBlock(bx + 0.18, 0.59, 0.025, 0.14, true)); // Сзади блок 2
+      blocks.add(GameBlock(bx + 0.13, 0.59, 0.025, 0.14, true)); // Правая опора (слой 1)
+      blocks.add(GameBlock(bx + 0.16, 0.59, 0.025, 0.14, true)); // Правая опора (слой 2)
       
-      blocks.add(GameBlock(bx - 0.01, 0.57, 0.22, 0.02, true));  // Наверху один блок (перекрытие)
+      blocks.add(GameBlock(bx - 0.01, 0.57, 0.20, 0.02, true));  // Перекрытие 1 яруса
 
       // --- 2 ЯРУС КРЕПОСТИ (Поуже) ---
-      blocks.add(GameBlock(bx + 0.04, 0.43, 0.02, 0.14, true));  // Слева яруса 2 блок 1
-      blocks.add(GameBlock(bx + 0.06, 0.43, 0.02, 0.14, true));  // Слева яруса 2 block 2
+      blocks.add(GameBlock(bx + 0.04, 0.43, 0.02, 0.14, true));  
+      blocks.add(GameBlock(bx + 0.06, 0.43, 0.02, 0.14, true));  
       
-      blocks.add(GameBlock(bx + 0.12, 0.43, 0.02, 0.14, true));  // Сзади яруса 2 блок 1
-      blocks.add(GameBlock(bx + 0.14, 0.43, 0.02, 0.14, true));  // Сзади яруса 2 блок 2
+      blocks.add(GameBlock(bx + 0.10, 0.43, 0.02, 0.14, true));  
+      blocks.add(GameBlock(bx + 0.12, 0.43, 0.02, 0.14, true));  
       
-      blocks.add(GameBlock(bx + 0.03, 0.41, 0.14, 0.02, true));  // Наверху один блок (перекрытие 2 яруса)
+      blocks.add(GameBlock(bx + 0.03, 0.41, 0.12, 0.02, true));  
 
-      // 🐷 ГЕНЕРАЛ СВИНОМАТКИН СИДИТ СТРОГО ВНУТРИ КРЕПОСТИ НА 1 ЭТАЖЕ
-      pigs.add(MolluskMaksim(bx + 0.08, 0.57 - 0.019));
+      // 🐷 ИСПРАВЛЕНО: ПЕРЕМЕСТИЛИ ГЕНЕРАЛА В САМЫЙ КОНЕЦ ДОМА (В УПОР К ПРАВОЙ ОПОРЕ)
+      // Теперь до него сложнее добраться, пока игрок не разнесет перекрытия!
+      pigs.add(MolluskMaksim(bx + 0.11, 0.57 - 0.019));
 
-      // 🏯 НЕУЯЗВИМЫЙ ЗАМОК-МОНОЛИТ (Сдвинут чётко за крепость на остров)
-      // Мы делаем специальный GameBlock-замок, который защитим от пробития птицей
-      final castleBlock = GameBlock(bx + 0.19, 0.15, 0.25, 0.58, true)
+      // 🏯 ОДИН ЕДИНСТВЕННЫЙ ЗАМОК-БЛОК (СДВИHУТ ЕЩЁ ПРАВЕЕ, ЧТОБЫ УБРАТЬ ЛИШНИЙ ХЛАМ)
+      // Координата X изменена на bx + 0.22, чтобы он стоял впритирку к дому
+      final castleBlock = GameBlock(bx + 0.22, 0.15, 0.25, 0.58, true)
         ..isSleeping = true; 
       blocks.add(castleBlock);
     }
@@ -947,63 +948,70 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
     }
 
     // ЧЕСТНАЯ ПОБЕДА: Свиньи уничтожены, и ВСЕ блоки/осколки полностью затихли!
-    if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictorySequenceStarted && !isAnythingMoving) {
-      isVictorySequenceStarted = true;
-      
-      // ИСПРАВЛЕНО ДЛЯ УРОВНЯ 5: Глушим ливень ровно в секунду фиксации победы, 
-      // когда игровой процесс полностью остановился!
-      if (currentLevel == 5) {
-        AudioManager.stopLevel5Rain(); 
-      } else {
-        if (currentBird != null && currentBird!.isLaunched && currentBird!.isAngryMode) {
-          AudioManager.stopRage();
-        }
-      }
-
-      int remainingBirds = birdsQueue.length;
-      
-        // ИСПРАВЛЕНО: ВСТАВИЛИ ТРИГГЕР МЕДАЛИ "СНАЙПЕР" СТРОГО СЮДА!
-      // Проверяем в момент триумфа: если в очереди осталось ровно 2 птицы, значит потрачена всего одна!
-      if (remainingBirds == 2) {
-        SharedPreferences.getInstance().then((prefs) async {
-          final alreadyUnlocked = prefs.getBool('achievement_sniper') ?? false;
-          if (!alreadyUnlocked) {
-            await prefs.setBool('achievement_sniper', true);
-            AudioManager.playAchievement(); // Звук фанфар
-            overlays.add('AchievementToast'); // Вылетает синяя плашка
-            
-            // Прячем плашку ровно через 5 секунд
-            Future.delayed(const Duration(seconds: 5), () {
-              overlays.remove('AchievementToast');
-            });
-          }
-        });
-      }
-
-      AngryMolluskGame.score += remainingBirds * 70;  
-      
-      int currentStars = 0;
-      if (AngryMolluskGame.score >= targetScore3Stars) currentStars = 3;
-      else if (AngryMolluskGame.score >= targetScore2Stars) currentStars = 2;
-      else if (AngryMolluskGame.score >= targetScore1Star) currentStars = 1;
-
-      // Динамическое сохранение рекорда под текущий уровень в SharedPreferences
-      SharedPreferences.getInstance().then((prefs) async {
-        int savedStars = prefs.getInt('level_${currentLevel}_stars') ?? 0;
-        if (currentStars > savedStars) {
-          await prefs.setInt('level_${currentLevel}_stars', currentStars);
-        }
-      });
-
-      levelCleared = true;
-      AudioManager.playVictory(); 
-
-      // Плавная задержка перед оверлеем, чтобы SCORE зафиксировал финальную цифру
-      Future.delayed(const Duration(milliseconds: 200), () {
-        overlays.add('VictoryMenu');
-      });
-      return;
+if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictorySequenceStarted && !isAnythingMoving) {
+  isVictorySequenceStarted = true;
+  
+  // ИСПРАВЛЕНО ДЛЯ УРОВНЯ 5: Глушим ливень ровно в секунду фиксации победы
+  if (currentLevel == 5) {
+    AudioManager.stopLevel5Rain(); 
+  } else {
+    if (currentBird != null && currentBird!.isLaunched && currentBird!.isAngryMode) {
+      AudioManager.stopRage();
     }
+  }
+
+  int remainingBirds = birdsQueue.length;
+  AngryMolluskGame.score += remainingBirds * 70;  
+  
+  int currentStars = 0;
+  if (AngryMolluskGame.score >= targetScore3Stars) currentStars = 3;
+  else if (AngryMolluskGame.score >= targetScore2Stars) currentStars = 2;
+  else if (AngryMolluskGame.score >= targetScore1Star) currentStars = 1;
+
+  // Выносим асинхронную логику сохранения и ачивок в отдельный безопасный блок
+  () async {
+    final prefs = await SharedPreferences.getInstance();
+    
+    // 1. ИСПРАВЛЕНО: Безопасный триггер медали "СНАЙПЕР"
+    if (remainingBirds == 2) {
+      final alreadyUnlocked = prefs.getBool('achievement_sniper') ?? false;
+      if (!alreadyUnlocked) {
+        await prefs.setBool('achievement_sniper', true);
+        AudioManager.playAchievement(); // Звук фанфар
+        
+        // Проверяем, активна ли еще игра (компонент не удален)
+        if (isMounted) {
+          overlays.add('AchievementToast'); // Вылетает синяя плашка
+          
+          // Безопасное удаление плашки через 5 секунд
+          Future.delayed(const Duration(seconds: 5), () {
+            if (isMounted && overlays.isActive('AchievementToast')) {
+              overlays.remove('AchievementToast');
+            }
+          });
+        }
+      }
+    }
+
+    // 2. Безопасное динамическое сохранение рекорда звезд
+    int savedStars = prefs.getInt('level_${currentLevel}_stars') ?? 0;
+    if (currentStars > savedStars) {
+      await prefs.setInt('level_${currentLevel}_stars', currentStars);
+    }
+  }();
+
+  levelCleared = true;
+  AudioManager.playVictory(); 
+
+  // Плавная задержка перед оверлеем, чтобы SCORE зафиксировал финальную цифру
+  Future.delayed(const Duration(milliseconds: 200), () {
+    if (isMounted) {
+      overlays.add('VictoryMenu');
+    }
+  });
+  return;
+}
+
 
 
     // ЧЕСТНОЕ ПОРАЖЕНИЕ: Птицы кончились, всё остановилось, а свиньи ВЫЖИЛИ!
@@ -1230,19 +1238,16 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
       
       // 8. ИСПРАВЛЕНО: ОТРИСОВКА ВСЕХ ОБЪЕКТОВ С УМНОЙ ПРОВЕРКОЙ НА СУНДУК, ЖЕЛЕЗО И БРОНЕСТЕКЛО
     for (var block in blocks) {
-       if (currentLevel == 5 && block.x >= 1.40) {
-        // =========================================================================
-        // ИСПРАВЛЕНО: ОТРИСОВКА ОДНОГО БОЛЬШОГО ФОТО ЗАМКА СДВИHУТОГО ВПРАВО И ВНИЗ
-        // =========================================================================
+       if (currentLevel == 5 && block.x >= 1.45) {
         canvas.save();
         
-        // СМЕЩЕНИЕ: Увеличиваем координату X (+ 60 пикселей вправо), чтобы замок встал чётко сзади крепости
-        double cX = (block.x * size.width) + 60;
+        double cX = block.x * size.width;
+        double cW = block.w * size.width;
         
-        // Высоту cH увеличиваем, а cY опускаем вниз прямо к травяному покрову скалы острова!
-        double cW = block.w * size.width * 1.1; 
-        double cH = size.height * 0.58; 
-        double cY = (size.height * groundY) - cH; // Жесткая привязка основания замка к линии травы
+        // ИСПРАВЛЕНО: ОПУСКАЕМ ЗАМОК НИЖЕ ПРЯМО НА ЗЕМЛЮ К ТРАВЕ
+        // Высота замкаcH зафиксирована, а верхняя точка cY рассчитывается строго от уровня земли
+        double cH = size.height * 0.53; // Чуть уменьшили высоту для плотной посадки
+        double cY = (size.height * groundY) - cH; // Нижний край замка теперь идеально на траве!
 
         try {
           final castleImage = images.fromCache('castle_monolith.png');
@@ -1255,7 +1260,7 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
         }
 
         canvas.restore();
-        continue; // ГАРАНТИЯ: Убирает любые дубликаты и маленькие замки с экрана на 100%!
+        continue; // Жестко блокируем дефолтный рендеринг блоков
       }    
         
         if (block.isSecretChest) {
