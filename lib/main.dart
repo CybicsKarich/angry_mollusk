@@ -937,7 +937,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                         const SizedBox(width: 35),
                         _buildAchievementCircle(
                           title: "Триумф",
-                          desc: "Пройди все 4 уровня\nна максимальные 3 звезды",
+                          desc: "Пройди все 5 уровней\nна максимальные 3 звезды",
                           isUnlocked: isTriumphUnlocked,
                           child: AnimatedBuilder(
                             animation: _animController,
