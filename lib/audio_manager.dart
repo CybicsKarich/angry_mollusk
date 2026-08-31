@@ -229,18 +229,24 @@ static Future<void> playPaperRustle() async {
   // БЛОК ГРОЗЫ И ЛИВНЯ ДЛЯ ЭПИЧНОГО 5 УРОВНЯ
   // =========================================================================
 
-  // 1. СИЛЬНЫЙ ЗАПУСК ДОЖДЯ С СИСТЕМНЫМ ПРИОРИТЕТОМ MULTI-AUDIO
+  // 1. ИСПРАВЛЕННЫЙ БЕЗОПАСНЫЙ ЗАПУСК ДОЖДЯ ДЛЯ ЧЕКЕРА
   static Future<void> startLevel5Rain() async {
     try {
-      await _rainPlayer.stop(); // Сбрасываем старые сессии
-      await _rainPlayer.setVolume(0.40); // Идеальный баланс фонового шума
-      await _rainPlayer.setReleaseMode(ReleaseMode.loop); // Зацикливаем намертво
-      
-      // ИСПОЛЬЗУЕМ МЕДИА-ПОТОК: ОС воспринимает этот звук как фоновую музыку (как в Spotify),
-      // спецэффекты разрушения блоков не имеют прав закрыть этот системный канал!
-      await _rainPlayer.play(AssetSource('music/rain_ambient.mp3'), mode: PlayerMode.mediaPlayer);
+      await _rainPlayer.setVolume(0.45); 
+      await _rainPlayer.setReleaseMode(ReleaseMode.loop); 
+      // Возвращаем lowLatency, так как чекер теперь сам будет удерживать поток без сбоев ОС!
+      await _rainPlayer.play(AssetSource('music/rain_ambient.mp3'), mode: PlayerMode.lowLatency);
     } catch (e) {
-      print("Критическая ошибка запуска неуязвимого дождя: $e");
+      print("Ошибка запуска неуязвимого дождя: $e");
+    }
+  }
+
+  // 2. БЕЗОПАСНЫЙ ГЕТТЕР СТУСА ДЛЯ ИГРОВОГО ЦИКЛА (Защита от зависаний)
+  static bool get isRainPlaying {
+    try {
+      return _rainPlayer.state == PlayerState.playing;
+    } catch (_) {
+      return false; // Если плеер занят инициализацией, мягко возвращаем false без вылета игры
     }
   }
   // 2. Мгновенная остановка дождя при выходе из 5 уровня
