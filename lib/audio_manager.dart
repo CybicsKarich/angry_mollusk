@@ -7,6 +7,7 @@ class AudioManager {
   static final AudioPlayer _finalMenuPlayer = AudioPlayer();
   static final AudioPlayer _fxPlayer = AudioPlayer();
   static final AudioPlayer _rainPlayer = AudioPlayer();
+  static bool get isRainPlaying => _rainPlayer.state == PlayerState.playing;
   
   
   static final Random _random = Random();
