@@ -1247,13 +1247,12 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
 
 
 
-      
+      int castleRenderCount = 0;
       // 8. ИСПРАВЛЕНО: ОТРИСОВКА ВСЕХ ОБЪЕКТОВ С УМНОЙ ПРОВЕРКОЙ НА СУНДУК, ЖЕЛЕЗО И БРОНЕСТЕКЛО
     for (var block in blocks) {
        if (currentLevel == 5 && block.x >= 1.40) {
-        // =========================================================================
-        // РЕНДЕРИМ НАСТОЯЩИЙ ДЕТАЛИЗИРОВАННЫЙ ЗАМОК ИЗ КОМИКСА (БЕЗ ТЕНЕЙ И ОШИБОК)
-        // =========================================================================
+        castleRenderCount++; // Считаем блоки цитадели
+        
         canvas.save();
         
         double cX = block.x * size.width;
@@ -1265,7 +1264,7 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
         final sideTowerPaint = Paint()..color = const Color(0xFF37474F);
         final strokePaint = Paint()..color = const Color(0xFF101418)..style = PaintingStyle.stroke..strokeWidth = 2.0;
 
-        // ПОДЛОЖКА СТЕНЫ ЦИТАДЕЛИ
+        // ПОДЛОЖКА СТЕНЫ ЦИТАДЕЛИ (Заливаем наглухо, чтобы не просвечивало небо)
         canvas.drawRect(Rect.fromLTWH(cX, cY, cW, cH), Paint()..color = const Color(0xFF1A1D20));
 
         // 1. ЦЕНТРАЛЬНАЯ МАССИВНАЯ ЦИТАДЕЛЬ
@@ -1319,26 +1318,44 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
         canvas.drawPath(rightSpirePath, spirePaint);
         canvas.drawPath(rightSpirePath, strokePaint);
 
-        // 5. ИСПРАВЛЕНО: РЕНДЕРИМ СТРОГО ОДНУ МАЛЕНЬКУЮ АРКУ-ДВЕРЬ ПО ЦЕНТРУ ЗАМКА
-        final doorPaint = Paint()..color = const Color(0xFF111116);
-        final doorStroke = Paint()..color = const Color(0xFF37474F)..style = PaintingStyle.stroke..strokeWidth = 2.0;
-        
-        // Сузили дверь: ширина теперь всего 18 пикселей, и она стоит строго по центру центральной цитадели!
-        final doorRect = Rect.fromLTWH(
-          centralRect.left + (centralRect.width / 2) - 9, 
-          centralRect.bottom - 32, 
-          18, 
-          32
-        );
-        canvas.drawRect(doorRect, doorPaint);
-        canvas.drawRect(doorRect, doorStroke);
-        
-        // Маленькая золотая ручка на одной двери
-        canvas.drawCircle(Offset(doorRect.right - 4, doorRect.top + 16), 1.5, Paint()..color = const Color(0xFFFFD54F));
+        double spirePeakX = leftTower.left + leftTower.width / 2;
+        double spirePeakY = leftTower.top - 25;
+
+        // Серый металлический флагшток вверх от пика шпиля
+        final flagpolePaint = Paint()..color = const Color(0xFF455A64)..strokeWidth = 1.5;
+        canvas.drawLine(Offset(spirePeakX, spirePeakY), Offset(spirePeakX, spirePeakY - 14), flagpolePaint);
+
+        // Полотнище красного флага, направленное вправо (треугольник)
+        final flagPaint = Paint()..color = const Color(0xFFB71C1C)..style = PaintingStyle.fill;
+        final flagPath = Path()
+          ..moveTo(spirePeakX, spirePeakY - 14)       // Верхняя точка крепления на флагштоке
+          ..lineTo(spirePeakX + 12, spirePeakY - 9)   // Острый кончик флага справа
+          ..lineTo(spirePeakX, spirePeakY - 4)        // Нижняя точка крепления на флагштоке
+          ..close();
+        canvas.drawPath(flagPath, flagPaint);
+        canvas.drawPath(flagPath, strokePaint..strokeWidth = 0.8); // Тонкий черный контур флага
+        // 5. АРКА-ДВЕРЬ ПРОРЫВА В САМОМ НИЗУ (РИСУЕМ СТРОГО ОДИН РАЗ НА ПЕРВОМ БЛОКЕ ЗАМКА!)
+        if (castleRenderCount == 1) {
+          final doorPaint = Paint()..color = const Color(0xFF111116);
+          final doorStroke = Paint()..color = const Color(0xFF37474F)..style = PaintingStyle.stroke..strokeWidth = 2.0;
+          
+          // Привязываем маленькую дверь строго по центру цитадели первого замка
+          final doorRect = Rect.fromLTWH(
+            centralRect.left + (centralRect.width / 2) - 9, 
+            centralRect.bottom - 32, 
+            18, 
+            32
+          );
+          canvas.drawRect(doorRect, doorPaint);
+          canvas.drawRect(doorRect, doorStroke);
+          
+          // Маленькая золотая ручка
+          canvas.drawCircle(Offset(doorRect.right - 4, doorRect.top + 16), 1.5, Paint()..color = const Color(0xFFFFD54F));
+        }
 
         canvas.restore();
-        continue;
-      } 
+        continue; // Пропускаем стандартный рендерер блоков камня
+      }  
         if (block.isSecretChest) {
         // Отрисовка кастомного сундука с твоей картинки (с замком и открыванием!)
         final boxRect = Rect.fromLTWH(block.x * size.width, block.y * size.height, block.w * size.width, block.h * size.height);
@@ -2261,16 +2278,16 @@ class MolluskMaksim {
       try {
         final beardImage = Flame.images.fromCache('beard.png'); 
         
-        // Уменьшили коэффициенты: ширина теперь radius * 2.2 (была 3.2), высота radius * 1.3
-        double beardW = radius * 2.2; 
-        double beardH = radius * 1.3;
+        // Сделали пошире (radius * 2.8) и подлиннее (radius * 1.65)
+        double beardW = radius * 1.7; 
+        double beardH = radius * 1.65;
         
         final srcRect = Rect.fromLTWH(0, 0, beardImage.width.toDouble(), beardImage.height.toDouble());
         
-        // Сдвиг влево тоже уменьшен (radius * 1.1 вместо 1.6), чтобы борода центрировалась идеально по узкому контуру
+        // Сместили левее (минус radius * 1.45 вместо прежних 1.1)
         final dstRect = Rect.fromLTWH(
-          screenPos.dx - radius * 1.1, 
-          screenPos.dy + radius * 0.25, 
+          screenPos.dx - radius * 1.45, 
+          screenPos.dy + radius * 0.20, 
           beardW, 
           beardH
         );
