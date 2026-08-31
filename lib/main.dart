@@ -433,6 +433,7 @@ SizedBox(
       prefs.getInt('level_2_stars') ?? 0,
       prefs.getInt('level_3_stars') ?? 0,
       prefs.getInt('level_4_stars') ?? 0,
+      prefs.getInt('level_5_stars') ?? 0
     ]),
     builder: (context, snapshot) {
       final stars = snapshot.data ?? [];
@@ -460,14 +461,18 @@ SizedBox(
             ],
           ),
 
-          // СТРАНИЦА 2: УРОВНИ 4 И 5
+                    // СТРАНИЦА 2: УРОВНИ 4, 5 И 6 (ИСПРАВЛЕНО: ТЕПЕРЬ СТРОГО ПО ПОРЯДКУ!)
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _buildLevelCard('4', isLvl4Open), 
-              const SizedBox(width: 30),
-              // ЗАМЕНИТЬ НА ЭТУ СТРОКУ:
-               _buildLevelCard('5', isLvl5Open),
+              const SizedBox(width: 20), 
+              
+              _buildLevelCard('5', isLvl5Open),
+              const SizedBox(width: 20),
+              
+              // ИКОНКА УРОВНЯ 6: Теперь замыкает ряд справа и остаётся заблокированной (false)
+              _buildLevelCard('6', false), 
             ],
           ),
         ],
