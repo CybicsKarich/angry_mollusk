@@ -7,7 +7,6 @@ class AudioManager {
   static final AudioPlayer _finalMenuPlayer = AudioPlayer();
   static final AudioPlayer _fxPlayer = AudioPlayer();
   static final AudioPlayer _rainPlayer = AudioPlayer();
-  static bool get isRainPlaying => _rainPlayer.state == PlayerState.playing;
   
   
   static final Random _random = Random();
@@ -18,6 +17,7 @@ class AudioManager {
   static bool hasWoodToken = true;
   static bool hasPigHitToken = true;
   static bool hasMissToken = true;
+  static bool get isRainPlaying => _rainPlayer.state == PlayerState.playing;
 
   static Future<void> init() async {
     _stretchPlayer.setReleaseMode(ReleaseMode.loop);
