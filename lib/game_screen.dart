@@ -2245,13 +2245,16 @@ class MolluskMaksim {
       try {
         final beardImage = Flame.images.fromCache('beard.png'); 
         
-        double beardW = radius * 3.0; // Слегка уменьшили, чтобы сидела аккуратно по контуру круга
-        double beardH = radius * 1.5;
+        // Уменьшили коэффициенты: ширина теперь radius * 2.2 (была 3.2), высота radius * 1.3
+        double beardW = radius * 2.2; 
+        double beardH = radius * 1.3;
         
         final srcRect = Rect.fromLTWH(0, 0, beardImage.width.toDouble(), beardImage.height.toDouble());
+        
+        // Сдвиг влево тоже уменьшен (radius * 1.1 вместо 1.6), чтобы борода центрировалась идеально по узкому контуру
         final dstRect = Rect.fromLTWH(
-          screenPos.dx - radius * 1.5, 
-          screenPos.dy + radius * 0.15, 
+          screenPos.dx - radius * 1.1, 
+          screenPos.dy + radius * 0.25, 
           beardW, 
           beardH
         );
@@ -2319,7 +2322,16 @@ class GameBlock {
 
        void update(double dt, List<GameBlock> allBlocks, List<MolluskMaksim> allPigs, double groundY, AngryMolluskGame game) {
     
-       // ЛОГИКА СЕКРЕТНОГО СУНДУКА IVANDROP С КЛЕШНЕЙ И КРАСИВЫМ ВЫЛЕТОМ ФОТОКАРТОЧКИ
+       if (game.currentLevel == 5 && x >= 1.40) {
+      isSleeping = true;
+      isFalling = false;
+      isBroken = false;
+      vx = 0;
+      vy = 0;
+      return; // Мертвая отсечка, код разрушения ниже не выполнится никогда!
+    }
+           
+        // ЛОГИКА СЕКРЕТНОГО СУНДУКА IVANDROP С КЛЕШНЕЙ И КРАСИВЫМ ВЫЛЕТОМ ФОТОКАРТОЧКИ
     if (isSecretChest && chestCapturedBird) {
       isSleeping = false; 
       chestAnimTimer += dt;
