@@ -975,8 +975,8 @@ if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictor
     final prefs = await SharedPreferences.getInstance();
     
  // 1. ИСПРАВЛЕНО: Безопасный триггер медали "СНАЙПЕР" 
-    // Считаем птиц, которые вообще НЕ запускались игроком (остались в очереди/рогатке)
-    int unusedBirdsCount = birds.where((bird) => !bird.wasLaunched).length; 
+    int unusedBirdsCount = birdsQueue.where((bird) => !bird.wasLaunched).length;
+
 
     if (unusedBirdsCount >= 2) {
       final alreadyUnlocked = prefs.getBool('achievement_sniper') ?? false;
