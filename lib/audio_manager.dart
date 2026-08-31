@@ -205,10 +205,11 @@ static Future<void> playPaperRustle() async {
     }
   }
 
-  // 2. ИСПРАВЛЕННЫЙ МЕТОД ЭФФЕКТОВ (Защищаем плеер дождя от глушения!)
+  // 2. ИСПРАВЛЕННЫЙ МЕТОД ОДИНOЧНЫХ ЭФФЕКТОВ (Полная изоляция от дождя!)
   static void _playSingleEffect(String assetPath) async {
     try {
-      // ВАЖНО: Глушим только эффекты (_fxPlayer), но _rainPlayer НИ В КОЕМ СЛУЧАЕ НЕ ТРОГАЕМ!
+      // Глушим ТОЛЬКО старый FX плеер, плеер дождя (_rainPlayer) здесь не упоминается,
+      // а за счет системного разделения потоков Android больше не будет тушить ливень!
       await _fxPlayer.stop(); 
       
       final AudioPlayer temporaryPlayer = AudioPlayer();
@@ -219,7 +220,7 @@ static Future<void> playPaperRustle() async {
         temporaryPlayer.dispose();
       });
     } catch (e) {
-      print("Ошибка звука: $e");
+      print("Ошибка игрового звука: $e");
     }
   }
 
@@ -227,19 +228,19 @@ static Future<void> playPaperRustle() async {
   // БЛОК ГРОЗЫ И ЛИВНЯ ДЛЯ ЭПИЧНОГО 5 УРОВНЯ
   // =========================================================================
 
-  // 1. ПОЛНОСТЬЮ ЗАМЕНИ МЕТОД ЗАПУСКА ДОЖДЯ (Выставляем самый высокий приоритет)
+  // 1. СИЛЬНЫЙ ЗАПУСК ДОЖДЯ С СИСТЕМНЫМ ПРИОРИТЕТОМ MULTI-AUDIO
   static Future<void> startLevel5Rain() async {
     try {
-      // Плеер дождя работает изолированно, его методы эффектов не имеют права трогать!
-      await _rainPlayer.stop(); 
-      await _rainPlayer.setVolume(0.45); 
-      await _rainPlayer.setReleaseMode(ReleaseMode.loop); 
-      // Режим lowLatency гарантирует стабильное фоновое удержание потока Android/iOS
-      await _rainPlayer.play(AssetSource('music/rain_ambient.mp3'), mode: PlayerMode.lowLatency);
+      await _rainPlayer.stop(); // Сбрасываем старые сессии
+      await _rainPlayer.setVolume(0.40); // Идеальный баланс фонового шума
+      await _rainPlayer.setReleaseMode(ReleaseMode.loop); // Зацикливаем намертво
+      
+      // ИСПОЛЬЗУЕМ МЕДИА-ПОТОК: ОС воспринимает этот звук как фоновую музыку (как в Spotify),
+      // спецэффекты разрушения блоков не имеют прав закрыть этот системный канал!
+      await _rainPlayer.play(AssetSource('music/rain_ambient.mp3'), mode: PlayerMode.mediaPlayer);
     } catch (e) {
-      print("Ошибка запуска эмбиента дождя: $e");
+      print("Критическая ошибка запуска неуязвимого дождя: $e");
     }
-  }
 
   // 2. Мгновенная остановка дождя при выходе из 5 уровня
   static Future<void> stopLevel5Rain() async {
