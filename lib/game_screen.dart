@@ -697,7 +697,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
 
       // 🐷 ИСПРАВЛЕНО: ПЕРЕМЕСТИЛИ ГЕНЕРАЛА В САМЫЙ КОНЕЦ ДОМА (В УПОР К ПРАВОЙ ОПОРЕ)
       // Теперь до него сложнее добраться, пока игрок не разнесет перекрытия!
-      pigs.add(MolluskMaksim(bx + 0.14, 0.6));
+      pigs.add(MolluskMaksim(bx + 0.14, 0.53));
 
       // 🏯 ОДИН ЕДИНСТВЕННЫЙ ЗАМОК-БЛОК (СДВИHУТ ЕЩЁ ПРАВЕЕ, ЧТОБЫ УБРАТЬ ЛИШНИЙ ХЛАМ)
       // Координата X изменена на bx + 0.22, чтобы он стоял впритирку к дому
@@ -953,7 +953,36 @@ if (spawnCompleted && pigs.isEmpty && !levelFailed && !levelCleared && !isVictor
     // ЧЕСТНАЯ ПОБЕДА: Свиньи уничтожены, и ВСЕ блоки/осколки полностью затихли!
 if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictorySequenceStarted && !isAnythingMoving) {
   
-  // ИСПРАВЛЕНО ДЛЯ УРОВНЯ 5: Глушим ливень ровно в секунду фиксации победы
+ int birdsInSlingQueue = birdsQueue.length;
+      
+      // Проверяем: если птица на экране запущена, но ещё не успела умереть и удалиться...
+      bool isBirdFlyingOnScreen = currentBird != null && currentBird!.isLaunched && !currentBird!.shouldRemove;
+      
+      // ...значит, фактически на рогатке числится текущая очередь + летящая птица
+      int effectiveSlingCount = birdsInSlingQueue + (isBirdFlyingOnScreen ? 1 : 0);
+
+      // Медаль выдаётся строго если на рогатке осталось 2 или 3 птицы!
+      if (effectiveSlingCount >= 2) {
+        SharedPreferences.getInstance().then((prefs) async {
+          final alreadyUnlocked = prefs.getBool('achievement_sniper') ?? false;
+          if (!alreadyUnlocked) {
+            await prefs.setBool('achievement_sniper', true);
+            AudioManager.playAchievement(); // Звук фанфар
+            
+            if (isMounted) {
+              overlays.add('AchievementToast'); // Вылетает синяя плашка
+              
+              Future.delayed(const Duration(seconds: 5), () {
+                if (isMounted && overlays.contains('AchievementToast')) {
+                  overlays.remove('AchievementToast');
+                }
+              });
+            }
+          }
+        });
+      }
+    
+// ИСПРАВЛЕНО ДЛЯ УРОВНЯ 5: Глушим ливень ровно в секунду фиксации победы
   if (currentLevel == 5) {
     AudioManager.stopLevel5Rain(); 
   } else {
@@ -974,26 +1003,7 @@ if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictor
   () async {
     final prefs = await SharedPreferences.getInstance();
     
- // 1. ИСПРАВЛЕНО: Безопасный триггер медали "СНАЙПЕР" 
-    int unusedBirdsCount = birdsQueue.length;
-
-
-    if (unusedBirdsCount >= 2) {
-      final alreadyUnlocked = prefs.getBool('achievement_sniper') ?? false;
-      if (!alreadyUnlocked) {
-        await prefs.setBool('achievement_sniper', true);
-        AudioManager.playAchievement(); // Звук фанфар
-        
-        if (isMounted) {
-          overlays.add('AchievementToast'); // Вылетает синяя плашка
-          Future.delayed(const Duration(seconds: 5), () {
-            if (isMounted && overlays.isActive('AchievementToast')) {
-              overlays.remove('AchievementToast');
-            }
-          });
-        }
-      }
-    }
+ 
 
 
     // 2. Безопасное динамическое сохранение рекорда звезд
