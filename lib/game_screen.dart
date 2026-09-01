@@ -973,10 +973,11 @@ if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictor
               overlays.add('AchievementToast'); // Вылетает синяя плашка
               
               Future.delayed(const Duration(seconds: 5), () {
-                if (isMounted && overlays.contains('AchievementToast')) {
-                  overlays.remove('AchievementToast');
-                }
-              });
+  // ИСПРАВЛЕНО: Используем правильный метод .isActive() для проверки оверлея во Flame
+  if (isMounted && overlays.isActive('AchievementToast')) {
+    overlays.remove('AchievementToast');
+  }
+});
             }
           }
         });
