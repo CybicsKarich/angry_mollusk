@@ -568,6 +568,11 @@ Widget _buildLevelCard(String levelNumber, bool isActive) {
               return;
             }
 
+            if (levelNumber == '6') {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const Level6ComicScreen()));
+              return;
+            }
+            
             GameScreen gameScreenInstance = GameScreen();
             int targetLevel = int.tryParse(levelNumber) ?? 1;
             gameScreenInstance.gameInstance.currentLevel = targetLevel;
@@ -3328,7 +3333,7 @@ class _WindowTentacleShadowPainter extends CustomPainter {
 }
 
 // =========================================================================
-// ИНТЕРАКТИВНЫЙ КОМИКС УРОВНЯ 6: ПЕРВАЯ СТРАНИЦА И ВЫБОР СУДЬБЫ ВАНЯ
+// ИHТЕРАКТИВНЫЙ 3D-КОМИКС ГЛАВЫ VI: ЛОГОВО ЗЕЛЁHОГО ДОHА МОЛЛЮСКА
 // =========================================================================
 class Level6ComicScreen extends StatefulWidget {
   const Level6ComicScreen({super.key});
@@ -3338,60 +3343,47 @@ class Level6ComicScreen extends StatefulWidget {
 }
 
 class _Level6ComicScreenState extends State<Level6ComicScreen> {
-  int _currentFrame = 1; // Текущий кадр (1, 2 или 3)
-  int _selectedChoice = 0; // 0 - выбор не сделан, 1 - жёсткий, 2 - мягкий
-
-  @override
-  void initState() {
-    super.initState();
-    // Включаем мрачную музыку капель для атмосферы тронного зала
-    // AudioManager.startCastleDrops(); // Включим, как только обновим AudioManager
-  }
+  int _currentFrame = 1; // 1, 2 или 3 кадр
+  int _selectedChoice = 0; // 0 - нет выбора, 1 - жёсткий, 2 - мягкий
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF07070A), // Атмосферный кромешный мрак замка
+      backgroundColor: const Color(0xFF040407), // Мрак тронного зала
       body: SafeArea(
         child: Column(
           children: [
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
             const Text(
               "ГЛАВА VI: ЛОГОВО ДОНА МОЛЛЮСКА",
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w900,
-                color: Color(0xFF37474F), // Суровый каменный оттенок
-                letterSpacing: 2.0,
-                shadows: [Shadow(color: Colors.black, blurRadius: 4, offset: Offset(2, 2))],
+                color: Color(0xFF455A64),
+                letterSpacing: 2.5,
+                shadows: [Shadow(color: Colors.black, blurRadius: 6, offset: Offset(2, 2))],
               ),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
 
-            // ГЛАВНЫЙ ЭКРАН КОМИКСА (Три кадра в ряд)
+            // ГЛАВHАЯ СЕТКА: ВСЕ КАДРЫ ИМЕЮТ ПOЛНОЦЕHHЫЙ 3D ЗАДHИЙ ФOН И ДЕТАЛИЗАЦИЮ
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 14),
                 child: Row(
                   children: [
-                    // КАДР 1: Ваня входит, видит тотем у трона, в темноте улыбка
                     if (_currentFrame >= 1) _buildFrame1(),
                     if (_currentFrame >= 2) const SizedBox(width: 12),
-                    
-                    // КАДР 2: Дон Моллюск выходит из темноты и заслоняет тотем
                     if (_currentFrame >= 2) _buildFrame2(),
                     if (_currentFrame >= 3) const SizedBox(width: 12),
-                    
-                    // КАДР 3: Интерактивный диалог с выбором фраз в черных рамочках
                     if (_currentFrame >= 3) _buildFrame3(),
                   ],
                 ),
               ),
             ),
 
-            // НИЖНЯЯ ПАНЕЛЬ НАВИГАЦИИ С УМНОЙ КНОПКОЙ
             Padding(
-              padding: const EdgeInsets.all(14.0),
+              padding: const EdgeInsets.all(12.0),
               child: _buildNavigationButton(),
             ),
           ],
@@ -3401,34 +3393,33 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
   }
 
   // =========================================================================
-  // РЕНДЕР КАДРА 1: ВХОД В ЗАМОК И СКРЫТАЯ УЛЫБКА
+  // КАДР 1: ВХОД В ЗАМОК, ТЕМHОТА И СКРЫТАЯ УЛЫБКА
   // =========================================================================
   Widget _buildFrame1() {
     return Expanded(
-      child: _buildBaseFrame(
+      child: _buildAdvanced3DFrame(
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // В темноте на заднем фоне проступает блёклая зловещая улыбка Дона Моллюска
+            // 😈 СКРЫТАЯ УЛЫБКА ARDOR В ТЕМНОТЕ НА ЗАДНЕМ ПЛАНЕ
             Positioned(
-              bottom: 12, right: 35,
-              child: CustomPaint(
-                size: const Size(55, 30),
-                painter: _SecretMouthShadowPainter(), // Твоя готовая пиксельная улыбка из main.dart
+              bottom: 42, right: 30,
+              child: Opacity(
+                opacity: 0.7, // Слегка размыта во мраке зала
+                child: CustomPaint(
+                  size: const Size(60, 25),
+                  painter: ScaryMouthPainter(),
+                ),
               ),
             ),
-            // Деревянный трон Босса в глубине зала
-            Positioned(bottom: 10, right: 15, child: _buildCastleToner()),
-            // Рядом с троном лежит Древний Тотем Гнева птиц
-            Positioned(bottom: 10, right: 55, child: _buildTotemGneva()),
-            // Ваня Баннихоп входит слева (без шляпы и сумки)
-            Positioned(bottom: 10, left: 16, child: _buildCharacterBase('assets/images/bunnyhop.png', 58, false)),
+            Positioned(bottom: 22, right: 15, child: _buildAdvanced3DThrone()),
+            Positioned(bottom: 22, right: 70, child: _buildGoldTotemFromPhoto(38)),
+            Positioned(bottom: 22, left: 16, child: _buildCharacterBase('assets/images/bunnyhop.png', 56)),
 
-            // Текстовое облачко Вани
             Positioned(
               top: 25, left: 6, right: 6,
               child: CustomPaint(
-                painter: ComicBubblePainter(tailX: 0.25),
+                painter: SpeechBubblePainter(tailXFactor: 0.25, tailGoesUp: false),
                 child: const Padding(
                   padding: EdgeInsets.all(8.0),
                   child: Text(
@@ -3446,39 +3437,29 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
   }
 
   // =========================================================================
-  // РЕНДЕР КАДРА 2: ЭПИЧНЫЙ ВЫХОД БОССА С ЗАСЛОHЕНИЕМ
+  // КАДР 2: ЭПИЧНЫЙ ВЫХОД ЗЕЛЁHОГО БOССА (ЗАСЛОHЕHИЕ ТРOНА)
   // =========================================================================
   Widget _buildFrame2() {
     return Expanded(
-      child: _buildBaseFrame(
+      child: _buildAdvanced3DFrame(
         child: Stack(
           alignment: Alignment.center,
           children: [
-             // ИСПРАВЛЕНО: Трон и тотем теперь перекрыты фигурой босса и убраны в прозрачность по канонам Flutter!
-            Positioned(
-              bottom: 10, 
-              right: 15, 
-              child: Opacity(opacity: 0.3, child: _buildCastleToner()),
-            ),
-            Positioned(
-              bottom: 10, 
-              right: 55, 
-              child: Opacity(opacity: 0.3, child: _buildTotemGneva()),
-            ),
-
+            // Трон и тотем уходят в глубокую тень позади гигантского осьминога
+            Positioned(bottom: 22, right: 15, child: Opacity(opacity: 0.25, child: _buildAdvanced3DThrone())),
+            Positioned(bottom: 22, right: 70, child: Opacity(opacity: 0.20, child: _buildGoldTotemFromPhoto(38))),
             
-            Positioned(bottom: 10, left: 12, child: _buildCharacterBase('assets/images/bunnyhop.png', 50, false)),
+            Positioned(bottom: 22, left: 12, child: _buildCharacterBase('assets/images/bunnyhop.png', 48)),
             
-            // ВЫХОДИТ ДОН МОЛЛЮСК (Прорисован у троих блоков, заслоняя награду)
-            Positioned(bottom: 4, right: 10, child: _buildDonMolluskBoss(70)),
+            // ВЫХОДИТ УЛЬТРА-ПРОРАБОТАННЫЙ ЗЕЛЁНЫЙ БОСС ДОН МОЛЛЮСК
+            Positioned(bottom: 12, right: 8, child: _buildUltraDetailedDonMollusk(72)),
 
-            // Полное молчание, эпичный кадр без речевых облачков
             Positioned(
               top: 15, left: 20, right: 20,
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                color: Colors.black87,
-                child: const Text("ШАГИ ИЗ ТЕМНОТЫ...", style: TextStyle(color: Colors.white70, fontSize: 8, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                decoration: BoxDecoration(color: Colors.black87, border: Border.all(color: Colors.red.shade900, width: 0.8)),
+                child: const Text("ШАГИ ИЗ ТЕМHОТЫ...", style: TextStyle(color: Colors.redAccent, fontSize: 8, fontWeight: FontWeight.bold, letterSpacing: 1.1), textAlign: TextAlign.center),
               ),
             ),
           ],
@@ -3488,18 +3469,18 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
   }
 
   // =========================================================================
-  // РЕНДЕР КАДРА 3: ИHТЕРАКТИВНЫЙ ДИБАТ С ВЫБОРОМ РЕПЛИК
+  // КАДР 3: ИНТЕРАКТИВНЫЙ ДИАЛОГ С ВЫБОРОМ РЕПЛИК В РАМОЧКАХ
   // =========================================================================
   Widget _buildFrame3() {
     return Expanded(
-      child: _buildBaseFrame(
+      child: _buildAdvanced3DFrame(
         child: Stack(
           alignment: Alignment.center,
           children: [
-            Positioned(bottom: 10, left: 12, child: _buildCharacterBase('assets/images/bunnyhop.png', 50, false)),
-            Positioned(bottom: 4, right: 10, child: _buildDonMolluskBoss(65)),
+            Positioned(bottom: 22, left: 12, child: _buildCharacterBase('assets/images/bunnyhop.png', 48)),
+            Positioned(bottom: 12, right: 8, child: _buildUltraDetailedDonMollusk(68)),
 
-            // А) ЕСЛИ ВЫБОР ЕЩЕ НЕ СДЕЛАН: Показываем две черные небольшие рамочки фраз
+            // Черные рамочки выбора Вани
             if (_selectedChoice == 0)
               Positioned(
                 top: 15, left: 4, right: 4,
@@ -3512,12 +3493,12 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
                 ),
               ),
 
-            // Б) ЕСЛИ ИГРОК НАЖАЛ НА ФРАЗУ: Рамочки пропадают, и Моллюск сразу же отвечает в этом кадре!
+            // Моментальные лорные ответы Дона Моллюска в зависимости от выбора
             if (_selectedChoice == 1)
               Positioned(
                 top: 25, left: 6, right: 6,
                 child: CustomPaint(
-                  painter: ComicBubblePainter(tailX: 0.8), // Хвостик указывает на Босса справа
+                  painter: SpeechBubblePainter(tailXFactor: 0.8, tailGoesUp: false),
                   child: const Padding(
                     padding: EdgeInsets.all(8.0),
                     child: Text(
@@ -3531,14 +3512,14 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
 
             if (_selectedChoice == 2)
               Positioned(
-                top: 15, left: 4, right: 4,
+                top: 14, left: 4, right: 4,
                 child: CustomPaint(
-                  painter: ComicBubblePainter(tailX: 0.8),
+                  painter: SpeechBubblePainter(tailXFactor: 0.8, tailGoesUp: false),
                   child: const Padding(
-                    padding: EdgeInsets.all(8.0),
+                    padding: EdgeInsets.all(7.0),
                     child: Text(
                       "По-хорошему? Ты слишком вежлив для птицы, потерявшей способность летать. Этим предметом мы лишили ваш род неба! И ты думаешь, я отдам его просто так?",
-                      style: TextStyle(fontSize: 8.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
+                      style: TextStyle(fontSize: 8.0, fontWeight: FontWeight.bold, color: Colors.black, height: 1.12),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -3550,157 +3531,10 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
     );
   }
 
-  // Конструктор черных рамочек для интерактивного выбора фраз Вани
-  Widget _buildChoiceBox(String text, int choiceId) {
-    return GestureDetector(
-      onTap: () => setState(() => _selectedChoice = choiceId), // Меняем фразу Дона Моллюска на лету!
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 8),
-        decoration: BoxDecoration(
-          color: const Color(0xFF111116), // Небольшая черная рамочка
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: Colors.grey.shade800, width: 1.2),
-        ),
-        child: Text(
-          text,
-          style: const TextStyle(color: Colors.white, fontSize: 7.2, fontWeight: FontWeight.w600, height: 1.1),
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
-  }
-
     // =========================================================================
-  // УМНАЯ УПРАВЛЯЮЩАЯ КНОПКА СНИЗУ КОМИКСА (ИНТЕРАКТИВНАЯ НАВИГАЦИЯ)
+  // СУПЕРДЕТАЛИЗИРОВАННЫЙ ЗЕЛЁНЫЙ БОСС ДОН МОЛЛЮСК С РАЗДЕЛЬНЫМИ СТВОРКАМИ КЛЕШНЕЙ
   // =========================================================================
-  Widget _buildNavigationButton() {
-    // Если мы дошли до 3 кадра, но игрок ещё не сделал судьбоносный выбор — кнопка исчезает!
-    if (_currentFrame == 3 && _selectedChoice == 0) {
-      return const SizedBox(
-        height: 48, 
-        child: Center(
-          child: Text(
-            "ВЫБЕРИТЕ ОТВЕТ ВАНЯ ДЛЯ ПРОДОЛЖЕНИЯ СЮЖЕТА", 
-            style: TextStyle(color: Colors.redAccent, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.1),
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      width: double.infinity,
-      constraints: const BoxConstraints(maxWidth: 240),
-      height: 46,
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            spreadRadius: 1, blurRadius: 4, offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF37474F), // Суровый каменный цвет
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          elevation: 0,
-        ),
-        onPressed: () {
-          if (_currentFrame < 3) {
-            setState(() => _currentFrame++); // Листаем кадры 1 -> 2 -> 3
-          } else {
-            // Клик по кнопке «Дальше» после сделанного выбора переносит на нужную ветку Экрана 2!
-            if (_selectedChoice == 1) {
-              // Переход на страницу плохой концовки (её код напишем в следующем шаге)
-              // Navigator.push(context, MaterialPageRoute(builder: (context) => const Level6BadEndingScreen()));
-            } else if (_selectedChoice == 2) {
-              // Переход на хорошую ветку с обвалом перед Ваней и выходом на битву
-              // Navigator.push(context, MaterialPageRoute(builder: (context) => const Level6GoodRouteScreen()));
-            }
-          }
-        },
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text("ДАЛЬШЕ", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2)),
-            SizedBox(width: 8),
-            Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.white),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Обёртка мультяшного кадра с мрачным фоном тронного зала
-  Widget _buildBaseFrame({required Widget child, double opacity = 1.0}) {
-    return Expanded(
-      child: Opacity(
-        opacity: opacity,
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xFF161622), Color(0xFF09090F)],
-            ),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.black, width: 3.5),
-            boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 6, offset: Offset(0, 4))],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(11),
-            child: Stack(
-              children: [
-                // Пол зала
-                Positioned(bottom: 0, left: 0, right: 0, child: Container(height: 24, color: const Color(0xFF1E1E24))),
-                child,
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Вспомогательные сборщики графических лорных объектов тронного зала
-  Widget _buildCastleToner() => Container(width: 35, height: 50, decoration: const BoxDecoration(color: Color(0xFF25252D), borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)), boxShadow: [BoxShadow(color: Colors.black45, blurRadius: 2)]));
-  
-  Widget _buildTotemGneva() {
-    return Container(
-      width: 14, height: 28, 
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFB300), // Золотой Древний Тотем
-        borderRadius: BorderRadius.circular(3), 
-        border: Border.all(color: Colors.black, width: 1.2),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Container(width: 8, height: 3, color: const Color(0xFFB71C1C)), // Узоры гнева
-          Container(width: 6, height: 3, color: const Color(0xFF1B5E20)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCharacterBase(String assetPath, double size, bool isPig) {
-    return Container(
-      width: size, height: size,
-      decoration: BoxDecoration(
-        color: isPig ? const Color(0xFF7CB342) : const Color(0xFFE53935), 
-        shape: BoxShape.circle, 
-        border: Border.all(color: Colors.black, width: 2.0),
-        boxShadow: const [BoxShadow(color: Colors.black38, blurRadius: 3, offset: Offset(0, 2))],
-      ),
-      child: ClipOval(child: Image.asset(assetPath, fit: BoxFit.cover)),
-    );
-  }
-  
-  // =========================================================================
-  // ВЫСОКОДЕТАЛИЗИРОВАННАЯ КИНЕМАТОГРАФИЧHАЯ ОТРИСОВКА ДОНА МОЛЛЮСКА
-  // =========================================================================
-  Widget _buildDonMolluskBoss(double size) {
+  Widget _buildUltraDetailedDonMollusk(double size) {
     return SizedBox(
       width: size,
       height: size,
@@ -3708,114 +3542,315 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
         alignment: Alignment.center,
         clipBehavior: Clip.none,
         children: [
-          // 🐙 1. ЧЕТЫРЕ СИHИХ ИЗВИВАЮЩИХСЯ ЩУПАЛЬЦА ОЛЬМИНОГА НА ЗАДНЕМ ПЛАНЕ
-          Positioned(bottom: 6, left: -6, child: Transform.rotate(angle: -0.4, child: Container(width: size * 0.22, height: size * 0.65, decoration: BoxDecoration(color: const Color(0xFF0288D1), borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.black, width: 1.5))))),
-          Positioned(bottom: 2, left: size * 0.15, child: Transform.rotate(angle: -0.1, child: Container(width: size * 0.20, height: size * 0.60, decoration: BoxDecoration(color: const Color(0xFF039BE5), borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.black, width: 1.5))))),
-          Positioned(bottom: 2, right: size * 0.15, child: Transform.rotate(angle: 0.1, child: Container(width: size * 0.20, height: size * 0.60, decoration: BoxDecoration(color: const Color(0xFF039BE5), borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.black, width: 1.5))))),
-          Positioned(bottom: 6, right: -6, child: Transform.rotate(angle: 0.4, child: Container(width: size * 0.22, height: size * 0.65, decoration: BoxDecoration(color: const Color(0xFF0288D1), borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.black, width: 1.5))))),
+          // 🐙 1. ЧЕТЫРЕ АНАТОМИЧЕСКИХ СИНИХ ЩУПАЛЬЦА С ВНУТРЕННИМИ КРУГЛЫМИ ПРИСОСКАМИ
+          Positioned(bottom: 6, left: -8, child: Transform.rotate(angle: -0.4, child: CustomPaint(size: Size(size * 0.25, size * 0.65), painter: _MolluskTentacleWithSuctionsPainter(isLeft: true)))),
+          Positioned(bottom: 1, left: size * 0.16, child: Transform.rotate(angle: -0.1, child: CustomPaint(size: Size(size * 0.22, size * 0.60), painter: _MolluskTentacleWithSuctionsPainter(isLeft: true)))),
+          Positioned(bottom: 1, right: size * 0.16, child: Transform.rotate(angle: 0.1, child: CustomPaint(size: Size(size * 0.22, size * 0.60), painter: _MolluskTentacleWithSuctionsPainter(isLeft: false)))),
+          Positioned(bottom: 6, right: -8, child: Transform.rotate(angle: 0.4, child: CustomPaint(size: Size(size * 0.25, size * 0.65), painter: _MolluskTentacleWithSuctionsPainter(isLeft: false)))),
 
-          // 🐷 2. СВИHЫЕ ЗЕЛЕНОВАТЫЕ УШКИ БОССА (ТОРЧАТ ПО БОКАМ ИЗ-ЗА ГОЛОВЫ)
-          Positioned(top: size * 0.12, left: -2, child: Transform.rotate(angle: -0.3, child: Container(width: size * 0.18, height: size * 0.26, decoration: BoxDecoration(color: const Color(0xFF689F38), borderRadius: BorderRadius.circular(6), border: Border.all(color: Colors.black, width: 1.5))))),
-          Positioned(top: size * 0.12, right: -2, child: Transform.rotate(angle: 0.3, child: Container(width: size * 0.18, height: size * 0.26, decoration: BoxDecoration(color: const Color(0xFF689F38), borderRadius: BorderRadius.circular(6), border: Border.all(color: Colors.black, width: 1.5))))),
+          // 🐷 2. СВИНЫЕ УШКИ БОССА ПО БОКАМ ГOЛOВЫ
+          Positioned(top: size * 0.10, left: 0, child: Transform.rotate(angle: -0.2, child: Container(width: size * 0.16, height: size * 0.24, decoration: BoxDecoration(color: const Color(0xFF689F38), borderRadius: BorderRadius.circular(5), border: Border.all(color: Colors.black, width: 1.5))))),
+          Positioned(top: size * 0.10, right: 0, child: Transform.rotate(angle: 0.2, child: Container(width: size * 0.16, height: size * 0.24, decoration: BoxDecoration(color: const Color(0xFF689F38), borderRadius: BorderRadius.circular(5), border: Border.all(color: Colors.black, width: 1.5))))),
 
-          // 🔵 3. ГЛАВНОЕ МОНОЛИТHОЕ СИНЕЕ ТЕЛО ОСЬМИНОГА (ГОЛОВА-КОКОН)
+          // 🟢 3. ГЛАВНОЕ МОНОЛИТНОЕ ЗЕЛЁНОЕ ТЕЛО БОССА С НОВЫМ ГРОЗНЫМ ЛИЦОМ МАКСИМА
           Container(
-            width: size * 0.72,
-            height: size * 0.72,
+            width: size * 0.70, height: size * 0.70,
             decoration: BoxDecoration(
-              color: const Color(0xFF0288D1),
+              color: const Color(0xFF558B2F), // Насыщенный темно-зеленый цвет мафии свиней
               shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFF0B1B24), width: 2.2),
-              boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 4, offset: Offset(0, 3))],
+              border: Border.all(color: const Color(0xFF1B5E20), width: 2.2),
+              boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 5, offset: Offset(0, 3))],
             ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Злые, прищуренные свиные глаза Дона Моллюска по референсу
-                Positioned(
-                  top: size * 0.22, left: size * 0.14,
-                  child: Transform.rotate(angle: 0.2, child: Container(width: size * 0.14, height: size * 0.07, color: Colors.white, child: Center(child: Container(width: 4, height: 4, color: Colors.black)))),
-                ),
-                Positioned(
-                  top: size * 0.22, right: size * 0.14,
-                  child: Transform.rotate(angle: -0.2, child: Container(width: size * 0.14, height: size * 0.07, color: Colors.white, child: Center(child: Container(width: 4, height: 4, color: Colors.black)))),
-                ),
-                // Пятачок осьминога-свиньи
-                Positioned(
-                  top: size * 0.32,
-                  child: Container(
-                    width: size * 0.18, height: size * 0.13,
-                    decoration: BoxDecoration(color: const Color(0xFF039BE5), borderRadius: BorderRadius.circular(6), border: Border.all(color: Colors.black, width: 1.2)),
-                    child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [Container(width: 3, height: 5, color: Colors.black), Container(width: 3, height: 5, color: Colors.black)]),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-                    // Левая нижняя клешня
-          Positioned(
-            bottom: size * 0.05, 
-            left: -size * 0.15,
-            child: Container(
-              width: size * 0.28, 
-              height: size * 0.28, 
-              decoration: const BoxDecoration(
-                color: Color(0xFF2E6F22), 
-                shape: BoxShape.circle, 
-                boxShadow: [BoxShadow(color: Colors.black38, blurRadius: 2)],
-              ),
-            ),
-          ),
-          
-          // Правая нижняя клешня
-          Positioned(
-            bottom: size * 0.05, 
-            right: -size * 0.15,
-            child: Container(
-              width: size * 0.28, 
-              height: size * 0.28, 
-              decoration: const BoxDecoration(
-                color: Color(0xFF2E6F22), 
-                shape: BoxShape.circle, 
-                boxShadow: [BoxShadow(color: Colors.black38, blurRadius: 2)],
-              ),
-            ),
-          ),
-          
-          // Верхняя зажимающая клешня на макушке головы
-          Positioned(
-            top: -size * 0.08, 
-            left: size * 0.24,
-            child: Transform.rotate(
-              angle: 0.3, 
-              child: Container(
-                width: size * 0.24, 
-                height: size * 0.24, 
-                decoration: const BoxDecoration(
-                  color: Color(0xFF215217), 
-                  shape: BoxShape.circle,
-                ),
+            child: ClipOval(
+              // Накладываем твою новую, грозную фотографию Дона-Максима из кэша!
+              child: Image.asset(
+                'assets/images/maksim_boss.png',
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(color: const Color(0xFF558B2F)), 
               ),
             ),
           ),
 
-          // СЛЕД КРОВИ ОТ ОТОРВАНHОЙ ЧЕТВЁРТОЙ КЛЕШНИ (Пасхалка плаката WANTED!)
+          // 🦀 4. ТРИ УЛЬТРА-ПРОРАБОТАННЫЕ КЛЕШНИ (ЛЕВЫЙ ЗАЖИМ, ПРАВЫЙ ЗАЖИМ И ЗУБЦЫ)
+          // Левая нижняя клешня краба
           Positioned(
-            top: -size * 0.04, 
-            left: size * 0.04,
+            bottom: size * 0.02, left: -size * 0.14,
+            child: CustomPaint(size: Size(size * 0.35, size * 0.35), painter: CrabClawPainter(openFactor: 0.18)),
+          ),
+          // Правая нижняя клешня краба
+          Positioned(
+            bottom: size * 0.02, right: -size * 0.14,
+            child: CustomPaint(size: Size(size * 0.35, size * 0.35), painter: CrabClawPainter(openFactor: 0.18)),
+          ),
+          // Верхняя атакующая клешня на макушке головы
+          Positioned(
+            top: -size * 0.10, left: size * 0.24,
+            child: Transform.rotate(angle: 0.4, child: CustomPaint(size: Size(size * 0.30, size * 0.30), painter: CrabClawPainter(openFactor: 0.45))),
+          ),
+
+          // След крови от оторванной четвертой клешни (Пасхалка Wanted!)
+          Positioned(top: -size * 0.02, left: size * 0.06, child: Container(width: 7, height: 7, decoration: const BoxDecoration(color: Color(0xFFC62828), shape: BoxShape.circle))),
+        ],
+      ),
+    );
+  }
+
+  // =========================================================================
+  // МАКСИМАЛЬНО ДЕТАЛИЗИРОВАННЫЙ ЗАДНИЙ ФОН: 3D ПЛИТКА И ГОТИЧЕСКИЕ СВОДЫ КРЫШИ
+  // =========================================================================
+  Widget _buildAdvanced3DFrame({required Widget child}) {
+    return Expanded(
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.black, width: 3.5),
+          boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 6, offset: Offset(0, 4))],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(11),
+          child: Stack(
+            children: [
+              // Тёмный гранитный фон стен тронного зала
+              Positioned.fill(child: Container(decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFF14141E), Color(0xFF06060A)])))),
+              
+              // 📐 1. РЕЛЬЕФНАЯ ГОТИЧЕСКАЯ КРЫША ЗАМКА: Балки сходятся в 3D перспективу
+              Positioned(top: 0, left: 0, right: 0, child: CustomPaint(size: const Size(double.infinity, 35), painter: _CastleCeiling3DPainter())),
+
+              // 🧱 2. РЕЛЬЕФНАЯ КАМЕННАЯ ПЛИТКА НА ПОЛУ: Швы расходятся веером для глубины
+              Positioned(bottom: 0, left: 0, right: 0, child: CustomPaint(size: const Size(double.infinity, 24), painter: _CastleFloorTilesPainter())),
+              
+              child,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Интерактивный кубик выбора фраз
+  Widget _buildChoiceBox(String text, int choiceId) {
+    return GestureDetector(
+      onTap: () => setState(() => _selectedChoice = choiceId),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+        decoration: BoxDecoration(
+          color: const Color(0xFF0A0A0F),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: Colors.red.shade900.withOpacity(0.5), width: 1.2),
+        ),
+        child: Text(text, style: const TextStyle(color: Colors.white, fontSize: 7.2, fontWeight: FontWeight.w600, height: 1.1), textAlign: TextAlign.center),
+      ),
+    );
+  }
+
+  Widget _buildNavigationButton() {
+    if (_currentFrame == 3 && _selectedChoice == 0) {
+      return const SizedBox(height: 46, child: Center(child: Text("ВЫБЕРИТЕ ОТВЕТ ВАHЯ ДЛЯ ПРОДОЛЖЕHИЯ СЮЖЕTA", style: TextStyle(color: Colors.redAccent, fontSize: 9.5, fontWeight: FontWeight.bold, letterSpacing: 1.1))));
+    }
+    return Container(
+      width: double.infinity, constraints: const BoxConstraints(maxWidth: 240), height: 46,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF37474F), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+        onPressed: () {
+          if (_currentFrame < 3) {
+            setState(() => _currentFrame++);
+          } else {
+            if (_selectedChoice == 1) {
+              // Переход на вторую страницу плохой концовки
+            } else if (_selectedChoice == 2) {
+              // Переход на вторую страницу хорошего пути к битве
+            }
+          }
+        },
+        child: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [Text("ДАЛЬШЕ", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)), SizedBox(width: 8), Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.white)]),
+      ),
+    );
+  }
+
+  // Вспомогательные лорные элементы
+  Widget _buildCastleToner() => Container(width: 35, height: 50, decoration: const BoxDecoration(color: Color(0xFF25252D), borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8))));
+  
+  Widget _buildAdvanced3DThrone() {
+    return SizedBox(
+      width: 40, height: 58,
+      child: Stack(
+        children: [
+          Positioned(bottom: 4, left: 4, right: 4, child: Container(height: 54, decoration: BoxDecoration(color: const Color(0xFF3E2723), borderRadius: const BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)), border: Border.all(color: const Color(0xFF1A0C00), width: 1.8)))),
+          Positioned(bottom: 4, left: 0, child: Container(width: 5, height: 26, color: const Color(0xFF4E342E), decoration: BoxDecoration(border: Border.all(color: Colors.black, width: 0.8)))),
+          Positioned(bottom: 4, right: 0, child: Container(width: 5, height: 26, color: const Color(0xFF4E342E), decoration: BoxDecoration(border: Border.all(color: Colors.black, width: 0.8)))),
+          Positioned(bottom: 6, left: 3, right: 3, child: Container(height: 14, color: const Color(0xFF4E342E))),
+          
+          // 🔴 МЯГКАЯ КРАСHАЯ ПОДУШКА-ПОДЛОЖКА НА СИДЕНЬЕ
+          Positioned(bottom: 14, left: 4, right: 4, child: Container(height: 6, decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFFD32F2F), Color(0xFFFF5252), Color(0xFFB71C1C)]), borderRadius: BorderRadius.circular(2)))),
+        ],
+      ),
+    );
+  }
+
+    Widget _buildGoldTotemFromPhoto(double size) {
+    return SizedBox(
+      width: size, 
+      height: size * 1.1,
+      child: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          // Чёрный квадратный постамент-основание по фотографии
+          Positioned(
+            bottom: 0, 
             child: Container(
-              width: 8, 
-              height: 8,
-              decoration: const BoxDecoration(
-                color: Color(0xFFD32F2F), 
-                shape: BoxShape.circle,
+              width: size * 0.75, 
+              height: size * 0.16, 
+              decoration: BoxDecoration(
+                color: const Color(0xFF111116), 
+                borderRadius: BorderRadius.circular(2), 
+                border: Border.all(color: Colors.black, width: 1.5),
               ),
+            ),
+          ),
+          // Стройная золотая ножка статуи
+          Positioned(
+            bottom: size * 0.14, 
+            child: Container(
+              width: size * 0.14, 
+              height: size * 0.32, 
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFFE5A632), Color(0xFFFFD54F), Color(0xFFB57C1E)],
+                ),
+              ),
+            ),
+          ),
+          // Величественные раскинутые золотые крылья орла
+          Positioned(
+            bottom: size * 0.38, 
+            child: CustomPaint(
+              size: Size(size * 1.05, size * 0.65), 
+              painter: _GoldWingsPainter(),
             ),
           ),
         ],
       ),
     );
   }
+
+  Widget _buildCharacterBase(String assetPath, double size, bool isPig) {
+    return Container(
+      width: size, 
+      height: size, 
+      decoration: BoxDecoration(
+        color: const Color(0xFFE53935), 
+        shape: BoxShape.circle, 
+        border: Border.all(color: Colors.black, width: 2.0),
+      ), 
+      child: ClipOval(
+        child: Image.asset(assetPath, fit: BoxFit.cover),
+      ),
+    );
+  }
+}
+
+// =========================================================================
+// ВЕКТОРНЫЙ ХУДОЖНИК ЩУПАЛЬЦА С КРУГЛЫМИ ПРИСОСКАМИ ИЗНУТРИ
+// =========================================================================
+class _MolluskTentacleWithSuctionsPainter extends CustomPainter {
+  final bool isLeft;
+  _MolluskTentacleWithSuctionsPainter({required this.isLeft});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final tentaclePaint = Paint()..color = const Color(0xFF0288D1)..style = PaintingStyle.fill;
+    final strokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.5;
+    final suctionPaint = Paint()..color = Colors.white70..style = PaintingStyle.fill;
+
+    final path = Path();
+    path.moveTo(size.width * 0.5, size.height);
+    path.cubicTo(isLeft ? 0.0 : size.width, size.height * 0.6, isLeft ? size.width * 0.1 : size.width * 0.9, size.height * 0.2, size.width * 0.5, 0);
+    path.lineTo(size.width * 0.8, 0);
+    path.cubicTo(isLeft ? size.width * 0.4 : size.width * 0.6, size.height * 0.2, isLeft ? size.width * 0.3 : size.width * 0.7, size.height * 0.6, size.width * 0.8, size.height);
+    path.close();
+
+    canvas.drawPath(path, tentaclePaint);
+    canvas.drawPath(path, strokePaint);
+
+    // Расставляем четкие круглые присоски по ходу изгиба щупальца
+    for (int i = 1; i < 5; i++) {
+      double hFactor = i * 0.22;
+      double sx = isLeft ? size.width * 0.25 : size.width * 0.75;
+      canvas.drawCircle(Offset(sx, size.height * hFactor), 3.0, suctionPaint);
+      canvas.drawCircle(Offset(sx, size.height * hFactor), 3.0, strokePaint..strokeWidth = 0.5);
+    }
+  }
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// =========================================================================
+// КЛАССЫ РЕЛЬЕФНЫХ ХУДОЖНИКОВ ДЛЯ 3D ОКРУЖЕНИЯ ТРОННОГО ЗАЛА
+// =========================================================================
+
+class _GoldWingsPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final goldPaint = Paint()
+      ..gradient = const LinearGradient(colors: [Color(0xFFFFD54F), Color(0xFFE5A632), Color(0xFFFFEE58), Color(0xFFB57C1E)])
+      ..style = PaintingStyle.fill;
+    final strokePaint = Paint()..color = const Color(0xFF5D4037)..style = PaintingStyle.stroke..strokeWidth = 1.0;
+
+    final path = Path();
+    path.moveTo(size.width * 0.5, size.height);
+    path.cubicTo(size.width * 0.35, size.height * 0.6, size.width * 0.15, size.height * 0.3, 0, 0); 
+    path.cubicTo(size.width * 0.18, size.height * 0.4, size.width * 0.38, size.height * 0.65, size.width * 0.5, size.height * 0.45);
+    path.cubicTo(size.width * 0.62, size.height * 0.65, size.width * 0.82, size.height * 0.4, size.width * 1.0, 0); 
+    path.cubicTo(size.width * 0.85, size.height * 0.3, size.width * 0.65, size.height * 0.6, size.width * 0.5, size.height);
+    path.close();
+
+    canvas.drawPath(path, goldPaint);
+    canvas.drawPath(path, strokePaint);
+
+    for (int i = 1; i < 6; i++) {
+      double f = i * 0.08;
+      canvas.drawLine(Offset(size.width * (0.5 - f), size.height * (0.5 + f)), Offset(size.width * (0.1 + f), size.height * (0.15 + f)), strokePaint);
+      canvas.drawLine(Offset(size.width * (0.5 + f), size.height * (0.5 + f)), Offset(size.width * (0.9 - f), size.height * (0.15 + f)), strokePaint);
+    }
+  }
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _CastleFloorTilesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final tilePaint = Paint()..color = const Color(0xFF212126)..style = PaintingStyle.fill;
+    final linePaint = Paint()..color = const Color(0xFF141418)..style = PaintingStyle.stroke..strokeWidth = 1.5;
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), tilePaint);
+
+    canvas.drawLine(Offset(0, size.height * 0.4), Offset(size.width, size.height * 0.4), linePaint);
+    int linesCount = 8;
+    for (int i = 0; i <= linesCount; i++) {
+      double topX = size.width * (0.15 + (i * 0.7 / linesCount));
+      double bottomX = size.width * (i / linesCount);
+      canvas.drawLine(Offset(topX, 0), Offset(bottomX, size.height), linePaint);
+    }
+  }
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _CastleCeiling3DPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final ceilPaint = Paint()..color = const Color(0xFF171722)..style = PaintingStyle.fill;
+    final beamPaint = Paint()..color = const Color(0xFF0F0F16)..style = PaintingStyle.stroke..strokeWidth = 2.0;
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), ceilPaint);
+
+    for (int i = 0; i <= 6; i++) {
+      double startX = size.width * (i / 6);
+      canvas.drawLine(Offset(startX, 0), Offset(size.width * 0.5, size.height), beamPaint);
+    }
+    canvas.drawLine(Offset(0, size.height), Offset(size.width, size.height), beamPaint);
+  }
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
