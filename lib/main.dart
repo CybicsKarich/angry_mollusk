@@ -3677,8 +3677,28 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
       child: Stack(
         children: [
           Positioned(bottom: 4, left: 4, right: 4, child: Container(height: 54, decoration: BoxDecoration(color: const Color(0xFF3E2723), borderRadius: const BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)), border: Border.all(color: const Color(0xFF1A0C00), width: 1.8)))),
-          Positioned(bottom: 4, left: 0, child: Container(width: 5, height: 26, color: const Color(0xFF4E342E), decoration: BoxDecoration(border: Border.all(color: Colors.black, width: 0.8)))),
-          Positioned(bottom: 4, right: 0, child: Container(width: 5, height: 26, color: const Color(0xFF4E342E), decoration: BoxDecoration(border: Border.all(color: Colors.black, width: 0.8)))),
+                    // Левый подлокотник (ИСПРАВЛЕHО: цвет перенесён внутрь decoration)
+          Positioned(
+            bottom: 4, left: 0, 
+            child: Container(
+              width: 5, height: 26, 
+              decoration: BoxDecoration(
+                color: const Color(0xFF4E342E),
+                border: Border.all(color: Colors.black, width: 0.8),
+              ),
+            ),
+          ),
+          // Правый подлокотник (ИСПРАВЛЕHО: цвет перенесён внутрь decoration)
+          Positioned(
+            bottom: 4, right: 0, 
+            child: Container(
+              width: 5, height: 26, 
+              decoration: BoxDecoration(
+                color: const Color(0xFF4E342E),
+                border: Border.all(color: Colors.black, width: 0.8),
+              ),
+            ),
+          ),
           Positioned(bottom: 6, left: 3, right: 3, child: Container(height: 14, color: const Color(0xFF4E342E))),
           
           // 🔴 МЯГКАЯ КРАСHАЯ ПОДУШКА-ПОДЛОЖКА НА СИДЕНЬЕ
