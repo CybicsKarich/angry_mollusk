@@ -433,7 +433,7 @@ SizedBox(
       prefs.getInt('level_2_stars') ?? 0,
       prefs.getInt('level_3_stars') ?? 0,
       prefs.getInt('level_4_stars') ?? 0,
-      prefs.getInt('level_5_stars') ?? 0
+      prefs.getInt('level_5_stars') ?? 0, 
     ]),
     builder: (context, snapshot) {
       final stars = snapshot.data ?? [];
@@ -443,6 +443,7 @@ SizedBox(
       final bool isLvl3Open = stars[1] >= 2;
       final bool isLvl4Open = stars[2] >= 2;
       final bool isLvl5Open = stars[3] >= 2;
+      final bool isLvl6Open = stars[4] >= 2;
 
       return PageView(
         controller: _pageController,
@@ -471,8 +472,8 @@ SizedBox(
               _buildLevelCard('5', isLvl5Open),
               const SizedBox(width: 20),
               
-              // ИКОНКА УРОВНЯ 6: Теперь замыкает ряд справа и остаётся заблокированной (false)
-              _buildLevelCard('6', false), 
+              // ИКОНКА УРОВНЯ 6: Теперь замыкает ряд справа 
+              _buildLevelCard('6', isLvl6Open), 
             ],
           ),
         ],
@@ -3326,6 +3327,486 @@ class _WindowTentacleShadowPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
+// =========================================================================
+// ИНТЕРАКТИВНЫЙ КОМИКС УРОВНЯ 6: ПЕРВАЯ СТРАНИЦА И ВЫБОР СУДЬБЫ ВАНЯ
+// =========================================================================
+class Level6ComicScreen extends StatefulWidget {
+  const Level6ComicScreen({super.key});
 
+  @override
+  State<Level6ComicScreen> createState() => _Level6ComicScreenState();
+}
 
+class _Level6ComicScreenState extends State<Level6ComicScreen> {
+  int _currentFrame = 1; // Текущий кадр (1, 2 или 3)
+  int _selectedChoice = 0; // 0 - выбор не сделан, 1 - жёсткий, 2 - мягкий
+
+  @override
+  void initState() {
+    super.initState();
+    // Включаем мрачную музыку капель для атмосферы тронного зала
+    // AudioManager.startCastleDrops(); // Включим, как только обновим AudioManager
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF07070A), // Атмосферный кромешный мрак замка
+      body: SafeArea(
+        child: Column(
+          children: [
+            const SizedBox(height: 14),
+            const Text(
+              "ГЛАВА VI: ЛОГОВО ДОНА МОЛЛЮСКА",
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF37474F), // Суровый каменный оттенок
+                letterSpacing: 2.0,
+                shadows: [Shadow(color: Colors.black, blurRadius: 4, offset: Offset(2, 2))],
+              ),
+            ),
+            const SizedBox(height: 14),
+
+            // ГЛАВНЫЙ ЭКРАН КОМИКСА (Три кадра в ряд)
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    // КАДР 1: Ваня входит, видит тотем у трона, в темноте улыбка
+                    if (_currentFrame >= 1) _buildFrame1(),
+                    if (_currentFrame >= 2) const SizedBox(width: 12),
+                    
+                    // КАДР 2: Дон Моллюск выходит из темноты и заслоняет тотем
+                    if (_currentFrame >= 2) _buildFrame2(),
+                    if (_currentFrame >= 3) const SizedBox(width: 12),
+                    
+                    // КАДР 3: Интерактивный диалог с выбором фраз в черных рамочках
+                    if (_currentFrame >= 3) _buildFrame3(),
+                  ],
+                ),
+              ),
+            ),
+
+            // НИЖНЯЯ ПАНЕЛЬ НАВИГАЦИИ С УМНОЙ КНОПКОЙ
+            Padding(
+              padding: const EdgeInsets.all(14.0),
+              child: _buildNavigationButton(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // =========================================================================
+  // РЕНДЕР КАДРА 1: ВХОД В ЗАМОК И СКРЫТАЯ УЛЫБКА
+  // =========================================================================
+  Widget _buildFrame1() {
+    return Expanded(
+      child: _buildBaseFrame(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // В темноте на заднем фоне проступает блёклая зловещая улыбка Дона Моллюска
+            Positioned(
+              bottom: 12, right: 35,
+              child: CustomPaint(
+                size: const Size(55, 30),
+                painter: _SecretMouthShadowPainter(), // Твоя готовая пиксельная улыбка из main.dart
+              ),
+            ),
+            // Деревянный трон Босса в глубине зала
+            Positioned(bottom: 10, right: 15, child: _buildCastleToner()),
+            // Рядом с троном лежит Древний Тотем Гнева птиц
+            Positioned(bottom: 10, right: 55, child: _buildTotemGneva()),
+            // Ваня Баннихоп входит слева (без шляпы и сумки)
+            Positioned(bottom: 10, left: 16, child: _buildCharacterBase('assets/images/bunnyhop.png', 58, false)),
+
+            // Текстовое облачко Вани
+            Positioned(
+              top: 25, left: 6, right: 6,
+              child: CustomPaint(
+                painter: ComicBubblePainter(tailX: 0.25),
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    "Дон Молюск! Все твои свиньи убиты! Где же ты спрятался, выйди ко мне.",
+                    style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // =========================================================================
+  // РЕНДЕР КАДРА 2: ЭПИЧНЫЙ ВЫХОД БОССА С ЗАСЛОHЕНИЕМ
+  // =========================================================================
+  Widget _buildFrame2() {
+    return Expanded(
+      child: _buildBaseFrame(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // Трон и тотем теперь перекрыты огромной фигурой босса
+            Positioned(bottom: 10, right: 15, opacity: 0.3, child: _buildCastleToner()),
+            Positioned(bottom: 10, right: 55, opacity: 0.3, child: _buildTotemGneva()),
+            
+            Positioned(bottom: 10, left: 12, child: _buildCharacterBase('assets/images/bunnyhop.png', 50, false)),
+            
+            // ВЫХОДИТ ДОН МОЛЛЮСК (Прорисован у троих блоков, заслоняя награду)
+            Positioned(bottom: 4, right: 10, child: _buildDonMolluskBoss(70)),
+
+            // Полное молчание, эпичный кадр без речевых облачков
+            Positioned(
+              top: 15, left: 20, right: 20,
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                color: Colors.black87,
+                child: const Text("ШАГИ ИЗ ТЕМНОТЫ...", style: TextStyle(color: Colors.white70, fontSize: 8, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // =========================================================================
+  // РЕНДЕР КАДРА 3: ИHТЕРАКТИВНЫЙ ДИБАТ С ВЫБОРОМ РЕПЛИК
+  // =========================================================================
+  Widget _buildFrame3() {
+    return Expanded(
+      child: _buildBaseFrame(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned(bottom: 10, left: 12, child: _buildCharacterBase('assets/images/bunnyhop.png', 50, false)),
+            Positioned(bottom: 4, right: 10, child: _buildDonMolluskBoss(65)),
+
+            // А) ЕСЛИ ВЫБОР ЕЩЕ НЕ СДЕЛАН: Показываем две черные небольшие рамочки фраз
+            if (_selectedChoice == 0)
+              Positioned(
+                top: 15, left: 4, right: 4,
+                child: Column(
+                  children: [
+                    _buildChoiceBox("Вот ты где! Сдавайся чудовище! Твоё время пришло!", 1),
+                    const SizedBox(height: 6),
+                    _buildChoiceBox("Давай по-хорошему. отдай Древний Тотем Гнева, оставь склады с таблетками в покое и уйди слуга птиц навсегда.", 2),
+                  ],
+                ),
+              ),
+
+            // Б) ЕСЛИ ИГРОК НАЖАЛ НА ФРАЗУ: Рамочки пропадают, и Моллюск сразу же отвечает в этом кадре!
+            if (_selectedChoice == 1)
+              Positioned(
+                top: 25, left: 6, right: 6,
+                child: CustomPaint(
+                  painter: ComicBubblePainter(tailX: 0.8), // Хвостик указывает на Босса справа
+                  child: const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(
+                      "Хрю-ха-ха! Сдаться тебе? Жалкая птица! Не на того напал!",
+                      style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ),
+
+            if (_selectedChoice == 2)
+              Positioned(
+                top: 15, left: 4, right: 4,
+                child: CustomPaint(
+                  painter: ComicBubblePainter(tailX: 0.8),
+                  child: const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(
+                      "По-хорошему? Ты слишком вежлив для птицы, потерявшей способность летать. Этим предметом мы лишили ваш род неба! И ты думаешь, я отдам его просто так?",
+                      style: TextStyle(fontSize: 8.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Конструктор черных рамочек для интерактивного выбора фраз Вани
+  Widget _buildChoiceBox(String text, int choiceId) {
+    return GestureDetector(
+      onTap: () => setState(() => _selectedChoice = choiceId), // Меняем фразу Дона Моллюска на лету!
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 8),
+        decoration: BoxDecoration(
+          color: const Color(0xFF111116), // Небольшая черная рамочка
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: Colors.grey.shade800, width: 1.2),
+        ),
+        child: Text(
+          text,
+          style: const TextStyle(color: Colors.white, fontSize: 7.2, fontWeight: FontWeight.w600, height: 1.1),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+
+    // =========================================================================
+  // УМНАЯ УПРАВЛЯЮЩАЯ КНОПКА СНИЗУ КОМИКСА (ИНТЕРАКТИВНАЯ НАВИГАЦИЯ)
+  // =========================================================================
+  Widget _buildNavigationButton() {
+    // Если мы дошли до 3 кадра, но игрок ещё не сделал судьбоносный выбор — кнопка исчезает!
+    if (_currentFrame == 3 && _selectedChoice == 0) {
+      return const SizedBox(
+        height: 48, 
+        child: Center(
+          child: Text(
+            "ВЫБЕРИТЕ ОТВЕТ ВАНЯ ДЛЯ ПРОДОЛЖЕНИЯ СЮЖЕТА", 
+            style: TextStyle(color: Colors.redAccent, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.1),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      width: double.infinity,
+      constraints: const BoxConstraints(maxWidth: 240),
+      height: 46,
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            spreadRadius: 1, blurRadius: 4, offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF37474F), // Суровый каменный цвет
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          elevation: 0,
+        ),
+        onPressed: () {
+          if (_currentFrame < 3) {
+            setState(() => _currentFrame++); // Листаем кадры 1 -> 2 -> 3
+          } else {
+            // Клик по кнопке «Дальше» после сделанного выбора переносит на нужную ветку Экрана 2!
+            if (_selectedChoice == 1) {
+              // Переход на страницу плохой концовки (её код напишем в следующем шаге)
+              // Navigator.push(context, MaterialPageRoute(builder: (context) => const Level6BadEndingScreen()));
+            } else if (_selectedChoice == 2) {
+              // Переход на хорошую ветку с обвалом перед Ваней и выходом на битву
+              // Navigator.push(context, MaterialPageRoute(builder: (context) => const Level6GoodRouteScreen()));
+            }
+          }
+        },
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("ДАЛЬШЕ", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2)),
+            SizedBox(width: 8),
+            Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.white),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Обёртка мультяшного кадра с мрачным фоном тронного зала
+  Widget _buildBaseFrame({required Widget child, double opacity = 1.0}) {
+    return Expanded(
+      child: Opacity(
+        opacity: opacity,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0xFF161622), Color(0xFF09090F)],
+            ),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.black, width: 3.5),
+            boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 6, offset: Offset(0, 4))],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(11),
+            child: Stack(
+              children: [
+                // Пол зала
+                Positioned(bottom: 0, left: 0, right: 0, child: Container(height: 24, color: const Color(0xFF1E1E24))),
+                child,
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Вспомогательные сборщики графических лорных объектов тронного зала
+  Widget _buildCastleToner() => Container(width: 35, height: 50, decoration: const BoxDecoration(color: Color(0xFF25252D), borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)), boxShadow: [BoxShadow(color: Colors.black45, blurRadius: 2)]));
+  
+  Widget _buildTotemGneva() {
+    return Container(
+      width: 14, height: 28, 
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFB300), // Золотой Древний Тотем
+        borderRadius: BorderRadius.circular(3), 
+        border: Border.all(color: Colors.black, width: 1.2),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Container(width: 8, height: 3, color: const Color(0xFFB71C1C)), // Узоры гнева
+          Container(width: 6, height: 3, color: const Color(0xFF1B5E20)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCharacterBase(String assetPath, double size, bool isPig) {
+    return Container(
+      width: size, height: size,
+      decoration: BoxDecoration(
+        color: isPig ? const Color(0xFF7CB342) : const Color(0xFFE53935), 
+        shape: BoxShape.circle, 
+        border: Border.all(color: Colors.black, width: 2.0),
+        boxShadow: const [BoxShadow(color: Colors.black38, blurRadius: 3, offset: Offset(0, 2))],
+      ),
+      child: ClipOval(child: Image.asset(assetPath, fit: BoxFit.cover)),
+    );
+  }
+  
+  // =========================================================================
+  // ВЫСОКОДЕТАЛИЗИРОВАННАЯ КИНЕМАТОГРАФИЧHАЯ ОТРИСОВКА ДОНА МОЛЛЮСКА
+  // =========================================================================
+  Widget _buildDonMolluskBoss(double size) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        alignment: Alignment.center,
+        clipBehavior: Clip.none,
+        children: [
+          // 🐙 1. ЧЕТЫРЕ СИHИХ ИЗВИВАЮЩИХСЯ ЩУПАЛЬЦА ОЛЬМИНОГА НА ЗАДНЕМ ПЛАНЕ
+          Positioned(bottom: 6, left: -6, child: Transform.rotate(angle: -0.4, child: Container(width: size * 0.22, height: size * 0.65, decoration: BoxDecoration(color: const Color(0xFF0288D1), borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.black, width: 1.5))))),
+          Positioned(bottom: 2, left: size * 0.15, child: Transform.rotate(angle: -0.1, child: Container(width: size * 0.20, height: size * 0.60, decoration: BoxDecoration(color: const Color(0xFF039BE5), borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.black, width: 1.5))))),
+          Positioned(bottom: 2, right: size * 0.15, child: Transform.rotate(angle: 0.1, child: Container(width: size * 0.20, height: size * 0.60, decoration: BoxDecoration(color: const Color(0xFF039BE5), borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.black, width: 1.5))))),
+          Positioned(bottom: 6, right: -6, child: Transform.rotate(angle: 0.4, child: Container(width: size * 0.22, height: size * 0.65, decoration: BoxDecoration(color: const Color(0xFF0288D1), borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.black, width: 1.5))))),
+
+          // 🐷 2. СВИHЫЕ ЗЕЛЕНОВАТЫЕ УШКИ БОССА (ТОРЧАТ ПО БОКАМ ИЗ-ЗА ГОЛОВЫ)
+          Positioned(top: size * 0.12, left: -2, child: Transform.rotate(angle: -0.3, child: Container(width: size * 0.18, height: size * 0.26, decoration: BoxDecoration(color: const Color(0xFF689F38), borderRadius: BorderRadius.circular(6), border: Border.all(color: Colors.black, width: 1.5))))),
+          Positioned(top: size * 0.12, right: -2, child: Transform.rotate(angle: 0.3, child: Container(width: size * 0.18, height: size * 0.26, decoration: BoxDecoration(color: const Color(0xFF689F38), borderRadius: BorderRadius.circular(6), border: Border.all(color: Colors.black, width: 1.5))))),
+
+          // 🔵 3. ГЛАВНОЕ МОНОЛИТHОЕ СИНЕЕ ТЕЛО ОСЬМИНОГА (ГОЛОВА-КОКОН)
+          Container(
+            width: size * 0.72,
+            height: size * 0.72,
+            decoration: BoxDecoration(
+              color: const Color(0xFF0288D1),
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFF0B1B24), width: 2.2),
+              boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 4, offset: Offset(0, 3))],
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Злые, прищуренные свиные глаза Дона Моллюска по референсу
+                Positioned(
+                  top: size * 0.22, left: size * 0.14,
+                  child: Transform.rotate(angle: 0.2, child: Container(width: size * 0.14, height: size * 0.07, color: Colors.white, child: Center(child: Container(width: 4, height: 4, color: Colors.black)))),
+                ),
+                Positioned(
+                  top: size * 0.22, right: size * 0.14,
+                  child: Transform.rotate(angle: -0.2, child: Container(width: size * 0.14, height: size * 0.07, color: Colors.white, child: Center(child: Container(width: 4, height: 4, color: Colors.black)))),
+                ),
+                // Пятачок осьминога-свиньи
+                Positioned(
+                  top: size * 0.32,
+                  child: Container(
+                    width: size * 0.18, height: size * 0.13,
+                    decoration: BoxDecoration(color: const Color(0xFF039BE5), borderRadius: BorderRadius.circular(6), border: Border.all(color: Colors.black, width: 1.2)),
+                    child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [Container(width: 3, height: 5, color: Colors.black), Container(width: 3, height: 5, color: Colors.black)]),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+                    // Левая нижняя клешня
+          Positioned(
+            bottom: size * 0.05, 
+            left: -size * 0.15,
+            child: Container(
+              width: size * 0.28, 
+              height: size * 0.28, 
+              decoration: const BoxDecoration(
+                color: Color(0xFF2E6F22), 
+                shape: BoxShape.circle, 
+                boxShadow: [BoxShadow(color: Colors.black38, blurRadius: 2)],
+              ),
+            ),
+          ),
+          
+          // Правая нижняя клешня
+          Positioned(
+            bottom: size * 0.05, 
+            right: -size * 0.15,
+            child: Container(
+              width: size * 0.28, 
+              height: size * 0.28, 
+              decoration: const BoxDecoration(
+                color: Color(0xFF2E6F22), 
+                shape: BoxShape.circle, 
+                boxShadow: [BoxShadow(color: Colors.black38, blurRadius: 2)],
+              ),
+            ),
+          ),
+          
+          // Верхняя зажимающая клешня на макушке головы
+          Positioned(
+            top: -size * 0.08, 
+            left: size * 0.24,
+            child: Transform.rotate(
+              angle: 0.3, 
+              child: Container(
+                width: size * 0.24, 
+                height: size * 0.24, 
+                decoration: const BoxDecoration(
+                  color: Color(0xFF215217), 
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+          ),
+
+          // СЛЕД КРОВИ ОТ ОТОРВАНHОЙ ЧЕТВЁРТОЙ КЛЕШНИ (Пасхалка плаката WANTED!)
+          Positioned(
+            top: -size * 0.04, 
+            left: size * 0.04,
+            child: Container(
+              width: 8, 
+              height: 8,
+              decoration: const BoxDecoration(
+                color: Color(0xFFD32F2F), 
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
