@@ -3414,7 +3414,7 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
             ),
             Positioned(bottom: 22, right: 15, child: _buildAdvanced3DThrone()),
             Positioned(bottom: 22, right: 70, child: _buildGoldTotemFromPhoto(38)),
-            Positioned(bottom: 22, left: 16, child: _buildCharacterBase('assets/images/bunnyhop.png', 56)),
+            Positioned(bottom: 22, left: 16, child: _buildCharacterBase('assets/images/bunnyhop.png', 56, false)),
 
             Positioned(
               top: 25, left: 6, right: 6,
@@ -3449,7 +3449,7 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
             Positioned(bottom: 22, right: 15, child: Opacity(opacity: 0.25, child: _buildAdvanced3DThrone())),
             Positioned(bottom: 22, right: 70, child: Opacity(opacity: 0.20, child: _buildGoldTotemFromPhoto(38))),
             
-            Positioned(bottom: 22, left: 12, child: _buildCharacterBase('assets/images/bunnyhop.png', 48)),
+            Positioned(bottom: 22, left: 12, child: _buildCharacterBase('assets/images/bunnyhop.png', 48, false)),
             
             // ВЫХОДИТ УЛЬТРА-ПРОРАБОТАННЫЙ ЗЕЛЁНЫЙ БОСС ДОН МОЛЛЮСК
             Positioned(bottom: 12, right: 8, child: _buildUltraDetailedDonMollusk(72)),
@@ -3477,7 +3477,7 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            Positioned(bottom: 22, left: 12, child: _buildCharacterBase('assets/images/bunnyhop.png', 48)),
+            Positioned(bottom: 22, left: 12, child: _buildCharacterBase('assets/images/bunnyhop.png', 48, false)),
             Positioned(bottom: 12, right: 8, child: _buildUltraDetailedDonMollusk(68)),
 
             // Черные рамочки выбора Вани
@@ -3792,8 +3792,11 @@ class _MolluskTentacleWithSuctionsPainter extends CustomPainter {
 class _GoldWingsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
+        // ИСПРАВЛЕНО: Назначаем градиент крыльев Тотема через шейдер .shader по правилам Flutter
     final goldPaint = Paint()
-      ..gradient = const LinearGradient(colors: [Color(0xFFFFD54F), Color(0xFFE5A632), Color(0xFFFFEE58), Color(0xFFB57C1E)])
+      ..shader = const LinearGradient(
+        colors: [Color(0xFFFFD54F), Color(0xFFE5A632), Color(0xFFFFEE58), Color(0xFFB57C1E)],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
       ..style = PaintingStyle.fill;
     final strokePaint = Paint()..color = const Color(0xFF5D4037)..style = PaintingStyle.stroke..strokeWidth = 1.0;
 
