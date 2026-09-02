@@ -468,6 +468,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
     await images.load('bunnyhop_lose.png');
     await images.load('beard.png');
     await images.load('castle_monolith.png');
+    await images.load('maksim_boss.png');
       
     
     add(BackgroundDecoration());
