@@ -3454,9 +3454,18 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Трон и тотем теперь перекрыты огромной фигурой босса
-            Positioned(bottom: 10, right: 15, opacity: 0.3, child: _buildCastleToner()),
-            Positioned(bottom: 10, right: 55, opacity: 0.3, child: _buildTotemGneva()),
+             // ИСПРАВЛЕНО: Трон и тотем теперь перекрыты фигурой босса и убраны в прозрачность по канонам Flutter!
+            Positioned(
+              bottom: 10, 
+              right: 15, 
+              child: Opacity(opacity: 0.3, child: _buildCastleToner()),
+            ),
+            Positioned(
+              bottom: 10, 
+              right: 55, 
+              child: Opacity(opacity: 0.3, child: _buildTotemGneva()),
+            ),
+
             
             Positioned(bottom: 10, left: 12, child: _buildCharacterBase('assets/images/bunnyhop.png', 50, false)),
             
