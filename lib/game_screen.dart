@@ -175,7 +175,15 @@ if (game.currentLevel == 3) {
     context,
     MaterialPageRoute(builder: (context) => const SvinomatkinComicScreen()),
   );
-} else if (game.currentLevel < 4) {
+} 
+else if (game.currentLevel == 5) {
+  Navigator.pop(context); // Выходим из игрового экрана
+  Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => const Level6ComicScreen()), // В логово Дона Моллюска!
+  );
+}                             
+else if (game.currentLevel < 4) {
   // Теперь обычное прибавление уровня работает для 1 и 2 уровней
   game.currentLevel = game.currentLevel + 1;
 }
