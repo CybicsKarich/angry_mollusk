@@ -3628,55 +3628,7 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
       ),
     );
   }
-}
 
-// =========================================================================
-// КЛАСС 1: ВЫСОКОДЕТАЛИЗИРОВАННЫЙ РИСОВАЛЬЩИК ЩУПАЛЬЦА ОСЬМИНОГА С ПРИСОСКАМИ
-// =========================================================================
-class _DetailedTentaclePainter extends CustomPainter {
-  final bool isLeft;
-  _DetailedTentaclePainter({required this.isLeft});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final tentaclePaint = Paint()..color = const Color(0xFF0288D1)..style = PaintingStyle.fill;
-    final strokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.6;
-    final suctionPaint = Paint()..color = Colors.white..style = PaintingStyle.fill;
-    final suctionHolePaint = Paint()..color = const Color(0xFF01579B)..style = PaintingStyle.fill;
-
-    final w = size.width;
-    final h = size.height;
-
-    // Плавный S-образный анатомический изгиб щупальца осьминога
-    final path = Path();
-    path.moveTo(w * 0.5, h);
-    path.cubicTo(isLeft ? -w * 0.2 : w * 1.2, h * 0.65, isLeft ? w * 0.2 : w * 0.8, h * 0.25, w * 0.5, 0);
-    path.lineTo(w * 0.8, 0);
-    path.cubicTo(isLeft ? w * 0.5 : w * 0.5, h * 0.25, isLeft ? w * 0.2 : w * 0.8, h * 0.65, w * 0.8, h);
-    path.close();
-
-    canvas.drawPath(path, tentaclePaint);
-    canvas.drawPath(path, strokePaint);
-
-    // ПРОРАБОТКА: Расставляем 6 круглых присосок с отверстиями по внешнему контуру лапы
-    for (int i = 1; i <= 6; i++) {
-      double factor = i * 0.15;
-      double cx = isLeft ? w * (0.28 - factor * 0.1) : w * (0.72 + factor * 0.1);
-      double cy = h * factor;
-      double radius = 3.2 - (i * 0.2); // Сужаются к кончику лапы
-      
-      if (radius > 1.0) {
-        canvas.drawCircle(Offset(cx, cy), radius, suctionPaint);
-        canvas.drawCircle(Offset(cx, cy), radius, strokePaint..strokeWidth = 0.5);
-        // Внутреннее отверстие присоски для узнаваемости текстуры осьминога
-        canvas.drawCircle(Offset(cx, cy), radius * 0.4, suctionHolePaint);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
 
 
 
@@ -3853,6 +3805,54 @@ class _DetailedTentaclePainter extends CustomPainter {
       ),
     );
   }
+}
+
+// =========================================================================
+// КЛАСС 1: ВЫСОКОДЕТАЛИЗИРОВАННЫЙ РИСОВАЛЬЩИК ЩУПАЛЬЦА ОСЬМИНОГА С ПРИСОСКАМИ
+// =========================================================================
+class _DetailedTentaclePainter extends CustomPainter {
+  final bool isLeft;
+  _DetailedTentaclePainter({required this.isLeft});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final tentaclePaint = Paint()..color = const Color(0xFF0288D1)..style = PaintingStyle.fill;
+    final strokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.6;
+    final suctionPaint = Paint()..color = Colors.white..style = PaintingStyle.fill;
+    final suctionHolePaint = Paint()..color = const Color(0xFF01579B)..style = PaintingStyle.fill;
+
+    final w = size.width;
+    final h = size.height;
+
+    // Плавный S-образный анатомический изгиб щупальца осьминога
+    final path = Path();
+    path.moveTo(w * 0.5, h);
+    path.cubicTo(isLeft ? -w * 0.2 : w * 1.2, h * 0.65, isLeft ? w * 0.2 : w * 0.8, h * 0.25, w * 0.5, 0);
+    path.lineTo(w * 0.8, 0);
+    path.cubicTo(isLeft ? w * 0.5 : w * 0.5, h * 0.25, isLeft ? w * 0.2 : w * 0.8, h * 0.65, w * 0.8, h);
+    path.close();
+
+    canvas.drawPath(path, tentaclePaint);
+    canvas.drawPath(path, strokePaint);
+
+    // ПРОРАБОТКА: Расставляем 6 круглых присосок с отверстиями по внешнему контуру лапы
+    for (int i = 1; i <= 6; i++) {
+      double factor = i * 0.15;
+      double cx = isLeft ? w * (0.28 - factor * 0.1) : w * (0.72 + factor * 0.1);
+      double cy = h * factor;
+      double radius = 3.2 - (i * 0.2); // Сужаются к кончику лапы
+      
+      if (radius > 1.0) {
+        canvas.drawCircle(Offset(cx, cy), radius, suctionPaint);
+        canvas.drawCircle(Offset(cx, cy), radius, strokePaint..strokeWidth = 0.5);
+        // Внутреннее отверстие присоски для узнаваемости текстуры осьминога
+        canvas.drawCircle(Offset(cx, cy), radius * 0.4, suctionHolePaint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 // =========================================================================
 // КЛАСС 2: УЛЬТРА-ПРОРАБОТАНHЫЕ КРАБОВЫЕ КЛЕШHИ (СУСТАВЫ, ЗАЖИМЫ И ЗУБЦЫ)
