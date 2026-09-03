@@ -3927,6 +3927,7 @@ class _MolluskTentacleWithSuctionsPainter extends CustomPainter {
     final tentaclePaint = Paint()..color = const Color(0xFF0288D1)..style = PaintingStyle.fill;
     final strokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.5;
     final suctionPaint = Paint()..color = Colors.white70..style = PaintingStyle.fill;
+    final suctionHolePaint = Paint()..color = const Color(0xFF01579B)..style = PaintingStyle.fill;
 
     final path = Path();
     path.moveTo(size.width * 0.5, size.height);
@@ -3944,10 +3945,24 @@ class _MolluskTentacleWithSuctionsPainter extends CustomPainter {
       double sx = isLeft ? size.width * 0.25 : size.width * 0.75;
       canvas.drawCircle(Offset(sx, size.height * hFactor), 3.0, suctionPaint);
       canvas.drawCircle(Offset(sx, size.height * hFactor), 3.0, strokePaint..strokeWidth = 0.5);
+      canvas.drawCircle(Offset(sx, size.height * hFactor), 1.2, suctionHolePaint);
     }
   }
+
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// =========================================================================
+// ХЕЛПЕР-РАСШИРЕНИЕ ДЛЯ УДОБНОЙ ОТРИСОВКИ ТРЕУГОЛЬНЫХ ЗУБЬЕВ КЛЕШНИ
+// =========================================================================
+extension _CanvasTriangleExt on Canvas {
+  void drawTriangle(Offset p1, Offset p2, Offset p3, Paint paint) {
+    final path = Path()..moveTo(p1.dx, p1.dy)..lineTo(p2.dx, p2.dy)..lineTo(p3.dx, p3.dy)..close();
+    drawPath(path, paint);
+    // Накладываем тонкий контрастный чёрный контур на каждый зубчик
+    drawPath(path, Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 0.5);
+  }
 }
 
 // =========================================================================
