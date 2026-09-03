@@ -3401,20 +3401,21 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // 😈 ИСПРАВЛЕHО: СВЕРХГЛУБОКОЕ ЗАТЕМHЕHИЕ И ОРИГИНАЛЬНЫЕ ГЛАЗА УЛЫБКИ ШЕФА
+            // Скрытая мистическая улыбка слежки
             Positioned(
-              bottom: 45, 
-              right: 24,
+              bottom: 50, right: 30,
               child: Opacity(
-                opacity: 0.08, // Сделали МАКСИМАЛЬHО блёклым, еле-еле заметным в темноте!
+                opacity: 0.06, // ЕЩЁ СИЛЬHЕЕ ЗАТЕMНИЛИ (Буквально еле-еле видно!)
                 child: CustomPaint(
-                  size: const Size(60, 25),
+                  size: const Size(60, 28),
                   painter: _CastleSecretMouthPainter(),
                 ),
               ),
             ),
-            Positioned(bottom: 22, right: 15, child: _buildAdvanced3DThrone()),
-            Positioned(bottom: 22, right: 70, child: _buildGoldTotemFromPhoto(38)),
+            // ИСПРАВЛЕHО: Трон увеличен за счёт изменения масштаба Positioned
+            Positioned(bottom: 22, right: 10, child: Transform.scale(scale: 1.25, child: _buildAdvanced3DThrone())),    
+            // ИСПРАВЛЕHО: Отодвинули Тотем Гнева левее к Ване (right: 95 вместо 70)
+            Positioned(bottom: 22, right: 95, child: _buildGoldTotemFromPhoto(38)),
             Positioned(bottom: 22, left: 16, child: _buildCharacterBase('assets/images/bunnyhop.png', 56, false)),
 
             Positioned(
@@ -3532,10 +3533,10 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
     );
   }
 
-    // =========================================================================
-  // ИСПРАВЛЕНО: МОНОЛИТНАЯ АНАТОМИЧЕСКАЯ СБОРКА БОССА С ВЕКТОРНЫМ ОБРУБКОМ ЛАПЫ
   // =========================================================================
-  Widget _buildUltraDetailedDonMollusk(double size) {
+  // УЛЬТРА-ДЕТАЛИЗИРОВАННЫЙ ЗЕЛЁНЫЙ БОСС ДОН МОЛЛЮСК (МАКСИМАЛЬНАЯ АНАТОМИЯ)
+  // =========================================================================
+  Widget _buildDonMolluskBoss(double size) {
     return SizedBox(
       width: size,
       height: size,
@@ -3543,69 +3544,69 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
         alignment: Alignment.center,
         clipBehavior: Clip.none,
         children: [
-          // 🐙 1. ЧЕТЫРЕ СИНИХ ЩУПАЛЬЦА: Прижали плотнее к центру (внахлёст под тело!)
-          Positioned(bottom: size * 0.12, left: size * 0.04, child: Transform.rotate(angle: -0.3, child: CustomPaint(size: Size(size * 0.22, size * 0.55), painter: _MolluskTentacleWithSuctionsPainter(isLeft: true)))),
-          Positioned(bottom: size * 0.08, left: size * 0.20, child: Transform.rotate(angle: -0.1, child: CustomPaint(size: Size(size * 0.18, size * 0.50), painter: _MolluskTentacleWithSuctionsPainter(isLeft: true)))),
-          Positioned(bottom: size * 0.08, right: size * 0.20, child: Transform.rotate(angle: 0.1, child: CustomPaint(size: Size(size * 0.18, size * 0.50), painter: _MolluskTentacleWithSuctionsPainter(isLeft: false)))),
-          Positioned(bottom: size * 0.12, right: size * 0.04, child: Transform.rotate(angle: 0.3, child: CustomPaint(size: Size(size * 0.22, size * 0.55), painter: _MolluskTentacleWithSuctionsPainter(isLeft: false)))),
+          // 🐙 1. СИHИЕ ЩУПАЛЬЦА С ПРИСОСКАМИ: Распределены веером по кругу из-за спины
+          Positioned(bottom: size * 0.16, left: -size * 0.16, child: Transform.rotate(angle: -0.6, child: CustomPaint(size: Size(size * 0.28, size * 0.65), painter: _DetailedTentaclePainter(isLeft: true)))),
+          Positioned(top: -size * 0.08, left: -size * 0.10, child: Transform.rotate(angle: -1.2, child: CustomPaint(size: Size(size * 0.24, size * 0.60), painter: _DetailedTentaclePainter(isLeft: true)))),
+          Positioned(top: -size * 0.08, right: -size * 0.10, child: Transform.rotate(angle: 1.2, child: CustomPaint(size: Size(size * 0.24, size * 0.60), painter: _DetailedTentaclePainter(isLeft: false)))),
+          Positioned(bottom: size * 0.16, right: -size * 0.16, child: Transform.rotate(angle: 0.6, child: CustomPaint(size: Size(size * 0.28, size * 0.65), painter: _DetailedTentaclePainter(isLeft: false)))),
 
-          // 🐷 2. СВИНЫЕ УШКИ: Сдвинуты внутрь контура головы (растут ПРЯМО из черепа!)
-          Positioned(top: size * 0.14, left: size * 0.06, child: Transform.rotate(angle: -0.4, child: Container(width: size * 0.15, height: size * 0.22, decoration: BoxDecoration(color: const Color(0xFF689F38), borderRadius: BorderRadius.circular(4), border: Border.all(color: Colors.black, width: 1.5))))),
-          Positioned(top: size * 0.14, right: size * 0.06, child: Transform.rotate(angle: 0.4, child: Container(width: size * 0.15, height: size * 0.22, decoration: BoxDecoration(color: const Color(0xFF689F38), borderRadius: BorderRadius.circular(4), border: Border.all(color: Colors.black, width: 1.5))))),
+          // 🐷 2. СВИНЫЕ УШКИ: Идеально круглые, растут прямо из головы-круга
+          Positioned(top: size * 0.14, left: size * 0.06, child: Container(width: size * 0.16, height: size * 0.16, decoration: BoxDecoration(color: const Color(0xFF689F38), shape: BoxShape.circle, border: Border.all(color: Colors.black, width: 1.6)))),
+          Positioned(top: size * 0.14, right: size * 0.06, child: Container(width: size * 0.16, height: size * 0.16, decoration: BoxDecoration(color: const Color(0xFF689F38), shape: BoxShape.circle, border: Border.all(color: Colors.black, width: 1.6)))),
 
-          // 🦀 3. ДВЕ НИЖНИЕ КЛЕШНИ: Заведены под срез живота (растут из суставов тела!)
+          // 🦀 3. ДВЕ НИЖНИЕ КЛЕШНИ: Прорисованные крабовые щипцы по бокам основания
           Positioned(
-            bottom: size * 0.10, left: size * 0.02,
-            child: CustomPaint(size: Size(size * 0.30, size * 0.30), painter: CrabClawPainter(openFactor: 0.15)),
+            bottom: size * 0.04, left: -size * 0.08,
+            child: CustomPaint(size: Size(size * 0.36, size * 0.36), painter: _DetailedCrabClawPainter(isOpen: false)),
           ),
           Positioned(
-            bottom: size * 0.10, right: size * 0.02,
-            child: CustomPaint(size: Size(size * 0.30, size * 0.30), painter: CrabClawPainter(openFactor: 0.15)),
+            bottom: size * 0.04, right: -size * 0.08,
+            child: CustomPaint(size: Size(size * 0.36, size * 0.36), painter: _DetailedCrabClawPainter(isOpen: false)),
           ),
 
-          // 🦀 4. ВЕРХНЯЯ АТАКУЮЩАЯ КЛЕШНЯ: Смещена к макушке, растёт из плечевого узла
+          // 🦀 4. ВЕРХНЯЯ КЛЕШНЯ: Сидит грозно прямо на макушке по центру головы
           Positioned(
-            top: size * 0.02, left: size * 0.38,
-            child: Transform.rotate(angle: 0.2, child: CustomPaint(size: Size(size * 0.26, size * 0.26), painter: CrabClawPainter(openFactor: 0.40))),
+            top: -size * 0.15, left: size * 0.32,
+            child: CustomPaint(size: Size(size * 0.36, size * 0.36), painter: _DetailedCrabClawPainter(isOpen: true)),
           ),
 
           // =========================================================================
-          // 🩸 5. ВЕКТОРНЫЙ ЛОРНЫЙ ОБРУБОК ЧЕТВЁРТОЙ КЛЕШНИ (ПРИКРЕПЛЁН НА ПЛЕЧО СЛЕВА)
+          // 🩸 5. ИСПРАВЛЕНО: ЧЁТКИЙ ОСНОВНОЙ СТВОЛ (РОВНО ПОЛОВИНА ЛАПЫ) И ПЯТНО КРОВИ
           // =========================================================================
           Positioned(
-            top: size * 0.22, left: -size * 0.04,
-            child: Transform.rotate(
-              angle: -0.5,
-              child: Stack(
-                children: [
-                  // Кожаный зелёный наплыв оторванного сустава лапы
-                  Container(
-                    width: size * 0.16, height: size * 0.14,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF33691E), // Темно-зеленое мясо лапы
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(color: Colors.black, width: 1.5),
+            top: size * 0.32, left: -size * 0.07,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                // Обрубок ствола лапы (половина от основания)
+                Container(
+                  width: size * 0.12, height: size * 0.14,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF33691E), // Темно-зеленое мясо лапы
+                    border: Border.all(color: Colors.black, width: 1.6),
+                    borderRadius: const BorderRadius.only(topLeft: Radius.circular(4), bottomLeft: Radius.circular(4)),
+                  ),
+                  child: Center(
+                    // Торчащая белая кость внутри раны для детализации
+                    child: Container(width: 4, height: 6, decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(1))),
+                  ),
+                ),
+                // Кровавое пятно, накладывающееся прямо на зелёный круг тела Босса
+                Positioned(
+                  right: -5, top: 2,
+                  child: Container(
+                    width: 11, height: 11,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFC62828), // Пятно крови синдиката
+                      shape: BoxShape.circle,
                     ),
                   ),
-                  // Белая торчащая кость сустава по центру раны!
-                  Positioned(
-                    top: 2, left: 4,
-                    child: Container(
-                      width: 6, height: 8,
-                      decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(1), border: Border.all(color: Colors.black45, width: 0.8)),
-                    ),
-                  ),
-                  // Капли тёмно-красной крови мафии свиней
-                  Positioned(
-                    bottom: -2, right: 2,
-                    child: Container(width: 5, height: 5, decoration: const BoxDecoration(color: Color(0xFFB71C1C), shape: BoxShape.circle)),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
 
-          // 🟢 6. ЦЕНТРАЛЬНОЕ ТЕЛО ДОНА МОЛЛЮСКА (Ложится ПОВЕРХ всех корней лап и ушей!)
+          // 🟢 6. ЦЕНТРАЛЬНОЕ ЗЕЛИКОВОЕ ТЕЛО БОССА (Перекрывает корни всех лап)
           Container(
             width: size * 0.70,
             height: size * 0.70,
@@ -3627,7 +3628,127 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
       ),
     );
   }
+}
 
+// =========================================================================
+// КЛАСС 1: ВЫСОКОДЕТАЛИЗИРОВАННЫЙ РИСОВАЛЬЩИК ЩУПАЛЬЦА ОСЬМИНОГА С ПРИСОСКАМИ
+// =========================================================================
+class _DetailedTentaclePainter extends CustomPainter {
+  final bool isLeft;
+  _DetailedTentaclePainter({required this.isLeft});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final tentaclePaint = Paint()..color = const Color(0xFF0288D1)..style = PaintingStyle.fill;
+    final strokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.6;
+    final suctionPaint = Paint()..color = Colors.white..style = PaintingStyle.fill;
+    final suctionHolePaint = Paint()..color = const Color(0xFF01579B)..style = PaintingStyle.fill;
+
+    final w = size.width;
+    final h = size.height;
+
+    // Плавный S-образный анатомический изгиб щупальца осьминога
+    final path = Path();
+    path.moveTo(w * 0.5, h);
+    path.cubicTo(isLeft ? -w * 0.2 : w * 1.2, h * 0.65, isLeft ? w * 0.2 : w * 0.8, h * 0.25, w * 0.5, 0);
+    path.lineTo(w * 0.8, 0);
+    path.cubicTo(isLeft ? w * 0.5 : w * 0.5, h * 0.25, isLeft ? w * 0.2 : w * 0.8, h * 0.65, w * 0.8, h);
+    path.close();
+
+    canvas.drawPath(path, tentaclePaint);
+    canvas.drawPath(path, strokePaint);
+
+    // ПРОРАБОТКА: Расставляем 6 круглых присосок с отверстиями по внешнему контуру лапы
+    for (int i = 1; i <= 6; i++) {
+      double factor = i * 0.15;
+      double cx = isLeft ? w * (0.28 - factor * 0.1) : w * (0.72 + factor * 0.1);
+      double cy = h * factor;
+      double radius = 3.2 - (i * 0.2); // Сужаются к кончику лапы
+      
+      if (radius > 1.0) {
+        canvas.drawCircle(Offset(cx, cy), radius, suctionPaint);
+        canvas.drawCircle(Offset(cx, cy), radius, strokePaint..strokeWidth = 0.5);
+        // Внутреннее отверстие присоски для узнаваемости текстуры осьминога
+        canvas.drawCircle(Offset(cx, cy), radius * 0.4, suctionHolePaint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// =========================================================================
+// КЛАСС 2: УЛЬТРА-ПРОРАБОТАНHЫЕ КРАБОВЫЕ КЛЕШHИ (СУСТАВЫ, ЗАЖИМЫ И ЗУБЦЫ)
+// =========================================================================
+class _DetailedCrabClawPainter extends CustomPainter {
+  final bool isOpen;
+  _DetailedCrabClawPainter({required this.isOpen});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final clawPaint = Paint()..color = const Color(0xFF2E6F22)..style = PaintingStyle.fill;
+    final strokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.6;
+    
+    final w = size.width;
+    final h = size.height;
+
+    // 1. Рисуем прочный сустав-основание лапы (локоть краба)
+    final jointPath = Path()
+      ..moveTo(w * 0.4, h)
+      ..lineTo(w * 0.3, h * 0.6)
+      ..lineTo(w * 0.7, h * 0.6)
+      ..lineTo(w * 0.6, h)
+      ..close();
+    canvas.drawPath(jointPath, clawPaint);
+    canvas.drawPath(jointPath, strokePaint);
+
+    // 2. Рисуем неподвижный ПРАВЫЙ зажимающий палец клешни с зубцами
+    final mainClawPath = Path()
+      ..moveTo(w * 0.3, h * 0.6)
+      ..cubicTo(w * 0.05, h * 0.4, w * 0.1, 0, w * 0.5, 0) // Острый кончик лапы
+      ..lineTo(w * 0.45, h * 0.2)
+      ..cubicTo(w * 0.3, h * 0.3, w * 0.35, h * 0.5, w * 0.7, h * 0.6)
+      ..close();
+    canvas.drawPath(mainClawPath, clawPaint);
+    canvas.drawPath(mainClawPath, strokePaint);
+
+    // 3. Рисуем подвижный ЛЕВЫЙ зажимающий палец клешни (открывается по флагу)
+    final movingFingerPath = Path();
+    if (isOpen) {
+      // Широко раскрытый зловещий зажим щипцов лапы
+      movingFingerPath.moveTo(w * 0.45, h * 0.25);
+      movingFingerPath.cubicTo(w * 0.75, h * 0.1, w * 0.95, h * 0.2, w * 0.85, h * 0.5);
+      movingFingerPath.lineTo(w * 0.6, h * 0.45);
+    } else {
+      // Смыкающийся плотный зажим
+      movingFingerPath.moveTo(w * 0.42, h * 0.15);
+      movingFingerPath.cubicTo(w * 0.65, h * 0.2, w * 0.75, h * 0.35, w * 0.65, h * 0.55);
+      movingFingerPath.lineTo(w * 0.52, h * 0.42);
+    }
+    movingFingerPath.close();
+    canvas.drawPath(movingFingerPath, clawPaint);
+    canvas.drawPath(movingFingerPath, strokePaint);
+
+    // 4. ТЕКСТУРА: Вырезаем мелкие острые зубцы на внутренних гранях щипцов
+    final toothPaint = Paint()..color = Colors.white70..style = PaintingStyle.fill;
+    canvas.drawTriangle(Offset(w * 0.38, h * 0.25), Offset(w * 0.34, h * 0.28), Offset(w * 0.42, h * 0.29), toothPaint);
+    // Ровно второй, финальный зубец на противоположной створке зажима лапы Босса
+    canvas.drawTriangle(Offset(w * 0.46, h * 0.32), Offset(w * 0.42, h * 0.35), Offset(w * 0.48, h * 0.36), toothPaint);
+  }
+}
+
+// =========================================================================
+// ХЕЛПЕР-РАСШИРЕНИЕ ДЛЯ УДОБНОЙ ОТРИСОВКИ ТРЕУГОЛЬНЫХ ЗУБЬЕВ КЛЕШНИ
+// =========================================================================
+extension _CanvasTriangleExt on Canvas {
+  void drawTriangle(Offset p1, Offset p2, Offset p3, Paint paint) {
+    final path = Path()..moveTo(p1.dx, p1.dy)..lineTo(p2.dx, p2.dy)..lineTo(p3.dx, p3.dy)..close();
+    drawPath(path, paint);
+    // Накладываем тонкий контрастный чёрный контур на каждый зубчик
+    drawPath(path, Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 0.5);
+  }
+}
 
   // =========================================================================
   // МАКСИМАЛЬНО ДЕТАЛИЗИРОВАННЫЙ ЗАДНИЙ ФОН: 3D ПЛИТКА И ГОТИЧЕСКИЕ СВОДЫ КРЫШИ
@@ -3846,13 +3967,13 @@ class _MolluskTentacleWithSuctionsPainter extends CustomPainter {
 class _GoldWingsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-        final goldPaint = Paint()
-      // ИСПРАВЛЕHО: Только чистые, дорогие золотые металлы и неоновые блики!
+    final goldPaint = Paint()
+      // ИСПРАВЛЕHО: Идеальное сияющее золото без коричневой грязи!
       ..shader = const LinearGradient(
-        colors: [Color(0xFFFFD54F), Color(0xFFFFE082), Color(0xFFFFC107), Color(0xFFFFD54F)],
+        colors: [Color(0xFFFFF176), Color(0xFFFFD54F), Color(0xFFFFC107), Color(0xFFFFD54F)],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
       ..style = PaintingStyle.fill;
-    final strokePaint = Paint()..color = const Color(0xFF5D4037)..style = PaintingStyle.stroke..strokeWidth = 1.0;
+    final strokePaint = Paint()..color = const Color(0xFF795548)..style = PaintingStyle.stroke..strokeWidth = 1.0;
 
     final path = Path();
     path.moveTo(size.width * 0.5, size.height);
@@ -3932,51 +4053,49 @@ class _CastleCeiling3DPainter extends CustomPainter {
 }
 
 // =========================================================================
-// ИЗОЛИРОВАННЫЙ ХУДОЖНИК СКРЫТОЙ СЛЕДКИ ДЛЯ ТРОННОГО ЗАЛА 6 УРОВНЯ
+// ИСПРАВЛЕНО: СКРЫТЫЙ СЛЕДЯЩИЙ ОСКАЛ (ДВА ГЛАЗА-РОМБА + ПРОРАБОТАННАЯ ДУГА ЛИЦА)
 // =========================================================================
 class _CastleSecretMouthPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    // ИСПРАВЛЕHО: Убрана лишняя точка в каскаде кисти
-final whitePaint = Paint()
-  ..color = Colors.white.withOpacity(0.95)
-  ..style = PaintingStyle.fill;
-    final eyePaint = Paint()..color = const Color(0xFFFF1744)..style = PaintingStyle.fill; // Неоновые зрачки
+    final whitePaint = Paint()..color = Colors.white..style = PaintingStyle.fill;
+    final linePaint = Paint()..color = Colors.white.withOpacity(0.4)..style = PaintingStyle.stroke..strokeWidth = 1.2;
 
-    // 1. ЗЛОВЕЩИЕ ГЛАЗА-РОМБЫ С ПЛАКАТОВ СЛЕДКИ
+    // 1. ДВА ГЛАЗА-РОМБА ВЕРХНЕЙ СЛЕДКИ
     // Левый глаз
     final leftEye = Path()
-      ..moveTo(size.width * 0.15, 0)
-      ..lineTo(size.width * 0.30, size.height * 0.2)
-      ..lineTo(size.width * 0.22, size.height * 0.5)
-      ..lineTo(size.width * 0.08, size.height * 0.2)
+      ..moveTo(size.width * 0.20, 0)
+      ..lineTo(size.width * 0.32, size.height * 0.2)
+      ..lineTo(size.width * 0.24, size.height * 0.45)
+      ..lineTo(size.width * 0.12, size.height * 0.2)
       ..close();
     canvas.drawPath(leftEye, whitePaint);
-    canvas.drawCircle(Offset(size.width * 0.20, size.height * 0.25), 1.4, eyePaint);
 
     // Правый глаз
     final rightEye = Path()
-      ..moveTo(size.width * 0.85, 0)
-      ..lineTo(size.width * 0.92, size.height * 0.2)
-      ..lineTo(size.width * 0.78, size.height * 0.5)
-      ..lineTo(size.width * 0.70, size.height * 0.2)
+      ..moveTo(size.width * 0.80, 0)
+      ..lineTo(size.width * 0.88, size.height * 0.2)
+      ..lineTo(size.width * 0.76, size.height * 0.45)
+      ..lineTo(size.width * 0.68, size.height * 0.2)
       ..close();
     canvas.drawPath(rightEye, whitePaint);
-    canvas.drawCircle(Offset(size.width * 0.80, size.height * 0.25), 1.4, eyePaint);
 
-    // 2. ПИКСЕЛЬНАЯ ШИРОКАЯ И ПЛОСКАЯ УЛЫБКА ИЗ КВАДРАТИКОВ (7 ЗУБОВ)
+    // 2. ПРОРАБОТАННАЯ ОКРУГЛАЯ ДУГА ЛИЦА ЗЛОДЕЯ (Тонкий контур подбородка босса)
+    final faceOutline = Path()
+      ..moveTo(size.width * 0.02, size.height * 0.1)
+      ..cubicTo(size.width * 0.1, size.height * 0.95, size.width * 0.9, size.height * 0.95, size.width * 0.98, size.height * 0.1);
+    canvas.drawPath(faceOutline, linePaint);
+
+    // 3. ПИКСЕЛЬНАЯ УЛЫБКА ИЗ ЗУБОВ-КВАДРАТИКОВ ПОВАЛЕННАЯ НА ДУГУ
     int teethCount = 7;
-    double toothSize = 1.8; 
     for (int i = 0; i < teethCount; i++) {
-      double offsetX = (size.width * 0.06) + (i * (size.width * 0.88 / (teethCount - 1)));
+      double offsetX = (size.width * 0.08) + (i * (size.width * 0.84 / (teethCount - 1)));
       double progress = i / (teethCount - 1);
-      double offsetY = size.height * 0.72 + (sin(progress * pi) * (size.height * 0.12));
+      double offsetY = size.height * 0.62 + (sin(progress * pi) * (size.height * 0.15));
       
-      canvas.drawRect(Rect.fromLTWH(offsetX, offsetY, toothSize, toothSize), whitePaint);
+      canvas.drawRect(Rect.fromLTWH(offsetX, offsetY, 1.8, 1.8), whitePaint);
     }
   }
-
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-
