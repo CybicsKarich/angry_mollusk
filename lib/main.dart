@@ -3536,7 +3536,7 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
   // =========================================================================
   // УЛЬТРА-ДЕТАЛИЗИРОВАННЫЙ ЗЕЛЁНЫЙ БОСС ДОН МОЛЛЮСК (МАКСИМАЛЬНАЯ АНАТОМИЯ)
   // =========================================================================
-  Widget _buildDonMolluskBoss(double size) {
+  Widget _buildUltraDetailedDonMollusk(double size) {
     return SizedBox(
       width: size,
       height: size,
@@ -3730,24 +3730,14 @@ class _DetailedCrabClawPainter extends CustomPainter {
     canvas.drawPath(movingFingerPath, clawPaint);
     canvas.drawPath(movingFingerPath, strokePaint);
 
-    // 4. ТЕКСТУРА: Вырезаем мелкие острые зубцы на внутренних гранях щипцов
+    // 4. ТЕКСТУРА: Вырезаем ровно 2 мелких острых зубца на внутренних гранях щипцов
     final toothPaint = Paint()..color = Colors.white70..style = PaintingStyle.fill;
     canvas.drawTriangle(Offset(w * 0.38, h * 0.25), Offset(w * 0.34, h * 0.28), Offset(w * 0.42, h * 0.29), toothPaint);
-    // Ровно второй, финальный зубец на противоположной створке зажима лапы Босса
     canvas.drawTriangle(Offset(w * 0.46, h * 0.32), Offset(w * 0.42, h * 0.35), Offset(w * 0.48, h * 0.36), toothPaint);
   }
-}
 
-// =========================================================================
-// ХЕЛПЕР-РАСШИРЕНИЕ ДЛЯ УДОБНОЙ ОТРИСОВКИ ТРЕУГОЛЬНЫХ ЗУБЬЕВ КЛЕШНИ
-// =========================================================================
-extension _CanvasTriangleExt on Canvas {
-  void drawTriangle(Offset p1, Offset p2, Offset p3, Paint paint) {
-    final path = Path()..moveTo(p1.dx, p1.dy)..lineTo(p2.dx, p2.dy)..lineTo(p3.dx, p3.dy)..close();
-    drawPath(path, paint);
-    // Накладываем тонкий контрастный чёрный контур на каждый зубчик
-    drawPath(path, Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 0.5);
-  }
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
   // =========================================================================
