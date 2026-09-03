@@ -3535,7 +3535,7 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
     // =========================================================================
   // ИСПРАВЛЕНО: МОНОЛИТНАЯ АНАТОМИЧЕСКАЯ СБОРКА БОССА С ВЕКТОРНЫМ ОБРУБКОМ ЛАПЫ
   // =========================================================================
-  Widget _buildDonMolluskBoss(double size) {
+  Widget _buildUltraDetailedDonMollusk(double size) {
     return SizedBox(
       width: size,
       height: size,
@@ -3937,7 +3937,10 @@ class _CastleCeiling3DPainter extends CustomPainter {
 class _CastleSecretMouthPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final whitePaint = Paint()...color = Colors.white.withOpacity(0.95)..style = PaintingStyle.fill;
+    // ИСПРАВЛЕHО: Убрана лишняя точка в каскаде кисти
+final whitePaint = Paint()
+  ..color = Colors.white.withOpacity(0.95)
+  ..style = PaintingStyle.fill;
     final eyePaint = Paint()..color = const Color(0xFFFF1744)..style = PaintingStyle.fill; // Неоновые зрачки
 
     // 1. ЗЛОВЕЩИЕ ГЛАЗА-РОМБЫ С ПЛАКАТОВ СЛЕДКИ
