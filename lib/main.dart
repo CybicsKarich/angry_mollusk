@@ -3678,67 +3678,7 @@ class _DetailedTentaclePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// =========================================================================
-// КЛАСС 2: УЛЬТРА-ПРОРАБОТАНHЫЕ КРАБОВЫЕ КЛЕШHИ (СУСТАВЫ, ЗАЖИМЫ И ЗУБЦЫ)
-// =========================================================================
-class _DetailedCrabClawPainter extends CustomPainter {
-  final bool isOpen;
-  _DetailedCrabClawPainter({required this.isOpen});
 
-  @override
-  void paint(Canvas canvas, Size size) {
-    final clawPaint = Paint()..color = const Color(0xFF2E6F22)..style = PaintingStyle.fill;
-    final strokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.6;
-    
-    final w = size.width;
-    final h = size.height;
-
-    // 1. Рисуем прочный сустав-основание лапы (локоть краба)
-    final jointPath = Path()
-      ..moveTo(w * 0.4, h)
-      ..lineTo(w * 0.3, h * 0.6)
-      ..lineTo(w * 0.7, h * 0.6)
-      ..lineTo(w * 0.6, h)
-      ..close();
-    canvas.drawPath(jointPath, clawPaint);
-    canvas.drawPath(jointPath, strokePaint);
-
-    // 2. Рисуем неподвижный ПРАВЫЙ зажимающий палец клешни с зубцами
-    final mainClawPath = Path()
-      ..moveTo(w * 0.3, h * 0.6)
-      ..cubicTo(w * 0.05, h * 0.4, w * 0.1, 0, w * 0.5, 0) // Острый кончик лапы
-      ..lineTo(w * 0.45, h * 0.2)
-      ..cubicTo(w * 0.3, h * 0.3, w * 0.35, h * 0.5, w * 0.7, h * 0.6)
-      ..close();
-    canvas.drawPath(mainClawPath, clawPaint);
-    canvas.drawPath(mainClawPath, strokePaint);
-
-    // 3. Рисуем подвижный ЛЕВЫЙ зажимающий палец клешни (открывается по флагу)
-    final movingFingerPath = Path();
-    if (isOpen) {
-      // Широко раскрытый зловещий зажим щипцов лапы
-      movingFingerPath.moveTo(w * 0.45, h * 0.25);
-      movingFingerPath.cubicTo(w * 0.75, h * 0.1, w * 0.95, h * 0.2, w * 0.85, h * 0.5);
-      movingFingerPath.lineTo(w * 0.6, h * 0.45);
-    } else {
-      // Смыкающийся плотный зажим
-      movingFingerPath.moveTo(w * 0.42, h * 0.15);
-      movingFingerPath.cubicTo(w * 0.65, h * 0.2, w * 0.75, h * 0.35, w * 0.65, h * 0.55);
-      movingFingerPath.lineTo(w * 0.52, h * 0.42);
-    }
-    movingFingerPath.close();
-    canvas.drawPath(movingFingerPath, clawPaint);
-    canvas.drawPath(movingFingerPath, strokePaint);
-
-    // 4. ТЕКСТУРА: Вырезаем ровно 2 мелких острых зубца на внутренних гранях щипцов
-    final toothPaint = Paint()..color = Colors.white70..style = PaintingStyle.fill;
-    canvas.drawTriangle(Offset(w * 0.38, h * 0.25), Offset(w * 0.34, h * 0.28), Offset(w * 0.42, h * 0.29), toothPaint);
-    canvas.drawTriangle(Offset(w * 0.46, h * 0.32), Offset(w * 0.42, h * 0.35), Offset(w * 0.48, h * 0.36), toothPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
 
   // =========================================================================
   // МАКСИМАЛЬНО ДЕТАЛИЗИРОВАННЫЙ ЗАДНИЙ ФОН: 3D ПЛИТКА И ГОТИЧЕСКИЕ СВОДЫ КРЫШИ
@@ -3914,6 +3854,67 @@ class _DetailedCrabClawPainter extends CustomPainter {
     );
   }
 
+// =========================================================================
+// КЛАСС 2: УЛЬТРА-ПРОРАБОТАНHЫЕ КРАБОВЫЕ КЛЕШHИ (СУСТАВЫ, ЗАЖИМЫ И ЗУБЦЫ)
+// =========================================================================
+class _DetailedCrabClawPainter extends CustomPainter {
+  final bool isOpen;
+  _DetailedCrabClawPainter({required this.isOpen});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final clawPaint = Paint()..color = const Color(0xFF2E6F22)..style = PaintingStyle.fill;
+    final strokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.6;
+    
+    final w = size.width;
+    final h = size.height;
+
+    // 1. Рисуем прочный сустав-основание лапы (локоть краба)
+    final jointPath = Path()
+      ..moveTo(w * 0.4, h)
+      ..lineTo(w * 0.3, h * 0.6)
+      ..lineTo(w * 0.7, h * 0.6)
+      ..lineTo(w * 0.6, h)
+      ..close();
+    canvas.drawPath(jointPath, clawPaint);
+    canvas.drawPath(jointPath, strokePaint);
+
+    // 2. Рисуем неподвижный ПРАВЫЙ зажимающий палец клешни с зубцами
+    final mainClawPath = Path()
+      ..moveTo(w * 0.3, h * 0.6)
+      ..cubicTo(w * 0.05, h * 0.4, w * 0.1, 0, w * 0.5, 0) // Острый кончик лапы
+      ..lineTo(w * 0.45, h * 0.2)
+      ..cubicTo(w * 0.3, h * 0.3, w * 0.35, h * 0.5, w * 0.7, h * 0.6)
+      ..close();
+    canvas.drawPath(mainClawPath, clawPaint);
+    canvas.drawPath(mainClawPath, strokePaint);
+
+    // 3. Рисуем подвижный ЛЕВЫЙ зажимающий палец клешни (открывается по флагу)
+    final movingFingerPath = Path();
+    if (isOpen) {
+      // Широко раскрытый зловещий зажим щипцов лапы
+      movingFingerPath.moveTo(w * 0.45, h * 0.25);
+      movingFingerPath.cubicTo(w * 0.75, h * 0.1, w * 0.95, h * 0.2, w * 0.85, h * 0.5);
+      movingFingerPath.lineTo(w * 0.6, h * 0.45);
+    } else {
+      // Смыкающийся плотный зажим
+      movingFingerPath.moveTo(w * 0.42, h * 0.15);
+      movingFingerPath.cubicTo(w * 0.65, h * 0.2, w * 0.75, h * 0.35, w * 0.65, h * 0.55);
+      movingFingerPath.lineTo(w * 0.52, h * 0.42);
+    }
+    movingFingerPath.close();
+    canvas.drawPath(movingFingerPath, clawPaint);
+    canvas.drawPath(movingFingerPath, strokePaint);
+
+    // 4. ТЕКСТУРА: Вырезаем ровно 2 мелких острых зубца на внутренних гранях щипцов
+    final toothPaint = Paint()..color = Colors.white70..style = PaintingStyle.fill;
+    canvas.drawTriangle(Offset(w * 0.38, h * 0.25), Offset(w * 0.34, h * 0.28), Offset(w * 0.42, h * 0.29), toothPaint);
+    canvas.drawTriangle(Offset(w * 0.46, h * 0.32), Offset(w * 0.42, h * 0.35), Offset(w * 0.48, h * 0.36), toothPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
 
 // =========================================================================
 // ВЕКТОРНЫЙ ХУДОЖНИК ЩУПАЛЬЦА С КРУГЛЫМИ ПРИСОСКАМИ ИЗНУТРИ
@@ -3966,14 +3967,13 @@ extension _CanvasTriangleExt on Canvas {
 }
 
 // =========================================================================
-// КЛАССЫ РЕЛЬЕФНЫХ ХУДОЖНИКОВ ДЛЯ 3D ОКРУЖЕНИЯ ТРОННОГО ЗАЛА
+// КЛАССЫ РЕЛЬЕФНЫХ ХУДОЖНИКОВ ДЛЯ БЕСКОНЕЧНОГО 3D ОКРУЖЕНИЯ ТРОННОГО ЗАЛА
 // =========================================================================
 
 class _GoldWingsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final goldPaint = Paint()
-      // ИСПРАВЛЕHО: Идеальное сияющее золото без коричневой грязи!
       ..shader = const LinearGradient(
         colors: [Color(0xFFFFF176), Color(0xFFFFD54F), Color(0xFFFFC107), Color(0xFFFFD54F)],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
@@ -4001,7 +4001,6 @@ class _GoldWingsPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// ИСПРАВЛЕHО: 3D-плитка пола уходит глубоко вдаль и вытянута вперёд!
 class _CastleFloorTilesPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -4009,17 +4008,15 @@ class _CastleFloorTilesPainter extends CustomPainter {
     final linePaint = Paint()..color = const Color(0xFF111114)..style = PaintingStyle.stroke..strokeWidth = 1.6;
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), tilePaint);
 
-    // Многочисленные горизонтальные стыки плит, сужающиеся к горизонту (вверх)
     for (int i = 0; i < 5; i++) {
       double hY = size.height * (0.2 + (i * i * 0.8 / 16));
       canvas.drawLine(Offset(0, hY), Offset(size.width, hY), linePaint);
     }
 
-    // Вертикальные швы плит, расходящиеся экстремальным 3D-веером вперёд
-    int linesCount = 12; // Сделали плитку более частой и детальной
+    int linesCount = 12; 
     for (int i = 0; i <= linesCount; i++) {
-      double topX = size.width * (0.3 + (i * 0.4 / linesCount)); // Схождение вдалеке
-      double bottomX = size.width * (i / linesCount);            // Расширение вблизи
+      double topX = size.width * (0.3 + (i * 0.4 / linesCount)); 
+      double bottomX = size.width * (i / linesCount);            
       canvas.drawLine(Offset(topX, 0), Offset(bottomX, size.height), linePaint);
     }
   }
@@ -4027,7 +4024,6 @@ class _CastleFloorTilesPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// ИСПРАВЛЕHО: Готическая крыша со сводами и окнами-бойницами на стыке
 class _CastleCeiling3DPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -4035,14 +4031,12 @@ class _CastleCeiling3DPainter extends CustomPainter {
     final beamPaint = Paint()..color = const Color(0xFF09090D)..style = PaintingStyle.stroke..strokeWidth = 2.2;
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), ceilPaint);
 
-    // Массивные балки перекрытия, сходящиеся к центру
     for (int i = 0; i <= 6; i++) {
       double startX = size.width * (i / 6);
       canvas.drawLine(Offset(startX, 0), Offset(size.width * 0.5, size.height), beamPaint);
     }
     canvas.drawLine(Offset(0, size.height), Offset(size.width, size.height), beamPaint);
 
-    // ДЕКОР: Отрисовываем маленькие узкие окна-бойницы замка на линии горизонта (внизу крыши)
     final windowPaint = Paint()..color = const Color(0xFF09090E)..style = PaintingStyle.fill;
     double winW = 6;
     double winH = 14;
@@ -4056,6 +4050,7 @@ class _CastleCeiling3DPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
+
 
 // =========================================================================
 // ИСПРАВЛЕНО: СКРЫТЫЙ СЛЕДЯЩИЙ ОСКАЛ (ДВА ГЛАЗА-РОМБА + ПРОРАБОТАННАЯ ДУГА ЛИЦА)
