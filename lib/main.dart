@@ -3632,6 +3632,37 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
     );
   }
 
+  // =========================================================================
+  // МАКСИМАЛЬНО ДЕТАЛИЗИРОВАННЫЙ ЗАДНИЙ ФОН: 3D ПЛИТКА И ГОТИЧЕСКИЕ СВОДЫ КРЫШИ
+  // =========================================================================
+  Widget _buildAdvanced3DFrame({required Widget child}) {
+    return Expanded(
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.black, width: 3.5),
+          boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 6, offset: Offset(0, 4))],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(11),
+          child: Stack(
+            children: [
+              // Тёмный гранитный фон стен тронного зала
+              Positioned.fill(child: Container(decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFF14141E), Color(0xFF06060A)])))),
+              
+              // 📐 1. РЕЛЬЕФНАЯ ГОТИЧЕСКАЯ КРЫША ЗАМКА: Балки сходятся в 3D перспективу
+              Positioned(top: 0, left: 0, right: 0, child: CustomPaint(size: const Size(double.infinity, 35), painter: _CastleCeiling3DPainter())),
+
+              // 🧱 2. РЕЛЬЕФНАЯ КАМЕННАЯ ПЛИТКА НА ПОЛУ: Швы расходятся веером для глубины
+              Positioned(bottom: 0, left: 0, right: 0, child: CustomPaint(size: const Size(double.infinity, 24), painter: _CastleFloorTilesPainter())),
+              
+              child,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   // ВЕКТОРНЫЙ ХУДОЖHИК ОБРУБКА СТВОЛА КЛЕШНИ С ИЗРЕЗАННЫМ КРАЕМ
 class _RaggedStumpPainter extends CustomPainter {
@@ -3665,39 +3696,7 @@ class _RaggedStumpPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-
-  // =========================================================================
-  // МАКСИМАЛЬНО ДЕТАЛИЗИРОВАННЫЙ ЗАДНИЙ ФОН: 3D ПЛИТКА И ГОТИЧЕСКИЕ СВОДЫ КРЫШИ
-  // =========================================================================
-  Widget _buildAdvanced3DFrame({required Widget child}) {
-    return Expanded(
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.black, width: 3.5),
-          boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 6, offset: Offset(0, 4))],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(11),
-          child: Stack(
-            children: [
-              // Тёмный гранитный фон стен тронного зала
-              Positioned.fill(child: Container(decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFF14141E), Color(0xFF06060A)])))),
-              
-              // 📐 1. РЕЛЬЕФНАЯ ГОТИЧЕСКАЯ КРЫША ЗАМКА: Балки сходятся в 3D перспективу
-              Positioned(top: 0, left: 0, right: 0, child: CustomPaint(size: const Size(double.infinity, 35), painter: _CastleCeiling3DPainter())),
-
-              // 🧱 2. РЕЛЬЕФНАЯ КАМЕННАЯ ПЛИТКА НА ПОЛУ: Швы расходятся веером для глубины
-              Positioned(bottom: 0, left: 0, right: 0, child: CustomPaint(size: const Size(double.infinity, 24), painter: _CastleFloorTilesPainter())),
-              
-              child,
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
+  
   // Интерактивный кубик выбора фраз
   Widget _buildChoiceBox(String text, int choiceId) {
     return GestureDetector(
