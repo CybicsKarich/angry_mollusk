@@ -3533,7 +3533,7 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
     );
   }
 
-    Widget _buildUltraDetailedDonMollusk(double size) {
+      Widget _buildUltraDetailedDonMollusk(double size) {
     return SizedBox(
       width: size,
       height: size,
@@ -3541,38 +3541,37 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
         alignment: Alignment.center,
         clipBehavior: Clip.none,
         children: [
-          // 🐙 1. ИСПРАВЛЕHО: ЩУПАЛЬЦА КРЕПКО ПРИЖАТЫ К ЗЕЛИКОВОМУ ТЕЛУ И РАСПРЕДЕЛЕНЫ ПО ВСЕМУ КРУГУ
-          // Две руки уходят горизонтально вбок, две тянутся наверх
+          // 🐙 1. ЩУПАЛЬЦА НАХОДЯТСЯ ПО КРУГУ ТЕЛА ВНАХЛЁСТ
           Positioned(bottom: size * 0.22, left: -size * 0.05, child: Transform.rotate(angle: -0.4, child: CustomPaint(size: Size(size * 0.25, size * 0.55), painter: _DetailedTentaclePainter(isLeft: true)))),
           Positioned(top: size * 0.02, left: size * 0.08, child: Transform.rotate(angle: -1.3, child: CustomPaint(size: Size(size * 0.22, size * 0.50), painter: _DetailedTentaclePainter(isLeft: true)))),
           Positioned(top: size * 0.02, right: size * 0.08, child: Transform.rotate(angle: 1.3, child: CustomPaint(size: Size(size * 0.22, size * 0.50), painter: _DetailedTentaclePainter(isLeft: false)))),
           Positioned(bottom: size * 0.22, right: -size * 0.05, child: Transform.rotate(angle: 0.4, child: CustomPaint(size: Size(size * 0.25, size * 0.55), painter: _DetailedTentaclePainter(isLeft: false)))),
 
-          // 🐷 2. ИСПРАВЛЕНО: КРУГЛЫЕ УШИ С ЧЁТКОЙ ТЕКСТУРОЙ И ОБВОДКОЙ НА САМОМ ТЕЛЕ
+          // 🐷 2. ИСПРАВЛЕНО: УШИ У ДОНА МОЛЛЮСКА СТАЛИ НАМНОГО БОЛЬШЕ С ЧЁТКОЙ ОБВОДКОЙ
           Positioned(
-            top: size * 0.16, left: size * 0.08, 
+            top: size * 0.12, left: size * 0.04, 
             child: Container(
-              width: size * 0.16, height: size * 0.16, 
+              width: size * 0.22, height: size * 0.22, // Увеличили размер ушек с 0.16 до 0.22!
               decoration: BoxDecoration(
                 color: const Color(0xFF689F38), shape: BoxShape.circle, 
-                border: Border.all(color: Colors.black, width: 1.8), // Жирная обводка ушек
+                border: Border.all(color: Colors.black, width: 2.0), // Плотный чёрный контур
               ),
-              child: Center(child: Container(width: size * 0.08, height: size * 0.08, decoration: BoxDecoration(color: const Color(0xFF558B2F), shape: BoxShape.circle))), // Текстурная раковина уха
+              child: Center(child: Container(width: size * 0.11, height: size * 0.11, decoration: const BoxDecoration(color: Color(0xFF558B2F), shape: BoxShape.circle))),
             ),
           ),
           Positioned(
-            top: size * 0.16, right: size * 0.08, 
+            top: size * 0.12, right: size * 0.04, 
             child: Container(
-              width: size * 0.16, height: size * 0.16, 
+              width: size * 0.22, height: size * 0.22, 
               decoration: BoxDecoration(
                 color: const Color(0xFF689F38), shape: BoxShape.circle, 
-                border: Border.all(color: Colors.black, width: 1.8),
+                border: Border.all(color: Colors.black, width: 2.0),
               ),
-              child: Center(child: Container(width: size * 0.08, height: size * 0.08, decoration: BoxDecoration(color: const Color(0xFF558B2F), shape: BoxShape.circle))),
+              child: Center(child: Container(width: size * 0.11, height: size * 0.11, decoration: const BoxDecoration(color: Color(0xFF558B2F), shape: BoxShape.circle))),
             ),
           ),
 
-          // 🦀 3. ДВЕ НИЖНИЕ КЛЕШНИ: Растут прямо горизонтально из боковых точек тела внахлёст
+          // 🦀 3. ДВЕ НИЖНИЕ КЛЕШНИ ПОЛУКРУГОМ ПО БОКАМ ОСНОВАНИЯ
           Positioned(
             bottom: size * 0.15, left: -size * 0.04,
             child: CustomPaint(size: Size(size * 0.32, size * 0.32), painter: _DetailedCrabClawPainter(isOpen: false)),
@@ -3582,47 +3581,35 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
             child: CustomPaint(size: Size(size * 0.32, size * 0.32), painter: _DetailedCrabClawPainter(isOpen: false)),
           ),
 
-          // 🦀 4. ВЕРХНЯЯ КЛЕШНЯ: Прикреплена строго по центру макушки головы вверх
+          // 🦀 4. ВЕРХНЯЯ КЛЕШНЯ ПОЛУКРУГОМ НА МАКУШКЕ
           Positioned(
             top: -size * 0.08, left: size * 0.34,
             child: CustomPaint(size: Size(size * 0.32, size * 0.32), painter: _DetailedCrabClawPainter(isOpen: true)),
           ),
 
           // =========================================================================
-          // 🩸 5. ИСПРАВЛЕНО: МАЛЕНЬКИЙ ОСНОВНОЙ СТВОЛ (ПОЛОВИНА ЛАПЫ) И ТЕКСТУРНОЕ ПЯТНО КРОВИ С ОБВОДКОЙ
+          // 🩸 5. ИСПРАВЛЕНО: ОБВЕДЁННЫЙ СТВОЛ КЛЕШНИ С ИЗРЕЗАННЫМ-РВАНЫМ КРАЕМ СРЕЗА!
           // =========================================================================
           Positioned(
-            top: size * 0.36, left: -size * 0.02,
+            top: size * 0.36, left: -size * 0.04,
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                // Маленький пенёк-ствол лапы
-                Container(
-                  width: size * 0.08, height: size * 0.11,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF33691E), 
-                    border: Border.all(color: Colors.black, width: 1.6),
-                    borderRadius: const BorderRadius.only(topLeft: Radius.circular(3), bottomLeft: Radius.circular(3)),
-                  ),
-                  child: Center(child: Container(width: 3, height: 5, color: Colors.grey.shade200)),
+                // ИСПРАВЛЕНО: Обведенный ствол оторванной клешни (половина от лапы)
+                CustomPaint(
+                  size: Size(size * 0.12, size * 0.14),
+                  painter: _RaggedStumpPainter(), // Кастомный рисовальщик рваного края
                 ),
-                // ИСПРАВЛЕHО: Круглое кровавое пятно, намертво прижатое к зеленому кругу с черным контуром!
+                // Белый кончик кости внутри мяса раны
                 Positioned(
-                  right: -5, top: 1,
-                  child: Container(
-                    width: 12, height: 12,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFC62828), 
-                      shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0xFF5D4037), width: 1.2), // Текстурная обводка раны
-                    ),
-                  ),
+                  left: 3, top: 4,
+                  child: Container(width: 4, height: 6, decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(1))),
                 ),
               ],
             ),
           ),
 
-          // 🟢 6. ЦЕНТРАЛЬНОЕ ЗЕЛИКОВОЕ ТЕЛО БОССА (Перекрывает все места крепления лап!)
+          // 🟢 6. ЦЕНТРАЛЬНОЕ ЗЕЛИКОВОЕ ТЕЛО БОССА
           Container(
             width: size * 0.70,
             height: size * 0.70,
@@ -3645,6 +3632,39 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
     );
   }
 
+
+  // ВЕКТОРНЫЙ ХУДОЖHИК ОБРУБКА СТВОЛА КЛЕШНИ С ИЗРЕЗАННЫМ КРАЕМ
+class _RaggedStumpPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final meatPaint = Paint()..color = const Color(0xFF33691E)..style = PaintingStyle.fill;
+    final strokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.6;
+    final bloodPaint = Paint()..color = const Color(0xFFC62828)..style = PaintingStyle.fill;
+
+    final path = Path();
+    path.moveTo(0, size.height * 0.15);
+    path.lineTo(size.width * 0.8, size.height * 0.15); // Верхняя грань
+    
+    // ИСПРАВЛЕHО: Изрезанный, рваный зигзагообразный край сустава на стыке с телом!
+    path.lineTo(size.width * 0.75, size.height * 0.35);
+    path.lineTo(size.width * 0.90, size.height * 0.50);
+    path.lineTo(size.width * 0.70, size.height * 0.65);
+    path.lineTo(size.width * 0.85, size.height * 0.85);
+    
+    path.lineTo(0, size.height * 0.85); // Нижня граница ствола
+    path.close();
+
+    canvas.drawPath(path, meatPaint);
+    canvas.drawPath(path, strokePaint);
+
+    // Сверху заляпываем стык рваным кровяным пятном с обводкой
+    canvas.drawCircle(Offset(size.width * 0.8, size.height * 0.5), 5.5, bloodPaint);
+    canvas.drawCircle(Offset(size.width * 0.8, size.height * 0.5), 5.5, strokePaint..strokeWidth = 1.0);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
 
   // =========================================================================
   // МАКСИМАЛЬНО ДЕТАЛИЗИРОВАННЫЙ ЗАДНИЙ ФОН: 3D ПЛИТКА И ГОТИЧЕСКИЕ СВОДЫ КРЫШИ
@@ -3874,7 +3894,7 @@ class _DetailedCrabClawPainter extends CustomPainter {
   final bool isOpen;
   _DetailedCrabClawPainter({required this.isOpen});
 
-    @override
+      @override
   void paint(Canvas canvas, Size size) {
     final clawPaint = Paint()..color = const Color(0xFF2E6F22)..style = PaintingStyle.fill;
     final strokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.6;
@@ -3882,46 +3902,47 @@ class _DetailedCrabClawPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
 
-    // 1. Прочный сустав-основание (локоть лапы)
+    // 1. Прочный сустав-основание лапы (локоть)
     final jointPath = Path()
       ..moveTo(w * 0.4, h)
-      ..lineTo(w * 0.3, h * 0.5)
-      ..lineTo(w * 0.7, h * 0.5)
+      ..lineTo(w * 0.3, h * 0.6)
+      ..lineTo(w * 0.7, h * 0.6)
       ..lineTo(w * 0.6, h)
       ..close();
     canvas.drawPath(jointPath, clawPaint);
     canvas.drawPath(jointPath, strokePaint);
 
-    // 2. ИСПРАВЛЕНО: Прямой правый зажимающий палец-клинок (без закруглённых дуг!)
+    // 2. ИСПРАВЛЕНО: Правая створка зажима в виде идеального налитого полукруга
     final mainClawPath = Path()
-      ..moveTo(w * 0.3, h * 0.5)
-      ..lineTo(w * 0.25, h * 0.1) // Прямая стремящаяся вверх линия
-      ..lineTo(w * 0.48, h * 0.15)
-      ..lineTo(w * 0.5, h * 0.5)
+      ..moveTo(w * 0.3, h * 0.6)
+      ..cubicTo(w * 0.05, h * 0.4, w * 0.1, 0, w * 0.5, 0)
+      ..lineTo(w * 0.45, h * 0.2)
+      ..cubicTo(w * 0.3, h * 0.3, w * 0.35, h * 0.5, w * 0.7, h * 0.6)
       ..close();
     canvas.drawPath(mainClawPath, clawPaint);
     canvas.drawPath(mainClawPath, strokePaint);
 
-    // 3. ИСПРАВЛЕНО: Прямой левый зажимающий палец (раскрыт или сомкнут по прямым весовым линиям)
+    // 3. ИСПРАВЛЕНО: Левая створка зажима тоже идет плавным полукругом
     final movingFingerPath = Path();
     if (isOpen) {
-      movingFingerPath.moveTo(w * 0.48, h * 0.15);
-      movingFingerPath.lineTo(w * 0.85, h * 0.05); // Прямой раскрытый зажим вбок
-      movingFingerPath.lineTo(w * 0.65, h * 0.45);
+      movingFingerPath.moveTo(w * 0.45, h * 0.25);
+      movingFingerPath.cubicTo(w * 0.75, h * 0.1, w * 0.95, h * 0.2, w * 0.85, h * 0.5);
+      movingFingerPath.lineTo(w * 0.6, h * 0.45);
     } else {
-      movingFingerPath.moveTo(w * 0.45, h * 0.15);
-      movingFingerPath.lineTo(w * 0.60, h * 0.12); // Прямой плотный зажим
-      movingFingerPath.lineTo(w * 0.55, h * 0.45);
+      movingFingerPath.moveTo(w * 0.42, h * 0.15);
+      movingFingerPath.cubicTo(w * 0.65, h * 0.2, w * 0.75, h * 0.35, w * 0.65, h * 0.55);
+      movingFingerPath.lineTo(w * 0.52, h * 0.42);
     }
     movingFingerPath.close();
     canvas.drawPath(movingFingerPath, clawPaint);
     canvas.drawPath(movingFingerPath, strokePaint);
 
-    // 4. ТЕКСТУРА: 2 мелких острых зубчика
+    // 4. ТЕКСТУРА: Ровно 2 мелких острых зубца
     final toothPaint = Paint()..color = Colors.white70..style = PaintingStyle.fill;
     canvas.drawTriangle(Offset(w * 0.38, h * 0.25), Offset(w * 0.34, h * 0.28), Offset(w * 0.42, h * 0.29), toothPaint);
     canvas.drawTriangle(Offset(w * 0.46, h * 0.32), Offset(w * 0.42, h * 0.35), Offset(w * 0.48, h * 0.36), toothPaint);
   }
+
 
 
   @override
@@ -3983,17 +4004,15 @@ extension _CanvasTriangleExt on Canvas {
 // =========================================================================
 
 class _GoldWingsPainter extends CustomPainter {
-  @override
+    @override
   void paint(Canvas canvas, Size size) {
     final goldPaint = Paint()
-      // ИСПРАВЛЕHО: Чистый, переливающийся жёлто-золотой градиент металлов статуи!
-      ..shader = const LinearGradient(
-        colors: [Color(0xFFFFEE58), Color(0xFFFFD54F), Color(0xFFFFC107), Color(0xFFFFEE58)],
-      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
+      // ИСПРАВЛЕНО: Убрали оранжевый! Теперь крылья залиты чистым, благородным ярко-жёлтым цветом
+      ..color = const Color(0xFFFFD54F) // Точный оттенок маски орла на Тотеме
       ..style = PaintingStyle.fill;
       
-    // ИСПРАВЛЕHО: Обводка крыльев Тотема теперь тоже тёмно-золотая, никакой коричневой грязи!
-    final strokePaint = Paint()..color = const Color(0xFFE65100)..style = PaintingStyle.stroke..strokeWidth = 1.2;
+    // Тонкий контрастный чёрный контур для перьев
+    final strokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.1;
 
     final path = Path();
     path.moveTo(size.width * 0.5, size.height);
@@ -4012,6 +4031,7 @@ class _GoldWingsPainter extends CustomPainter {
       canvas.drawLine(Offset(size.width * (0.5 + f), size.height * (0.5 + f)), Offset(size.width * (0.9 - f), size.height * (0.15 + f)), strokePaint);
     }
   }
+
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
