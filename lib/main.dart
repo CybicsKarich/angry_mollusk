@@ -3664,38 +3664,7 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
     );
   }
 
-  // ВЕКТОРНЫЙ ХУДОЖHИК ОБРУБКА СТВОЛА КЛЕШНИ С ИЗРЕЗАННЫМ КРАЕМ
-class _RaggedStumpPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final meatPaint = Paint()..color = const Color(0xFF33691E)..style = PaintingStyle.fill;
-    final strokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.6;
-    final bloodPaint = Paint()..color = const Color(0xFFC62828)..style = PaintingStyle.fill;
-
-    final path = Path();
-    path.moveTo(0, size.height * 0.15);
-    path.lineTo(size.width * 0.8, size.height * 0.15); // Верхняя грань
-    
-    // ИСПРАВЛЕHО: Изрезанный, рваный зигзагообразный край сустава на стыке с телом!
-    path.lineTo(size.width * 0.75, size.height * 0.35);
-    path.lineTo(size.width * 0.90, size.height * 0.50);
-    path.lineTo(size.width * 0.70, size.height * 0.65);
-    path.lineTo(size.width * 0.85, size.height * 0.85);
-    
-    path.lineTo(0, size.height * 0.85); // Нижня граница ствола
-    path.close();
-
-    canvas.drawPath(path, meatPaint);
-    canvas.drawPath(path, strokePaint);
-
-    // Сверху заляпываем стык рваным кровяным пятном с обводкой
-    canvas.drawCircle(Offset(size.width * 0.8, size.height * 0.5), 5.5, bloodPaint);
-    canvas.drawCircle(Offset(size.width * 0.8, size.height * 0.5), 5.5, strokePaint..strokeWidth = 1.0);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
+  
   
   // Интерактивный кубик выбора фраз
   Widget _buildChoiceBox(String text, int choiceId) {
@@ -4130,6 +4099,39 @@ class _CastleSecretMouthPainter extends CustomPainter {
       canvas.drawRect(Rect.fromLTWH(offsetX, offsetY, 1.8, 1.8), whitePaint);
     }
   }
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// ВЕКТОРНЫЙ ХУДОЖHИК ОБРУБКА СТВОЛА КЛЕШНИ С ИЗРЕЗАННЫМ КРАЕМ
+class _RaggedStumpPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final meatPaint = Paint()..color = const Color(0xFF33691E)..style = PaintingStyle.fill;
+    final strokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.6;
+    final bloodPaint = Paint()..color = const Color(0xFFC62828)..style = PaintingStyle.fill;
+
+    final path = Path();
+    path.moveTo(0, size.height * 0.15);
+    path.lineTo(size.width * 0.8, size.height * 0.15); // Верхняя грань
+    
+    // ИСПРАВЛЕHО: Изрезанный, рваный зигзагообразный край сустава на стыке с телом!
+    path.lineTo(size.width * 0.75, size.height * 0.35);
+    path.lineTo(size.width * 0.90, size.height * 0.50);
+    path.lineTo(size.width * 0.70, size.height * 0.65);
+    path.lineTo(size.width * 0.85, size.height * 0.85);
+    
+    path.lineTo(0, size.height * 0.85); // Нижня граница ствола
+    path.close();
+
+    canvas.drawPath(path, meatPaint);
+    canvas.drawPath(path, strokePaint);
+
+    // Сверху заляпываем стык рваным кровяным пятном с обводкой
+    canvas.drawCircle(Offset(size.width * 0.8, size.height * 0.5), 5.5, bloodPaint);
+    canvas.drawCircle(Offset(size.width * 0.8, size.height * 0.5), 5.5, strokePaint..strokeWidth = 1.0);
+  }
+
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
