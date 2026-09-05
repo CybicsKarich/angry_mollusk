@@ -104,7 +104,7 @@ static Future<void> playPaperRustle() async {
   static Future<void> startCastleDrops() async {
     try {
       // 1. Принудительно тушим фоновую музыку меню и ливень 5 уровня, если они играли
-      await _bgmPlayer.stop();
+      await _finalMenuPlayer.stop();
       await _rainPlayer.stop();
       
       // 2. Настраиваем плеер капель на среднюю, гнетущую громкость
