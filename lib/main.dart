@@ -3972,15 +3972,18 @@ extension _CanvasTriangleExt on Canvas {
 // =========================================================================
 
 class _GoldWingsPainter extends CustomPainter {
-    @override
+  @override
   void paint(Canvas canvas, Size size) {
+    // ИСПРАВЛЕНО: Никакого чёрного и градиентов! Чистый, монолитный ярко-жёлтый цвет маски орла!
     final goldPaint = Paint()
-      // ИСПРАВЛЕНО: Убрали оранжевый! Теперь крылья залиты чистым, благородным ярко-жёлтым цветом
-      ..color = const Color(0xFFFFD54F) // Точный оттенок маски орла на Тотеме
+      ..color = const Color(0xFFFFD54F) // Твой фирменный ярко-жёлтый лорный цвет
       ..style = PaintingStyle.fill;
       
-    // Тонкий контрастный чёрный контур для перьев
-    final strokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.1;
+    // Тонкий аккуратный чёрный контур для прорисовки перьев орла
+    final strokePaint = Paint()
+      ..color = Colors.black
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
 
     final path = Path();
     path.moveTo(size.width * 0.5, size.height);
@@ -3993,6 +3996,7 @@ class _GoldWingsPainter extends CustomPainter {
     canvas.drawPath(path, goldPaint);
     canvas.drawPath(path, strokePaint);
 
+    // Прорисовываем перья-прорези внутри крыльев
     for (int i = 1; i < 6; i++) {
       double f = i * 0.08;
       canvas.drawLine(Offset(size.width * (0.5 - f), size.height * (0.5 + f)), Offset(size.width * (0.1 + f), size.height * (0.15 + f)), strokePaint);
@@ -4003,6 +4007,7 @@ class _GoldWingsPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
+
 
 class _CastleFloorTilesPainter extends CustomPainter {
   @override
