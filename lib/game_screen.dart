@@ -101,8 +101,11 @@ class GameScreen extends StatelessWidget {
                               decoration: const BoxDecoration(color: Color(0xFF4CAF50), shape: BoxShape.circle),
                               child: RawMaterialButton(
                                 shape: const CircleBorder(),
-                                onPressed: () {
-                                  AudioManager.stopAllLevelSounds();
+                                 onPressed: () {
+                                  // ИСПРАВЛЕHО: Глушим ливень 5 уровня или капли 6 уровня, 
+                                  // и принудительно возвращаем красивую фоновую музыку меню!
+                                  AudioManager.stopLevelAudioAndPlayMenu();
+                                  
                                   game.overlays.remove('VictoryMenu');
                                   Navigator.pop(context); // Возвращает в меню уровней
                                 },
