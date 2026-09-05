@@ -3977,61 +3977,49 @@ extension _CanvasTriangleExt on Canvas {
 // =========================================================================
 // КЛАССЫ РЕЛЬЕФНЫХ ХУДОЖНИКОВ ДЛЯ БЕСКОНЕЧНОГО 3D ОКРУЖЕНИЯ ТРОННОГО ЗАЛА
 // =========================================================================
-
-class _GoldWingsPainter extends CustomPainter {
+  class _GoldWingsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     canvas.save();
 
     // 1. НАШ ЧИСТЫЙ ЯРКО-ЖЁЛТЫЙ ЦВЕТ МАСКИ ОРЛА (СПЛОШНАЯ ЗАЛИВКА)
     final goldPaint = Paint()
-      ..color = const Color(0xFFFFD54F) // Точный жёлтый оттенок без грязи
+      ..color = const Color(0xFFFFD54F) // Точный жёлтый оттенок маски орла
       ..style = PaintingStyle.fill;
       
-    // 2. ИСПРАВЛЕНО: МИНИМАЛЬНЫЙ, ЕДВА ЗАМЕТНЫЙ ТОНКИЙ КОНТУР В ТОН МЕТАЛЛА (НИКАКОГО ЧЕРНОГО!)
+    // 2. УЛЬТРА-МЯГКИЙ ЕДВА ЗАМЕТНЫЙ ВНЕШНИЙ КОНТУР В ТОН МЕТАЛЛА
     final strokePaint = Paint()
-      ..color = const Color(0xFFE65100).withOpacity(0.4) // Мягкий золотисто-оранжевый контур вместо грубого чёрного
+      ..color = const Color(0xFFFFD54F).withOpacity(0.2) // Сделали контур практически прозрачным
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.6; // Ультра-тонкая линия
+      ..strokeWidth = 0.5;
 
     final path = Path();
     
-    // =========================================================================
-    // ИСПРАВЛЕНО: ГЕОМЕТРИЯ ПОЛНОЦЕННЫХ БОЛЬШИХ И МАССИВНЫХ КРЫЛЬЕВ ОРЛА
-    // Сделали размах намного шире, а само полотно крыла — плотным и объёмным
-    // =========================================================================
+    // ГЕОМЕТРИЯ ПОЛНОЦЕННЫХ БOЛЬШИХ И МАССИВНЫХ КРЫЛЬЕВ ОРЛА
     path.moveTo(size.width * 0.5, size.height);
     
     // Левое крыло: мощный, размашистый изгиб далеко влево и вверх
     path.cubicTo(size.width * 0.25, size.height * 0.8, -size.width * 0.2, size.height * 0.2, -size.width * 0.1, -size.height * 0.25); 
-    // Внутренний контур левого крыла (сделали его глубоким и мясистым, увеличив площадь)
     path.cubicTo(size.width * 0.15, size.height * 0.2, size.width * 0.35, size.height * 0.5, size.width * 0.5, size.height * 0.35);
     
     // Правое крыло: симметричный массивный размах вправо и вверх
     path.cubicTo(size.width * 0.65, size.height * 0.5, size.width * 0.85, size.height * 0.2, size.width * 1.1, -size.height * 0.25); 
-    // Внутренний контур правого крыла
     path.cubicTo(size.width * 1.2, size.height * 0.2, size.width * 0.75, size.height * 0.8, size.width * 0.5, size.height);
     path.close();
 
-    // Заливаем большие крылья чистым жёлтым цветом
+    // Заливаем большие крылья монолитным чистым жёлтым цветом
     canvas.drawPath(path, goldPaint);
-    // Кладём микро-обводку
+    // Кладём микро-обводку по внешнему краю
     canvas.drawPath(path, strokePaint);
 
-    // Мягкие внутренние перья-прорези (тоже тонкие и без чёрного цвета)
-    for (int i = 1; i < 6; i++) {
-      double f = i * 0.08;
-      canvas.drawLine(Offset(size.width * (0.5 - f), size.height * (0.4 + f)), Offset(-size.width * 0.05 + (f * size.width), size.height * 0.05 + f), strokePaint);
-      canvas.drawLine(Offset(size.width * (0.5 + f), size.height * (0.4 + f)), Offset(size.width * 1.05 - (f * size.width), size.height * 0.05 + f), strokePaint);
-    }
+    // ИСПРАВЛЕHО: Все оранжевые полоски маленьких перьев полностью удалены из цикла!
+    // Теперь полотно крыла идеально чистое и гладкое.
 
     canvas.restore();
   }
-
-  @override
+ @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
+  }
 
 class _CastleFloorTilesPainter extends CustomPainter {
   @override
