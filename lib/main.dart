@@ -3747,7 +3747,10 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
     );
   }
 
-    Widget _buildGoldTotemFromPhoto(double size) {
+      // =========================================================================
+  // ИСПРАВЛЕHО: ТОТЕМ ГНЕВА БОЛЬШЕ НЕ ЧЁРНЫЙ! УБРАНА СИСТЕМНАЯ ПОДЛОЖКА КОНТЕЙНЕРА
+  // =========================================================================
+  Widget _buildGoldTotemFromPhoto(double size) {
     return SizedBox(
       width: size, 
       height: size * 1.1,
@@ -3780,18 +3783,22 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
               ),
             ),
           ),
-          // Величественные раскинутые золотые крылья орла
+          // ИСПРАВЛЕHО: Обернули крылья в SizedBox, чтобы убрать баг сжатия CustomPaint
           Positioned(
             bottom: size * 0.38, 
-            child: CustomPaint(
-              size: Size(size * 1.05, size * 0.65), 
-              painter: _GoldWingsPainter(),
+            child: SizedBox(
+              width: size * 1.05,
+              height: size * 0.65,
+              child: CustomPaint(
+                painter: _GoldWingsPainter(),
+              ),
             ),
           ),
         ],
       ),
     );
   }
+
 
   Widget _buildCharacterBase(String assetPath, double size, bool isPig) {
     return Container(
@@ -3974,34 +3981,51 @@ extension _CanvasTriangleExt on Canvas {
 class _GoldWingsPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    // ИСПРАВЛЕНО: Никакого чёрного и градиентов! Чистый, монолитный ярко-жёлтый цвет маски орла!
+    canvas.save();
+
+    // 1. НАШ ЧИСТЫЙ ЯРКО-ЖЁЛТЫЙ ЦВЕТ МАСКИ ОРЛА (СПЛОШНАЯ ЗАЛИВКА)
     final goldPaint = Paint()
-      ..color = const Color(0xFFFFD54F) // Твой фирменный ярко-жёлтый лорный цвет
+      ..color = const Color(0xFFFFD54F) // Точный жёлтый оттенок без грязи
       ..style = PaintingStyle.fill;
       
-    // Тонкий аккуратный чёрный контур для прорисовки перьев орла
+    // 2. ИСПРАВЛЕНО: МИНИМАЛЬНЫЙ, ЕДВА ЗАМЕТНЫЙ ТОНКИЙ КОНТУР В ТОН МЕТАЛЛА (НИКАКОГО ЧЕРНОГО!)
     final strokePaint = Paint()
-      ..color = Colors.black
+      ..color = const Color(0xFFE65100).withOpacity(0.4) // Мягкий золотисто-оранжевый контур вместо грубого чёрного
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0;
+      ..strokeWidth = 0.6; // Ультра-тонкая линия
 
     final path = Path();
+    
+    // =========================================================================
+    // ИСПРАВЛЕНО: ГЕОМЕТРИЯ ПОЛНОЦЕННЫХ БОЛЬШИХ И МАССИВНЫХ КРЫЛЬЕВ ОРЛА
+    // Сделали размах намного шире, а само полотно крыла — плотным и объёмным
+    // =========================================================================
     path.moveTo(size.width * 0.5, size.height);
-    path.cubicTo(size.width * 0.35, size.height * 0.6, size.width * 0.15, size.height * 0.3, 0, 0); 
-    path.cubicTo(size.width * 0.18, size.height * 0.4, size.width * 0.38, size.height * 0.65, size.width * 0.5, size.height * 0.45);
-    path.cubicTo(size.width * 0.62, size.height * 0.65, size.width * 0.82, size.height * 0.4, size.width * 1.0, 0); 
-    path.cubicTo(size.width * 0.85, size.height * 0.3, size.width * 0.65, size.height * 0.6, size.width * 0.5, size.height);
+    
+    // Левое крыло: мощный, размашистый изгиб далеко влево и вверх
+    path.cubicTo(size.width * 0.25, size.height * 0.8, -size.width * 0.2, size.height * 0.2, -size.width * 0.1, -size.height * 0.25); 
+    // Внутренний контур левого крыла (сделали его глубоким и мясистым, увеличив площадь)
+    path.cubicTo(size.width * 0.15, size.height * 0.2, size.width * 0.35, size.height * 0.5, size.width * 0.5, size.height * 0.35);
+    
+    // Правое крыло: симметричный массивный размах вправо и вверх
+    path.cubicTo(size.width * 0.65, size.height * 0.5, size.width * 0.85, size.height * 0.2, size.width * 1.1, -size.height * 0.25); 
+    // Внутренний контур правого крыла
+    path.cubicTo(size.width * 1.2, size.height * 0.2, size.width * 0.75, size.height * 0.8, size.width * 0.5, size.height);
     path.close();
 
+    // Заливаем большие крылья чистым жёлтым цветом
     canvas.drawPath(path, goldPaint);
+    // Кладём микро-обводку
     canvas.drawPath(path, strokePaint);
 
-    // Прорисовываем перья-прорези внутри крыльев
+    // Мягкие внутренние перья-прорези (тоже тонкие и без чёрного цвета)
     for (int i = 1; i < 6; i++) {
       double f = i * 0.08;
-      canvas.drawLine(Offset(size.width * (0.5 - f), size.height * (0.5 + f)), Offset(size.width * (0.1 + f), size.height * (0.15 + f)), strokePaint);
-      canvas.drawLine(Offset(size.width * (0.5 + f), size.height * (0.5 + f)), Offset(size.width * (0.9 - f), size.height * (0.15 + f)), strokePaint);
+      canvas.drawLine(Offset(size.width * (0.5 - f), size.height * (0.4 + f)), Offset(-size.width * 0.05 + (f * size.width), size.height * 0.05 + f), strokePaint);
+      canvas.drawLine(Offset(size.width * (0.5 + f), size.height * (0.4 + f)), Offset(size.width * 1.05 - (f * size.width), size.height * 0.05 + f), strokePaint);
     }
+
+    canvas.restore();
   }
 
   @override
