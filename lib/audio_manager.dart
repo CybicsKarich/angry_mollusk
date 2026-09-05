@@ -351,18 +351,24 @@ static Future<void> playPaperRustle() async {
     static void stopAllLevelSounds() async {
     _isStretching = false;
     await stopLevel5Rain(); // ГАРАНТИРОВАННО тушим дождь при любом выходе из уровня!
+    
     try {
       await _stretchPlayer.stop();
-      await _finalMenuPlayer.stop();
       
-      // Запускаем фоновую музыку меню обратно на чистом канале
-      final AudioPlayer menuBgm = AudioPlayer();
-      await menuBgm.setReleaseMode(ReleaseMode.loop);
-      await menuBgm.play(AssetSource('music/bg_music.mp3'));
+      // ИСПРАВЛЕНО: Вместо создания нового плеера menuBgm, 
+      // мы работаем строго с твоей глобальной переменной _finalMenuPlayer!
+      await _finalMenuPlayer.stop();
+      await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
+      
+      // Запускаем фоновую музыку обратно на чистом, контролируемом канале
+      // (Используем твой точный ассет 'music/bg_music.mp3')
+      await _finalMenuPlayer.play(AssetSource('music/bg_music.mp3'));
+      print("Все игровые звуки и капли остановлены. Родная музыка меню перезапущена.");
     } catch (e) {
       print("Ошибка при полной остановке звуков: $e");
     }
   }
+
 
 
   // 3. ИСПРАВЛЕНО: ЗВУК АЧИВКИ МЕДАЛИ
