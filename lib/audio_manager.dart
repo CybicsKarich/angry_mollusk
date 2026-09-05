@@ -98,6 +98,30 @@ static Future<void> playPaperRustle() async {
   }
 }
 
+  // =========================================================================
+  // ЖУТКИЙ ЗВУК КАПЕЛЬ ДЛЯ 6 УРОВНЯ (ГЛУШИТ СТАРЫЕ, НО УСТУПАЕТ НОВЫМ)
+  // =========================================================================
+  static Future<void> startCastleDrops() async {
+    try {
+      // 1. Принудительно тушим фоновую музыку меню и ливень 5 уровня, если они играли
+      await _bgmPlayer.stop();
+      await _rainPlayer.stop();
+      
+      // 2. Настраиваем плеер капель на среднюю, гнетущую громкость
+      await _rainPlayer.setVolume(0.35); 
+      await _rainPlayer.setReleaseMode(ReleaseMode.loop);
+      
+      // 3. Запускаем капли в режиме lowLatency, чтобы нативная система ОС 
+      // автоматически приглушила этот поток, как только появится любой новый эффект!
+      await _rainPlayer.play(
+        AssetSource('music/castle_drops.mp3'), 
+        mode: PlayerMode.lowLatency
+      );
+      print("Жуткий эмбиент капель замка запущен.");
+    } catch (e) {
+      print("Ошибка запуска звука капель замка: $e");
+    }
+  }
 
   // 1. ЗВУК НАТЯЖЕНИЯ РОГАТКИ
   static void playStretch() async {
