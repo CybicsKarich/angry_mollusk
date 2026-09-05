@@ -3693,7 +3693,7 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
 
   Widget _buildNavigationButton() {
     if (_currentFrame == 3 && _selectedChoice == 0) {
-      return const SizedBox(height: 46, child: Center(child: Text("ВЫБЕРИТЕ ОТВЕТ ВАHЯ ДЛЯ ПРОДОЛЖЕHИЯ СЮЖЕTA", style: TextStyle(color: Colors.redAccent, fontSize: 9.5, fontWeight: FontWeight.bold, letterSpacing: 1.1))));
+      return const SizedBox(height: 46, child: Center(child: Text("ВЫБЕРИТЕ ОТВЕТ ШЕРИФА ДЛЯ ПРОДОЛЖЕHИЯ СЮЖЕTA", style: TextStyle(color: Colors.redAccent, fontSize: 9.5, fontWeight: FontWeight.bold, letterSpacing: 1.1))));
     }
     return Container(
       width: double.infinity, constraints: const BoxConstraints(maxWidth: 240), height: 46,
