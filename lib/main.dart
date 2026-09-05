@@ -3,6 +3,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'game_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'audio_manager.dart';
 import 'package:flutter/services.dart'; // Пакет для управления экраном и системными панелями
 import 'package:audioplayers/audioplayers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
