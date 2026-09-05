@@ -65,16 +65,24 @@ class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObse
     _playBackgroundMusic();
   }
 
-  // Этот метод ставит музыку на паузу, если игру свернули
-  @override
+    @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.paused) {
-      _audioPlayer.pause(); // Игра свернута — пауза
-    } else if (state == AppLifecycleState.resumed) {
-      _audioPlayer.resume(); // Игра развернута — продолжаем
+    
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      // =========================================================================
+      // ИГРОК ВЫШЕЛ ИЗ ИГРЫ ИЛИ СВЕРНУЛ ЕЁ: НАМЕРТВО ГЛУШИМ АБСОЛЮТНО ВСЕ ПОТОКИ!
+      // =========================================================================
+      AudioManager.pauseAll(); // Ставим на паузу музыку меню, ливень и жуткие капли
+    } 
+    else if (state == AppLifecycleState.resumed) {
+      // =========================================================================
+      // ИГРОК ВЕРНУЛСЯ В ИГРУ: ВОЗВРАЩАЕМ АКТИВНЫЕ ЗВУКИ НАЗАД
+      // =========================================================================
+      AudioManager.resumeAll(); 
     }
   }
+
 
     Future<void> _playBackgroundMusic() async {
     try {
