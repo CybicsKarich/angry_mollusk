@@ -3347,6 +3347,13 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
   int _selectedChoice = 0; // 0 - нет выбора, 1 - жёсткий, 2 - мягкий
 
   @override
+  void initState() {
+    super.initState();
+    // 1. ИСПРАВЛЕНО: Музыка капель замка стартует строго здесь!
+    AudioManager.startCastleDrops(); 
+  }
+  
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF040407), // Мрак тронного зала
@@ -3533,7 +3540,10 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
     );
   }
 
-      Widget _buildUltraDetailedDonMollusk(double size) {
+    // =========================================================================
+  // ИСПРАВЛЕHО: АНАТОМИЧЕСКАЯ СБОРКА БОССА ВПЛОТHУЮ К ТЕЛУ И БЕЗ КРАСHОГО ПЯТHА
+  // =========================================================================
+  Widget _buildUltraDetailedDonMollusk(double size) {
     return SizedBox(
       width: size,
       height: size,
@@ -3541,75 +3551,63 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
         alignment: Alignment.center,
         clipBehavior: Clip.none,
         children: [
-          // 🐙 1. ЩУПАЛЬЦА НАХОДЯТСЯ ПО КРУГУ ТЕЛА ВНАХЛЁСТ
-          Positioned(bottom: size * 0.22, left: -size * 0.05, child: Transform.rotate(angle: -0.4, child: CustomPaint(size: Size(size * 0.25, size * 0.55), painter: _DetailedTentaclePainter(isLeft: true)))),
-          Positioned(top: size * 0.02, left: size * 0.08, child: Transform.rotate(angle: -1.3, child: CustomPaint(size: Size(size * 0.22, size * 0.50), painter: _DetailedTentaclePainter(isLeft: true)))),
-          Positioned(top: size * 0.02, right: size * 0.08, child: Transform.rotate(angle: 1.3, child: CustomPaint(size: Size(size * 0.22, size * 0.50), painter: _DetailedTentaclePainter(isLeft: false)))),
-          Positioned(bottom: size * 0.22, right: -size * 0.05, child: Transform.rotate(angle: 0.4, child: CustomPaint(size: Size(size * 0.25, size * 0.55), painter: _DetailedTentaclePainter(isLeft: false)))),
+          // 🐙 1. ЩУПАЛЬЦА СТАЛИ НА КАПЛЮ БОЛЬШЕ (size * 0.28) И ЗАЛЕЗАЮТ ПОД ЗЕЛЁHЫЙ КРУГ
+          Positioned(bottom: size * 0.24, left: size * 0.04, child: Transform.rotate(angle: -0.3, child: CustomPaint(size: Size(size * 0.28, size * 0.58), painter: _DetailedTentaclePainter(isLeft: true)))),
+          Positioned(top: size * 0.06, left: size * 0.12, child: Transform.rotate(angle: -1.3, child: CustomPaint(size: Size(size * 0.25, size * 0.53), painter: _DetailedTentaclePainter(isLeft: true)))),
+          Positioned(top: size * 0.06, right: size * 0.12, child: Transform.rotate(angle: 1.3, child: CustomPaint(size: Size(size * 0.25, size * 0.53), painter: _DetailedTentaclePainter(isLeft: false)))),
+          Positioned(bottom: size * 0.24, right: size * 0.04, child: Transform.rotate(angle: 0.4, child: CustomPaint(size: Size(size * 0.28, size * 0.58), painter: _DetailedTentaclePainter(isLeft: false)))),
 
-          // 🐷 2. ИСПРАВЛЕНО: УШИ У ДОНА МОЛЛЮСКА СТАЛИ НАМНОГО БОЛЬШЕ С ЧЁТКОЙ ОБВОДКОЙ
+          // 🐷 2. ИСПРАВЛЕНО: УШКИ СТАЛИ ПОДЛИННЕЕ (ОВАЛЫ) И ЗАЛЕЗАЮТ ПРЯМО НА ТЕЛО БОССА
           Positioned(
-            top: size * 0.12, left: size * 0.04, 
-            child: Container(
-              width: size * 0.22, height: size * 0.22, // Увеличили размер ушек с 0.16 до 0.22!
-              decoration: BoxDecoration(
-                color: const Color(0xFF689F38), shape: BoxShape.circle, 
-                border: Border.all(color: Colors.black, width: 2.0), // Плотный чёрный контур
-              ),
-              child: Center(child: Container(width: size * 0.11, height: size * 0.11, decoration: const BoxDecoration(color: Color(0xFF558B2F), shape: BoxShape.circle))),
-            ),
-          ),
-          Positioned(
-            top: size * 0.12, right: size * 0.04, 
-            child: Container(
-              width: size * 0.22, height: size * 0.22, 
-              decoration: BoxDecoration(
-                color: const Color(0xFF689F38), shape: BoxShape.circle, 
-                border: Border.all(color: Colors.black, width: 2.0),
-              ),
-              child: Center(child: Container(width: size * 0.11, height: size * 0.11, decoration: const BoxDecoration(color: Color(0xFF558B2F), shape: BoxShape.circle))),
-            ),
-          ),
-
-          // 🦀 3. ДВЕ НИЖНИЕ КЛЕШНИ ПОЛУКРУГОМ ПО БОКАМ ОСНОВАНИЯ
-          Positioned(
-            bottom: size * 0.15, left: -size * 0.04,
-            child: CustomPaint(size: Size(size * 0.32, size * 0.32), painter: _DetailedCrabClawPainter(isOpen: false)),
-          ),
-          Positioned(
-            bottom: size * 0.15, right: -size * 0.04,
-            child: CustomPaint(size: Size(size * 0.32, size * 0.32), painter: _DetailedCrabClawPainter(isOpen: false)),
-          ),
-
-          // 🦀 4. ВЕРХНЯЯ КЛЕШНЯ ПОЛУКРУГОМ НА МАКУШКЕ
-          Positioned(
-            top: -size * 0.08, left: size * 0.34,
-            child: CustomPaint(size: Size(size * 0.32, size * 0.32), painter: _DetailedCrabClawPainter(isOpen: true)),
-          ),
-
-          // =========================================================================
-          // 🩸 5. ИСПРАВЛЕНО: ОБВЕДЁННЫЙ СТВОЛ КЛЕШНИ С ИЗРЕЗАННЫМ-РВАНЫМ КРАЕМ СРЕЗА!
-          // =========================================================================
-          Positioned(
-            top: size * 0.36, left: -size * 0.04,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                // ИСПРАВЛЕНО: Обведенный ствол оторванной клешни (половина от лапы)
-                CustomPaint(
-                  size: Size(size * 0.12, size * 0.14),
-                  painter: _RaggedStumpPainter(), // Кастомный рисовальщик рваного края
+            top: size * 0.10, left: size * 0.08, 
+            child: Transform.rotate(
+              angle: -0.2,
+              child: Container(
+                width: size * 0.18, height: size * 0.26, // Сделали уши длинными вытянутыми овалами
+                decoration: BoxDecoration(
+                  color: const Color(0xFF689F38),
+                  borderRadius: BorderRadius.circular(size * 0.09), // Скругление под длинный овал
+                  border: Border.all(color: Colors.black, width: 1.8),
                 ),
-                // Белый кончик кости внутри мяса раны
-                Positioned(
-                  left: 3, top: 4,
-                  child: Container(width: 4, height: 6, decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(1))),
+                child: Center(child: Container(width: size * 0.08, height: size * 0.14, decoration: BoxDecoration(color: const Color(0xFF558B2F), borderRadius: BorderRadius.circular(size * 0.05)))),
+              ),
+            ),
+          ),
+          Positioned(
+            top: size * 0.10, right: size * 0.08, 
+            child: Transform.rotate(
+              angle: 0.2,
+              child: Container(
+                width: size * 0.18, height: size * 0.26, 
+                decoration: BoxDecoration(
+                  color: const Color(0xFF689F38),
+                  borderRadius: BorderRadius.circular(size * 0.09),
+                  border: Border.all(color: Colors.black, width: 1.8),
                 ),
-              ],
+                child: Center(child: Container(width: size * 0.08, height: size * 0.14, decoration: BoxDecoration(color: const Color(0xFF558B2F), borderRadius: BorderRadius.circular(size * 0.05)))),
+              ),
             ),
           ),
 
-          // 🟢 6. ЦЕНТРАЛЬНОЕ ЗЕЛИКОВОЕ ТЕЛО БОССА
+          // 🦀 3. ДВЕ НИЖНИЕ КЛЕШНИ: Идут строго ВВЕРХ, одинаковые полукругом и залезают на подложку
+          Positioned(
+            bottom: size * 0.16, left: -size * 0.02,
+            child: Transform.rotate(angle: -0.1, child: CustomPaint(size: Size(size * 0.34, size * 0.34), painter: _DetailedCrabClawPainter(isOpen: false))),
+          ),
+          Positioned(
+            bottom: size * 0.16, right: -size * 0.02,
+            child: Transform.rotate(angle: 0.1, child: CustomPaint(size: Size(size * 0.34, size * 0.34), painter: _DetailedCrabClawPainter(isOpen: false))),
+          ),
+
+          // 🦀 4. ВЕРХНЯЯ КЛЕШНЯ: Тоже идёт строго вверх по центру макушки головы
+          Positioned(
+            top: -size * 0.12, left: size * 0.33,
+            child: CustomPaint(size: Size(size * 0.34, size * 0.34), painter: _DetailedCrabClawPainter(isOpen: true)),
+          ),
+
+          // ИСПРАВЛЕНО: Красное пятно крови и обрубок полностью УДАЛЕНЫ с тела Босса по ТЗ!
+
+          // 🟢 5. ЦЕНТРАЛЬНОЕ ЗЕЛИКОВОЕ ТЕЛО БОССА (Ложится ПОВЕРХ всех залезших конечностей)
           Container(
             width: size * 0.70,
             height: size * 0.70,
@@ -3631,6 +3629,7 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
       ),
     );
   }
+
 
   // =========================================================================
   // МАКСИМАЛЬНО ДЕТАЛИЗИРОВАННЫЙ ЗАДНИЙ ФОН: 3D ПЛИТКА И ГОТИЧЕСКИЕ СВОДЫ КРЫШИ
@@ -3844,15 +3843,18 @@ class _DetailedTentaclePainter extends CustomPainter {
     canvas.drawPath(path, tentaclePaint);
     canvas.drawPath(path, strokePaint);
 
+        // ПРОРАБОТКА: Расставляем присоски, сделав их на каплю МЕНЬШЕ для детализации
     for (int i = 1; i <= 6; i++) {
       double factor = i * 0.14;
       double cx = isLeft ? w * (0.32 - factor * 0.15) : w * (0.68 + factor * 0.15);
       double cy = h * factor;
-      double radius = 3.4 - (i * 0.22); 
       
-      if (radius > 1.0) {
+      // ИСПРАВЛЕHО: Уменьшили базовый радиус присосок с 3.4 до 2.2!
+      double radius = 2.2 - (i * 0.15); 
+      
+      if (radius > 0.6) {
         canvas.drawCircle(Offset(cx, cy), radius, suctionPaint);
-        canvas.drawCircle(Offset(cx, cy), radius, strokePaint..strokeWidth = 0.5);
+        canvas.drawCircle(Offset(cx, cy), radius, strokePaint..strokeWidth = 0.4);
         canvas.drawCircle(Offset(cx, cy), radius * 0.4, suctionHolePaint);
       }
     }
