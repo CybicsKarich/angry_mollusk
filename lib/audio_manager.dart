@@ -348,24 +348,29 @@ static Future<void> playPaperRustle() async {
     }
   }
 
-      static void stopAllLevelSounds() async {
+    static void stopAllLevelSounds() async {
     _isStretching = false;
-    await stopLevel5Rain(); // Тушим дождь 5 уровня и капли 6 уровня
+    await stopLevel5Rain(); // ГАРАНТИРОВАННО тушим дождь и капли 6 уровня!
     
     try {
-      // ИСПРАВЛЕНО: Начисто останавливаем абсолютно ВСЕ каналы звуков, которые могут висеть в памяти!
+      // Начисто тушим натяжение рогатки Вани
       await _stretchPlayer.stop();
+      
+      // ИСПРАВЛЕНО: Намертво выключаем плеер эффектов, чтобы звук победы не циклился в меню!
+      await _fxPlayer.stop();
+      
+      // Сбрасываем старый системный плеер меню
       await _finalMenuPlayer.stop();
+      await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
       
-      // Если у тебя в менеджере есть плеер под звуки победы/эффектов (например, _sfxPlayer или подобные)
-      // Обязательно допиши сюда их остановку, например:
-      // await _victoryPlayer.stop(); 
-      
-      print("Полная зачистка игровых аудиопотоков завершена успешно.");
+      // Запускаем фоновую музыку обратно на чистом канале
+      await _finalMenuPlayer.play(AssetSource('music/bg_music.mp3'));
+      print("Полная зачистка всех аудиопотоков (включая _fxPlayer) завершена.");
     } catch (e) {
-      print("Ошибка при полной остановке звуков уровня: $e");
+      print("Ошибка при полной остановке звуков: $e");
     }
   }
+
 
 
 
