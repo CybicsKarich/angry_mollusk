@@ -50,7 +50,7 @@ class MainMenuScreen extends StatefulWidget {
 }
 
 class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObserver {
-  // ИСПРАВЛЕНО: Убрали late, сделали плеер nullable, чтобы проверять его наличие перед созданием
+  // Оставляем плеер nullable, чтобы избежать заиканий при камбэке
   AudioPlayer? _audioPlayer; 
   double _currentVolume = 0.5; // Громкость по умолчанию 50%
 
@@ -60,23 +60,36 @@ class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObse
     // Включаем слежку за тем, свернули ли игру
     WidgetsBinding.instance.addObserver(this);
     
-    // ИСПРАВЛЕНО: Сначала полностью выжигаем все игровые шумы и зацикленные фанфары!
+    // Принудительно выжигаем все игровые шумы, капли 6 уровня и зацикленные победы!
     AudioManager.stopAllLevelSounds();
     
-    // ИСПРАВЛЕНО: Создаём плеер ТОЛЬКО если его ещё нет в памяти! Это уберёт заикание и тишину при разворачивании.
+    // ИСПРАВЛЕНО: Создаём плеер только один раз, убирая дублирование при перезапусках
     if (_audioPlayer == null) {
       _audioPlayer = AudioPlayer();
       _audioPlayer!.setVolume(_currentVolume); // Задаем громкость
-      _playBackgroundMusic();
+      _playBackgroundMusic(); // Запускаем фоновую музыку
     }
   }
 
+  // ИСПРАВЛЕНО: Объединили два метода dispose() в один монолитный, убрав ошибку дублирования!
   @override
   void dispose() {
-    // Обязательно чистим наблюдателя и плеер при уничтожении экрана
-    WidgetsBinding.instance.removeObserver(this);
-    _audioPlayer?.dispose();
+    WidgetsBinding.instance.removeObserver(this); // Отключаем слежку за телефоном
+    _audioPlayer?.dispose(); // Безопасно чистим плеер из памяти, если он существует
     super.dispose();
+  }
+
+  // Твой метод запуска музыки (ИСПРАВЛЕНО: Добавлены безопасные операторы вызова плеера !)
+  void _playBackgroundMusic() async {
+    try {
+      if (_audioPlayer != null) {
+        // ИСПРАВЛЕНО: Добавлен ! перед методами, так как мы точно знаем, что плеер создан
+        await _audioPlayer!.setReleaseMode(ReleaseMode.loop);
+        await _audioPlayer!.play(AssetSource('music/bg_music.mp3'));
+      }
+    } catch (e) {
+      print("Ошибка запуска фоновой музыки меню: $e");
+    }
   }
 
   @override
@@ -84,38 +97,15 @@ class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObse
     super.didChangeAppLifecycleState(state);
     
     if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
-      // =========================================================================
-      // ИГРОК ВЫШЕЛ ИЗ ИГРЫ ИЛИ СВЕРНУЛ ЕЁ: НАМЕРТВО ГЛУШИМ АБСОЛЮТНО ВСЕ ПОТОКИ!
-      // =========================================================================
-      _audioPlayer?.pause(); // ИСПРАВЛЕНО: Безопасная пауза локальной музыки меню
-      AudioManager.pauseAll(); // Ставим на паузу ливень и жуткие капли 6 уровня
+      _audioPlayer?.pause(); 
+      AudioManager.pauseAll(); 
     } 
     else if (state == AppLifecycleState.resumed) {
-      // =========================================================================
-      // ИГРОК ВЕРНУЛСЯ В ИГРУ: ВОЗВРАЩАЕМ АКТИВНЫЕ ЗВУКИ НАЗАД
-      // =========================================================================
-      _audioPlayer?.resume(); // ИСПРАВЛЕНО: Мягкое возобновление музыки главного меню без затыканий!
+      _audioPlayer?.resume(); 
       AudioManager.resumeAll(); 
     }
   }
 
-
-
-    Future<void> _playBackgroundMusic() async {
-    try {
-      await _audioPlayer.setReleaseMode(ReleaseMode.loop);
-      await _audioPlayer.play(AssetSource('music/bg_music.mp3'));
-    } catch (e) {
-      debugPrint("Музыка пока не загружена в ассеты: $e");
-    }
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this); // Выключаем слежку
-    _audioPlayer.dispose();
-    super.dispose();
-  }
 
   // Метод для открытия экрана настроек
   void _openSettings() async {
