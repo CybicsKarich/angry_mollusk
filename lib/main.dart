@@ -92,7 +92,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObse
     }
   }
 
-  @override
+    @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     
@@ -101,10 +101,28 @@ class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObse
       AudioManager.pauseAll(); 
     } 
     else if (state == AppLifecycleState.resumed) {
+      // ИСПРАВЛЕНО: Если мы вернулись в приложение и мы на главном экране — проверяем звук!
       _audioPlayer?.resume(); 
       AudioManager.resumeAll(); 
     }
   }
+
+  // =========================================================================
+  // ИСПРАВЛЕНО: ХАК ДЛЯ ПЕРЕХВАТА ФОКУСА! Каждый раз, когда игрок возвращается 
+  // с уровня назад в меню, этот системный триггер заново включит музыку!
+  // =========================================================================
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Как только экран меню снова стал активным в системе навигаторов Flutter
+    // Начисто выжигаем зацикленные звуки победы и заводим фоновый трек меню!
+    AudioManager.stopAllLevelSounds();
+    
+    if (_audioPlayer != null) {
+      _playBackgroundMusic();
+    }
+  }
+
 
 
   // Метод для открытия экрана настроек
