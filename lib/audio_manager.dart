@@ -256,16 +256,26 @@ static Future<void> playPaperRustle() async {
     }
   }
 
-  // 7. МГНОВЕННЫЙ ЗВУК ПОБЕДЫ (Глобальный плеер вне движка)
+    // =========================================================================
+  // ИСПРАВЛЕНО: ЗВУК ПОБЕДЫ ИГРАЕТ БЕЗ ДУБЛЯЖА И НЕ ПОРТИТ МУЗЫКУ МЕНЮ!
+  // =========================================================================
   static void playVictory() async {
     stopStretch();
     try {
-      await _finalMenuPlayer.stop();
-      await _finalMenuPlayer.play(AssetSource('audio/victory_screamer.MP3'));
+      // 1. ИСПРАВЛЕНО: Перед запуском сбрасываем плеер эффектов, чтобы убрать эхо и дублирование!
+      await _fxPlayer.stop();
+      
+      // Отключаем бесконечный повтор для эффекта победы
+      await _fxPlayer.setReleaseMode(ReleaseMode.release);
+      
+      // 2. ИСПРАВЛЕНО: Перенесли трек на _fxPlayer, чтобы он больше не затирал _finalMenuPlayer!
+      await _fxPlayer.play(AssetSource('audio/victory_screamer.MP3'));
+      print("Звук победы успешно запущен на канале эффектов в один поток.");
     } catch (e) {
       print("Ошибка звука победы: $e");
     }
   }
+
 
   // 8. МГНОВЕННЫЙ ЗВУК ПРОИГРЫША
   static void playGameOver() async {
