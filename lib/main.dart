@@ -54,16 +54,20 @@ class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObse
   late AudioPlayer _audioPlayer;
   double _currentVolume = 0.5; // Громкость по умолчанию 50%
 
-  @override
+    @override
   void initState() {
     super.initState();
     // Включаем слежку за тем, свернули ли игру
     WidgetsBinding.instance.addObserver(this);
     
+    // ИСПРАВЛЕНО: Перед стартом музыки меню полностью выжигаем ливень, капли 6 уровня и ярость!
+    AudioManager.stopAllLevelSounds();
+    
     _audioPlayer = AudioPlayer();
     _audioPlayer.setVolume(_currentVolume); // Задаем громкость
     _playBackgroundMusic();
   }
+
 
     @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
