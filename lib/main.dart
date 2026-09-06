@@ -114,7 +114,8 @@ class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObse
       MaterialPageRoute(
         builder: (context) => SettingsScreen(
           initialVolume: _currentVolume,
-          audioPlayer: _audioPlayer,
+                    // ИСПРАВЛЕНО: Передаём плеер как не-null объект через оператор !
+          audioPlayer: _audioPlayer!,
         ),
       ),
     );
