@@ -49,27 +49,37 @@ class MainMenuScreen extends StatefulWidget {
   State<MainMenuScreen> createState() => _MainMenuScreenState();
 }
 
-// ЗАМЕНИ СТАРУЮ СТРОКУ ОБЪЯВЛЕНИЯ КЛАССА НА ЭТУ:
 class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObserver {
-  late AudioPlayer _audioPlayer;
+  // ИСПРАВЛЕНО: Убрали late, сделали плеер nullable, чтобы проверять его наличие перед созданием
+  AudioPlayer? _audioPlayer; 
   double _currentVolume = 0.5; // Громкость по умолчанию 50%
 
-    @override
+  @override
   void initState() {
     super.initState();
     // Включаем слежку за тем, свернули ли игру
     WidgetsBinding.instance.addObserver(this);
     
-    // ИСПРАВЛЕНО: Перед стартом музыки меню полностью выжигаем ливень, капли 6 уровня и ярость!
+    // ИСПРАВЛЕНО: Сначала полностью выжигаем все игровые шумы и зацикленные фанфары!
     AudioManager.stopAllLevelSounds();
     
-    _audioPlayer = AudioPlayer();
-    _audioPlayer.setVolume(_currentVolume); // Задаем громкость
-    _playBackgroundMusic();
+    // ИСПРАВЛЕНО: Создаём плеер ТОЛЬКО если его ещё нет в памяти! Это уберёт заикание и тишину при разворачивании.
+    if (_audioPlayer == null) {
+      _audioPlayer = AudioPlayer();
+      _audioPlayer!.setVolume(_currentVolume); // Задаем громкость
+      _playBackgroundMusic();
+    }
   }
 
+  @override
+  void dispose() {
+    // Обязательно чистим наблюдателя и плеер при уничтожении экрана
+    WidgetsBinding.instance.removeObserver(this);
+    _audioPlayer?.dispose();
+    super.dispose();
+  }
 
-    @override
+  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     
@@ -77,14 +87,14 @@ class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObse
       // =========================================================================
       // ИГРОК ВЫШЕЛ ИЗ ИГРЫ ИЛИ СВЕРНУЛ ЕЁ: НАМЕРТВО ГЛУШИМ АБСОЛЮТНО ВСЕ ПОТОКИ!
       // =========================================================================
-      _audioPlayer.pause(); // ИСПРАВЛЕHО: Начисто глушим локальную музыку самого главного меню!
+      _audioPlayer?.pause(); // ИСПРАВЛЕНО: Безопасная пауза локальной музыки меню
       AudioManager.pauseAll(); // Ставим на паузу ливень и жуткие капли 6 уровня
     } 
     else if (state == AppLifecycleState.resumed) {
       // =========================================================================
       // ИГРОК ВЕРНУЛСЯ В ИГРУ: ВОЗВРАЩАЕМ АКТИВНЫЕ ЗВУКИ НАЗАД
       // =========================================================================
-      _audioPlayer.resume(); // ИСПРАВЛЕHО: Возвращаем музыку главного меню при камбэке!
+      _audioPlayer?.resume(); // ИСПРАВЛЕНО: Мягкое возобновление музыки главного меню без затыканий!
       AudioManager.resumeAll(); 
     }
   }
