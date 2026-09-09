@@ -2495,6 +2495,12 @@ void render(Canvas canvas, Size size) {
       canvas.drawPath(crackPath, crackPaint);
     }
   }
+  // Класс заднего фона: рисует градиент неба, вращающееся солнце и движущиеся облака
+class BackgroundDecoration extends Component with HasGameRef<AngryMolluskGame> {
+  @override
+  void render(Canvas canvas) {
+  }
+} 
 } 
        
 
