@@ -2254,7 +2254,7 @@ class GameBlock {
   bool isFalling = false;
   bool shouldRemove = false;
   bool isGlassBlock = false;  // Флаг бронестекла Максимов
- bool isCracked = false;    // Появились ли трещины после удара об землю
+  bool isCracked = false;    // Появились ли трещины после удара об землю
   double groundFade = 1.0;   // Плавное исчезновение после падения на землю
   bool isSleeping = true; // Блок спит и стоит мёртво до тех пор, пока в него не попадут
   bool isBroken = false; // Разрушен ли блок напополам
@@ -2266,6 +2266,7 @@ class GameBlock {
   bool isSecretChest = false;      // Флаг секретного сундука
   bool chestCapturedBird = false;  // Сработал ли захват Баннихопа
   double chestAnimTimer = 0.0;     // Таймер для логики исчезновения сундука
+  bool _achievementTriggered = false; // Флаг одиночного срабатывания
   
     GameBlock(this.x, this.y, this.w, this.h, this.isStone);
 
@@ -2298,13 +2299,13 @@ class GameBlock {
       return; // Мертвая отсечка, код разрушения ниже не выполнится никогда!
     }
            
-        // ЛОГИКА СЕКРЕТНОГО СУНДУКА IVANDROP С КЛЕШНЕЙ И КРАСИВЫМ ВЫЛЕТОМ ФОТОКАРТОЧКИ
     if (isSecretChest && chestCapturedBird) {
       isSleeping = false; 
       chestAnimTimer += dt;
       
-      // В первую миллисекунду выдаём ачивку и звук фанфар
-      if (chestAnimTimer >= 0.02 && chestAnimTimer < 0.08) {
+      // Исправлено: защита от повторного срабатывания через флаг _achievementTriggered
+      if (chestAnimTimer >= 0.02 && !_achievementTriggered) {
+        _achievementTriggered = true;
         SharedPreferences.getInstance().then((prefs) async {
           final alreadyUnlocked = prefs.getBool('achievement_secret_chest') ?? false;
           if (!alreadyUnlocked) {
@@ -2318,25 +2319,28 @@ class GameBlock {
         });
       }
 
-      // Через 1.5 секунды клешня прячет птицу, и ФОТКА НАЧИНАЕТ ВЫЛЕТАТЬ ИЗ СУНДУКА!
       if (chestAnimTimer >= 1.5) {
         if (game.currentBird != null) {
-          game.currentBird!.shouldRemove = true; // Птица исчезает
+          game.currentBird!.shouldRemove = true;
         }
-        game.showFlyingLosePhoto = true; // Включаем отрисовку фотки
-        // Плавно увеличиваем масштаб фотки от 0.0 до красивого уменьшенного размера 0.45
+        game.showFlyingLosePhoto = true;
         if (game.losePhotoScale < 0.45) {
           game.losePhotoScale += 0.35 * dt; 
         }
       }
 
-      // Через 5.5 секунд плавно закрываем всё и выходим в главное меню карточек
       if (chestAnimTimer >= 5.5) {
         shouldRemove = true;
         game.showFlyingLosePhoto = false;
         game.losePhotoScale = 0.0;
         AudioManager.stopAllLevelSounds();
-        Navigator.of(game.buildContext!).pop(); // Мягкий выход в меню
+        
+        // Исправлено: безопасный переход в меню после завершения кадра
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (game.buildContext != null && Navigator.canPop(game.buildContext!)) {
+            Navigator.of(game.buildContext!).pop();
+          }
+        });
       }
       return; 
     }
@@ -2442,10 +2446,9 @@ class GameBlock {
     }
   }
 
-      void render(Canvas canvas, Size size) {
+void render(Canvas canvas, Size size) {
     if (groundFade <= 0) return;
 
-    // Переводим относительные координаты в реальные пиксели экрана смартфона
     final rect = Rect.fromLTWH(
       size.width * x, 
       size.height * y, 
@@ -2453,7 +2456,6 @@ class GameBlock {
       size.height * h
     );
 
-    // Создаем изолированные кисти с прозрачностью для таяния на земле
     final paint = Paint()
       ..color = (isStone ? const Color(0xFFB0BEC5) : const Color(0xFFFFB74D)).withValues(alpha: groundFade)
       ..style = PaintingStyle.fill;
@@ -2463,11 +2465,9 @@ class GameBlock {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 
-    // Рисуем сам кубик на экране
     canvas.drawRect(rect, paint);
     canvas.drawRect(rect, borderPaint);
 
-    // Рисуем текстуру материалов (дерево или кирпич)
     if (!isStone) {
       final woodPaint = Paint()..color = const Color(0xFFE65100).withValues(alpha: groundFade)..strokeWidth = 1.2;
       canvas.drawLine(Offset(rect.left + 3, rect.top + rect.height * 0.35), Offset(rect.right - 3, rect.top + rect.height * 0.35), woodPaint);
@@ -2478,7 +2478,7 @@ class GameBlock {
       canvas.drawLine(Offset(rect.left + rect.width * 0.7, rect.top + 2), Offset(rect.left + rect.width * 0.7, rect.bottom - 2), stonePaint);
     }
 
-    // НАСТОЯЩИЕ ТРЕЩИНЫ: Появляются, когда блок шмякается об землю острова
+    // ТРЕЩИНЫ (Оставлен один экземпляр)
     if (isCracked) {
       final crackPaint = Paint()
         ..color = const Color(0xFF212121).withValues(alpha: groundFade)
@@ -2489,25 +2489,6 @@ class GameBlock {
       crackPath.moveTo(rect.left + 5, rect.top + 5);
       crackPath.lineTo(rect.left + rect.width * 0.3, rect.top + rect.height * 0.4);
       crackPath.lineTo(rect.left + 2, rect.bottom - 5);
-      crackPath.moveTo(rect.right - 5, rect.bottom - 5);
-      crackPath.lineTo(rect.left + rect.width * 0.6, rect.top + rect.height * 0.5);
-      
-      canvas.drawPath(crackPath, crackPaint);
-    }
-  
-    // МУЛЬТЯШНЫЕ ТРЕЩИНЫ: Рисуются поверх блока, если он жестко шмякнулся о землю скалы
-    if (isCracked) {
-      final crackPaint = Paint()
-        ..color = const Color(0xFF212121).withValues(alpha: groundFade)
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.5;
-        
-      final crackPath = Path();
-      // Левая трещина идет от верхнего левого края к центру
-      crackPath.moveTo(rect.left + 5, rect.top + 5);
-      crackPath.lineTo(rect.left + rect.width * 0.3, rect.top + rect.height * 0.4);
-      crackPath.lineTo(rect.left + 2, rect.bottom - 5);
-      // Правая трещина
       crackPath.moveTo(rect.right - 5, rect.bottom - 5);
       crackPath.lineTo(rect.left + rect.width * 0.6, rect.top + rect.height * 0.5);
       
@@ -2515,12 +2496,7 @@ class GameBlock {
     }
   }
 } 
-// Класс заднего фона: рисует градиент неба, вращающееся солнце и движущиеся облака
-class BackgroundDecoration extends Component with HasGameRef<AngryMolluskGame> {
-  @override
-  void render(Canvas canvas) {
-  }
-}       
+       
 
 // =========================================================================
 // КЛАСС ДЛЯ ВЕКТОРНОГО РИСОВАНИЯ НАСТОЯЩЕЙ КРАБЬЕЙ КЛЕШНИ С ФОТОГРАФИИ
@@ -2713,25 +2689,24 @@ class WantedPosterPainter {
 
 
 
-      // =========================================================================
-    // 4. СТРОГИЙ КОНТРАСТНЫЙ ТЕКСТ
-    // =========================================================================
-    void drawCleanText(String text, double fontSize, double offsetY, {bool isTitle = false}) {
-      final textPainter = TextPainter(
-        text: TextSpan(
-          text: text,
-          style: TextStyle(
-            fontFamily: 'serif',
-            fontSize: fontSize,
-            fontWeight: FontWeight.w900,
-            color: const Color(0xFF1A0A0A),
-            letterSpacing: isTitle ? 3.0 : 1.0,
-          ),
-        ),
-        textDirection: TextDirection.ltr,
-      )..layout();
-      textPainter.paint(canvas, Offset(-textPainter.width / 2, offsetY));
-    }
+      void drawCleanText(String text, double fontSize, double offsetY, {bool isTitle = false}) {
+  final textPainter = TextPainter(
+    text: TextSpan(
+      text: text,
+      style: TextStyle(
+        fontFamily: 'serif',
+        fontSize: fontSize,
+        fontWeight: FontWeight.w900,
+        color: const Color(0xFF1A0A0A),
+        letterSpacing: isTitle ? 3.0 : 1.0,
+      ),
+    ),
+    textDirection: TextDirection.ltr,
+  )..layout();
+  
+  textPainter.paint(canvas, Offset(-textPainter.width / 2, offsetY));
+  textPainter.dispose(); // Освобождаем нативную память
+}
 
     drawCleanText('РАЗЫСКИВАЕТСЯ', 22, -h / 2 + 25, isTitle: true);
 
