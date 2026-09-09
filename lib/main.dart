@@ -3985,12 +3985,14 @@ class _MolluskTentacleWithSuctionsPainter extends CustomPainter {
     canvas.drawPath(path, tentaclePaint);
     canvas.drawPath(path, strokePaint);
 
-    // Расставляем четкие круглые присоски по ходу изгиба щупальца
+    // РАССЧИТЫВАЕМ И ОТРИСОВЫВАЕМ ПРИСОСКИ:
+    final suctionStrokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 0.5;
+
     for (int i = 1; i < 5; i++) {
       double hFactor = i * 0.22;
       double sx = isLeft ? size.width * 0.25 : size.width * 0.75;
       canvas.drawCircle(Offset(sx, size.height * hFactor), 3.0, suctionPaint);
-      canvas.drawCircle(Offset(sx, size.height * hFactor), 3.0, strokePaint..strokeWidth = 0.5);
+      canvas.drawCircle(Offset(sx, size.height * hFactor), 3.0, suctionStrokePaint);
       canvas.drawCircle(Offset(sx, size.height * hFactor), 1.2, suctionHolePaint);
     }
   }
@@ -4095,13 +4097,15 @@ class _CastleCeiling3DPainter extends CustomPainter {
     canvas.drawLine(Offset(0, size.height), Offset(size.width, size.height), beamPaint);
 
     final windowPaint = Paint()..color = const Color(0xFF09090E)..style = PaintingStyle.fill;
+    final windowStrokePaint = Paint()..color = const Color(0xFF09090D)..style = PaintingStyle.stroke..strokeWidth = 1.0;
+    
     double winW = 6;
     double winH = 14;
     for (int i = 1; i < 4; i++) {
       double winX = size.width * (0.25 * i) - (winW / 2);
       Rect winRect = Rect.fromLTWH(winX, size.height - winH - 2, winW, winH);
       canvas.drawRRect(RRect.fromRectAndRadius(winRect, const Radius.circular(2)), windowPaint);
-      canvas.drawRRect(RRect.fromRectAndRadius(winRect, const Radius.circular(2)), beamPaint..strokeWidth = 1.0);
+      canvas.drawRRect(RRect.fromRectAndRadius(winRect, const Radius.circular(2)), windowStrokePaint);
     }
   }
   @override
@@ -4181,9 +4185,11 @@ class _RaggedStumpPainter extends CustomPainter {
     canvas.drawPath(path, meatPaint);
     canvas.drawPath(path, strokePaint);
 
+    final bloodStrokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.0;
+    
     // Сверху заляпываем стык рваным кровяным пятном с обводкой
     canvas.drawCircle(Offset(size.width * 0.8, size.height * 0.5), 5.5, bloodPaint);
-    canvas.drawCircle(Offset(size.width * 0.8, size.height * 0.5), 5.5, strokePaint..strokeWidth = 1.0);
+    canvas.drawCircle(Offset(size.width * 0.8, size.height * 0.5), 5.5, bloodStrokePaint);
   }
 
   @override
