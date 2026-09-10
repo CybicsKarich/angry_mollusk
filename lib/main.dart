@@ -1878,7 +1878,7 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
             AdaptivePositioned(bottom: 12, left: 34, child: _buildWoodenChair()),
             // ЗАМЕНИТЬ ТОЛЬКО ЭТУ СТРОКУ В _buildPage1Frame1:
             AdaptivePositioned(bottom: 22, left: 35, child: _buildCharacterSp('assets/images/bunnyhop.png', 55, isPig: false)),
-           Adaptive Positioned(bottom: 2, left: 62, child: _buildWoodenTable()),
+           AdaptivePositioned(bottom: 2, left: 62, child: _buildWoodenTable()),
             AdaptivePositioned(
               top: 25, left: 10, right: 10,
               child: CustomPaint(
@@ -1907,7 +1907,7 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
             AdaptivePositioned(bottom: 22, left: 19, child: _buildCharacterSp('assets/images/bunnyhop.png', 50, isPig: false)),
             AdaptivePositioned(bottom: 2, left: 44, child: _buildWoodenTable()),
             AdaptivePositioned(bottom: 4, right: 8, child: CustomPaint(size: const Size(26, 60), painter: StickmanSweatPainter())),
-           Adaptive Positioned(
+           AdaptivePositioned(
               top: 15, left: 4, right: 4,
               child: CustomPaint(
                 painter: ComicBubblePainter(tailX: 0.8),
@@ -1975,7 +1975,7 @@ AdaptivePositioned(
                 width: 50, height: 50,
                 child: Stack(
                   children: [
-                   Adaptive Positioned(bottom: 0, left: 4, right: 4, child: Container(width: 42, height: 40, decoration: BoxDecoration(color: const Color(0xFF8D4F37), borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16), bottomLeft: Radius.circular(12), bottomRight: Radius.circular(12)), border: Border.all(color: const Color(0xFF4A2711), width: 2.0)))),
+                   AdaptivePositioned(bottom: 0, left: 4, right: 4, child: Container(width: 42, height: 40, decoration: BoxDecoration(color: const Color(0xFF8D4F37), borderRadius: const BorderRadius.only(topLeft: Radius.circular(16), topRight: Radius.circular(16), bottomLeft: Radius.circular(12), bottomRight: Radius.circular(12)), border: Border.all(color: const Color(0xFF4A2711), width: 2.0)))),
                     AdaptivePositioned(bottom: 2, left: 6, child: Container(width: 3, height: 26, color: const Color(0xFF6E331B))),
                     AdaptivePositioned(bottom: 2, right: 6, child: Container(width: 3, height: 26, color: const Color(0xFF6E331B))),
                     AdaptivePositioned(top: 10, left: 8, right: 8, child: Container(height: 6, decoration: const BoxDecoration(color: Color(0xFF6E331B), borderRadius: BorderRadius.all(Radius.circular(4))))),
@@ -2087,7 +2087,7 @@ AdaptivePositioned(
                     padding: const EdgeInsets.only(top: 10),
                     child: _buildCharacterSp('assets/images/bunnyhop.png', 52, isPig: false),
                   ),
-                 Adaptive Positioned(
+                 AdaptivePositioned(
                     top: 0,
                     child: SizedBox(
                       width: 55, height: 25,
@@ -2115,7 +2115,7 @@ AdaptivePositioned(
             AdaptivePositioned(bottom: 4, right: 46, child: Transform.rotate(angle: -0.1, child: _buildBlisterWidget())), 
 
             // 5. Два облака диалогов
-           Adaptive Positioned(
+           AdaptivePositioned(
               top: 15, left: 6, width: 95,
               child: CustomPaint(
                 painter: ComicBubblePainter(tailX: 0.25),
