@@ -141,31 +141,30 @@ static Future<void> playPaperRustle() async {
   // =========================================================================
   static Future<void> resumeAll() async {
     try {
-      // Возвращаем на паузу только то, что должно играть в данный момент
       await _finalMenuPlayer.resume();
-      await _rainPlayer.resume();
-      print("Все звуковые потоки успешно возобновлены.");
+      if (_rainPlayer.state == PlayerState.paused) {
+        await _rainPlayer.resume();
+      }
+      print("Звуковые потоки возобновлены.");
     } catch (e) {
       print("Ошибка при возобновлении звуков: $e");
     }
   }
 
-  // =========================================================================
-  // ИСПРАВЛЕНО: ТУШИМ ДОЖДЬ/КАПЛИ И ВОЗВРАЩАЕМ МУЗЫКУ МЕНЮ ПРИ ВЫХОДЕ ИЗ БОЯ
-  // =========================================================================
   static Future<void> stopLevelAudioAndPlayMenu() async {
     try {
-      // 1. Начисто тушим игровой плеер, где сидят дождь 5 уровня и капли 6 уровня
+      // 1. Мгновенно глушим все игровые эффекты и звуки уровня
+      _isStretching = false;
+      await _stretchPlayer.stop();
+      await _fxPlayer.stop();
       await _rainPlayer.stop();
+      await stopRage();
       
-      // 2. Возобновляем или запускаем фоновую музыку меню заново
+      // 2. Запускаем фоновую музыку меню по верному пути
       await _finalMenuPlayer.setVolume(0.40);
       await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
-      
-      // Если музыка была остановлена через .stop(), запускаем её из ассетов заново
-      // (замени 'music/menu_theme.mp3' на точное имя твоего главного трека меню, если нужно)
-      await _finalMenuPlayer.play(AssetSource('music/menu_theme.mp3')); 
-      print("Игровые амбиенты остановлены. Фоновая музыка меню возобновлена.");
+      await _finalMenuPlayer.play(AssetSource('music/bg_music.mp3')); 
+      print("Все игровые звуки заглушены. Фоновая музыка меню возобновлена.");
     } catch (e) {
       print("Ошибка при возврате к музыке меню: $e");
     }
@@ -226,36 +225,19 @@ static Future<void> playPaperRustle() async {
     _playSingleEffect('audio/pig_snort.mp3');
   }
 
-  // 6. ХРУСТ БЛОКОВ (Строго 1 раз для камня и 1 раз для дерева за полет!)
-  static void playBlockBreak(bool isStone) async {
+  static void playBlockBreak(bool isStone) {
     if (_isRageSoundPlaying) return;
     if (isStone) {
-      if (!hasStoneToken) return; // Если в этом выстреле камень УЖЕ ХРУСТЕЛ — выходим!
+      if (!hasStoneToken) return;
       hasStoneToken = false;
     } else {
-      if (!hasWoodToken) return; // Если дерево уже хрустело — выходим!
+      if (!hasWoodToken) return;
       hasWoodToken = false;
     }
 
-    try {
-      final AudioPlayer blockPlayer = AudioPlayer();
-      await blockPlayer.setReleaseMode(ReleaseMode.release);
-      
-      String path = isStone ? 'audio/stone_break.mp3' : 'audio/wood_break.mp3';
-      await blockPlayer.play(AssetSource(path), mode: PlayerMode.lowLatency);
-      
-      // ТАЙМЕР ОБРЕЗКИ: Ровно через 1 секунду намертво тушим плеер, убирая бесконечный гул!
-      Future.delayed(const Duration(seconds: 1), () async {
-        try {
-          await blockPlayer.stop();
-          await blockPlayer.dispose();
-        } catch (_) {}
-      });
-    } catch (e) {
-      print("Ошибка звука блока: $e");
-    }
+    String path = isStone ? 'audio/stone_break.mp3' : 'audio/wood_break.mp3';
+    _playSingleEffect(path);
   }
-
     // =========================================================================
   // ИСПРАВЛЕНО: ЗВУК ПОБЕДЫ ИГРАЕТ БЕЗ ДУБЛЯЖА И НЕ ПОРТИТ МУЗЫКУ МЕНЮ!
   // =========================================================================
@@ -277,12 +259,12 @@ static Future<void> playPaperRustle() async {
   }
 
 
-  // 8. МГНОВЕННЫЙ ЗВУК ПРОИГРЫША
   static void playGameOver() async {
     stopStretch();
     try {
-      await _finalMenuPlayer.stop();
-      await _finalMenuPlayer.play(AssetSource('audio/game_over_fail.MP3'));
+      await _fxPlayer.stop();
+      await _fxPlayer.setReleaseMode(ReleaseMode.release);
+      await _fxPlayer.play(AssetSource('audio/game_over_fail.MP3'));
     } catch (e) {
       print("Ошибка звука поражения: $e");
     }
