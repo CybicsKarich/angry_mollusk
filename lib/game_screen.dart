@@ -5,7 +5,6 @@ import 'dart:math';
 import 'package:flame/game.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
-import 'package:flutter/material.dart' hide Wallet;
 import 'package:angry_mollusk/audio_manager.dart'; // Подключаем наш звуковой движок
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -526,9 +525,7 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
       pigs.add(MolluskMaksim(bx + 0.175, 0.57 - 0.019)); 
       pigs.add(MolluskMaksim(bx + 0.105, 0.45 - 0.019));
    
-      pigs.add(MolluskMaksim(bx + 0.035, 0.57 - 0.019)); 
-      pigs.add(MolluskMaksim(bx + 0.175, 0.57 - 0.019)); 
-      pigs.add(MolluskMaksim(bx + 0.105, 0.45 - 0.019));
+      
 
             // ИСПРАВЛЕНО: СУНДУК И ЖЕЛЕЗО СПАВНЯТСЯ ТОЛЬКО ЕСЛИ АЧИВКА ЕЩЁ НЕ ОТКРЫТА!
       // Если игрок уже разгадал тайну сундука, они навсегда исчезают с 1 уровня
