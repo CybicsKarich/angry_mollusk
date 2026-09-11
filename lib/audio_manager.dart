@@ -148,7 +148,7 @@ static Future<void> playPaperRustle() async {
       await _rainPlayer.pause(); 
       await _stretchPlayer.pause(); // Добавлена пауза натяжения рогатки
       print("Все звуковые потоки поставлены на паузу при выходе из приложения.");
-    } catch (e) { ... }
+    } catch (e) {print("Ошибка запуска звука капель кочка: $e");}
   }
 
   static Future<void> resumeAll() async {
@@ -161,7 +161,7 @@ static Future<void> playPaperRustle() async {
         await _rainPlayer.resume();
       }
       print("Звуковые потоки возобновлены.");
-    } catch (e) { ... }
+    } catch (e) {print("Ошибка запуска звука капель кочка: $e");}
   }
 
 
@@ -177,7 +177,7 @@ static Future<void> playPaperRustle() async {
       await _finalMenuPlayer.setVolume(0.40);
       await playBackgroundMusic(); 
       print("Все игровые звуки заглушены. Фоновая музыка меню возобновлена.");
-    } catch (e) { ... }
+    } catch (e) {print("Ошибка запуска звука капель кочка: $e");}
   }
 
 
@@ -291,7 +291,7 @@ static Future<void> playPaperRustle() async {
       temporaryPlayer.onPlayerComplete.listen((_) {
         temporaryPlayer.dispose();
       });
-    } catch (e) { ... }
+    } catch (e) {print("Ошибка запуска звука капель кочка: $e");}
   }
 
 
@@ -305,7 +305,7 @@ static Future<void> playPaperRustle() async {
       await _rainPlayer.setVolume(0.45); 
       await _rainPlayer.setReleaseMode(ReleaseMode.loop); 
       await _rainPlayer.play(AssetSource('music/rain_ambient.mp3'), mode: PlayerMode.lowLatency);
-    } catch (e) { ... }
+    } catch (e) {print("Ошибка запуска звука капель кочка: $e");}
   }
 
 
