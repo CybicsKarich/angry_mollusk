@@ -8,6 +8,14 @@ class AudioManager {
   static final AudioPlayer _fxPlayer = AudioPlayer();
   static final AudioPlayer _rainPlayer = AudioPlayer();
   
+    // Геттер для получения текущего состояния фонового плеера (нужен для main.dart)
+  static AudioPlayer get menuPlayer => _finalMenuPlayer;
+
+  // Метод для изменения громкости музыки на лету из экрана настроек
+  static Future<void> setMenuVolume(double volume) async {
+    await _finalMenuPlayer.setVolume(volume);
+  }
+
   
   static final Random _random = Random();
   static bool _isStretching = false;
@@ -24,7 +32,18 @@ class AudioManager {
     resetTokensForNextBird(); // Заряжаем жетоны при старте
   }
 
-    // =========================================================================
+    // === ВСTАВЛЯЙ НОВЫЙ МЕТОД СТРОГО СЮДА ===
+  static Future<void> playBackgroundMusic() async {
+    try {
+      if (_finalMenuPlayer.state != PlayerState.playing) {
+        await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
+        await _finalMenuPlayer.play(AssetSource('music/bg_music.mp3'));
+      }
+    } catch (e) {
+      print("Ошибка запуска фоновой музыки: $e");
+    }
+  }
+  // =========================================================================
   // ТОЧЕЧНЫЙ БЛОК ЯРОСТИ ВАНЯ-ПТИЦЫ: ПЕРЕМЕННЫЕ И МЕТОДЫ ВМЕСТЕ!
   // =========================================================================
   static AudioPlayer? _ragePlayer;
@@ -123,52 +142,44 @@ static Future<void> playPaperRustle() async {
     }
   }
 
-    // =========================================================================
-  // ИСПРАВЛЕНО: ПРИНУДИТЕЛЬНАЯ ПАУЗА ВСЕХ ПЛЕЕРОВ ПРИ СВЕРТЫВАНИИ ИГРЫ
-  // =========================================================================
-  static Future<void> pauseAll() async {
+      static Future<void> pauseAll() async {
     try {
       await _finalMenuPlayer.pause();
       await _rainPlayer.pause(); 
+      await _stretchPlayer.pause(); // Добавлена пауза натяжения рогатки
       print("Все звуковые потоки поставлены на паузу при выходе из приложения.");
-    } catch (e) {
-      print("Ошибка при паузе звуков: $e");
-    }
+    } catch (e) { ... }
   }
 
-  // =========================================================================
-  // ИСПРАВЛЕНО: ВОЗОБНОВЛЕНИЕ ЗВУКОВ ПРИ ВОЗВРАЩЕНИИ В ПРИЛОЖЕНИЕ
-  // =========================================================================
   static Future<void> resumeAll() async {
     try {
-      await _finalMenuPlayer.resume();
+      // Музыка возобновляется строго из состояния паузы, без перезапусков
+      if (_finalMenuPlayer.state == PlayerState.paused) {
+        await _finalMenuPlayer.resume();
+      }
       if (_rainPlayer.state == PlayerState.paused) {
         await _rainPlayer.resume();
       }
       print("Звуковые потоки возобновлены.");
-    } catch (e) {
-      print("Ошибка при возобновлении звуков: $e");
-    }
+    } catch (e) { ... }
   }
 
-  static Future<void> stopLevelAudioAndPlayMenu() async {
+
+    static Future<void> stopLevelAudioAndPlayMenu() async {
     try {
-      // 1. Мгновенно глушим все игровые эффекты и звуки уровня
       _isStretching = false;
       await _stretchPlayer.stop();
       await _fxPlayer.stop();
       await _rainPlayer.stop();
       await stopRage();
       
-      // 2. Запускаем фоновую музыку меню по верному пути
+      // Запуск фона через единую, защищенную от дублирования точку
       await _finalMenuPlayer.setVolume(0.40);
-      await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
-      await _finalMenuPlayer.play(AssetSource('music/bg_music.mp3')); 
+      await playBackgroundMusic(); 
       print("Все игровые звуки заглушены. Фоновая музыка меню возобновлена.");
-    } catch (e) {
-      print("Ошибка при возврате к музыке меню: $e");
-    }
+    } catch (e) { ... }
   }
+
 
 
   // 1. ЗВУК НАТЯЖЕНИЯ РОГАТКИ
@@ -270,13 +281,9 @@ static Future<void> playPaperRustle() async {
     }
   }
 
-  // 2. ИСПРАВЛЕННЫЙ МЕТОД ОДИНOЧНЫХ ЭФФЕКТОВ (Полная изоляция от дождя!)
-  static void _playSingleEffect(String assetPath) async {
+    static void _playSingleEffect(String assetPath) async {
     try {
-      // Глушим ТОЛЬКО старый FX плеер, плеер дождя (_rainPlayer) здесь не упоминается,
-      // а за счет системного разделения потоков Android больше не будет тушить ливень!
-      await _fxPlayer.stop(); 
-      
+      // Удален лишний вызов await _fxPlayer.stop(), плейеры полностью изолированы
       final AudioPlayer temporaryPlayer = AudioPlayer();
       await temporaryPlayer.setReleaseMode(ReleaseMode.release);
       await temporaryPlayer.play(AssetSource(assetPath), mode: PlayerMode.lowLatency);
@@ -284,26 +291,23 @@ static Future<void> playPaperRustle() async {
       temporaryPlayer.onPlayerComplete.listen((_) {
         temporaryPlayer.dispose();
       });
-    } catch (e) {
-      print("Ошибка игрового звука: $e");
-    }
+    } catch (e) { ... }
   }
+
 
     // =========================================================================
   // БЛОК ГРОЗЫ И ЛИВНЯ ДЛЯ ЭПИЧНОГО 5 УРОВНЯ
   // =========================================================================
 
-  // 1. ИСПРАВЛЕННЫЙ БЕЗОПАСНЫЙ ЗАПУСК ДОЖДЯ ДЛЯ ЧЕКЕРА
-  static Future<void> startLevel5Rain() async {
+    static Future<void> startLevel5Rain() async {
     try {
+      await _finalMenuPlayer.stop(); // Гарантированно убираем музыку меню во время ливня
       await _rainPlayer.setVolume(0.45); 
       await _rainPlayer.setReleaseMode(ReleaseMode.loop); 
-      // Возвращаем lowLatency, так как чекер теперь сам будет удерживать поток без сбоев ОС!
       await _rainPlayer.play(AssetSource('music/rain_ambient.mp3'), mode: PlayerMode.lowLatency);
-    } catch (e) {
-      print("Ошибка запуска неуязвимого дождя: $e");
-    }
+    } catch (e) { ... }
   }
+
 
   // 2. БЕЗОПАСНЫЙ ГЕТТЕР СТУСА ДЛЯ ИГРОВОГО ЦИКЛА (Защита от зависаний)
   static bool get isRainPlaying {
