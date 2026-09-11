@@ -53,58 +53,44 @@ class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObse
   AudioPlayer? _audioPlayer; 
   double _currentVolume = 0.5; // Громкость по умолчанию 50%
 
-  @override
+    @override
   void initState() {
     super.initState();
     // Включаем слежку за тем, свернули ли игру
     WidgetsBinding.instance.addObserver(this);
     
-    // Принудительно выжигаем все игровые шумы, капли 6 уровня и зацикленные победы!
+    // Принудительно выжигаем все игровые шумы
     AudioManager.stopAllLevelSounds();
     
-    // ИСПРАВЛЕНО: Создаём плеер только один раз, убирая дублирование при перезапусках
-    if (_audioPlayer == null) {
-      _audioPlayer = AudioPlayer();
-      _audioPlayer!.setVolume(_currentVolume); // Задаем громкость
-      _playBackgroundMusic(); // Запускаем фоновую музыку
-    }
+    // Инициализируем менеджер и запускаем фон на настроенной громкости
+    AudioManager.init().then((_) {
+      AudioManager.setMenuVolume(_currentVolume);
+      AudioManager.playBackgroundMusic();
+    });
   }
 
-  // ИСПРАВЛЕНО: Объединили два метода dispose() в один монолитный, убрав ошибку дублирования!
-  @override
+
+    @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this); // Отключаем слежку за телефоном
-    _audioPlayer?.dispose(); // Безопасно чистим плеер из памяти, если он существует
     super.dispose();
   }
 
-  // Твой метод запуска музыки (ИСПРАВЛЕНО: Добавлены безопасные операторы вызова плеера !)
-  void _playBackgroundMusic() async {
-    try {
-      if (_audioPlayer != null) {
-        // ИСПРАВЛЕНО: Добавлен ! перед методами, так как мы точно знаем, что плеер создан
-        await _audioPlayer!.setReleaseMode(ReleaseMode.loop);
-        await _audioPlayer!.play(AssetSource('music/bg_music.mp3'));
-      }
-    } catch (e) {
-      print("Ошибка запуска фоновой музыки меню: $e");
-    }
-  }
 
-    @override
+  
+
+     @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
     
     if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
-      _audioPlayer?.pause(); 
       AudioManager.pauseAll(); 
     } 
     else if (state == AppLifecycleState.resumed) {
-      // ИСПРАВЛЕНО: Если мы вернулись в приложение и мы на главном экране — проверяем звук!
-      _audioPlayer?.resume(); 
       AudioManager.resumeAll(); 
     }
   }
+
 
   @override
   void didChangeDependencies() {
@@ -119,17 +105,13 @@ class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObse
 
 
 
-  // Метод для открытия экрана настроек
-  void _openSettings() async {
-    // Если плеер по какой-то причине равен null, прерываем выполнение
-    if (_audioPlayer == null) return;
-
+    void _openSettings() async {
     final updatedVolume = await Navigator.push<double>(
       context,
       MaterialPageRoute(
         builder: (context) => SettingsScreen(
           initialVolume: _currentVolume,
-          audioPlayer: _audioPlayer!, // Теперь безопасен
+          audioPlayer: AudioManager.menuPlayer, // Передаем глобальный статический плеер
         ),
       ),
     );
@@ -137,8 +119,10 @@ class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObse
       setState(() {
         _currentVolume = updatedVolume;
       });
+      AudioManager.setMenuVolume(_currentVolume); // Меняем звук глобально
     }
   }
+
 
 
   @override
