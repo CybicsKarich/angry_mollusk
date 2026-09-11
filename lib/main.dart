@@ -92,16 +92,17 @@ class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObse
   }
 
 
-  @override
+    @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     AudioManager.stopAllLevelSounds();
     
-    // Запускаем музыку только если плеер инициализирован и трек НЕ играет прямо сейчас
-    if (_audioPlayer != null && _audioPlayer!.state != PlayerState.playing) {
-      _playBackgroundMusic();
+    // Безопасно запускаем музыку через наш новый AudioManager
+    if (AudioManager.menuPlayer.state != PlayerState.playing) {
+      AudioManager.playBackgroundMusic();
     }
   }
+
 
 
 
