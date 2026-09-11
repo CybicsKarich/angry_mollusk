@@ -1995,7 +1995,7 @@ Positioned(
         child: Stack(
           alignment: Alignment.center,
           children: [
-            positioned(
+            Positioned(
               bottom: 10, left: 25,
               child: Stack(
                 alignment: Alignment.topCenter,
@@ -2003,7 +2003,7 @@ Positioned(
                   // ЗАМЕНИТЬ ТОЛЬКО ЭТУ СТРОКУ В _buildPage2Frame1:
                   Padding(padding: const EdgeInsets.only(top: 10), child: _buildCharacterSp('assets/images/bunnyhop.png', 65, isPig: false)),
                   // ШЛЯПА ВШИТА В КОД КАДРА СЕРДЦЕМ СТЕКА
-                  positioned(
+                  Positioned(
                     top: 0,
                     child: SizedBox(
                       width: 55, height: 25,
@@ -2011,9 +2011,9 @@ Positioned(
                         alignment: Alignment.topCenter,
                         children: [
                           Container(width: 32, height: 14, decoration: const BoxDecoration(color: Color(0xFF795548), borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)))),
-                          positioned(bottom: 3, child: Container(width: 52, height: 5, decoration: BoxDecoration(color: const Color(0xFF6D4C41), borderRadius: BorderRadius.circular(4), border: Border.all(color: const Color(0xFF4E342E), width: 0.8)))),
-                          positioned(bottom: 7, child: Container(width: 31, height: 2, decoration: BoxDecoration(color: const Color(0xFF212121), borderRadius: BorderRadius.circular(1)))),
-                          positioned(top: 2, child: Stack(alignment: Alignment.center, children: [Icon(Icons.star_rounded, color: Colors.blueGrey.shade100, size: 14), Container(width: 4, height: 4, decoration: const BoxDecoration(color: Color(0xFFFFFFFF), shape: BoxShape.circle))])),
+                          Positioned(bottom: 3, child: Container(width: 52, height: 5, decoration: BoxDecoration(color: const Color(0xFF6D4C41), borderRadius: BorderRadius.circular(4), border: Border.all(color: const Color(0xFF4E342E), width: 0.8)))),
+                          Positioned(bottom: 7, child: Container(width: 31, height: 2, decoration: BoxDecoration(color: const Color(0xFF212121), borderRadius: BorderRadius.circular(1)))),
+                          Positioned(top: 2, child: Stack(alignment: Alignment.center, children: [Icon(Icons.star_rounded, color: Colors.blueGrey.shade100, size: 14), Container(width: 4, height: 4, decoration: const BoxDecoration(color: Color(0xFFFFFFFF), shape: BoxShape.circle))])),
                         ],
                       ),
                     ),
@@ -2021,8 +2021,8 @@ Positioned(
                 ],
               ),
             ),
-            positioned(bottom: 8, right: 35, child: _buildBlisterWidget()),
-            positioned(
+            Positioned(bottom: 8, right: 35, child: _buildBlisterWidget()),
+            Positioned(
               top: 25, left: 8, right: 8,
               child: CustomPaint(
                 painter: ComicBubblePainter(tailX: 0.35),
@@ -2046,7 +2046,7 @@ Positioned(
           alignment: Alignment.center,
           children: [
             // 1. Еле заметная маленькая тень скрученного щупальца на синем небе рядом с солнцем
-            positioned(
+            Positioned(
               top: 10,
               right: 45, // Рядом с солнцем
               child: CustomPaint(
@@ -2056,13 +2056,13 @@ Positioned(
             ),
 
             // 2. Деревянная рогатка на заднем фоне луга
-            positioned(bottom: 20, left: 95, child: Container(width: 8, height: 26, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(2)))),
-            positioned(bottom: 42, left: 88, child: Transform.rotate(angle: -0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5))))),
-            positioned(bottom: 42, left: 104, child: Transform.rotate(angle: 0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5))))),
-            positioned(bottom: 54, left: 86, child: Container(width: 26, height: 4, decoration: BoxDecoration(color: const Color(0xFFD32F2F), borderRadius: BorderRadius.circular(1)))),
+            Positioned(bottom: 20, left: 95, child: Container(width: 8, height: 26, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(2)))),
+            Positioned(bottom: 42, left: 88, child: Transform.rotate(angle: -0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5))))),
+            Positioned(bottom: 42, left: 104, child: Transform.rotate(angle: 0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5))))),
+            Positioned(bottom: 54, left: 86, child: Container(width: 26, height: 4, decoration: BoxDecoration(color: const Color(0xFFD32F2F), borderRadius: BorderRadius.circular(1)))),
 
             // 3. Ваня в ШЛЯПЕ подходит слева
-            positioned(
+            Positioned(
               bottom: 10, left: 6,
               child: Stack(
                 alignment: Alignment.topCenter,
@@ -2071,7 +2071,7 @@ Positioned(
                     padding: const EdgeInsets.only(top: 10),
                     child: _buildCharacterSp('assets/images/bunnyhop.png', 52, isPig: false),
                   ),
-                 positioned(
+                 Positioned(
                     top: 0,
                     child: SizedBox(
                       width: 55, height: 25,
@@ -2079,9 +2079,9 @@ Positioned(
                         alignment: Alignment.topCenter,
                         children: [
                           Container(width: 32, height: 14, decoration: const BoxDecoration(color: Color(0xFF795548), borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)))),
-                          positioned(bottom: 3, child: Container(width: 52, height: 5, decoration: BoxDecoration(color: const Color(0xFF6D4C41), borderRadius: BorderRadius.circular(4), border: Border.all(color: const Color(0xFF4E342E), width: 0.8)))),
-                          positioned(bottom: 7, child: Container(width: 31, height: 2, decoration: BoxDecoration(color: const Color(0xFF212121), borderRadius: BorderRadius.circular(1)))),
-                          positioned(top: 2, child: Stack(alignment: Alignment.center, children: [Icon(Icons.star_rounded, color: Colors.blueGrey.shade100, size: 14), Container(width: 4, height: 4, decoration: const BoxDecoration(color: Color(0xFFFFFFFF), shape: BoxShape.circle))])),
+                          Positioned(bottom: 3, child: Container(width: 52, height: 5, decoration: BoxDecoration(color: const Color(0xFF6D4C41), borderRadius: BorderRadius.circular(4), border: Border.all(color: const Color(0xFF4E342E), width: 0.8)))),
+                          Positioned(bottom: 7, child: Container(width: 31, height: 2, decoration: BoxDecoration(color: const Color(0xFF212121), borderRadius: BorderRadius.circular(1)))),
+                          Positioned(top: 2, child: Stack(alignment: Alignment.center, children: [Icon(Icons.star_rounded, color: Colors.blueGrey.shade100, size: 14), Container(width: 4, height: 4, decoration: const BoxDecoration(color: Color(0xFFFFFFFF), shape: BoxShape.circle))])),
                         ],
                       ),
                     ),
@@ -2091,22 +2091,22 @@ Positioned(
             ),
 
             // 4. Две свиньи Максима сидят у рогатки справа
-            positioned(bottom: 10, right: 38, child: _buildCharacterSp('assets/images/maksim.png', 44, isPig: true)),
-            positioned(bottom: 10, right: 8, child: _buildCharacterSp('assets/images/maksim.png', 44, isPig: true)),
+            Positioned(bottom: 10, right: 38, child: _buildCharacterSp('assets/images/maksim.png', 44, isPig: true)),
+            Positioned(bottom: 10, right: 8, child: _buildCharacterSp('assets/images/maksim.png', 44, isPig: true)),
 
             // Блистеры виагры на кадре
-            positioned(bottom: 6, left: 40, child: Transform.rotate(angle: 0.2, child: _buildBlisterWidget())),
-            positioned(bottom: 4, right: 46, child: Transform.rotate(angle: -0.1, child: _buildBlisterWidget())), 
+            Positioned(bottom: 6, left: 40, child: Transform.rotate(angle: 0.2, child: _buildBlisterWidget())),
+            Positioned(bottom: 4, right: 46, child: Transform.rotate(angle: -0.1, child: _buildBlisterWidget())), 
 
             // 5. Два облака диалогов
-           positioned(
+           Positioned(
               top: 15, left: 6, width: 95,
               child: CustomPaint(
                 painter: ComicBubblePainter(tailX: 0.25),
                 child: const Padding(padding: EdgeInsets.all(5.0), child: Text("Я нашёл вас!", style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center)),
               ),
             ),
-            positioned(
+            Positioned(
               top: 35, right: 6, width: 135,
               child: CustomPaint(
                 painter: ComicBubblePainter(tailX: 0.8),
@@ -2116,7 +2116,7 @@ Positioned(
                 ),
               ),
             ),
-            positioned(
+            Positioned(
               bottom: 60, left: 10, right: 10,
               child: CustomPaint(
                 painter: ComicBubblePainter(tailX: 0.2),
@@ -2140,20 +2140,20 @@ Positioned(
             // ПОЛНОСТЬЮ ЗАМЕНИТЬ СОДЕРЖИМОЕ Stack ВНУТРИ _buildPage2Frame3 НА ЭТОТ КОРРЕКТНЫЙ ВАРИАНТ:
 // 1. КОРИЧНЕВАЯ РОГАТКА СДВИГНУТА ВПРАВО И ВИДНА ПОЛНОСТЬЮ (left: 120)
 // Рукоять рогатки (вертикальный ствол стоит на траве)
-positioned(bottom: 20, left: 120, child: Container(width: 8, height: 28, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(2)))),
+Positioned(bottom: 20, left: 120, child: Container(width: 8, height: 28, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(2)))),
 // Левый рожок (прижат к стволу)
-positioned(bottom: 44, left: 113, child: Transform.rotate(angle: -0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5))))),
+Positioned(bottom: 44, left: 113, child: Transform.rotate(angle: -0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5))))),
 // Правый рожок (прижат к стволу)
-positioned(bottom: 44, left: 129, child: Transform.rotate(angle: 0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5))))),
+Positioned(bottom: 44, left: 129, child: Transform.rotate(angle: 0.4, child: Container(width: 6, height: 16, decoration: BoxDecoration(color: const Color(0xFF4E342E), borderRadius: BorderRadius.circular(1.5))))),
 
 // ЗАМЕНИТЬ СТРОГО ЭТИ ДВЕ СТРОКИ РЕЗИНКИ ВНУТРИ _buildPage2Frame3:
 // Нитка 1: привязана к самому верху левого рожка (bottom: 58, left: 35) и натянута к Ване
-positioned(bottom: 58, left: 35, child: Transform.rotate(angle: 0.32, child: Container(width: 82, height: 4, color: const Color(0xFFD32F2F)))),
+Positioned(bottom: 58, left: 35, child: Transform.rotate(angle: 0.32, child: Container(width: 82, height: 4, color: const Color(0xFFD32F2F)))),
 // Нитка 2: привязана к самому верху правого рожка (bottom: 58, left: 45) и натянута к Ване
-positioned(bottom: 58, left: 45, child: Transform.rotate(angle: 0.28, child: Container(width: 84, height: 4, color: const Color(0xFFD32F2F)))),
+Positioned(bottom: 58, left: 45, child: Transform.rotate(angle: 0.28, child: Container(width: 84, height: 4, color: const Color(0xFFD32F2F)))),
 
 // 3. ВАНЯ БАННИХОП И ШЛЯПА СМЕЩЕНЫ ДИКО ВЛЕВО И СИДЯТ НА КРАСНОЙ НИТКЕ (left: 12)
-positioned(
+Positioned(
   bottom: 24, // Сидит прямо в седле натянутой резинки, чуть приподнятый над травой
   left: 12,   // Смещён в самый левый край кадра!
   child: Stack(
@@ -2164,7 +2164,7 @@ positioned(
         child: _buildCharacterSp('assets/images/bunnyhop.png', 62, isPig: false),
       ),
       // Ковбойская шляпа шерифа вшита в код кадра
-      positioned(
+      Positioned(
         top: 0,
         child: SizedBox(
           width: 55, height: 25,
@@ -2172,9 +2172,9 @@ positioned(
             alignment: Alignment.topCenter,
             children: [
               Container(width: 32, height: 14, decoration: const BoxDecoration(color: Color(0xFF795548), borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)))),
-              positioned(bottom: 3, child: Container(width: 52, height: 5, decoration: BoxDecoration(color: const Color(0xFF6D4C41), borderRadius: BorderRadius.circular(4), border: Border.all(color: const Color(0xFF4E342E), width: 0.8)))),
-             positioned(bottom: 7, child: Container(width: 31, height: 2, decoration: BoxDecoration(color: const Color(0xFF212121), borderRadius: BorderRadius.circular(1)))),
-              positioned(top: 2, child: Stack(alignment: Alignment.center, children: [Icon(Icons.star_rounded, color: Colors.blueGrey.shade100, size: 14), Container(width: 4, height: 4, decoration: const BoxDecoration(color: Color(0xFFFFFFFF), shape: BoxShape.circle))])),
+              Positioned(bottom: 3, child: Container(width: 52, height: 5, decoration: BoxDecoration(color: const Color(0xFF6D4C41), borderRadius: BorderRadius.circular(4), border: Border.all(color: const Color(0xFF4E342E), width: 0.8)))),
+             Positioned(bottom: 7, child: Container(width: 31, height: 2, decoration: BoxDecoration(color: const Color(0xFF212121), borderRadius: BorderRadius.circular(1)))),
+              Positioned(top: 2, child: Stack(alignment: Alignment.center, children: [Icon(Icons.star_rounded, color: Colors.blueGrey.shade100, size: 14), Container(width: 4, height: 4, decoration: const BoxDecoration(color: Color(0xFFFFFFFF), shape: BoxShape.circle))])),
             ],
           ),
         ),
@@ -2184,7 +2184,7 @@ positioned(
 ),
 
 // 4. ОБЛАЧКО СЛОВ (Центрировано по кадру, висит красиво над всей этой сценой)
-positioned(
+Positioned(
   top: 20, 
   left: 10, 
   right: 10,
@@ -2217,10 +2217,10 @@ positioned(
       child: Stack(
         alignment: Alignment.center,
         children: [
-          positioned(top: 2, left: 2, child: Container(width: 5, height: 7, decoration: BoxDecoration(color: const Color(0xFF29B6F6), borderRadius: BorderRadius.circular(2)))),
-          positioned(top: 2, right: 2, child: Container(width: 5, height: 7, decoration: BoxDecoration(color: const Color(0xFF29B6F6), borderRadius: BorderRadius.circular(2)))),
-          positioned(bottom: 2, left: 2, child: Container(width: 5, height: 7, decoration: BoxDecoration(color: const Color(0xFF29B6F6), borderRadius: BorderRadius.circular(2)))),
-          positioned(bottom: 2, right: 2, child: Container(width: 5, height: 7, decoration: BoxDecoration(color: const Color(0xFF29B6F6), borderRadius: BorderRadius.circular(2)))),
+          Positioned(top: 2, left: 2, child: Container(width: 5, height: 7, decoration: BoxDecoration(color: const Color(0xFF29B6F6), borderRadius: BorderRadius.circular(2)))),
+          Positioned(top: 2, right: 2, child: Container(width: 5, height: 7, decoration: BoxDecoration(color: const Color(0xFF29B6F6), borderRadius: BorderRadius.circular(2)))),
+          Positioned(bottom: 2, left: 2, child: Container(width: 5, height: 7, decoration: BoxDecoration(color: const Color(0xFF29B6F6), borderRadius: BorderRadius.circular(2)))),
+          Positioned(bottom: 2, right: 2, child: Container(width: 5, height: 7, decoration: BoxDecoration(color: const Color(0xFF29B6F6), borderRadius: BorderRadius.circular(2)))),
         ],
       ),
     );
@@ -2235,7 +2235,7 @@ positioned(
       child: Stack(
         children: [
           // Задние ножки переходящие в вертикальные стойки спинки (ИСПРАВЛЕНО: Занесли цвет внутрь!)
-          positioned(
+          Positioned(
             bottom: 0, left: 4, 
             child: Container(
               width: 3, height: 48, 
@@ -2245,7 +2245,7 @@ positioned(
               ),
             ),
           ),
-          positioned(
+          Positioned(
             bottom: 0, right: 16, 
             child: Container(
               width: 3, height: 48, 
@@ -2257,7 +2257,7 @@ positioned(
           ),
           
           // Верхняя горизонтальная планка спинки стула с фото
-          positioned(
+          Positioned(
             top: 2, left: 4, right: 16, 
             child: Container(
               height: 12, 
@@ -2270,7 +2270,7 @@ positioned(
           ),
           
           // Передние ножки стула (ИСПРАВЛЕНО: Занесли цвет внутрь!)
-          positioned(
+          Positioned(
             bottom: 0, left: 14, 
             child: Container(
               width: 3.5, height: 24, 
@@ -2280,7 +2280,7 @@ positioned(
               ),
             ),
           ),
-          positioned(
+          Positioned(
             bottom: 0, right: 6, 
             child: Container(
               width: 3.5, height: 24, 
@@ -2292,7 +2292,7 @@ positioned(
           ),
           
           // Горизонтальное сиденье стула (ИСПРАВЛЕНО: Занесли цвет внутрь!)
-          positioned(
+          Positioned(
             bottom: 22, left: 2, right: 4, 
             child: Container(
               height: 4, 
@@ -2305,7 +2305,7 @@ positioned(
           ),
           
           // Поперечные деревянные перекладины жесткости снизу с фото (Тут был только цвет, оставляем без изменений)
-          positioned(
+          Positioned(
             bottom: 8, left: 4, right: 16, 
             child: Container(height: 2.5, color: const Color(0xFFD6B274)),
           ),
@@ -2325,29 +2325,29 @@ positioned(
         children: [
           // 1. ДЕРЕВЯННЫЕ НОЖКИ СТОЛА (Высота 40, стоят в основании bottom: 0)
           // Ножка 1 
-          positioned(bottom: 0, left: 6, child: Container(width: 5, height: 40, decoration: BoxDecoration(color: const Color(0xFFF1D299), border: Border.all(color: const Color(0xFFC6A065), width: 0.5)))),
+          Positioned(bottom: 0, left: 6, child: Container(width: 5, height: 40, decoration: BoxDecoration(color: const Color(0xFFF1D299), border: Border.all(color: const Color(0xFFC6A065), width: 0.5)))),
           // Ножка 2 (В тени)
-          positioned(bottom: 0, left: 22, child: Container(width: 4, height: 40, decoration: BoxDecoration(color: const Color(0xFFE2C08A)))), 
+          Positioned(bottom: 0, left: 22, child: Container(width: 4, height: 40, decoration: BoxDecoration(color: const Color(0xFFE2C08A)))), 
           // Ножка 3 (Дальняя правая)
-          positioned(bottom: 0, right: 26, child: Container(width: 4, height: 40, decoration: BoxDecoration(color: const Color(0xFFE2C08A)))), 
+          Positioned(bottom: 0, right: 26, child: Container(width: 4, height: 40, decoration: BoxDecoration(color: const Color(0xFFE2C08A)))), 
           // Ножка 4 
-          positioned(bottom: 0, right: 6, child: Container(width: 5, height: 40, decoration: BoxDecoration(color: const Color(0xFFF1D299), border: Border.all(color: const Color(0xFFC6A065), width: 0.5)))),
+          Positioned(bottom: 0, right: 6, child: Container(width: 5, height: 40, decoration: BoxDecoration(color: const Color(0xFFF1D299), border: Border.all(color: const Color(0xFFC6A065), width: 0.5)))),
           
           // 2. СТОЛЕШНИЦА И ПОДСТОЛЬЕ (Высота от пола до 44 пикселей)
           // Массивное подстолье 
-          positioned(bottom: 35, left: 4, right: 4, child: Container(height: 8, decoration: BoxDecoration(color: const Color(0xFFE8C384), border: Border.all(color: const Color(0xFFB58F4B), width: 0.5)))),
+          Positioned(bottom: 35, left: 4, right: 4, child: Container(height: 8, decoration: BoxDecoration(color: const Color(0xFFE8C384), border: Border.all(color: const Color(0xFFB58F4B), width: 0.5)))),
           // Толстая гладкая столешница из светлой сосны по фотографии
-          positioned(bottom: 40, left: 0, right: 0, child: Container(height: 5, decoration: BoxDecoration(color: const Color(0xFFEDCD96), borderRadius: BorderRadius.circular(1), border: Border.all(color: const Color(0xFFC6A065), width: 1.0)))),
+          Positioned(bottom: 40, left: 0, right: 0, child: Container(height: 5, decoration: BoxDecoration(color: const Color(0xFFEDCD96), borderRadius: BorderRadius.circular(1), border: Border.all(color: const Color(0xFFC6A065), width: 1.0)))),
           
           // =========================================================================
           // 3. ПРЕДМЕТЫ НА СТОЛЕ: ЛЕЖАТ СТРОГО НА ПОВЕРХНОСТИ СТОЛЕШНИЦЫ (bottom: 44)
           // =========================================================================
           // Разбросанные бумаги рапортов
-          positioned(bottom: 44, left: 6, child: Transform.rotate(angle: -0.2, child: Container(width: 16, height: 10, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.9), borderRadius: BorderRadius.circular(1), border: Border.all(color: Colors.black45, width: 0.5))))),
-          positioned(bottom: 45, left: 16, child: Transform.rotate(angle: 0.1, child: Container(width: 14, height: 11, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.85), borderRadius: BorderRadius.circular(1), border: Border.all(color: Colors.black45, width: 0.5))))),
+          Positioned(bottom: 44, left: 6, child: Transform.rotate(angle: -0.2, child: Container(width: 16, height: 10, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.9), borderRadius: BorderRadius.circular(1), border: Border.all(color: Colors.black45, width: 0.5))))),
+          Positioned(bottom: 45, left: 16, child: Transform.rotate(angle: 0.1, child: Container(width: 14, height: 11, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.85), borderRadius: BorderRadius.circular(1), border: Border.all(color: Colors.black45, width: 0.5))))),
           
           // НАША ДЕТАЛИЗИРОВАННАЯ ЖЁЛТАЯ КРУЖКА ШЕРИФА С РУЧКОЙ ПО ФОТОГРАФИИ!
-          positioned(
+          Positioned(
             bottom: 44, right: 10, // Стоит чётко на крышке стола во весь свой рост!
             child: _buildSheriffCup(),
           ),
@@ -2397,17 +2397,17 @@ Widget _buildComicFrame({required Widget child, required bool isRoom}) {
           // ЕСЛИ ЭТО ЛУГ (ВТОРАЯ СТРАНИЦА): Отрисовываем солнце, облака и сочную траву луга в основании
           if (!isRoom) ...[
             // Яркое круглое солнце в углу кадра
-            positioned(top: -15, right: -15, child: Container(width: 50, height: 50, decoration: const BoxDecoration(color: Color(0xFFFFF176), shape: BoxShape.circle))),
+            Positioned(top: -15, right: -15, child: Container(width: 50, height: 50, decoration: const BoxDecoration(color: Color(0xFFFFF176), shape: BoxShape.circle))),
             // Облака на небе
-            positioned(top: 15, left: 10, child: Icon(Icons.cloud_rounded, size: 24, color: Colors.white.withOpacity(0.5))),
-            positioned(top: 30, right: 35, child: Icon(Icons.cloud_rounded, size: 20, color: Colors.white.withOpacity(0.5))),
+            Positioned(top: 15, left: 10, child: Icon(Icons.cloud_rounded, size: 24, color: Colors.white.withOpacity(0.5))),
+            Positioned(top: 30, right: 35, child: Icon(Icons.cloud_rounded, size: 20, color: Colors.white.withOpacity(0.5))),
             // Сочный зеленый луг в самом низу кадра
-            positioned(bottom: 0, left: 0, right: 0, child: Container(height: 35, color: const Color(0xFF4CAF50))),
+            Positioned(bottom: 0, left: 0, right: 0, child: Container(height: 35, color: const Color(0xFF4CAF50))),
           ],
           
           // ЕСЛИ ЭТО КАБИНЕТ (ПЕРВАЯ СТРАНИЦА): Рисуем только коричневый деревянный пол кабинета
           if (isRoom)
-            positioned(bottom: 0, left: 0, right: 0, child: Container(height: 16, color: const Color(0xFF8D6E63))),
+            Positioned(bottom: 0, left: 0, right: 0, child: Container(height: 16, color: const Color(0xFF8D6E63))),
             
           child, // Поверх фона накладываются сами персонажи и диалоги
         ],
@@ -2503,7 +2503,7 @@ class ComicBubblePainter extends CustomPainter {
         clipBehavior: Clip.none,
         children: [
           // 1. Большая круглая ручка кружки (ИСПРАВЛЕНО: Прижали плотно к правой границе, right: 0)
-          positioned(
+          Positioned(
             top: 3, right: 0,
             child: Container(
               width: 7, height: 11,
@@ -2515,7 +2515,7 @@ class ComicBubblePainter extends CustomPainter {
             ),
           ),
           // Внутреннее отверстие ручки (ИСПРАВЛЕНО: Сдвинули влево, right: 1)
-          positioned(
+          Positioned(
             top: 5, right: 1,
             child: Container(
               width: 3, height: 7,
@@ -2527,7 +2527,7 @@ class ComicBubblePainter extends CustomPainter {
           ),
 
           // 2. Массивное цилиндрическое тело кружки
-          positioned(
+          Positioned(
             top: 0, left: 0,
             child: Container(
               width: 16, height: 18,
