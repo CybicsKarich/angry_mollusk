@@ -95,22 +95,22 @@ class GameScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             // 1. КНОПКА СЛЕВА: ДОМИК (ВЫХОД В ГЛАВНОЕ МЕНЮ КАРТОЧЕК)
-                            Container(
-                              width: 60, height: 60,
-                              decoration: const BoxDecoration(color: Color(0xFF4CAF50), shape: BoxShape.circle),
-                              child: RawMaterialButton(
-                                shape: const CircleBorder(),
-                                 onPressed: () {
-                                  // ИСПРАВЛЕHО: Глушим ливень 5 уровня или капли 6 уровня, 
-                                  // и принудительно возвращаем красивую фоновую музыку меню!
-                                  AudioManager.stopLevelAudioAndPlayMenu();
-                                  
-                                  game.overlays.remove('VictoryMenu');
-                                  Navigator.pop(context); // Возвращает в меню уровней
-                                },
-                                child: const Icon(Icons.home_rounded, color: Colors.white, size: 32),
-                              ),
-                            ),
+Container(
+  width: 60, height: 60,
+  decoration: const BoxDecoration(color: Color(0xFF4CAF50), shape: BoxShape.circle),
+  child: RawMaterialButton(
+    shape: const CircleBorder(),
+    onPressed: () {
+      // Принудительно гасим уровень и включаем фоновую музыку меню
+      AudioManager.stopLevelAudioAndPlayMenu();
+      
+      game.overlays.remove('VictoryMenu');
+      Navigator.pop(context); // Возвращает в меню уровней
+    },
+    child: const Icon(Icons.home_rounded, color: Colors.white, size: 32),
+  ),
+),
+
                             const SizedBox(width: 20),
                             
                             // 2. КНОПКА ПО ЦЕНТРУ: ЗАНОВО (ПЕРЕЗАПУСК ТЕКУЩЕГО УРОВНЯ)
@@ -309,10 +309,14 @@ else if (game.currentLevel < 4) {
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                             onPressed: () {
-                              game.overlays.remove('PauseMenu');
-                              game.resumeEngine();
-                              Navigator.pop(context); 
-                            },
+  game.overlays.remove('PauseMenu');
+  game.resumeEngine();
+  
+  // Принудительно включаем фоновую музыку при выходе из паузы в меню
+  AudioManager.stopLevelAudioAndPlayMenu();
+  
+  Navigator.pop(context); 
+},
                             child: const Text('В МЕНЮ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                           ),
                         ),
@@ -349,10 +353,12 @@ else if (game.currentLevel < 4) {
                             IconButton(
                               icon: const Icon(Icons.home_rounded, color: Colors.white, size: 32),
                               onPressed: () {
-                                  AudioManager.stopAllLevelSounds();
-                                  game.overlays.remove('GameOverMenu');
-                                Navigator.pop(context);
-                              },
+  // Принудительно тушим звуки поражения и запускаем музыку меню
+  AudioManager.stopLevelAudioAndPlayMenu();
+  
+  game.overlays.remove('GameOverMenu');
+  Navigator.pop(context);
+},
                             ),
                             IconButton(
                               icon: const Icon(Icons.refresh_rounded, color: Colors.white, size: 32),
