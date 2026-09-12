@@ -165,20 +165,29 @@ static Future<void> playPaperRustle() async {
   }
 
 
-    static Future<void> stopLevelAudioAndPlayMenu() async {
+      static Future<void> stopLevelAudioAndPlayMenu() async {
     try {
+      // 1. Мгновенно глушим все игровые эффекты и звуки уровня
       _isStretching = false;
       await _stretchPlayer.stop();
       await _fxPlayer.stop();
       await _rainPlayer.stop();
       await stopRage();
       
-      // Запуск фона через единую, защищенную от дублирования точку
+      // 2. СБРАСЫВАЕМ плеер фона, чтобы снять любые зависания состояния
+      await _finalMenuPlayer.stop();
+      
+      // 3. Выставляем настройки и запускаем принудительно (без проверок state)
       await _finalMenuPlayer.setVolume(0.40);
-      await playBackgroundMusic(); 
-      print("Все игровые звуки заглушены. Фоновая музыка меню возобновлена.");
-    } catch (e) {print("Ошибка запуска звука капель кочка: $e");}
+      await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
+      await _finalMenuPlayer.play(AssetSource('music/bg_music.mp3')); 
+      
+      print("Все игровые звуки заглушены. Фоновая музыка меню запущена принудительно.");
+    } catch (e) {
+      print("Ошибка при принудительном возврате к музыке меню: $e");
+    }
   }
+
 
 
 
