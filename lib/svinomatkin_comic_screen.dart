@@ -697,3 +697,46 @@ class _WindowTentacleShadowPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
+
+// Обёртка кадра с ЖЕСТКИМ фоном солнца, облаков и травы (Задний фон уровня)
+  Widget _buildComicFrame({required Widget child}) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Colors.blue.shade300, Colors.lightBlue.shade100], 
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFF000000), width: 3.5), 
+        boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 6, offset: Offset(0, 4))],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Stack(
+          children: [
+            // Рисуем яркое неподвижное солнце на фоне кадра
+            Positioned(
+              top: -15, right: -15,
+              child: Container(width: 50, height: 50, decoration: const BoxDecoration(color: Color(0xFFFFF176), shape: BoxShape.circle)),
+            ),
+            // Рисуем пушистые белые облака на небе
+            Positioned(top: 15, left: 10, child: Icon(Icons.cloud_rounded, size: 28, color: Colors.white.withOpacity(0.5))),
+            Positioned(top: 30, right: 35, child: Icon(Icons.cloud_rounded, size: 22, color: Colors.white.withOpacity(0.5))),
+            // Рисуем сочную зеленую траву луга в основании кадра
+            Positioned(
+              bottom: 0, left: 0, right: 0,
+              child: Container(
+                height: 35, 
+                decoration: const BoxDecoration(
+                  color: Color(0xFF4CAF50),
+                  borderRadius: BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12)),
+                ),
+              ),
+            ),
+            child, 
+          ],
+        ),
+      ),
+    );
+  }
