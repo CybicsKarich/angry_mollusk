@@ -282,7 +282,6 @@ Positioned(
   Widget _buildPage2Frame2() {
     return Expanded(
       child: _buildComicFrame(
-        isRoom: false,
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -330,7 +329,6 @@ Positioned(
   Widget _buildPage2Frame3() {
     return Expanded(
       child: _buildComicFrame(
-        isRoom: false,
         child: Stack(
           alignment: Alignment.center,
           children: [
