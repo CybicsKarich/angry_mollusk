@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 import 'audio_manager.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'sheriff_comic_screen.dart';
+
 
 void main() async {
   // Гарантируем инициализацию внутренних сервисов Flutter
@@ -586,7 +588,7 @@ Widget _buildLevelCard(String levelNumber, bool isActive) {
             if (!isActive) return; // Жесткая блокировка клика сразу
             
             if (levelNumber == '1') {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const SheriffComicScreen()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => SheriffComicScreen()));
               return;
             }
             if (levelNumber == '4') {
@@ -3297,3 +3299,95 @@ class _RaggedStumpPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
+class _ClawCloudShadowPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Облако белое полупрозрачное. Тень на нем делаем чуть сероватой для едва заметного контраста
+    final shadowPaint = Paint()..color = const Color(0x22455A64)..style = PaintingStyle.fill;
+    
+    // Рисуем крошечный горизонтальный силуэт клешни медали SECRET
+    double cw = size.width;
+    double ch = size.height;
+    
+    // Тело клешни
+    canvas.drawOval(Rect.fromLTWH(0, ch * 0.2, cw * 0.6, ch * 0.6), shadowPaint);
+    // Длинный верхний щипец, вытянутый вперед горизонтально
+    final topClaw = Path()
+      ..moveTo(cw * 0.5, ch * 0.3)
+      ..cubicTo(cw * 0.7, -ch * 0.2, cw * 0.9, ch * 0.1, cw, ch * 0.3)
+      ..lineTo(cw * 0.7, ch * 0.4)
+      ..close();
+    canvas.drawPath(topClaw, shadowPaint);
+    // Нижний встречный щипец
+    final bottomClaw = Path()
+      ..moveTo(cw * 0.5, ch * 0.7)
+      ..cubicTo(cw * 0.7, ch * 1.2, cw * 0.9, ch * 0.8, cw * 0.95, ch * 0.6)
+      ..lineTo(cw * 0.7, ch * 0.6)
+      ..close();
+    canvas.drawPath(bottomClaw, shadowPaint);
+  }
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// РИСОВАЛЬЩИК РЕЧЕВЫХ ПУЗЫРЕЙ ДЛЯ КОМИКСА ШЕРИФА (С ХВОСТИКАМИ СНИЗУ)
+class ComicBubblePainter extends CustomPainter {
+  final double tailX; // Позиция хвостика по оси X
+  ComicBubblePainter({required this.tailX});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = Colors.white..style = PaintingStyle.fill;
+    final borderPaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.8;
+
+    final path = Path()..addRRect(RRect.fromRectAndRadius(Rect.fromLTWH(0, 0, size.width, size.height), const Radius.circular(10)));
+    
+    // Хвостик облачка указывает строго вниз на макушку говорящего персонажа!
+    double sx = size.width * tailX;
+    path.moveTo(sx - 5, size.height);
+    path.lineTo(sx, size.height + 8);
+    path.lineTo(sx + 5, size.height);
+
+    canvas.drawPath(path, paint);
+    canvas.drawPath(path, borderPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// ПОЛНОСТЬЮ ЗАМЕНИ СТАРЫЙ МЕТОД _buildComicFrame НА ЭТОТ КОРРЕКТНЫЙ:
+Widget _buildComicFrame({required Widget child, required bool isRoom}) {
+  return Container(
+    decoration: BoxDecoration(
+      // Если это кабинет (isRoom = true) — красим в бежевый, если луг (isRoom = false) — в яркое небо
+      color: isRoom ? const Color(0xFFD7CCC8) : Colors.blue.shade300,
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: Colors.black, width: 3.5),
+      boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 6, offset: Offset(0, 4))],
+    ),
+    child: ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Stack(
+        children: [
+          // ЕСЛИ ЭТО ЛУГ (ВТОРАЯ СТРАНИЦА): Отрисовываем солнце, облака и сочную траву луга в основании
+          if (!isRoom) ...[
+            // Яркое круглое солнце в углу кадра
+            Positioned(top: -15, right: -15, child: Container(width: 50, height: 50, decoration: const BoxDecoration(color: Color(0xFFFFF176), shape: BoxShape.circle))),
+            // Облака на небе
+            Positioned(top: 15, left: 10, child: Icon(Icons.cloud_rounded, size: 24, color: Colors.white.withOpacity(0.5))),
+            Positioned(top: 30, right: 35, child: Icon(Icons.cloud_rounded, size: 20, color: Colors.white.withOpacity(0.5))),
+            // Сочный зеленый луг в самом низу кадра
+            Positioned(bottom: 0, left: 0, right: 0, child: Container(height: 35, color: const Color(0xFF4CAF50))),
+          ],
+          
+          // ЕСЛИ ЭТО КАБИНЕТ (ПЕРВАЯ СТРАНИЦА): Рисуем только коричневый деревянный пол кабинета
+          if (isRoom)
+            Positioned(bottom: 0, left: 0, right: 0, child: Container(height: 16, color: const Color(0xFF8D6E63))),
+            
+          child, // Поверх фона накладываются сами персонажи и диалоги
+        ],
+      ),
+    ),
+  );
+}
