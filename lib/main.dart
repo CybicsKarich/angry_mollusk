@@ -600,7 +600,7 @@ Widget _buildLevelCard(String levelNumber, bool isActive) {
              
             // ДОБАВИТЬ СРАЗУ ПОСЛЕ ПРОВЕРКИ НА levelNumber == '4':
             if (levelNumber == '5') {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const SvinomatkinComicScreen()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) =>  SvinomatkinComicScreen()));
               return;
             }
 
