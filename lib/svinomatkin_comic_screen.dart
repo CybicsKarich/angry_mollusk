@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'game_screen.dart';
 import 'audio_manager.dart';
+import 'main.dart';
 
 // =========================================================================
 // НАЧАЛЬНЫЙ КОМИКС 5 УРОВНЯ: ГЕНЕРАЛ СВИНOМАТКИН И ГРОЗОВАЯ ЦИТАДЕЛЬ
