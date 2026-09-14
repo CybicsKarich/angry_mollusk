@@ -175,7 +175,7 @@ if (game.currentLevel == 3) {
   Navigator.pop(context); 
   Navigator.push(
     context,
-    MaterialPageRoute(builder: (context) => const SvinomatkinComicScreen()),
+    MaterialPageRoute(builder: (context) =>  SvinomatkinComicScreen()),
   );
 } 
 else if (game.currentLevel == 5) {
