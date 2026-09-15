@@ -8,7 +8,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'sheriff_comic_screen.dart';
 import 'svinomatkin_comic_screen.dart';
-
+import 'level6_comic_screen.dart';
 
 
 void main() async {
