@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'audio_manager.dart';
+import 'main.dart';
 
 class Level6ComicScreen extends StatefulWidget {
   const Level6ComicScreen({super.key});
