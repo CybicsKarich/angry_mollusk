@@ -2150,13 +2150,14 @@ child: ElevatedButton(
         // 🟥 Переход на вторую страницу ПЛОХОЙ линии (скоро напишем её код)
         // AudioManager.playRage(); 
         // Navigator.push(context, MaterialPageRoute(builder: (context) => const Level6BadRouteScreen()));
-      } else if (_selectedChoice == 2) {
-        // 🟩 ПЕРЕХОД НА ХОРОШУЮ ЛИНИЮ (В наш новый отдельный файл!)
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const Level6ComicScreen()),
-        );
-      }
+      } // ТОЧЕЧНО В LIB/MAIN.DART (Внутри кнопки onPressed для хорошего выбора):
+} else if (_selectedChoice == 2) {
+  // 🟩 ПЕРЕХОД НА ХОРОШУЮ ЛИНИЮ С ПОЛНЫМ ЗАМЕЩЕНИЕМ СТАРОГО ЭКРАНА
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => const Level6ComicScreen()),
+  );
+}
     }
   },
   // ИСПРАВЛЕНО: Перед child теперь железно стоят все запятые и закрывающие скобки onPressed
