@@ -2139,16 +2139,22 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF37474F), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
         onPressed: () {
-          if (_currentFrame < 3) {
-            setState(() => _currentFrame++);
-          } else {
-            if (_selectedChoice == 1) {
-              // Переход на вторую страницу плохой концовки
-            } else if (_selectedChoice == 2) {
-              // Переход на вторую страницу хорошего пути к битве
-            }
-          }
-        },
+  if (_currentFrame < 3) {
+    setState(() => _currentFrame++);
+  } else {
+    if (_selectedChoice == 1) {
+      // 🟥 Переход на вторую страницу ПЛОХОЙ линии (скоро напишем её код)
+      // AudioManager.playRage(); // включим звук ярости Вани
+      // Navigator.push(context, MaterialPageRoute(builder: (context) => const Level6BadRouteScreen()));
+    } else if (_selectedChoice == 2) {
+      // 🟩 ПЕРЕХОД НА ХОРОШУЮ ЛИНИЮ (В наш новый отдельный файл!)
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const Level6ComicScreen()),
+      );
+    }
+  }
+}
         child: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [Text("ДАЛЬШЕ", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)), SizedBox(width: 8), Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.white)]),
       ),
     );
