@@ -2131,48 +2131,58 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
   }
 
   Widget _buildNavigationButton() {
-    if (_currentFrame == 3 && _selectedChoice == 0) {
-      return const SizedBox(height: 46, child: Center(child: Text("ВЫБЕРИТЕ ОТВЕТ ШЕРИФА ДЛЯ ПРОДОЛЖЕHИЯ СЮЖЕTA", style: TextStyle(color: Colors.redAccent, fontSize: 9.5, fontWeight: FontWeight.bold, letterSpacing: 1.1))));
-    }
-    return Container(
-      width: double.infinity, constraints: const BoxConstraints(maxWidth: 240), height: 46,
-      // ЗАМЕНИТЬ ТОЧЕЧНО В LIB/MAIN.DART (МЕТОД _buildNavigationButton):
-child: ElevatedButton(
-  style: ElevatedButton.styleFrom(
-    backgroundColor: const Color(0xFF37474F), 
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-  ),
-  onPressed: () {
-    if (_currentFrame < 3) {
-      setState(() => _currentFrame++);
-    } else {
-      if (_selectedChoice == 1) {
-        // 🟥 Переход на вторую страницу ПЛОХОЙ линии (скоро напишем её код)
-        // AudioManager.playRage(); 
-        // Navigator.push(context, MaterialPageRoute(builder: (context) => const Level6BadRouteScreen()));
-      } // ТОЧЕЧНО В LIB/MAIN.DART (Внутри кнопки onPressed для хорошего выбора):
-} else if (_selectedChoice == 2) {
-  // 🟩 ПЕРЕХОД НА ХОРОШУЮ ЛИНИЮ С ПОЛНЫМ ЗАМЕЩЕНИЕМ СТАРОГО ЭКРАНА
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(builder: (context) => const Level6ComicScreen()),
-  );
-}
-    }
-  },
-  // ИСПРАВЛЕНО: Перед child теперь железно стоят все запятые и закрывающие скобки onPressed
-  child: const Row(
-    mainAxisAlignment: MainAxisAlignment.center, 
-    children: [
-      Text("ДАЛЬШЕ", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)), 
-      SizedBox(width: 8), 
-      Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.white),
-    ],
-  ),
-),
+  if (_currentFrame == 3 && _selectedChoice == 0) {
+    return const SizedBox(
+      height: 46, 
+      child: Center(
+        child: Text(
+          "ВЫБЕРИТЕ ОТВЕТ ШЕРИФА ДЛЯ ПРОДОЛЖЕHИЯ СЮЖЕTA", 
+          style: TextStyle(color: Colors.redAccent, fontSize: 9.5, fontWeight: FontWeight.bold, letterSpacing: 1.1),
+        ),
+      ),
     );
   }
+  
+  return Container(
+    width: double.infinity, 
+    constraints: const BoxConstraints(maxWidth: 240), 
+    height: 46,
+    child: ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF37474F), 
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      onPressed: () {
+        if (_currentFrame < 3) {
+          setState(() => _currentFrame++);
+        } else {
+          if (_selectedChoice == 1) {
+            // 🟥 Переход на вторую страницу ПЛОХОЙ линии (скоро напишем её код)
+            // AudioManager.playRage(); 
+            // Navigator.push(context, MaterialPageRoute(builder: (context) => const Level6BadRouteScreen()));
+          } else if (_selectedChoice == 2) {
+            // 🟩 ПЕРЕХОД НА ХОРОШУЮ ЛИНИЮ С ПОЛНЫМ ЗАМЕЩЕНИЕМ СТАРОГО ЭКРАНА
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const Level6ComicScreen()),
+            );
+          }
+        }
+      },
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.center, 
+        children: [
+          Text("ДАЛЬШЕ", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)), 
+          SizedBox(width: 8), 
+          Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.white),
+        ],
+      ),
+    ),
+  );
+}
 
+
+  
   // Вспомогательные лорные элементы
   Widget _buildCastleToner() => Container(width: 35, height: 50, decoration: const BoxDecoration(color: Color(0xFF25252D), borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8))));
   
