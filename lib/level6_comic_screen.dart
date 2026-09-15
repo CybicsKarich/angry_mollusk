@@ -38,12 +38,12 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 14),
                 child: Row(
                   children: [
-                    if (_currentFrame >= 1) _buildFrame1(),
-                    if (_currentFrame >= 2) const SizedBox(width: 12),
-                    if (_currentFrame >= 2) _buildFrame2(),
-                    if (_currentFrame >= 3) const SizedBox(width: 12),
-                    if (_currentFrame >= 3) _buildFrame3(),
-                  ],
+        if (_currentFrame >= 1) _buildGoodFrame1(), // <--- ИСПРАВЛЕНО
+        if (_currentFrame >= 2) const SizedBox(width: 12),
+        if (_currentFrame >= 2) _buildGoodFrame2(), // <--- ИСПРАВЛЕНО
+        if (_currentFrame >= 3) const SizedBox(width: 12),
+        if (_currentFrame >= 3) _buildGoodFrame3(), // <--- ИСПРАВЛЕНО
+      ],
                 ),
               ),
             ),
@@ -61,7 +61,7 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
   // =========================================================================
   // ХОРОШАЯ ЛИНИЯ - КАДР 1: Спокойствие шерифа против ухмылки босса
   // =========================================================================
-  Widget _buildFrame1() {
+  Widget _buildGoodFrame1() {
     return Expanded(
       child: _buildAdvanced3DFrame(
         hasHole: false,
@@ -112,7 +112,7 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
   // =========================================================================
   // ХОРОШАЯ ЛИНИЯ - КАДР 2: Спокойное разоблачение планов босса
   // =========================================================================
-  Widget _buildFrame2() {
+  Widget _buildGoodFrame2() {
     return Expanded(
       child: _buildAdvanced3DFrame(
         hasHole: false,
@@ -162,7 +162,7 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
   // =========================================================================
   // ХОРОШАЯ ЛИНИЯ - КАДР 3: Дырка в потолке, падение обломков ПЕРЕД Ваней
   // =========================================================================
-  Widget _buildFrame3() {
+  Widget _buildGoodFrame3() {
     return Expanded(
       child: _buildAdvanced3DFrame(
         hasHole: true, // ВКЛЮЧАЕТ ТЕМНО-СИНЕЕ НЕБО И ДЫРУ В КРЫШЕ
