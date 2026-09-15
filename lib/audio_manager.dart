@@ -278,6 +278,16 @@ static Future<void> playPaperRustle() async {
     }
   }
 
+    // Сочный затяжной грохот обрушения каменного потолка замка
+  static Future<void> playCastleCollapse() async {
+    try {
+      await _fxPlayer.stop();
+      await _fxPlayer.setVolume(1.0);
+      await _fxPlayer.play(AssetSource('audio/stone_break.mp3'));
+    } catch (e) {
+      print("Ошибка звука обрушения потолка: $e");
+    }
+  }
 
   static void playGameOver() async {
     stopStretch();
