@@ -552,4 +552,165 @@ class SpeechBubblePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
+// =========================================================================
+// КЛАСС 1: ВЫСОКОДЕТАЛИЗИРОВАННЫЙ РИСОВАЛЬЩИК ЩУПАЛЬЦА ОСЬМИНОГА С ПРИСОСКАМИ
+// =========================================================================
+class _DetailedTentaclePainter extends CustomPainter {
+  final bool isLeft;
+  _DetailedTentaclePainter({required this.isLeft});
 
+    @override
+  void paint(Canvas canvas, Size size) {
+    final tentaclePaint = Paint()..color = const Color(0xFF0288D1)..style = PaintingStyle.fill;
+    final strokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.6;
+    final suctionPaint = Paint()..color = Colors.white..style = PaintingStyle.fill;
+    final suctionHolePaint = Paint()..color = const Color(0xFF01579B)..style = PaintingStyle.fill;
+
+    final w = size.width;
+    final h = size.height;
+
+    final path = Path();
+    path.moveTo(w * 0.5, h);
+    // ИСПРАВЛЕНО: Сильные радиальные кубические кривые для красивого круглого изгиба щупальца!
+    path.cubicTo(isLeft ? -w * 0.7 : w * 1.7, h * 0.7, isLeft ? w * 0.1 : w * 0.9, h * 0.2, w * 0.5, 0);
+    path.lineTo(w * 0.7, 0);
+    path.cubicTo(isLeft ? w * 0.3 : w * 0.7, h * 0.2, isLeft ? -w * 0.4 : w * 1.4, h * 0.7, w * 0.8, h);
+    path.close();
+
+    canvas.drawPath(path, tentaclePaint);
+    canvas.drawPath(path, strokePaint);
+
+        // ПРОРАБОТКА: Расставляем присоски, сделав их на каплю МЕНЬШЕ для детализации
+    for (int i = 1; i <= 6; i++) {
+      double factor = i * 0.14;
+      double cx = isLeft ? w * (0.32 - factor * 0.15) : w * (0.68 + factor * 0.15);
+      double cy = h * factor;
+      
+      // ИСПРАВЛЕHО: Уменьшили базовый радиус присосок с 3.4 до 2.2!
+      double radius = 2.2 - (i * 0.15); 
+      
+      if (radius > 0.6) {
+        canvas.drawCircle(Offset(cx, cy), radius, suctionPaint);
+        canvas.drawCircle(Offset(cx, cy), radius, strokePaint..strokeWidth = 0.4);
+        canvas.drawCircle(Offset(cx, cy), radius * 0.4, suctionHolePaint);
+      }
+    }
+  }
+
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+// =========================================================================
+// КЛАСС 2: УЛЬТРА-ПРОРАБОТАНHЫЕ КРАБОВЫЕ КЛЕШHИ (СУСТАВЫ, ЗАЖИМЫ И ЗУБЦЫ)
+// =========================================================================
+class _DetailedCrabClawPainter extends CustomPainter {
+  final bool isOpen;
+  _DetailedCrabClawPainter({required this.isOpen});
+
+      @override
+  void paint(Canvas canvas, Size size) {
+    final clawPaint = Paint()..color = const Color(0xFF2E6F22)..style = PaintingStyle.fill;
+    final strokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.6;
+    
+    final w = size.width;
+    final h = size.height;
+
+    // 1. Прочный сустав-основание лапы (локоть)
+    final jointPath = Path()
+      ..moveTo(w * 0.4, h)
+      ..lineTo(w * 0.3, h * 0.6)
+      ..lineTo(w * 0.7, h * 0.6)
+      ..lineTo(w * 0.6, h)
+      ..close();
+    canvas.drawPath(jointPath, clawPaint);
+    canvas.drawPath(jointPath, strokePaint);
+
+    // 2. ИСПРАВЛЕНО: Правая створка зажима в виде идеального налитого полукруга
+    final mainClawPath = Path()
+      ..moveTo(w * 0.3, h * 0.6)
+      ..cubicTo(w * 0.05, h * 0.4, w * 0.1, 0, w * 0.5, 0)
+      ..lineTo(w * 0.45, h * 0.2)
+      ..cubicTo(w * 0.3, h * 0.3, w * 0.35, h * 0.5, w * 0.7, h * 0.6)
+      ..close();
+    canvas.drawPath(mainClawPath, clawPaint);
+    canvas.drawPath(mainClawPath, strokePaint);
+
+    // 3. ИСПРАВЛЕНО: Левая створка зажима тоже идет плавным полукругом
+    final movingFingerPath = Path();
+    if (isOpen) {
+      movingFingerPath.moveTo(w * 0.45, h * 0.25);
+      movingFingerPath.cubicTo(w * 0.75, h * 0.1, w * 0.95, h * 0.2, w * 0.85, h * 0.5);
+      movingFingerPath.lineTo(w * 0.6, h * 0.45);
+    } else {
+      movingFingerPath.moveTo(w * 0.42, h * 0.15);
+      movingFingerPath.cubicTo(w * 0.65, h * 0.2, w * 0.75, h * 0.35, w * 0.65, h * 0.55);
+      movingFingerPath.lineTo(w * 0.52, h * 0.42);
+    }
+    movingFingerPath.close();
+    canvas.drawPath(movingFingerPath, clawPaint);
+    canvas.drawPath(movingFingerPath, strokePaint);
+
+    // 4. ТЕКСТУРА: Ровно 2 мелких острых зубца
+    final toothPaint = Paint()..color = Colors.white70..style = PaintingStyle.fill;
+    canvas.drawTriangle(Offset(w * 0.38, h * 0.25), Offset(w * 0.34, h * 0.28), Offset(w * 0.42, h * 0.29), toothPaint);
+    canvas.drawTriangle(Offset(w * 0.46, h * 0.32), Offset(w * 0.42, h * 0.35), Offset(w * 0.48, h * 0.36), toothPaint);
+  }
+
+
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// =========================================================================
+// ВЕКТОРНЫЙ ХУДОЖНИК ЩУПАЛЬЦА С КРУГЛЫМИ ПРИСОСКАМИ ИЗНУТРИ
+// =========================================================================
+class _MolluskTentacleWithSuctionsPainter extends CustomPainter {
+  final bool isLeft;
+  _MolluskTentacleWithSuctionsPainter({required this.isLeft});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final tentaclePaint = Paint()..color = const Color(0xFF0288D1)..style = PaintingStyle.fill;
+    final strokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.5;
+    final suctionPaint = Paint()..color = Colors.white70..style = PaintingStyle.fill;
+    final suctionHolePaint = Paint()..color = const Color(0xFF01579B)..style = PaintingStyle.fill;
+
+    final path = Path();
+    path.moveTo(size.width * 0.5, size.height);
+    path.cubicTo(isLeft ? 0.0 : size.width, size.height * 0.6, isLeft ? size.width * 0.1 : size.width * 0.9, size.height * 0.2, size.width * 0.5, 0);
+    path.lineTo(size.width * 0.8, 0);
+    path.cubicTo(isLeft ? size.width * 0.4 : size.width * 0.6, size.height * 0.2, isLeft ? size.width * 0.3 : size.width * 0.7, size.height * 0.6, size.width * 0.8, size.height);
+    path.close();
+
+    canvas.drawPath(path, tentaclePaint);
+    canvas.drawPath(path, strokePaint);
+
+    // РАССЧИТЫВАЕМ И ОТРИСОВЫВАЕМ ПРИСОСКИ:
+    final suctionStrokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 0.5;
+
+    for (int i = 1; i < 5; i++) {
+      double hFactor = i * 0.22;
+      double sx = isLeft ? size.width * 0.25 : size.width * 0.75;
+      canvas.drawCircle(Offset(sx, size.height * hFactor), 3.0, suctionPaint);
+      canvas.drawCircle(Offset(sx, size.height * hFactor), 3.0, suctionStrokePaint);
+      canvas.drawCircle(Offset(sx, size.height * hFactor), 1.2, suctionHolePaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// =========================================================================
+// ХЕЛПЕР-РАСШИРЕНИЕ ДЛЯ УДОБНОЙ ОТРИСОВКИ ТРЕУГОЛЬНЫХ ЗУБЬЕВ КЛЕШНИ
+// =========================================================================
+extension _CanvasTriangleExt on Canvas {
+  void drawTriangle(Offset p1, Offset p2, Offset p3, Paint paint) {
+    final path = Path()..moveTo(p1.dx, p1.dy)..lineTo(p2.dx, p2.dy)..lineTo(p3.dx, p3.dy)..close();
+    drawPath(path, paint);
+    // Накладываем тонкий контрастный чёрный контур на каждый зубчик
+    drawPath(path, Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 0.5);
+  }
+}
