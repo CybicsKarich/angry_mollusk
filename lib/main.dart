@@ -2152,23 +2152,29 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
         backgroundColor: const Color(0xFF37474F), 
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
-      onPressed: () {
-        if (_currentFrame < 3) {
-          setState(() => _currentFrame++);
-        } else {
-          if (_selectedChoice == 1) {
-            // 🟥 Переход на вторую страницу ПЛОХОЙ линии (скоро напишем её код)
-            // AudioManager.playRage(); 
-            // Navigator.push(context, MaterialPageRoute(builder: (context) => const Level6BadRouteScreen()));
-          } else if (_selectedChoice == 2) {
-            // 🟩 ПЕРЕХОД НА ХОРОШУЮ ЛИНИЮ С ПОЛНЫМ ЗАМЕЩЕНИЕМ СТАРОГО ЭКРАНА
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const Level6ComicScreen()),
-            );
-          }
-        }
-      },
+      // main.dart
+onPressed: () {
+  if (_currentFrame < 3) {
+    setState(() => _currentFrame++);
+    if (_currentFrame == 2) {
+      AudioManager.playMolluskTheme();
+    }
+  } else {
+    if (_selectedChoice == 1) {
+      // Идем по плохому пути
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const Level6BadRouteScreen()),
+      );
+    } else if (_selectedChoice == 2) {
+      // Идем по ХОРОШЕМУ пути
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const Level6GoodRouteScreen()), // <--- ТЕПЕРЬ ОТКРЫВАЕТСЯ ХОРОШАЯ ЛИНИЯ
+      );
+    }
+  }
+},
       child: const Row(
         mainAxisAlignment: MainAxisAlignment.center, 
         children: [
