@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class Level6BadRouteScreen extends StatelessWidget {
   const Level6BadRouteScreen({super.key});
 
@@ -11,7 +13,11 @@ class Level6BadRouteScreen extends StatelessWidget {
           children: [
             const Text(
               "ПЛОХАЯ ЛИНИЯ (В РАЗРАБОТКЕ)",
-              style: TextStyle(color: Colors.red, fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
