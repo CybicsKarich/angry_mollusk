@@ -12,7 +12,31 @@ class Level6GoodRouteScreen extends StatefulWidget {
 
 class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> {
   int _currentFrame = 1; // Текущий видимый кадр (1, 2 или 3)
+  late AnimationController _debrisController;
+  late Animation<double> _fallAnimation;
 
+  @override
+  void initState() {
+    super.initState();
+    // Настраиваем контроллер на 1.5 секунды для сочного падения и отскока
+    _debrisController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500), 
+    );
+    
+    // Используем кривую bounceOut — она идеально имитирует гравитацию и физический отскок от пола!
+    _fallAnimation = CurvedAnimation(
+      parent: _debrisController,
+      curve: Curves.bounceOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _debrisController.dispose(); // Очищаем память
+    super.dispose();
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -161,9 +185,6 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> {
     );
   }
 
-  // =========================================================================
-  // ХОРОШАЯ ЛИНИЯ - КАДР 3: Дырка в потолке, падение обломков ПЕРЕД Ваней
-  // =========================================================================
   Widget _buildGoodFrame3() {
     return Expanded(
       child: _buildAdvanced3DFrame(
@@ -171,26 +192,60 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Каменная глыба-баррикада упала строго по центру между ними
-            Positioned(
-              bottom: 20, left: 62,
-              child: Container(
-                width: 25, height: 45,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF37474F),
-                  border: Border.all(color: Colors.black, width: 1.5),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-            ),
-            
             Positioned(bottom: 22, left: 12, child: _buildCharacter('assets/images/bunnyhop.png', 48)),
             Positioned(bottom: 12, right: 8, child: _buildDonMollusk(64)),
 
-            // Анимация летящих вниз мелких осколков потолка
-            Positioned(bottom: 65, left: 68, child: _buildFallingDebris(6, 10)),
-            Positioned(bottom: 85, left: 74, child: _buildFallingDebris(8, 8)),
+            // =================================================================
+            // НОВЫЙ БЛОК: АНИМИРОВАННЫЕ ОБЛОМКИ С ФИЗИКОЙ ОТСКОКА
+            // =================================================================
+            AnimatedBuilder(
+              animation: _fallAnimation,
+              builder: (context, child) {
+                // fallValue идет от 0.0 (наверху) до 1.0 (на полу) с эффектом отскока
+                final fallValue = _fallAnimation.value;
+                
+                return Stack(
+                  children: [
+                    // 1. Главная каменная глыба-баррикада
+                    Positioned(
+                      // Падает с высоты 150 вниз и останавливается на координате 20 (на полу)
+                      bottom: 150 - (fallValue * 130), 
+                      left: 62,
+                      child: Container(
+                        width: 25, height: 45,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF37474F),
+                          border: Border.all(color: Colors.black, width: 1.5),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ),
+                    
+                    // 2. Мелкий осколок 1 (летит с вращением и отлетает влево)
+                    Positioned(
+                      bottom: 140 - (fallValue * 120), 
+                      left: 68 - (fallValue * 12), // Смещается влево при падении
+                      child: Transform.rotate(
+                        angle: fallValue * pi * 4, // Реалистично крутится (нужен import 'dart:math'; - он у тебя есть)
+                        child: _buildFallingDebris(6, 10),
+                      ),
+                    ),
 
+                    // 3. Мелкий осколок 2 (летит с другой скоростью и отлетает вправо)
+                    Positioned(
+                      bottom: 160 - (fallValue * 140), 
+                      left: 74 + (fallValue * 18), // Смещается вправо
+                      child: Transform.rotate(
+                        angle: -fallValue * pi * 3, // Крутится в обратную сторону
+                        child: _buildFallingDebris(8, 8),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+
+            // Облачко слов Вани (остается без изменений)
             Positioned(
               top: 25, left: 6, right: 6,
               child: CustomPaint(
@@ -222,12 +277,13 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> {
         onPressed: () {
           if (_currentFrame < 3) {
             setState(() => _currentFrame++);
-            // При переходе на 3-й кадр бахает звук обрушения потолка
+            
+            // ЕСЛИ ПЕРЕШЛИ НА 3 КАДР — ЗАПУСКАЕМ ЗВУК И АНИМАЦИЮ ПАДЕНИЯ
             if (_currentFrame == 3) {
-              AudioManager.playCastleCollapse();
+              AudioManager.playCastleCollapse(); // Грохот камней
+              _debrisController.forward(from: 0.0); // Запуск физики обломков
             }
           } else {
-            // КНОПКА ПОГНАЛИ СЕЙЧАС ЗАБЛОКИРОВАНА
             print("Кнопка 'ПОГНАЛИ!' заблокирована. Проектируем Action-битву.");
           }
         },
@@ -357,6 +413,18 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> {
     );
   }
 
+  Widget _buildFallingDebris(double width, double height) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: const Color(0xFF455A64),
+        border: Border.all(color: Colors.black, width: 1.0),
+        borderRadius: BorderRadius.circular(2),
+      ),
+    );
+  }
+  
   // =========================================================================
   // ИСПРАВЛЕHО: АНАТОМИЧЕСКАЯ СБОРКА БОССА ВПЛОТHУЮ К ТЕЛУ И БЕЗ КРАСHОГО ПЯТHА
   // =========================================================================
