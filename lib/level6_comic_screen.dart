@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'audio_manager.dart';
 import 'main.dart';
 
@@ -10,7 +11,7 @@ class Level6GoodRouteScreen extends StatefulWidget {
   State<Level6GoodRouteScreen> createState() => _Level6GoodRouteScreenState();
 }
 
-class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> {
+class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with TickerProviderStateMixin {
   int _currentFrame = 1; // Текущий видимый кадр (1, 2 или 3)
   late AnimationController _debrisController;
   late Animation<double> _fallAnimation;
@@ -413,17 +414,6 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> {
     );
   }
 
-  Widget _buildFallingDebris(double width, double height) {
-    return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        color: const Color(0xFF455A64),
-        border: Border.all(color: Colors.black, width: 1.0),
-        borderRadius: BorderRadius.circular(2),
-      ),
-    );
-  }
   
   // =========================================================================
   // ИСПРАВЛЕHО: АНАТОМИЧЕСКАЯ СБОРКА БОССА ВПЛОТHУЮ К ТЕЛУ И БЕЗ КРАСHОГО ПЯТHА
