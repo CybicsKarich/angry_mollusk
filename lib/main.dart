@@ -2152,25 +2152,22 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
         backgroundColor: const Color(0xFF37474F), 
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
-      // main.dart
-onPressed: () {
+      onPressed: () {
   if (_currentFrame < 3) {
     setState(() => _currentFrame++);
-    if (_currentFrame == 2) {
-      AudioManager.playMolluskTheme();
-    }
+    // ВЫЗОВ AudioManager.playMolluskTheme() УДАЛЁН
   } else {
     if (_selectedChoice == 1) {
-      // Идем по плохому пути
+      // Идем по плохому пути (убрали const, чтобы избежать ошибки константы)
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const Level6BadRouteScreen()),
+        MaterialPageRoute(builder: (context) => Level6BadRouteScreen()), 
       );
     } else if (_selectedChoice == 2) {
-      // Идем по ХОРОШЕМУ пути
+      // Идем по хорошему пути
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const Level6GoodRouteScreen()), // <--- ТЕПЕРЬ ОТКРЫВАЕТСЯ ХОРОШАЯ ЛИНИЯ
+        MaterialPageRoute(builder: (context) => const Level6GoodRouteScreen()), // Имя класса из level6_comic_screen.dart
       );
     }
   }
