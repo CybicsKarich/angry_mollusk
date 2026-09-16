@@ -356,19 +356,90 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> {
     );
   }
 
-  Widget _buildDonMollusk(double size) {
+  // =========================================================================
+  // ИСПРАВЛЕHО: АНАТОМИЧЕСКАЯ СБОРКА БОССА ВПЛОТHУЮ К ТЕЛУ И БЕЗ КРАСHОГО ПЯТHА
+  // =========================================================================
+  Widget _buildUltraDetailedDonMollusk(double size) {
     return SizedBox(
-      width: size, height: size,
+      width: size,
+      height: size,
       child: Stack(
         alignment: Alignment.center,
         clipBehavior: Clip.none,
         children: [
-          Positioned(top: size * 0.10, left: size * 0.08, child: Transform.rotate(angle: -0.2, child: Container(width: size * 0.18, height: size * 0.26, decoration: BoxDecoration(color: const Color(0xFF689F38), borderRadius: BorderRadius.circular(size * 0.09), border: Border.all(color: Colors.black, width: 1.8)), child: Center(child: Container(width: size * 0.08, height: size * 0.14, decoration: BoxDecoration(color: const Color(0xFF558B2F), borderRadius: BorderRadius.circular(size * 0.05))))))),
-          Positioned(top: size * 0.10, right: size * 0.08, child: Transform.rotate(angle: 0.2, child: Container(width: size * 0.18, height: size * 0.26, decoration: BoxDecoration(color: const Color(0xFF689F38), borderRadius: BorderRadius.circular(size * 0.09), border: Border.all(color: Colors.black, width: 1.8)), child: Center(child: Container(width: size * 0.08, height: size * 0.14, decoration: BoxDecoration(color: const Color(0xFF558B2F), borderRadius: BorderRadius.circular(size * 0.05))))))),
+          // 🐙 1. ЩУПАЛЬЦА СТАЛИ НА КАПЛЮ БОЛЬШЕ (size * 0.28) И ЗАЛЕЗАЮТ ПОД ЗЕЛЁHЫЙ КРУГ
+          Positioned(bottom: size * 0.24, left: size * 0.04, child: Transform.rotate(angle: -0.3, child: CustomPaint(size: Size(size * 0.28, size * 0.58), painter: _DetailedTentaclePainter(isLeft: true)))),
+          Positioned(top: size * 0.06, left: size * 0.12, child: Transform.rotate(angle: -1.3, child: CustomPaint(size: Size(size * 0.25, size * 0.53), painter: _DetailedTentaclePainter(isLeft: true)))),
+          Positioned(top: size * 0.06, right: size * 0.12, child: Transform.rotate(angle: 1.3, child: CustomPaint(size: Size(size * 0.25, size * 0.53), painter: _DetailedTentaclePainter(isLeft: false)))),
+          Positioned(bottom: size * 0.24, right: size * 0.04, child: Transform.rotate(angle: 0.4, child: CustomPaint(size: Size(size * 0.28, size * 0.58), painter: _DetailedTentaclePainter(isLeft: false)))),
+
+          // 🐷 2. ИСПРАВЛЕНО: УШКИ СТАЛИ ПОДЛИННЕЕ (ОВАЛЫ) И ЗАЛЕЗАЮТ ПРЯМО НА ТЕЛО БОССА
+          Positioned(
+            top: size * 0.10, left: size * 0.08, 
+            child: Transform.rotate(
+              angle: -0.2,
+              child: Container(
+                width: size * 0.18, height: size * 0.26, // Сделали уши длинными вытянутыми овалами
+                decoration: BoxDecoration(
+                  color: const Color(0xFF689F38),
+                  borderRadius: BorderRadius.circular(size * 0.09), // Скругление под длинный овал
+                  border: Border.all(color: Colors.black, width: 1.8),
+                ),
+                child: Center(child: Container(width: size * 0.08, height: size * 0.14, decoration: BoxDecoration(color: const Color(0xFF558B2F), borderRadius: BorderRadius.circular(size * 0.05)))),
+              ),
+            ),
+          ),
+          Positioned(
+            top: size * 0.10, right: size * 0.08, 
+            child: Transform.rotate(
+              angle: 0.2,
+              child: Container(
+                width: size * 0.18, height: size * 0.26, 
+                decoration: BoxDecoration(
+                  color: const Color(0xFF689F38),
+                  borderRadius: BorderRadius.circular(size * 0.09),
+                  border: Border.all(color: Colors.black, width: 1.8),
+                ),
+                child: Center(child: Container(width: size * 0.08, height: size * 0.14, decoration: BoxDecoration(color: const Color(0xFF558B2F), borderRadius: BorderRadius.circular(size * 0.05)))),
+              ),
+            ),
+          ),
+
+          // 🦀 3. ДВЕ НИЖНИЕ КЛЕШНИ: Идут строго ВВЕРХ, одинаковые полукругом и залезают на подложку
+          Positioned(
+            bottom: size * 0.16, left: -size * 0.02,
+            child: Transform.rotate(angle: -0.1, child: CustomPaint(size: Size(size * 0.34, size * 0.34), painter: _DetailedCrabClawPainter(isOpen: false))),
+          ),
+          Positioned(
+            bottom: size * 0.16, right: -size * 0.02,
+            child: Transform.rotate(angle: 0.1, child: CustomPaint(size: Size(size * 0.34, size * 0.34), painter: _DetailedCrabClawPainter(isOpen: false))),
+          ),
+
+          // 🦀 4. ВЕРХНЯЯ КЛЕШНЯ: Тоже идёт строго вверх по центру макушки головы
+          Positioned(
+            top: -size * 0.12, left: size * 0.33,
+            child: CustomPaint(size: Size(size * 0.34, size * 0.34), painter: _DetailedCrabClawPainter(isOpen: true)),
+          ),
+
+          // ИСПРАВЛЕНО: Красное пятно крови и обрубок полностью УДАЛЕНЫ с тела Босса по ТЗ!
+
+          // 🟢 5. ЦЕНТРАЛЬНОЕ ЗЕЛИКОВОЕ ТЕЛО БОССА (Ложится ПОВЕРХ всех залезших конечностей)
           Container(
-            width: size * 0.70, height: size * 0.70,
-            decoration: BoxDecoration(color: const Color(0xFF558B2F), shape: BoxShape.circle, border: Border.all(color: const Color(0xFF1B5E20), width: 2.2)),
-            child: ClipOval(child: Image.asset('assets/images/maksim_boss.png', fit: BoxFit.cover, errorBuilder: (c, e, s) => Container(color: const Color(0xFF558B2F)))),
+            width: size * 0.70,
+            height: size * 0.70,
+            decoration: BoxDecoration(
+              color: const Color(0xFF558B2F),
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFF1B5E20), width: 2.2),
+              boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 4, offset: Offset(0, 2))],
+            ),
+            child: ClipOval(
+              child: Image.asset(
+                'assets/images/maksim_boss.png',
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(color: const Color(0xFF558B2F)), 
+              ),
+            ),
           ),
         ],
       ),
