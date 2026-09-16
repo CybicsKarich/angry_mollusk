@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'audio_manager.dart';
 import 'main.dart';
 
-class Level6ComicScreen extends StatefulWidget {
-  const Level6ComicScreen({super.key});
+class Level6GoodRouteScreen extends StatefulWidget {
+  const Level6GoodRouteScreen({super.key});
 
   @override
-  State<Level6ComicScreen> createState() => _Level6ComicScreenState();
+  State<Level6GoodRouteScreen> createState() => _Level6GoodRouteScreenState();
 }
 
-class _Level6ComicScreenState extends State<Level6ComicScreen> {
+class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> {
   int _currentFrame = 1; // Текущий видимый кадр (1, 2 или 3)
 
   @override
