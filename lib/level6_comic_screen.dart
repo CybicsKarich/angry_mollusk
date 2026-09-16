@@ -72,6 +72,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> {
             Positioned(bottom: 22, right: 10, child: Transform.scale(scale: 1.25, child: _buildThrone())),    
             Positioned(bottom: 22, right: 95, child: _buildGoldTotem(38)),
             Positioned(bottom: 22, left: 16, child: _buildCharacter('assets/images/bunnyhop.png', 56)),
+            Positioned(bottom: 12, right: 8, child: _buildDonMollusk(68)),
 
             // Облачко слов Вани
             Positioned(
@@ -359,7 +360,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> {
   // =========================================================================
   // ИСПРАВЛЕHО: АНАТОМИЧЕСКАЯ СБОРКА БОССА ВПЛОТHУЮ К ТЕЛУ И БЕЗ КРАСHОГО ПЯТHА
   // =========================================================================
-  Widget _buildUltraDetailedDonMollusk(double size) {
+  Widget _buildDonMollusk(double size) {
     return SizedBox(
       width: size,
       height: size,
