@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'audio_manager.dart';
 import 'main.dart';
+import 'package:flutter/scheduler.dart';
 
 class Level6BadRouteScreen extends StatefulWidget {
   const Level6BadRouteScreen({super.key});
