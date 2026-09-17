@@ -71,27 +71,21 @@ class _Level6BadRouteScreenState extends State<Level6BadRouteScreen> with Ticker
             ),
             const SizedBox(height: 12),
 
-            // ГЛАВНАЯ СЕТКА ПЛОХОЙ ЛИНИИ
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                child: Row(
-                  children: [
-                    // Кадр 1 и Кадр 2 горят изначально на экране со старта, убирая "дежавю"
-                    _buildBadFrame1(), 
-                    const SizedBox(width: 12),
-                    _buildBadFrame2(), 
-                    const SizedBox(width: 12),
-                    
-                    // Кадр 3 (Падение плиты) вылетает по кнопке "ДАЛЬШЕ"
-                    if (_currentFrame >= 2) ...[
-                      _buildBadFrame3(), 
-                    ],
-                  ],
-                ),
-              ),
-            ),
-
+            // ЗАМЕНИТЬ ТОЧЕЧНО В МЕТОДЕ build:
+Expanded(
+  child: Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 14),
+    child: Row(
+      children: [
+        if (_currentFrame >= 1) _buildBadFrame1(), 
+        if (_currentFrame >= 2) const SizedBox(width: 12),
+        if (_currentFrame >= 2) _buildBadFrame2(), 
+        if (_currentFrame >= 3) const SizedBox(width: 12),
+        if (_currentFrame >= 3) _buildBadFrame3(), 
+      ],
+    ),
+  ),
+),
             Padding(
               padding: const EdgeInsets.all(12.0),
               child: _buildNavigationButton(),
@@ -153,96 +147,87 @@ class _Level6BadRouteScreenState extends State<Level6BadRouteScreen> with Ticker
     );
   }
 
-  // =========================================================================
-  // ПЛОХАЯ ЛИНИЯ - КАДР 2: Потеря контроля, искры и аура таблетки
-  // =========================================================================
   Widget _buildBadFrame2() {
-    double birdX = 36.0;
-    double birdY = 150.0; // Координаты Вани на полу (bottom: 22 пересчитано)
-    double birdRadius = 22.0;
+  double birdX = 36.0;
+  double birdSize = 48.0;
+  double birdRadius = birdSize / 2;
 
-    return Expanded(
-      child: _buildAdvanced3DFrame(
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Positioned(bottom: 22, right: 8, child: _buildDonMollusk(68)),
+  return Expanded(
+    child: _buildAdvanced3DFrame(
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned(bottom: 22, right: 8, child: _buildDonMollusk(68)),
 
-            // БЕШЕНЫЕ ЭФФЕКТЫ ЯРОСТИ ТАБЛЕТКИ ВОКРУГ ШЕРИФА С КАРТИНКИ
-            Stack(
+          // 1. ПОДЛОЖКА, ИСКРЫ И ЗВЁЗДЫ ОПУЩЕНЫ НА НИЖНИЙ СЛОЙ И ВЫРОВНЕНЫ СТРОГО ПО ЦЕНТРУ ВАНЬКИ
+          Positioned(
+            left: birdX - birdRadius, // Центрируем по горизонтали птицы
+            bottom: 22 - birdRadius + 12, // Подгоняем чётко на уровень тела Вани (bottom: 22)
+            child: Stack(
+              alignment: Alignment.center,
               children: [
-                // 1. Крутящаяся шипастая подложка поп-арт взрыва
-                Positioned(
-                  left: birdX - birdRadius,
-                  bottom: birdY - birdRadius - 42,
-                  child: Transform.rotate(
-                    angle: _sparkTimer * 12.0,
-                    child: CustomPaint(
-                      size: Size(birdRadius * 4, birdRadius * 4),
-                      painter: _RageAuraPainter(pulseTimer: _sparkTimer),
-                    ),
+                // Крутящаяся поп-арт подложка ярости (теперь сзади)
+                Transform.rotate(
+                  angle: _sparkTimer * 12.0,
+                  child: CustomPaint(
+                    size: Size(birdSize * 2.0, birdSize * 2.0),
+                    painter: _RageAuraPainter(pulseTimer: _sparkTimer),
                   ),
                 ),
-                // 2. Синие неоновые электрические разряды
-                Positioned(
-                  left: birdX - birdRadius - 10,
-                  bottom: birdY - birdRadius - 52,
-                  child: CustomPaint(
-                    size: Size(birdRadius * 5, birdRadius * 5),
-                    painter: _LightningSparkPainter(randSeed: (_sparkTimer * 60).toInt()),
-                  ),
+                // Синие неоновые разряды
+                CustomPaint(
+                  size: Size(birdSize * 2.2, birdSize * 2.2),
+                  painter: _LightningSparkPainter(randSeed: (_sparkTimer * 60).toInt()),
                 ),
-                // 3. Маленькие вылетающие жёлтые звёздочки
-                Positioned(
-                  left: birdX - birdRadius - 15,
-                  bottom: birdY - birdRadius - 57,
-                  child: CustomPaint(
-                    size: Size(birdRadius * 5.5, birdRadius * 5.5),
-                    painter: _FlyingStarsPainter(randSeed: (_sparkTimer * 30).toInt()),
-                  ),
+                // Вылетающие звёздочки
+                CustomPaint(
+                  size: Size(birdSize * 2.4, birdSize * 2.4),
+                  painter: _FlyingStarsPainter(randSeed: (_sparkTimer * 30).toInt()),
                 ),
               ],
             ),
+          ),
 
-            // Ваня подошёл вплотную (left: 36 вместо 16)
-            Positioned(bottom: 22, left: 36, child: _buildCharacter('assets/images/bunnyhop.png', 48)),
+          // 2. ВАНЯ БАННИХОП РЕНДЕРЯТСЯ ПОВЕРХ ВСЕХ ЭФФЕКТОВ ТАБЛЕТКИ
+          Positioned(bottom: 22, left: birdX, child: _buildCharacter('assets/images/bunnyhop.png', birdSize)),
 
-            // Вспышка гнева Вани
-            Positioned(
-              top: 15, left: 4, width: 110,
-              child: CustomPaint(
-                painter: SpeechBubblePainter(tailXFactor: 0.35),
-                child: const Padding(
-                  padding: EdgeInsets.all(5.0),
-                  child: Text(
-                    "Вот это у тебя план! Ничего сейчас он будет разрушен, как и твой замок и тотем гнева вместе с лугом придёт обратно птицам!",
-                    style: TextStyle(fontSize: 7.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
-                    textAlign: TextAlign.center,
-                  ),
+          // Облачко слов Вани
+          Positioned(
+            top: 15, left: 4, width: 110,
+            child: CustomPaint(
+              painter: SpeechBubblePainter(tailXFactor: 0.35),
+              child: const Padding(
+                padding: EdgeInsets.all(5.0),
+                child: Text(
+                  "Вот это у тебя план! Ничего сейчас он будет разрушен, как и твой замок и тотем гнева вместе с лугом придёт обратно птицам!",
+                  style: TextStyle(fontSize: 7.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
+                  textAlign: TextAlign.center,
                 ),
               ),
             ),
+          ),
 
-            // Ответ Дона Моллюска, заманивающего в ловушку
-            Positioned(
-              top: 75, right: 4, width: 110,
-              child: CustomPaint(
-                painter: SpeechBubblePainter(tailXFactor: 0.75),
-                child: const Padding(
-                  padding: EdgeInsets.all(5.0),
-                  child: Text(
-                    "Разрушишь замок? Маленькая птица разгневалась. Как и твой дед сорок лет назад!",
-                    style: TextStyle(fontSize: 7.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.1),
-                    textAlign: TextAlign.center,
-                  ),
+          // Ответ Дона Моллюска
+          Positioned(
+            top: 75, right: 4, width: 110,
+            child: CustomPaint(
+              painter: SpeechBubblePainter(tailXFactor: 0.75),
+              child: const Padding(
+                padding: EdgeInsets.all(5.0),
+                child: Text(
+                  "Разрушишь замок? Маленькая птица разгневалась. Как и твой дед сорок лет назад!",
+                  style: TextStyle(fontSize: 7.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.1),
+                  textAlign: TextAlign.center,
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
+
 
     Widget _buildBadFrame3() {
     return Expanded(
@@ -324,38 +309,47 @@ class _Level6BadRouteScreenState extends State<Level6BadRouteScreen> with Ticker
     );
   }
 
-  Widget _buildNavigationButton() {
-    return Container(
-      width: double.infinity, constraints: const BoxConstraints(maxWidth: 240), height: 46,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: _currentFrame == 2 ? Colors.grey.shade700 : const Color(0xFFB71C1C), // Боевой красный
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
-        ),
-        onPressed: () {
-          if (_currentFrame < 2) {
-            setState(() => _currentFrame = 2);
-            AudioManager.playCastleCollapse(); // Мощный грохот крушения
-            _debrisController.forward(from: 0.0); // Запуск точного падения глыбы
-          } else {
-            // КНОПКА КОНЕЦ СЕЙЧАС ЗАБЛОКИРОВАНА ДО СОЗДАНИЯ ЭКРАНА КОНЦОВКИ
-            print("Кнопка 'КОНЕЦ' заблокирована. Проектируем экран Плохого Финала.");
-          }
-        },
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center, 
-          children: [
-            Text(
-              _currentFrame == 2 ? "КОНЕЦ (ЗАБЛОКИРОВАНО)" : "ДАЛЬШЕ", 
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)
-            ), 
-            const SizedBox(width: 8), 
-            Icon(_currentFrame == 2 ? Icons.lock_rounded : Icons.arrow_forward_ios_rounded, size: 16, color: Colors.white)
-          ]
-        ),
+  // ЗАМЕНИТЬ ТОЧЕЧНО ВЕСЬ МЕТОД КНОПКИ:
+Widget _buildNavigationButton() {
+  return Container(
+    width: double.infinity, constraints: const BoxConstraints(maxWidth: 240), height: 46,
+    child: ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: _currentFrame == 3 ? Colors.grey.shade700 : const Color(0xFFB71C1C),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
       ),
-    );
-  }
+      onPressed: () {
+        if (_currentFrame < 3) {
+          setState(() => _currentFrame++);
+          
+          // ЕСЛИ ПЕРЕШЛИ НА 2 КАДР — строго здесь бахает звук ярости Вани!
+          if (_currentFrame == 2) {
+            AudioManager.playRage(); 
+          }
+          // ЕСЛИ ПЕРЕШЛИ НА 3 КАДР — запускаем обвал крыши
+          if (_currentFrame == 3) {
+            AudioManager.playCastleCollapse();
+            _debrisController.forward(from: 0.0);
+          }
+        } else {
+          print("Кнопка 'КОНЕЦ' заблокирована. Проектируем экран Плохого Финала.");
+        }
+      },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center, 
+        children: [
+          Text(
+            _currentFrame == 3 ? "КОНЕЦ (ЗАБЛОКИРОВАНО)" : "ДАЛЬШЕ", 
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)
+          ), 
+          const SizedBox(width: 8), 
+          Icon(_currentFrame == 3 ? Icons.lock_rounded : Icons.arrow_forward_ios_rounded, size: 16, color: Colors.white)
+        ]
+      ),
+    ),
+  );
+}
+
 
   Widget _buildAdvanced3DFrame({required Widget child}) {
     return Container(
