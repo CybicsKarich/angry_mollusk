@@ -87,7 +87,7 @@ Expanded(
   ),
 ),
             Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.only(bottom: 6.0, top: 4.0), // Убрали Overflow!
               child: _buildNavigationButton(),
             ),
           ],
@@ -148,50 +148,48 @@ Expanded(
   }
 
   Widget _buildBadFrame2() {
-  double birdX = 36.0;
-  double birdSize = 48.0;
-  double birdRadius = birdSize / 2;
-
   return Expanded(
     child: _buildAdvanced3DFrame(
+      hasHole: false,
       child: Stack(
         alignment: Alignment.center,
         children: [
           Positioned(bottom: 22, right: 8, child: _buildDonMollusk(68)),
 
-          // 1. ПОДЛОЖКА, ИСКРЫ И ЗВЁЗДЫ ОПУЩЕНЫ НА НИЖНИЙ СЛОЙ И ВЫРОВНЕНЫ СТРОГО ПО ЦЕНТРУ ВАНЬКИ
+          // ВАНЯ И ВСЕ ЕГО ЭФФЕКТЫ ТАБЛЕТКИ СОБРАНЫ В ОДИН СТАК С ОБЩИМ ЦЕНТРОМ
           Positioned(
-            left: birdX - birdRadius, // Центрируем по горизонтали птицы
-            bottom: 22 - birdRadius + 12, // Подгоняем чётко на уровень тела Вани (bottom: 22)
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Крутящаяся поп-арт подложка ярости (теперь сзади)
-                Transform.rotate(
-                  angle: _sparkTimer * 12.0,
-                  child: CustomPaint(
-                    size: Size(birdSize * 2.0, birdSize * 2.0),
-                    painter: _RageAuraPainter(pulseTimer: _sparkTimer),
+            bottom: 22, left: 32, // Четкое позиционирование Шерифа на полу кадра
+            child: SizedBox(
+              width: 80, height: 80, // Контейнер для центрирования
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // 1. Синяя шипастая аура (Строго НАД уровнем пола за спиной Вани)
+                  Transform.rotate(
+                    angle: _sparkTimer * 12.0,
+                    child: CustomPaint(
+                      size: const Size(76, 76),
+                      painter: _RageAuraPainter(pulseTimer: _sparkTimer),
+                    ),
                   ),
-                ),
-                // Синие неоновые разряды
-                CustomPaint(
-                  size: Size(birdSize * 2.2, birdSize * 2.2),
-                  painter: _LightningSparkPainter(randSeed: (_sparkTimer * 60).toInt()),
-                ),
-                // Вылетающие звёздочки
-                CustomPaint(
-                  size: Size(birdSize * 2.4, birdSize * 2.4),
-                  painter: _FlyingStarsPainter(randSeed: (_sparkTimer * 30).toInt()),
-                ),
-              ],
+                  // 2. Синие молнии
+                  CustomPaint(
+                    size: const Size(80, 80),
+                    painter: _LightningSparkPainter(randSeed: (_sparkTimer * 60).toInt()),
+                  ),
+                  // 3. Желтые звездочки
+                  CustomPaint(
+                    size: const Size(84, 84),
+                    painter: _FlyingStarsPainter(randSeed: (_sparkTimer * 30).toInt()),
+                  ),
+                  // 4. Сам Ваня Баннихоп поверх всех слоев эффектов
+                  _buildCharacter('assets/images/bunnyhop.png', 48),
+                ],
+              ),
             ),
           ),
 
-          // 2. ВАНЯ БАННИХОП РЕНДЕРЯТСЯ ПОВЕРХ ВСЕХ ЭФФЕКТОВ ТАБЛЕТКИ
-          Positioned(bottom: 22, left: birdX, child: _buildCharacter('assets/images/bunnyhop.png', birdSize)),
-
-          // Облачко слов Вани
+          // Текстовые облачка кадра
           Positioned(
             top: 15, left: 4, width: 110,
             child: CustomPaint(
@@ -206,8 +204,6 @@ Expanded(
               ),
             ),
           ),
-
-          // Ответ Дона Моллюска
           Positioned(
             top: 75, right: 4, width: 110,
             child: CustomPaint(
@@ -229,85 +225,68 @@ Expanded(
 }
 
 
+
     Widget _buildBadFrame3() {
-    return Expanded(
-      child: _buildAdvanced3DFrame(
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Positioned(bottom: 12, right: 8, child: _buildDonMollusk(64)),
+  return Expanded(
+    child: _buildAdvanced3DFrame(
+      hasHole: true, // ТОЧЕЧНО: Активируем дыру в потолке и темно-синее небо на 3 кадре!
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned(bottom: 12, right: 8, child: _buildDonMollusk(64)),
 
-            // АНИМАЦИЯ ПАДЕНИЯ ТЯЖЕЛОЙ ГЛЫБЫ С ВРАЩЕНИЕМ ОСКОЛКОВ
-            AnimatedBuilder(
-              animation: _fallAnimation,
-              builder: (context, child) {
-                final fallValue = _fallAnimation.value;
-                
-                return Stack(
-                  children: [
-                    // Ваня Баннихоп стоит на месте кадра 2 (left: 36)
-                    // Каменная глыба летит на него сверху и полностью НАКРЫВАЕТ на отметке bottom: 22
-                    Positioned(
-                      bottom: 160 - (fallValue * 138), // Летит с высоты 160 прямо на уровень пола (22)
-                      left: 30, // Выровнена чётко по центру Вани, чтобы накрыть его целиком
-                      child: Container(
-                        width: 60, height: 42, // Широкий прямоугольник плиты, полностью закрывающий птицу
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF455A64), // Тёмный могильный сланец крыши
-                          border: Border.all(color: Colors.black, width: 1.8),
-                          borderRadius: BorderRadius.circular(3),
-                        ),
+          // ФИЗИЧЕСКОЕ ПАДЕНИЕ ПЛИТЫ СВЕРХУ НА ВАНЮ
+          AnimatedBuilder(
+            animation: _fallAnimation,
+            builder: (context, child) {
+              final fallValue = _fallAnimation.value;
+              return Stack(
+                children: [
+                  // Серый блок крыши летит с высоты 160 вниз на пол (координата 22)
+                  Positioned(
+                    bottom: 160 - (fallValue * 138), 
+                    left: 26, 
+                    child: Container(
+                      width: 60, height: 42, 
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF455A64), 
+                        border: Border.all(color: Colors.black, width: 1.8),
+                        borderRadius: BorderRadius.circular(3),
                       ),
                     ),
-                    
-                    // Улетающий в левый край кадра осколок
-                    Positioned(
-                      bottom: 130 - (fallValue * 110), 
-                      left: 32 - (fallValue * 16), 
-                      child: Transform.rotate(
-                        angle: fallValue * pi * 4,
-                        child: _buildFallingDebris(6, 10),
-                      ),
-                    ),
-
-                    // Отлетающий вправо к трону осколок
-                    Positioned(
-                      bottom: 150 - (fallValue * 130), 
-                      left: 55 + (fallValue * 22), 
-                      child: Transform.rotate(
-                        angle: -fallValue * pi * 3,
-                        child: _buildFallingDebris(8, 8),
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-
-            // Ваня Баннихоп рисуется ПОД плитой (если fallValue маленький — его видно, когда плита упала — он скрыт)
-            if (_debrisController.value < 0.85)
-              Positioned(bottom: 22, left: 36, child: _buildCharacter('assets/images/bunnyhop.png', 48)),
-
-            // Торжествующий крик Дона Моллюска (облачко Вани удалено)
-            Positioned(
-              top: 25, left: 6, right: 6,
-              child: CustomPaint(
-                painter: SpeechBubblePainter(tailXFactor: 0.75), // Хвостик указывает на Босса
-                child: const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text(
-                    "Хрю-ха-ха! Я так и думал! Жалкая птица!",
-                    style: TextStyle(fontSize: 9.0, fontWeight: FontWeight.bold, color: Colors.red, height: 1.15),
-                    textAlign: TextAlign.center,
                   ),
+                  // Осколки
+                  Positioned(bottom: 130 - (fallValue * 110), left: 28 - (fallValue * 12), child: Transform.rotate(angle: fallValue * pi * 4, child: _buildFallingDebris(6, 10))),
+                  Positioned(bottom: 150 - (fallValue * 130), left: 50 + (fallValue * 18), child: Transform.rotate(angle: -fallValue * pi * 3, child: _buildFallingDebris(8, 8))),
+                ],
+              );
+            },
+          ),
+
+          // Прячем Ваню под плиту в финале падения
+          if (_debrisController.value < 0.85)
+            Positioned(bottom: 22, left: 32, child: _buildCharacter('assets/images/bunnyhop.png', 48)),
+
+          Positioned(
+            top: 25, left: 6, right: 6,
+            child: CustomPaint(
+              painter: SpeechBubblePainter(tailXFactor: 0.75), 
+              child: const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text(
+                  "Хрю-ха-ха! Я так и думал! Жалкая птица!",
+                  style: TextStyle(fontSize: 9.0, fontWeight: FontWeight.bold, color: Colors.red, height: 1.15),
+                  textAlign: TextAlign.center,
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   // ЗАМЕНИТЬ ТОЧЕЧНО ВЕСЬ МЕТОД КНОПКИ:
 Widget _buildNavigationButton() {
