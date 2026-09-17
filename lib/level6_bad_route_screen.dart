@@ -102,6 +102,7 @@ Expanded(
   Widget _buildBadFrame1() {
     return Expanded(
       child: _buildAdvanced3DFrame(
+        hasHole: false,
         child: Stack(
           alignment: Alignment.center,
           children: [
