@@ -330,48 +330,59 @@ Widget _buildNavigationButton() {
 }
 
 
-  Widget _buildAdvanced3DFrame({required Widget child}) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.black, width: 3.5),
-        boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 6, offset: Offset(0, 4))],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(11),
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Color(0xFF14141E), Color(0xFF06060A)],
-                  ),
+  // ЗАМЕНИТЬ ТОЧЕЧНО МЕТОД _buildAdvanced3DFrame В LIB/LEVEL6_BAD_ROUTE_SCREEN.DART:
+Widget _buildAdvanced3DFrame({required Widget child, required bool hasHole}) {
+  return Container(
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(14),
+      border: Border.all(color: Colors.black, width: 3.5),
+      boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 6, offset: Offset(0, 4))],
+    ),
+    child: ClipRRect(
+      borderRadius: BorderRadius.circular(11),
+      child: Stack(
+        children: [
+          // Гранитный фон стен тронного зала
+          Positioned.fill(
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xFF14141E), Color(0xFF06060A)],
                 ),
               ),
             ),
+          ),
+          
+          // Если на 3 кадре крыша обрушилась — прорисовываем глубокий синий проём неба
+          if (hasHole)
             Positioned(
-              top: 0, left: 0, right: 0, 
-              child: CustomPaint(
-                size: const Size(double.infinity, 35), 
-                painter: _CeilingPainter(drawHole: false),
-              ),
+              top: 0, left: 30, right: 30, height: 18,
+              child: Container(color: const Color(0xFF0D1B2A)), 
             ),
-            Positioned(
-              bottom: 0, left: 0, right: 0, 
-              child: CustomPaint(
-                size: const Size(double.infinity, 24), 
-                painter: _FloorTilesPainter(),
-              ),
+
+          Positioned(
+            top: 0, left: 0, right: 0, 
+            child: CustomPaint(
+              size: const Size(double.infinity, 35), 
+              painter: _CeilingPainter(drawHole: hasHole), // Передаём флаг дыры в рисовальщик потолка
             ),
-            child,
-          ],
-        ),
+          ),
+          Positioned(
+            bottom: 0, left: 0, right: 0, 
+            child: CustomPaint(
+              size: const Size(double.infinity, 24), 
+              painter: _FloorTilesPainter(),
+            ),
+          ),
+          child,
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   Widget _buildFallingDebris(double w, double h) {
     return Container(
