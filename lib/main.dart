@@ -2159,12 +2159,16 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
     // ВЫЗОВ AudioManager.playMolluskTheme() УДАЛЁН
   } else {
     if (_selectedChoice == 1) {
-      // Идем по плохому пути (убрали const, чтобы избежать ошибки константы)
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => Level6BadRouteScreen()), 
-      );
-    } else if (_selectedChoice == 2) {
+  // 🟥 Запускаем звук ярости Вани со старта плохой линии
+  AudioManager.playRage(); 
+  
+  // Переходим на вторую страницу ПЛОХОЙ линии с полным замещением
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => const Level6BadRouteScreen()),
+  );
+}
+ else if (_selectedChoice == 2) {
       // Идем по хорошему пути
       Navigator.pushReplacement(
         context,
