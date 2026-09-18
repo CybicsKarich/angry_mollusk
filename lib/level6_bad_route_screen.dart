@@ -456,8 +456,9 @@ Widget _buildAdvanced3DFrame({required Widget child, required bool hasHole}) {
   }
 }
 
+// ЗАМЕНИТЬ ТОЧЕЧНО В LIB/LEVEL6_COMIC_SCREEN.DART:
 class _CeilingPainter extends CustomPainter {
-  final bool drawHole; // Флаг пролома крыши
+  final bool drawHole;
   _CeilingPainter({required this.drawHole});
 
   @override
@@ -466,32 +467,35 @@ class _CeilingPainter extends CustomPainter {
     final beamPaint = Paint()..color = const Color(0xFF09090D)..style = PaintingStyle.stroke..strokeWidth = 2.2;
     
     if (!drawHole) {
-      // Сплошной потолок для 1 и 2 кадра
+      // Сплошной потолок: линии сходятся НА ПЕРЕДНЕМ плане и расширяются ВДАЛЬ
       canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), ceilPaint);
       for (int i = 0; i <= 6; i++) {
-        canvas.drawLine(Offset(size.width * (i / 6), 0), Offset(size.width * 0.5, size.height), beamPaint);
+        // ОБРАТНАЯ ПЕРСПЕКТИВА: Старт из сжатого центра на переднем плане, уход в широкие края вдаль
+        canvas.drawLine(Offset(size.width * 0.5, 0), Offset(size.width * (i / 6), size.height), beamPaint);
       }
     } else {
-      // КРЫША ОБРУШИЛАСЬ: Рисуем рваные края потолка, оставляя центр пустым под синее небо!
+      // КРЫША ОБВАЛИЛАСЬ: Пролом расширяется вглубь, левый и правый уцелевшие куски сужаются к переду
       final leftPath = Path()
-        ..moveTo(0, 0)..lineTo(size.width * 0.25, 0)
-        ..lineTo(size.width * 0.28, size.height)..lineTo(0, size.height)..close();
+        ..moveTo(0, 0)..lineTo(size.width * 0.42, 0)
+        ..lineTo(size.width * 0.35, size.height)..lineTo(0, size.height)..close();
       canvas.drawPath(leftPath, ceilPaint);
       canvas.drawPath(leftPath, beamPaint);
 
       final rightPath = Path()
-        ..moveTo(size.width * 0.75, 0)..lineTo(size.width, 0)
-        ..lineTo(size.width, size.height)..lineTo(size.width * 0.72, size.height)..close();
+        ..moveTo(size.width * 0.58, 0)..lineTo(size.width, 0)
+        ..lineTo(size.width, size.height)..lineTo(size.width * 0.65, size.height)..close();
       canvas.drawPath(rightPath, ceilPaint);
       canvas.drawPath(rightPath, beamPaint);
     }
     canvas.drawLine(Offset(0, size.height), Offset(size.width, size.height), beamPaint);
   }
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true; // Разрешаем перерисовку дыры!
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
 
+
+// ЗАМЕНИТЬ ТОЧЕЧНО В LIB/LEVEL6_COMIC_SCREEN.DART:
 class _FloorTilesPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -499,17 +503,20 @@ class _FloorTilesPainter extends CustomPainter {
     final linePaint = Paint()..color = const Color(0xFF111114)..style = PaintingStyle.stroke..strokeWidth = 1.6;
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), tilePaint);
     
+    // Горизонтальные плиты: сужаются (уплотняются) к нижнему краю экрана
     for (int i = 0; i < 5; i++) {
-      double hY = size.height * (0.2 + (i * i * 0.8 / 16));
+      double hY = size.height * (0.8 - (i * i * 0.8 / 16));
       canvas.drawLine(Offset(0, hY), Offset(size.width, hY), linePaint);
     }
+    // Вертикальные швы: ОБРАТНЫЙ ВЕЕР (расширяются от низа к верху)
     for (int i = 0; i <= 12; i++) {
-      canvas.drawLine(Offset(size.width * (0.3 + (i * 0.4 / 12)), 0), Offset(size.width * (i / 12), size.height), linePaint);
+      canvas.drawLine(Offset(size.width * (i / 12), 0), Offset(size.width * (0.3 + (i * 0.4 / 12)), size.height), linePaint);
     }
   }
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
+
 
 class _WingsPainter extends CustomPainter {
   @override
