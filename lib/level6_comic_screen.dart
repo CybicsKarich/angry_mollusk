@@ -38,44 +38,43 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
     super.dispose();
   }
   
-  @override
+    @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF040407), // Мрак тронного зала
+      backgroundColor: const Color(0xFF040407), 
       body: SafeArea(
         child: Column(
           children: [
-            const SizedBox(height: 12),
+            const SizedBox(height: 4), // Ужали верхний отступ с 12 до 4
             const Text(
               "ГЛАВА VI: ЛОГОВО ДОНА МОЛЛЮСКА",
               style: TextStyle(
-                fontSize: 22,
+                fontSize: 18, // Сократили размер текста для экономии места
                 fontWeight: FontWeight.w900,
                 color: Color(0xFF455A64),
-                letterSpacing: 2.5,
-                shadows: [Shadow(color: Colors.black, blurRadius: 6, offset: Offset(2, 2))],
+                letterSpacing: 2.0,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 6),
 
-            // ГЛАВНАЯ СЕТКА: Пошаговое появление кадров Хорошей Линии
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 14),
                 child: Row(
                   children: [
-        if (_currentFrame >= 1) _buildGoodFrame1(), // <--- ИСПРАВЛЕНО
-        if (_currentFrame >= 2) const SizedBox(width: 12),
-        if (_currentFrame >= 2) _buildGoodFrame2(), // <--- ИСПРАВЛЕНО
-        if (_currentFrame >= 3) const SizedBox(width: 12),
-        if (_currentFrame >= 3) _buildGoodFrame3(), // <--- ИСПРАВЛЕНО
-      ],
+                    if (_currentFrame >= 1) _buildGoodFrame1(),
+                    if (_currentFrame >= 2) const SizedBox(width: 12),
+                    if (_currentFrame >= 2) _buildGoodFrame2(),
+                    if (_currentFrame >= 3) const SizedBox(width: 12),
+                    if (_currentFrame >= 3) _buildGoodFrame3(),
+                  ],
                 ),
               ),
             ),
 
+            // ИСПРАВЛЕHО ДЛЯ ХОРОШЕЙ ЛИHИИ: Убрали Overflow полосу снизу намертво!
             Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.only(bottom: 4.0, top: 2.0),
               child: _buildNavigationButton(),
             ),
           ],
@@ -83,6 +82,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
       ),
     );
   }
+
 
   // =========================================================================
   // ХОРОШАЯ ЛИНИЯ - КАДР 1: Спокойствие шерифа против ухмылки босса
