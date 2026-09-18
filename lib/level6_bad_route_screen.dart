@@ -290,24 +290,24 @@ class _Level6BadRouteScreenState extends State<Level6BadRouteScreen> with Ticker
 }
 
 
-  // ЗАМЕНИТЬ ТОЧЕЧНО ВЕСЬ МЕТОД КНОПКИ:
-Widget _buildNavigationButton() {
+  Widget _buildNavigationButton() {
   return Container(
-    width: double.infinity, constraints: const BoxConstraints(maxWidth: 240), height: 46,
+    width: double.infinity,
+    constraints: const BoxConstraints(maxWidth: 240),
+    height: 38, // Уменьшено с 46 до 38 для полного исключения overflow
     child: ElevatedButton(
       style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         backgroundColor: _currentFrame == 3 ? Colors.grey.shade700 : const Color(0xFFB71C1C),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       onPressed: () {
         if (_currentFrame < 3) {
           setState(() => _currentFrame++);
           
-          // ЕСЛИ ПЕРЕШЛИ НА 2 КАДР — строго здесь бахает звук ярости Вани!
           if (_currentFrame == 2) {
             AudioManager.playRage(); 
           }
-          // ЕСЛИ ПЕРЕШЛИ НА 3 КАДР — запускаем обвал крыши
           if (_currentFrame == 3) {
             AudioManager.playCastleCollapse();
             _debrisController.forward(from: 0.0);
@@ -319,13 +319,19 @@ Widget _buildNavigationButton() {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center, 
         children: [
-          Text(
-            _currentFrame == 3 ? "КОНЕЦ (ЗАБЛОКИРОВАНО)" : "ДАЛЬШЕ", 
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)
+          Expanded(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                _currentFrame == 3 ? "КОНЕЦ (ЗАБЛОКИРОВАНО)" : "ДАЛЬШЕ", 
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+                textAlign: TextAlign.center,
+              ),
+            ),
           ), 
-          const SizedBox(width: 8), 
-          Icon(_currentFrame == 3 ? Icons.lock_rounded : Icons.arrow_forward_ios_rounded, size: 16, color: Colors.white)
-        ]
+          const SizedBox(width: 6), 
+          Icon(_currentFrame == 3 ? Icons.lock_rounded : Icons.arrow_forward_ios_rounded, size: 14, color: Colors.white),
+        ],
       ),
     ),
   );
