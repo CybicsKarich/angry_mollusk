@@ -22,9 +22,8 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      # Устанавливаем официальный Flutter SDK (Обновили экшен до стабильной v2.12.0)
       - name: Set up Flutter
-        uses: subosito/flutter-action@v2.12.0
+        uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
 
