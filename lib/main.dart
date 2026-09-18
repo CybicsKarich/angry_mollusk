@@ -2515,15 +2515,17 @@ class _CastleFloorTilesPainter extends CustomPainter {
     final linePaint = Paint()..color = const Color(0xFF111114)..style = PaintingStyle.stroke..strokeWidth = 1.6;
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), tilePaint);
 
+    // Горизонтальные стыки: сужаются (уплотняются) к нижнему краю экрана
     for (int i = 0; i < 5; i++) {
-      double hY = size.height * (0.2 + (i * i * 0.8 / 16));
+      double hY = size.height * (0.8 - (i * i * 0.8 / 16));
       canvas.drawLine(Offset(0, hY), Offset(size.width, hY), linePaint);
     }
 
     int linesCount = 12; 
     for (int i = 0; i <= linesCount; i++) {
-      double topX = size.width * (0.3 + (i * 0.4 / linesCount)); 
-      double bottomX = size.width * (i / linesCount);            
+      // ОБРАТНЫЙ ВЕЕР: Линии расширяются от низа к верху (вглубь комнаты)
+      double topX = size.width * (i / linesCount);            
+      double bottomX = size.width * (0.3 + (i * 0.4 / linesCount)); 
       canvas.drawLine(Offset(topX, 0), Offset(bottomX, size.height), linePaint);
     }
   }
@@ -2539,8 +2541,9 @@ class _CastleCeiling3DPainter extends CustomPainter {
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), ceilPaint);
 
     for (int i = 0; i <= 6; i++) {
-      double startX = size.width * (i / 6);
-      canvas.drawLine(Offset(startX, 0), Offset(size.width * 0.5, size.height), beamPaint);
+      // ОБРАТНАЯ ПЕРСПЕКТИВА ПОТОЛКА: Линии сходятся у переднего края и расширяются назад
+      double endX = size.width * (i / 6);
+      canvas.drawLine(Offset(size.width * 0.5, 0), Offset(endX, size.height), beamPaint);
     }
     canvas.drawLine(Offset(0, size.height), Offset(size.width, size.height), beamPaint);
 
@@ -2550,7 +2553,8 @@ class _CastleCeiling3DPainter extends CustomPainter {
     double winW = 6;
     double winH = 14;
     for (int i = 1; i < 4; i++) {
-      double winX = size.width * (0.25 * i) - (winW / 2);
+      // Окошки разъезжаются шире к дальней стене в обратной перспективе
+      double winX = size.width * (0.2 + (0.3 * i)) - (winW / 2);
       Rect winRect = Rect.fromLTWH(winX, size.height - winH - 2, winW, winH);
       canvas.drawRRect(RRect.fromRectAndRadius(winRect, const Radius.circular(2)), windowPaint);
       canvas.drawRRect(RRect.fromRectAndRadius(winRect, const Radius.circular(2)), windowStrokePaint);
