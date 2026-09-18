@@ -51,43 +51,43 @@ class _Level6BadRouteScreenState extends State<Level6BadRouteScreen> with Ticker
     super.dispose();
   }
   
-  @override
+    @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF040407), // Мрак тронного зала
+      backgroundColor: const Color(0xFF040407), 
       body: SafeArea(
         child: Column(
           children: [
-            const SizedBox(height: 12),
+            const SizedBox(height: 4), // Уменьшили отступ сверху с 12 до 4
             const Text(
               "ГЛАВА VI: ЛОГОВО ДОНА МОЛЛЮСКА",
               style: TextStyle(
-                fontSize: 22,
+                fontSize: 18, // Уменьшили шрифт с 22 до 18 для экономии места
                 fontWeight: FontWeight.w900,
                 color: Color(0xFF455A64),
-                letterSpacing: 2.5,
-                shadows: [Shadow(color: Colors.black, blurRadius: 6, offset: Offset(2, 2))],
+                letterSpacing: 2.0,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 6), // Уменьшили отступ до 6
 
-            // ЗАМЕНИТЬ ТОЧЕЧНО В МЕТОДЕ build:
-Expanded(
-  child: Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 14),
-    child: Row(
-      children: [
-        if (_currentFrame >= 1) _buildBadFrame1(), 
-        if (_currentFrame >= 2) const SizedBox(width: 12),
-        if (_currentFrame >= 2) _buildBadFrame2(), 
-        if (_currentFrame >= 3) const SizedBox(width: 12),
-        if (_currentFrame >= 3) _buildBadFrame3(), 
-      ],
-    ),
-  ),
-),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: Row(
+                  children: [
+                    if (_currentFrame >= 1) _buildBadFrame1(), 
+                    if (_currentFrame >= 2) const SizedBox(width: 12),
+                    if (_currentFrame >= 2) _buildBadFrame2(), 
+                    if (_currentFrame >= 3) const SizedBox(width: 12),
+                    if (_currentFrame >= 3) _buildBadFrame3(), 
+                  ],
+                ),
+              ),
+            ),
+
+            // ИСПРАВЛЕНО: Минимальные отступы кнопки для устранения Overflow
             Padding(
-              padding: const EdgeInsets.only(bottom: 6.0, top: 4.0), // Убрали Overflow!
+              padding: const EdgeInsets.only(bottom: 4.0, top: 2.0),
               child: _buildNavigationButton(),
             ),
           ],
@@ -95,6 +95,7 @@ Expanded(
       ),
     );
   }
+
 
   // =========================================================================
   // ПЛОХАЯ ЛИНИЯ - КАДР 1: Взаимные обвинения и раскрытие слежки
@@ -450,22 +451,40 @@ Widget _buildAdvanced3DFrame({required Widget child, required bool hasHole}) {
 }
 
 class _CeilingPainter extends CustomPainter {
-  final bool drawHole;
+  final bool drawHole; // Флаг пролома крыши
   _CeilingPainter({required this.drawHole});
 
   @override
   void paint(Canvas canvas, Size size) {
     final ceilPaint = Paint()..color = const Color(0xFF15151D)..style = PaintingStyle.fill;
     final beamPaint = Paint()..color = const Color(0xFF09090D)..style = PaintingStyle.stroke..strokeWidth = 2.2;
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), ceilPaint);
-    for (int i = 0; i <= 6; i++) {
-      canvas.drawLine(Offset(size.width * (i / 6), 0), Offset(size.width * 0.5, size.height), beamPaint);
+    
+    if (!drawHole) {
+      // Сплошной потолок для 1 и 2 кадра
+      canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), ceilPaint);
+      for (int i = 0; i <= 6; i++) {
+        canvas.drawLine(Offset(size.width * (i / 6), 0), Offset(size.width * 0.5, size.height), beamPaint);
+      }
+    } else {
+      // КРЫША ОБРУШИЛАСЬ: Рисуем рваные края потолка, оставляя центр пустым под синее небо!
+      final leftPath = Path()
+        ..moveTo(0, 0)..lineTo(size.width * 0.25, 0)
+        ..lineTo(size.width * 0.28, size.height)..lineTo(0, size.height)..close();
+      canvas.drawPath(leftPath, ceilPaint);
+      canvas.drawPath(leftPath, beamPaint);
+
+      final rightPath = Path()
+        ..moveTo(size.width * 0.75, 0)..lineTo(size.width, 0)
+        ..lineTo(size.width, size.height)..lineTo(size.width * 0.72, size.height)..close();
+      canvas.drawPath(rightPath, ceilPaint);
+      canvas.drawPath(rightPath, beamPaint);
     }
     canvas.drawLine(Offset(0, size.height), Offset(size.width, size.height), beamPaint);
   }
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true; // Разрешаем перерисовку дыры!
 }
+
 
 class _FloorTilesPainter extends CustomPainter {
   @override
