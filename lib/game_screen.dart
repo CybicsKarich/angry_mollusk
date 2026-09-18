@@ -1120,11 +1120,22 @@ if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictor
       }
     }
 
-    // Ослепляющая вспышка молнии для 5 уровня
+        // Ослепляющая вспышка молнии для 5 уровня + ВЫЛЕТ БОЖЕСТВЕННОЙ ТЕНИ КЛЕШНИ
     if (currentLevel == 5 && _showLightningFlash) {
+      canvas.save();
+      // Смещаем холст обратно против скролла worldScrollX, чтобы тень осталась на небе между островами, а не плыла за экраном
+      canvas.translate(-size.width * worldScrollX, 0);
+      
+      // Рисуем гигантскую клешню Дона Моллюска в небесах
+      _drawDivineLightningClaw(canvas, size);
+      
+      canvas.restore();
+
+      // Оставляем твой белый прямоугольник вспышки молнии поверх неба
       final lightningOverlayPaint = Paint()..color = Colors.white.withOpacity(0.88);
       canvas.drawRect(skyRect, lightningOverlayPaint);
     }
+
 
     // Если идет 5 уровень — вызываем метод анимированного ЖИВОГО ливня
     if (currentLevel == 5) {
@@ -1847,6 +1858,51 @@ if (hasWantedPoster && !showWantedBig) {
       
       canvas.drawLine(Offset(liveX, liveY), Offset(liveX + 6, liveY + 18), rainPaint);
     }
+  }
+    // ТОЧЕЧНО ДОБАВИТЬ В САМЫЙ КОНЕЦ КЛАССА AngryMolluskGame:
+  void _drawDivineLightningClaw(Canvas canvas, Size size) {
+    // Полупрозрачный, глубокий грозовой силуэт тени босса
+    final shadowPaint = Paint()
+      ..color = const Color(0x5A09111E) 
+      ..style = PaintingStyle.fill
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6.0); // Мягкое размытие в тучах
+
+    final borderPaint = Paint()
+      ..color = const Color(0x44000000)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.8
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2.0);
+
+    // Базовые координаты: сажаем гигантскую клешню на небо строго между 1 и 2 островами
+    double baseClawX = size.width * 0.75; 
+    double baseClawY = size.height * 0.05;
+
+    final clawPath = Path();
+    // Анатомическое основание клешни Дона Моллюска из туч
+    clawPath.moveTo(baseClawX, baseClawY);
+    clawPath.cubicTo(baseClawX + 50, baseClawY - 30, baseClawX + 90, baseClawY + 15, baseClawX + 120, baseClawY + 40);
+    
+    // Верхний массивный зажим
+    clawPath.cubicTo(baseClawX + 170, baseClawY - 15, baseClawX + 210, baseClawY + 25, baseClawX + 230, baseClawY + 60);
+    clawPath.lineTo(baseClawX + 180, baseClawY + 75);
+    clawPath.cubicTo(baseClawX + 150, baseClawY + 55, baseClawX + 130, baseClawY + 80, baseClawX + 160, baseClawY + 105);
+    
+    // Нижний прижимной крюк
+    clawPath.cubicTo(baseClawX + 200, baseClawY + 125, baseClawX + 190, baseClawY + 160, baseClawX + 150, baseClawY + 135);
+    clawPath.cubicTo(baseClawX + 100, baseClawY + 105, baseClawX + 70, baseClawY + 115, baseClawX + 35, baseClawY + 70);
+    clawPath.close();
+
+    canvas.drawPath(clawPath, shadowPaint);
+    canvas.drawPath(clawPath, borderPaint);
+
+    // Добавляем 2 мелких бугорка-зубца внутри зажима для жуткой детализации
+    final toothPaint = Paint()..color = const Color(0x33000000)..style = PaintingStyle.fill;
+    final pathTooth = Path()
+      ..moveTo(baseClawX + 165, baseClawY + 60)
+      ..lineTo(size.width * 0.015 + baseClawX + 150, baseClawY + 68)
+      ..lineTo(baseClawX + 168, baseClawY + 72)
+      ..close();
+    canvas.drawPath(pathTooth, toothPaint);
   }
 }
     // ДЕТАЛИЗИРОВАННЫЙ КЛАСС ПТИЦЫ БАННИХОПА
