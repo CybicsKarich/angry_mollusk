@@ -1864,61 +1864,74 @@ if (hasWantedPoster && !showWantedBig) {
       canvas.drawLine(Offset(liveX, liveY), Offset(liveX + 6, liveY + 18), rainPaint);
     }
   }
-  // ТОЧЕЧНО ЗАМЕНИТЬ В САМОМ КОНЦЕ КЛАССА AngryMolluskGame:
+    // ТОЧЕЧНО ЗАМЕНИТЬ В САМОМ КОНЦЕ КЛАССА AngryMolluskGame:
   void _drawDivineLightningClaw(Canvas canvas, Size size) {
-    // ИСПРАВЛЕНО: Глубокий, насыщенный чёрный цвет тени (альфа 0xCC — очень плотный и сильно видимый!)
+    // Угольно-чёрный, плотный и сильно видимый цвет тени ложного бога
     final shadowPaint = Paint()
-      ..color = const Color(0xCC000000) 
+      ..color = const Color(0xDD000000) 
       ..style = PaintingStyle.fill;
-      // МАСКА РАЗМЫТИЯ (BLUR) ПОЛНОСТЬЮ УДАЛЕНА ДЛЯ ДОСТИЖЕНИЯ СУПЕР ЧЁТКИХ КРАЕВ
 
-    // Жирная чёрная обводка для максимальной чёткости контура в небе
+    // Жирная чёрная обводка для бритвенной чёткости контура на фоне неба
     final borderPaint = Paint()
       ..color = Colors.black
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.5;
+      ..strokeWidth = 2.5;
 
-    // Базовые координаты: центрируем гигантскую клешню на небе между 1 и 2 островами
-    double baseClawX = size.width * 0.72; 
-    double baseClawY = size.height * -0.05; // Сдвинута чуть выше, чтобы массивное основание уходило в тучи
+    // ИСПРАВЛЕНО: Координаты привязаны к центру экрана и его высоте, чтобы клешня ВСЕГДА влезала в экран!
+    // Посадка высоко в небесах (на 10% высоты экрана) чётко между 1 и 2 островом (в районе 520 пикселей по X)
+    double baseClawX = size.width * 0.48; 
+    double baseClawY = size.height * 0.08;
+
+    // Масштабные коэффициенты формы, чтобы зажим был чётким и пропорциональным
+    double w = 120.0; // Идеальная ширина здания, чтобы игрок считывал форму целиком
+    double h = 75.0;
 
     final clawPath = Path();
-    // ИСПРАВЛЕНО: Координаты пересчитаны под гигантский размер (в 3 раза больше, размером со здание!)
+    
+    // 1. Рисуем массивное круглое основание сустава клешни (локоть), уходящее вверх в тучи
     clawPath.moveTo(baseClawX, baseClawY);
-    clawPath.cubicTo(baseClawX + 150, baseClawY - 90, baseClawX + 270, baseClawY + 45, baseClawX + 360, baseClawY + 120);
+    clawPath.cubicTo(baseClawX + w * 0.2, baseClawY - h * 0.3, baseClawX + w * 0.5, baseClawY + h * 0.1, baseClawX + w * 0.6, baseClawY + h * 0.3);
     
-    // Верхний гигантский загнутый щипец
-    clawPath.cubicTo(baseClawX + 510, baseClawY - 45, baseClawX + 630, baseClawY + 75, baseClawX + 690, baseClawY + 180);
-    clawPath.lineTo(baseClawX + 540, baseClawY + 225);
-    clawPath.cubicTo(baseClawX + 450, baseClawY + 165, baseClawX + 390, baseClawY + 240, baseClawX + 480, baseClawY + 315);
+    // 2. ВЕРХНИЙ КРЮК ЗАЖИМА (Большая загнутая дуга, уходящая вправо и плавно загибающаяся вниз)
+    clawPath.cubicTo(baseClawX + w * 1.1, baseClawY + h * 0.1, baseClawX + w * 1.4, baseClawY + h * 0.5, baseClawX + w * 1.5, baseClawY + h * 0.9);
+    // Острый кончик верхнего щипца
+    clawPath.lineTo(baseClawX + w * 1.35, baseClawY + h * 1.0);
+    // Внутренняя выемка верхнего зажима (возврат к центру раскрытия)
+    clawPath.cubicTo(baseClawX + w * 1.15, baseClawY + h * 0.7, baseClawX + w * 0.9, baseClawY + h * 0.6, baseClawX + w * 0.8, baseClawY + h * 0.7);
     
-    // Нижний прижимной крюк клешни
-    clawPath.cubicTo(baseClawX + 600, baseClawY + 375, baseClawX + 570, baseClawY + 480, baseClawX + 450, baseClawY + 405);
-    clawPath.cubicTo(baseClawX + 300, baseClawY + 315, baseClawX + 210, baseClawY + 345, baseClawX + 105, baseClawY + 210);
+    // 3. НИЖНИЙ ПРИЖИМНОЙ КРЮК (Образует красивый открытый зев ловушки)
+    // Острый кончик нижнего щипца
+    clawPath.lineTo(baseClawX + w * 1.0, baseClawY + h * 1.4);
+    clawPath.cubicTo(baseClawX + w * 0.7, baseClawY + h * 1.2, baseClawX + w * 0.5, baseClawY + h * 1.3, baseClawX + w * 0.4, baseClawY + h * 0.9);
+    
+    // 4. Возврат к основанию сустава лапы босса
+    clawPath.cubicTo(baseClawX + w * 0.2, baseClawY + h * 0.6, baseClawX - w * 0.1, baseClawY + h * 0.5, baseClawX, baseClawY);
     clawPath.close();
 
-    // Отрисовываем супер-чёткий чёрный силуэт
+    // Отрисовываем чёткий силуэт Дона Моллюска
     canvas.drawPath(clawPath, shadowPaint);
     canvas.drawPath(clawPath, borderPaint);
 
-    // Добавляем массивные, острые как бритва зазубрины внутри зажима
-    final toothPaint = Paint()..color = const Color(0xFF000000)..style = PaintingStyle.fill;
+    // =========================================================================
+    // 5. ТЕКСТУРА: ДОБАВЛЯЕМ ДВА ХАРАКТЕРНЫХ ОСТРЫХ ЗУБЦА ВНУТРИ РАСКРЫТОГО ЗЕВА
+    // =========================================================================
+    final toothPaint = Paint()..color = Colors.black..style = PaintingStyle.fill;
     
+    // Первый верхний зубец панциря клешни
     final pathTooth1 = Path()
-      ..moveTo(baseClawX + 495, baseClawY + 180)
-      ..lineTo(baseClawX + 450, baseClawY + 204)
-      ..lineTo(baseClawX + 504, baseClawY + 216)
+      ..moveTo(baseClawX + w * 1.05, baseClawY + h * 0.68)
+      ..lineTo(baseClawX + w * 0.98, baseClawY + h * 0.76)
+      ..lineTo(baseClawX + w * 1.08, baseClawY + h * 0.78)
       ..close();
     canvas.drawPath(pathTooth1, toothPaint);
-    canvas.drawPath(pathTooth1, borderPaint);
 
+    // Второй нижний зубец панциря клешни
     final pathTooth2 = Path()
-      ..moveTo(baseClawX + 470, baseClawY + 250)
-      ..lineTo(baseClawX + 430, baseClawY + 280)
-      ..lineTo(baseClawX + 485, baseClawY + 290)
+      ..moveTo(baseClawX + w * 0.88, baseClawY + h * 0.82)
+      ..lineTo(baseClawX + w * 0.82, baseClawY + h * 0.92)
+      ..lineTo(baseClawX + w * 0.92, baseClawY + h * 0.94)
       ..close();
     canvas.drawPath(pathTooth2, toothPaint);
-    canvas.drawPath(pathTooth2, borderPaint);
   }
 }
     // ДЕТАЛИЗИРОВАННЫЙ КЛАСС ПТИЦЫ БАННИХОПА
