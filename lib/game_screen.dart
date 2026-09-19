@@ -1120,19 +1120,25 @@ if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictor
       }
     }
 
-        // Ослепляющая вспышка молнии для 5 уровня + ВЫЛЕТ БОЖЕСТВЕННОЙ ТЕНИ КЛЕШНИ
+        // =========================================================================
+    // ОВЕРЛЕЙ МОЛНИИ ДЛЯ 5 УРОВНЯ + ИСПРАВЛЕННЫЙ ПОРЯДОК СЛОЁВ ДЛЯ ТЕНИ КЛЕШНИ
+    // =========================================================================
     if (currentLevel == 5 && _showLightningFlash) {
+      // 1. СНАЧАЛА заливаем экран ослепляющим белым светом молнии
+      final lightningOverlayPaint = Paint()..color = Colors.white.withOpacity(0.88);
+      canvas.drawRect(skyRect, lightningOverlayPaint);
+
+      // 2. И ТОЛЬКО ТЕПЕРЬ ПОВЕРХ БЕЛОЙ ВСПЫШКИ накладываем угольно-чёрную тень!
       canvas.save();
+      // Компенсируем скролл камеры, чтобы клешня намертво застыла в небе между 1 и 2 островами
       canvas.translate(-size.width * worldScrollX, 0);
       
-      // Вызываем обновлённую гигантскую чёткую клешню
+      // Рисуем гигантскую чёткую клешню Дона Моллюска (теперь она железно будет видна!)
       _drawDivineLightningClaw(canvas, size);
       
       canvas.restore();
-
-      final lightningOverlayPaint = Paint()..color = Colors.white.withOpacity(0.88);
-      canvas.drawRect(skyRect, lightningOverlayPaint);
     }
+
 
 
 
