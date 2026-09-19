@@ -1864,7 +1864,7 @@ if (hasWantedPoster && !showWantedBig) {
       canvas.drawLine(Offset(liveX, liveY), Offset(liveX + 6, liveY + 18), rainPaint);
     }
   }
-    // ТОЧЕЧНО ЗАМЕНИТЬ В САМОМ КОНЦЕ КЛАССА AngryMolluskGame:
+  // ТОЧЕЧНО ЗАМЕНИТЬ В САМОМ КОНЦЕ КЛАССА AngryMolluskGame:
   void _drawDivineLightningClaw(Canvas canvas, Size size) {
     // Угольно-чёрный, плотный и сильно видимый цвет тени ложного бога
     final shadowPaint = Paint()
@@ -1877,18 +1877,18 @@ if (hasWantedPoster && !showWantedBig) {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.5;
 
-    // ИСПРАВЛЕНО: Координаты привязаны к центру экрана и его высоте, чтобы клешня ВСЕГДА влезала в экран!
-    // Посадка высоко в небесах (на 10% высоты экрана) чётко между 1 и 2 островом (в районе 520 пикселей по X)
+    // Координаты привязаны к центру экрана и его высоте, чтобы клешня ВСЕГДА влезала в экран!
+    // Посадка высоко в небесах чётко между 1 и 2 островом
     double baseClawX = size.width * 0.48; 
     double baseClawY = size.height * 0.08;
 
     // Масштабные коэффициенты формы, чтобы зажим был чётким и пропорциональным
-    double w = 120.0; // Идеальная ширина здания, чтобы игрок считывал форму целиком
+    double w = 120.0; // Ширина размером со здание Генерала
     double h = 75.0;
 
     final clawPath = Path();
     
-    // 1. Рисуем массивное круглое основание сустава клешни (локоть), уходящее вверх в тучи
+    // 1. Массивное круглое основание сустава клешни (локоть), уходящее вверх в тучи
     clawPath.moveTo(baseClawX, baseClawY);
     clawPath.cubicTo(baseClawX + w * 0.2, baseClawY - h * 0.3, baseClawX + w * 0.5, baseClawY + h * 0.1, baseClawX + w * 0.6, baseClawY + h * 0.3);
     
@@ -1908,30 +1908,9 @@ if (hasWantedPoster && !showWantedBig) {
     clawPath.cubicTo(baseClawX + w * 0.2, baseClawY + h * 0.6, baseClawX - w * 0.1, baseClawY + h * 0.5, baseClawX, baseClawY);
     clawPath.close();
 
-    // Отрисовываем чёткий силуэт Дона Моллюска
+    // Отрисовываем чистый, чёткий силуэт Дона Моллюска
     canvas.drawPath(clawPath, shadowPaint);
     canvas.drawPath(clawPath, borderPaint);
-
-    // =========================================================================
-    // 5. ТЕКСТУРА: ДОБАВЛЯЕМ ДВА ХАРАКТЕРНЫХ ОСТРЫХ ЗУБЦА ВНУТРИ РАСКРЫТОГО ЗЕВА
-    // =========================================================================
-    final toothPaint = Paint()..color = Colors.black..style = PaintingStyle.fill;
-    
-    // Первый верхний зубец панциря клешни
-    final pathTooth1 = Path()
-      ..moveTo(baseClawX + w * 1.05, baseClawY + h * 0.68)
-      ..lineTo(baseClawX + w * 0.98, baseClawY + h * 0.76)
-      ..lineTo(baseClawX + w * 1.08, baseClawY + h * 0.78)
-      ..close();
-    canvas.drawPath(pathTooth1, toothPaint);
-
-    // Второй нижний зубец панциря клешни
-    final pathTooth2 = Path()
-      ..moveTo(baseClawX + w * 0.88, baseClawY + h * 0.82)
-      ..lineTo(baseClawX + w * 0.82, baseClawY + h * 0.92)
-      ..lineTo(baseClawX + w * 0.92, baseClawY + h * 0.94)
-      ..close();
-    canvas.drawPath(pathTooth2, toothPaint);
   }
 }
     // ДЕТАЛИЗИРОВАННЫЙ КЛАСС ПТИЦЫ БАННИХОПА
