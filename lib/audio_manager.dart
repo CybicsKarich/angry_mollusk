@@ -122,24 +122,29 @@ static Future<void> playPaperRustle() async {
   // =========================================================================
     
 
-       // 1. ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД ВЫХОДА В МЕНЮ В КЛАССЕ AudioManager:
+         // 1. ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД ВЫХОДА В МЕНЮ В КЛАССЕ AudioManager:
   static Future<void> stopLevelAudioAndPlayMenu() async {
     try {
       await _fxPlayer.stop();
-      await _finalMenuPlayer.stop(); // Просто останавливаем и сбрасываем на 0 секунду
+      await _finalMenuPlayer.stop(); 
       
-      // Намертво выгружаем и очищаем именно плеер дождя 5 уровня
+      // Намертво выгружаем и останавливаем плеер дождя 5 уровня
       if (_rainPlayer != null) {
         try {
           await _rainPlayer!.stop();
-          await _rainPlayer!.release(); // Плеер дождя очищать можно и нужно
+          await _rainPlayer!.release(); 
         } catch (_) {}
       }
 
-      // УДАЛЕНО: _finalMenuPlayer.release() больше не вызывается, ресурсы целы!
+      // ИСПРАВЛЕНО: Полностью очищаем глобальный кэш аудио-файлов во Flutter,
+      // чтобы убрать застрявшие в памяти буферы ливня и старой музыки!
+      await AudioCache.instance.clearAll();
+
+      // Даём плееру микросекунду прийти в себя после очистки кэша
+      await Future.delayed(const Duration(milliseconds: 50));
 
       await _finalMenuPlayer.setVolume(0.85);
-      await _finalMenuPlayer.play(AssetSource('audio/menu_theme.mp3')); // Теперь железно заиграет!
+      await _finalMenuPlayer.play(AssetSource('audio/menu_theme.mp3')); // Теперь точно заиграет!
     } catch (e) {
       print("Ошибка очистки звуков меню: $e");
     }
@@ -151,7 +156,7 @@ static Future<void> playPaperRustle() async {
       await _fxPlayer.stop();
       await _finalMenuPlayer.stop();
 
-      // Намертво выгружаем плеер дождя 5 уровня, чтобы он не лез на 6 уровень
+      // Намертво выгружаем плеер дождя 5 уровня
       if (_rainPlayer != null) {
         try {
           await _rainPlayer!.stop();
@@ -159,7 +164,12 @@ static Future<void> playPaperRustle() async {
         } catch (_) {}
       }
 
-      // УДАЛЕНО: _finalMenuPlayer.release() больше не вызывается, ресурсы целы!
+      // ИСПРАВЛЕНО: Очищаем кэш перед включением мистического эмбиента капель замка,
+      // освобождая звуковые каналы операционной системы Android
+      await AudioCache.instance.clearAll();
+
+      // Краткая пауза для стабильной перезагрузки аудио-декодера телефона
+      await Future.delayed(const Duration(milliseconds: 50));
 
       await _finalMenuPlayer.setVolume(1.0);
       await _finalMenuPlayer.play(AssetSource('audio/castle_drops.mp3')); // Теперь капли железно зазвучат!
@@ -167,6 +177,7 @@ static Future<void> playPaperRustle() async {
       print("Ошибка при запуске капель замка: $e");
     }
   }
+
 
 
 
