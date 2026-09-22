@@ -120,53 +120,46 @@ static Future<void> playPaperRustle() async {
   // =========================================================================
   // ЖУТКИЙ ЗВУК КАПЕЛЬ ДЛЯ 6 УРОВНЯ (ГЛУШИТ СТАРЫЕ, НО УСТУПАЕТ НОВЫМ)
   // =========================================================================
-    // 1. ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД ВЫХОДА В МЕНЮ В КЛАССЕ AudioManager:
+      // ТОЧЕЧНО ВСТАВИТЬ В КЛАСС AudioManager:
   static Future<void> stopLevelAudioAndPlayMenu() async {
     try {
-      // Жестко глушим абсолютно все плееры звуков, эффектов и эмбиентов
-      await _bgPlayer.stop();
+      // Глушим эффекты и твой основной плеер меню
       await _fxPlayer.stop();
+      await _finalMenuPlayer.stop();
       
-      // ИСПРАВЛЕНО: Намертво глушим и очищаем плеер дождя 5 уровня
       if (_rainPlayer != null) {
         await _rainPlayer!.stop();
-        await _rainPlayer!.release(); // Полностью очищаем кэш и ресурсы аудио-потока дождя!
+        await _rainPlayer!.release(); // Сброс кэша дождя
       }
 
-      // Полностью освобождаем ресурсы фонового плеера перед перезапуском
-      await _bgPlayer.release(); 
+      await _finalMenuPlayer.release(); // Очистка кэша плеера меню
 
-      // Заводим чистую музыку главного меню карточек с нулевого тайминга
-      await _bgPlayer.setVolume(0.85);
-      await _bgPlayer.play(AssetSource('audio/menu_theme.mp3'));
+      await _finalMenuPlayer.setVolume(0.85);
+      await _finalMenuPlayer.play(AssetSource('audio/menu_theme.mp3'));
     } catch (e) {
-      print("Ошибка при тотальной очистке звуков меню: $e");
+      print("Ошибка очистки звуков меню: $e");
     }
   }
 
-  // 2. ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД ЗАПУСКА КАПЕЛЬ 6 УРОВНЯ В КЛАССЕ AudioManager:
   static Future<void> startCastleDrops() async {
     try {
-      // Жестко глушим старую музыку и эффекты, чтобы они не наслаивались на финал
-      await _bgPlayer.stop();
       await _fxPlayer.stop();
+      await _finalMenuPlayer.stop();
 
-      // ИСПРАВЛЕНО: Намертво глушим и сбрасываем кэш ливня 5 уровня, если игрок перешёл оттуда
       if (_rainPlayer != null) {
         await _rainPlayer!.stop();
         await _rainPlayer!.release(); 
       }
 
-      // Полностью очищаем кэш фоновой музыки перед включением капель
-      await _bgPlayer.release();
+      await _finalMenuPlayer.release(); // Сброс кэша музыки перед каплями
 
-      // Запускаем чистый эмбиент капель замка
-      await _bgPlayer.setVolume(1.0);
-      await _bgPlayer.play(AssetSource('audio/castle_drops.mp3'));
+      await _finalMenuPlayer.setVolume(1.0);
+      await _finalMenuPlayer.play(AssetSource('audio/castle_drops.mp3'));
     } catch (e) {
       print("Ошибка при запуске капель замка: $e");
     }
   }
+
 
 
       static Future<void> pauseAll() async {
