@@ -2165,7 +2165,6 @@ class MolluskMaksim {
 
   MolluskMaksim(this.x, this.y);
 
-  // 1. ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД hit В КЛАССЕ MolluskMaksim:
   void hit(Offset birdVelocity) {
     AudioManager.playPigHit(); 
     // ИСПРАВЛЕНО: Коэффициент отскока увеличен до 0.72 + добавлена вертикальная упругость вверх
@@ -2174,26 +2173,7 @@ class MolluskMaksim {
     isFalling = true;
   }
 
-  // 2. ТОЧЕЧНО НАЙТИ В update() БЛОК "ПРИЗЕМЛЕНИЕ НА ЗЕМЛЮ ОСТРОВА" И ЗАМЕНИТЬ НА:
-  if (y >= groundY - 0.022) {
-    y = groundY - 0.022;
-    if (vy.abs() > 0.35) {
-      // ИСПРАВЛЕНО: Свинья чувствительно пружинит от земли, а не прилипает к ней сразу!
-      vy = -vy * 0.45; // Отскок вверх
-      vx = vx * 0.6;   // Небольшое торможение о землю
-    } else if (vy.abs() > 0.6) {
-      AngryMolluskGame.score += 50;
-      shouldRemove = true;
-    } else {
-      vx = 0;
-      vy = 0;
-      isFalling = false;
-    }
-  }
-
-
-
-      void update(double dt, List<GameBlock> blocks, double groundY) {
+  void update(double dt, List<GameBlock> blocks, double groundY) {
     // ИСПРАВЛЕНО: Счётчик блоков, которые задели свинью в этом кадре
     int hittingBlocksCount = 0;
 
@@ -2233,9 +2213,14 @@ class MolluskMaksim {
       x += vx * dt;
       y += vy * dt;
 
+      // ИСПРАВЛЕНО СТРОГО ТОЧЕЧНО: Логика упругости интегрирована прямо внутрь проверки падения!
       if (y >= groundY - 0.022) {
         y = groundY - 0.022;
-        if (vy > 0.6) {
+        if (vy.abs() > 0.35) {
+          // Свинья чувствительно пружинит от земли, а не прилипает к ней сразу!
+          vy = -vy * 0.45; // Отскок вверх
+          vx = vx * 0.6;   // Небольшое торможение о землю
+        } else if (vy.abs() > 0.6) {
           AngryMolluskGame.score += 50;
           shouldRemove = true;
         } else {
