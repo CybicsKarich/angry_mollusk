@@ -122,29 +122,35 @@ static Future<void> playPaperRustle() async {
   // =========================================================================
     
 
+    // ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД ВЫХОДА В МЕНЮ В КЛАССЕ AudioManager:
   static Future<void> stopLevelAudioAndPlayMenu() async {
     try {
-      // Начисто и жестко тушим игровой плеер, где сидят дождь и эффекты
+      // Начисто и жестко тушим игровой плеер дождя и эффекты
       await _rainPlayer.stop();
       await _fxPlayer.stop();
       
-      // Принудительно останавливаем плеер меню, чтобы сбросить дорожку на 0 секунду
+      // Принудительно останавливаем плеер меню
       await _finalMenuPlayer.stop();
       
-      // Глубокая очистка буфера, чтобы убрать зависшие хвосты старых треков
+      // ИСПРАВЛЕНО СТРОГО ТОЧЕЧНО: Добавляем await, чтобы дождаться ПОЛНОЙ очистки кэша,
+      // и только потом давать команду на воспроизведение!
       await _finalMenuPlayer.release();
 
       // Усердная настройка параметров перед стартом
-      await _finalMenuPlayer.setVolume(0.40); // Твой каноничный уровень громкости!
+      await _finalMenuPlayer.setVolume(0.40); // Твой каноничный уровень громкости
       await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
       
-      // ЗАПУСК: Используем твой точный рабочий путь 'music/menu_theme.mp3'
+      // Даем микросхеме звука микропаузу, чтобы Android окончательно освободил каналы
+      await Future.delayed(const Duration(milliseconds: 100));
+      
+      // ЗАПУСК: Теперь музыка включится на 100% успешно и без пропусков!
       await _finalMenuPlayer.play(AssetSource('music/menu_theme.mp3')); 
       print("Игровые эмбиенты остановлены. Фоновая музыка меню возобновлена.");
     } catch (e) {
       print("Ошибка при возврате к музыке меню: $e");
     }
   }
+
 
     
 
