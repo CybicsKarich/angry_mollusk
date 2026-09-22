@@ -185,30 +185,6 @@ static Future<void> playPaperRustle() async {
   }
 
 
-  static Future<void> stopLevelAudioAndPlayMenu() async {
-    try {
-      // Жестко глушим абсолютно все плееры звуков, эффектов и эмбиентов
-      await _bgPlayer.stop();
-      await _fxPlayer.stop();
-      
-      // ИСПРАВЛЕНО: Намертво глушим и очищаем плеер дождя 5 уровня
-      if (_rainPlayer != null) {
-        await _rainPlayer!.stop();
-        await _rainPlayer!.release(); // Полностью очищаем кэш и ресурсы аудио-потока дождя!
-      }
-
-      // Полностью освобождаем ресурсы фонового плеера перед перезапуском
-      await _bgPlayer.release(); 
-
-      // Заводим чистую музыку главного меню карточек с нулевого тайминга
-      await _bgPlayer.setVolume(0.85);
-      await _bgPlayer.play(AssetSource('audio/menu_theme.mp3'));
-    } catch (e) {
-      print("Ошибка при тотальной очистке звуков меню: $e");
-    }
-  }
-
-
 
 
   // 1. ЗВУК НАТЯЖЕНИЯ РОГАТКИ
