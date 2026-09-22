@@ -17,12 +17,17 @@ class _Level6BadRouteScreenState extends State<Level6BadRouteScreen> with Ticker
   late Animation<double> _fallAnimation;
   double _sparkTimer = 0.0;
   late final Ticker _sparkTicker;
+  bool _isEndingShow = false; // Переключатель на экран Плохой Концовки
+  double _endingTimer = 0.0;
+  final List<Offset> _rainDrops = []; // Капли ливня сквозь пролом
+  final List<Offset> _castleFloorDrops = []; // Редкие падающие капли замка
+  final Random _rand = Random(77);
 
-  @override
+
+    @override
   void initState() {
     super.initState();
     
-    // 1. Контроллер для сочного падения глыбы на Ваню с эффектом удара
     _debrisController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1300), 
@@ -30,19 +35,56 @@ class _Level6BadRouteScreenState extends State<Level6BadRouteScreen> with Ticker
     
     _fallAnimation = CurvedAnimation(
       parent: _debrisController,
-      curve: Curves.bounceOut, // Физический отскок плиты от пола после удара
+      curve: Curves.bounceOut,
     );
 
-    // 2. Живой тикер для бешеного вращения поп-арт подложки и искр ярости Вани во 2-м кадре
+    // ИСПРАВЛЕНО ТОЧЕЧНО: Добавлен апдейт ливня для концовки в главный тикер
     _sparkTicker = createTicker((elapsed) {
       if (mounted) {
         setState(() {
           _sparkTimer = elapsed.inMilliseconds / 1000.0;
+          if (_isEndingShow) {
+            _endingTimer = elapsed.inMilliseconds / 1000.0;
+            _updateEndingRainAndDrops();
+          }
         });
       }
     });
     _sparkTicker.start();
+
+    // Генерируем начальные капли ливня для пролома крыши
+    for (int i = 0; i < 45; i++) {
+      _rainDrops.add(Offset(_rand.nextDouble() * 140 + 80, _rand.nextDouble() * 180));
+    }
+    // Генерируем начальные брызги капель о пол замка под звук castle_drops
+    for (int i = 0; i < 4; i++) {
+      _castleFloorDrops.add(Offset(_rand.nextDouble() * 160 + 70, _rand.nextDouble() * 10 + 10));
+    }
   }
+
+  // ТОЧЕЧНО ДОБАВИТЬ СРАЗУ ПОСЛЕ initState():
+  void _updateEndingRainAndDrops() {
+    for (int i = 0; i < _rainDrops.length; i++) {
+      double x = _rainDrops[i].dx + 1.5;
+      double y = _rainDrops[i].dy + 5.0;
+      if (y > 180 || x > 260) {
+        x = _rand.nextDouble() * 100 + 70; // Спавн строго в зоне пролома крыши
+        y = 0;
+      }
+      _rainDrops[i] = Offset(x, y);
+    }
+
+    for (int i = 0; i < _castleFloorDrops.length; i++) {
+      double x = _castleFloorDrops[i].dx;
+      double y = _castleFloorDrops[i].dy + 3.5;
+      if (y > 155) {
+        x = _rand.nextDouble() * 160 + 70;
+        y = 0; // Сброс наверх к дыре
+      }
+      _castleFloorDrops[i] = Offset(x, y);
+    }
+  }
+
 
   @override
   void dispose() {
@@ -53,6 +95,9 @@ class _Level6BadRouteScreenState extends State<Level6BadRouteScreen> with Ticker
   
     @override
   Widget build(BuildContext context) {
+    if (_isEndingShow) {
+      return _buildBadEndingInterface();
+    }
     return Scaffold(
       backgroundColor: const Color(0xFF040407), 
       body: SafeArea(
@@ -302,20 +347,28 @@ class _Level6BadRouteScreenState extends State<Level6BadRouteScreen> with Ticker
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       onPressed: () {
-        if (_currentFrame < 3) {
-          setState(() => _currentFrame++);
-          
-          if (_currentFrame == 2) {
-            AudioManager.playRage(); 
-          }
-          if (_currentFrame == 3) {
-            AudioManager.playCastleCollapse();
-            _debrisController.forward(from: 0.0);
-          }
-        } else {
-          print("Кнопка 'КОНЕЦ' заблокирована. Проектируем экран Плохого Финала.");
-        }
-      },
+  if (_currentFrame < 3) {
+    setState(() => _currentFrame++);
+    
+    // Перешли со 1-го кадра на 2-й: включаем звук ярости
+    if (_currentFrame == 2) {
+      AudioManager.playRage(); 
+    }
+    // Перешли со 2-го кадра на 3-й: запускаем обвал крыши
+    if (_currentFrame == 3) {
+      AudioManager.playCastleCollapse(); 
+      _debrisController.forward(from: 0.0);
+    }
+  } else {
+    // Мы находимся на 3 кадре и нажимаем кнопку «КОНЕЦ»
+    AudioManager.stopRage(); // Глушим гул виагры мгновенно
+    AudioManager.startCastleDrops(); // Заводим редкий стук капель финала
+    
+    setState(() {
+      _isEndingShow = true; // Точечно включаем экран Плохой Концовки с Делом №06
+    });
+  }
+},
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center, 
         children: [
@@ -452,6 +505,145 @@ Widget _buildAdvanced3DFrame({required Widget child, required bool hasHole}) {
       width: size, height: size, 
       decoration: BoxDecoration(color: const Color(0xFFE53935), shape: BoxShape.circle, border: Border.all(color: Colors.black, width: 2.0)), 
       child: ClipOval(child: Image.asset(assetPath, fit: BoxFit.cover)),
+    );
+  }
+// ТОЧЕЧНО ДОБАВИТЬ В КОНЕЦ КЛАССА _Level6BadRouteScreenState:
+  Widget _buildBadEndingInterface() {
+    double loopTime = _endingTimer % 12.0;
+    bool showGrandpaFlash = loopTime >= 0.0 && loopTime <= 0.15;
+
+    // Грохот грома синхронно со вспышкой молнии деда
+    if (loopTime >= 0.0 && loopTime <= 0.02) {
+      AudioManager.playThunderStrike();
+    }
+
+    return Scaffold(
+      backgroundColor: const Color(0xFF020204),
+      body: Stack(
+        children: [
+          // 🏛️ 1. ГЛАВНЫЙ ЗАЛ В ОБРАТНОЙ ПЕРСПЕКТИВЕ С СИНЕЙ ДЫРОЙ В ПОТОЛКЕ
+          Positioned.fill(
+            child: CustomPaint(
+              painter: _EndingRoomBackgroundPainter(hasHole: true, showLightning: showGrandpaFlash),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Positioned(top: 0, left: 0, right: 0, child: CustomPaint(size: const Size(double.infinity, 35), painter: _CeilingPainter(drawHole: true))),
+                  Positioned(bottom: 0, left: 0, right: 0, child: CustomPaint(size: const Size(double.infinity, 24), painter: _FloorTilesPainter())),
+
+                  // Косой ливень, хлещущий из пролома крыши внутрь зала
+                  ..._rainDrops.map((pos) => Positioned(
+                        left: pos.dx, top: pos.dy,
+                        child: Container(width: 1.2, height: 10, color: Colors.blueGrey.shade100.withOpacity(0.35)),
+                      )),
+
+                  // Падающие капли, бьющие о пол под звук castle_drops
+                  ..._castleFloorDrops.map((pos) => Positioned(
+                        left: pos.dx, top: pos.dy,
+                        child: Container(width: 2.0, height: 2.0, decoration: BoxDecoration(color: Colors.white.withOpacity(0.4), shape: BoxShape.circle)),
+                      )),
+
+                  // 🪨 2. МАЛЕНЬКИЙ АККУРАТНЫЙ ЗАВАЛ КАМНЕЙ ИЗ КОМИКСА НА ПОЛУ
+                  Positioned(
+                    bottom: 22, left: 110,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Container(
+                          width: 48, height: 48,
+                          decoration: const BoxDecoration(color: Color(0xFFE53935), shape: BoxShape.circle),
+                          child: const Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text("—", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black)),
+                                SizedBox(width: 4),
+                                Text("—", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black)),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: 60, height: 42,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF455A64),
+                            border: Border.all(color: Colors.black, width: 1.8),
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // 👻 3. ЧЁРНАЯ ЧЁТКАЯ ТЕНЬ ДЕДА С БОРОДОЙ В СЕКУНДУ МОЛНИИ
+                  if (showGrandpaFlash)
+                    Positioned(
+                      top: 12, left: 105,
+                      child: CustomPaint(
+                        size: const Size(60, 50),
+                        painter: _GrandpaGhostPainter(),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+
+          // 🌫️ 4. ПЛАВНО СТЕЛЮЩИЙСЯ ТЁМНО-СИНИЙ ТУМАН В НИЖНЕЙ ЧАСТИ ЭКРАНА
+          Positioned(
+            bottom: 0, left: 0, right: 0, height: 75,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.transparent, const Color(0xFF0F1424).withOpacity(0.65), const Color(0xFF040407)],
+                ),
+              ),
+            ),
+          ),
+
+          // 📜 5. ОФИЦИАЛЬНЫЙ СУХОЙ АРХИВНЫЙ ТЕКСТ ДЕЛА №06 ПО ЦЕНТРУ
+          Positioned(
+            left: 24, right: 24, bottom: 90,
+            child: Column(
+              children: [
+                const Text(
+                  "КОНЕЦ ИГРЫ",
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Color(0xFFB71C1C), letterSpacing: 3.0),
+                ),
+                const SizedBox(height: 14),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(color: Colors.black45, borderRadius: BorderRadius.circular(8)),
+                  child: const Text(
+                    "Дело №06: Шериф Ваня Баннихоп объявлен пропавшим без вести в замке Дона Моллюска. Расследование прекращено.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontFamily: 'serif', fontSize: 11.5, fontWeight: FontWeight.bold, color: Colors.white70, height: 1.4),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // 🏠 6. КНОПКА ВОЗВРАТА В МЕНЮ КАРТОЧЕК ДЛЯ ПЕРЕПРОХОЖДЕНИЯ
+          Positioned(
+            bottom: 24, left: MediaQuery.of(context).size.width * 0.38,
+            child: SizedBox(
+              width: 160, height: 42,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF37474F), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                onPressed: () {
+                  AudioManager.stopLevelAudioAndPlayMenu(); 
+                  Navigator.pop(context); 
+                },
+                icon: const Icon(Icons.home_rounded, color: Colors.white, size: 18),
+                label: const Text("В МЕНЮ УРОВНЕЙ", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white)),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -903,4 +1095,80 @@ extension _CanvasTriangleExt on Canvas {
   }
 }
 
+  
+
+// =========================================================================
+// ВСТАВИТЬ В САМЫЙ КОНЕЦ ФАЙЛА ПОСЛЕ ЗАКРЫТИЯ ВСЕХ КЛАССОВ СТРАНИЦЫ:
+// =========================================================================
+class _EndingRoomBackgroundPainter extends CustomPainter {
+  final bool hasHole;
+  final bool showLightning;
+  _EndingRoomBackgroundPainter({required this.hasHole, required this.showLightning});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final wallPaint = Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color(0xFF14141E), Color(0xFF06060A)],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), wallPaint);
+
+    if (hasHole) {
+      final skyRect = Rect.fromLTWH(size.width * 0.25, 0, size.width * 0.5, 25);
+      canvas.drawRect(skyRect, Paint()..color = const Color(0xFF0D1B2A));
+
+      if (showLightning) {
+        canvas.drawRect(skyRect, Paint()..color = Colors.white.withOpacity(0.85));
+      }
+    }
+  }
+  @override
+  bool shouldRepaint(covariant _EndingRoomBackgroundPainter oldDelegate) => true;
+}
+
+class _GrandpaGhostPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final ghostPaint = Paint()..color = const Color(0xEE000000)..style = PaintingStyle.fill;
+    double cx = size.width / 2;
+    double cy = size.height / 2;
+    double r = 14.0; 
+
+    canvas.drawCircle(Offset(cx, cy), r, ghostPaint);
+
+    final hatPath = Path()
+      ..moveTo(cx - 9, cy - r + 3)
+      ..lineTo(cx - 7, cy - r - 9)
+      ..cubicTo(cx - 3, cy - r - 13, cx + 3, cy - r - 13, cx + 7, cy - r - 9)
+      ..lineTo(cx - 9, cy - r + 3)
+      ..close();
+    canvas.drawPath(hatPath, ghostPaint);
+
+    final brimPath = Path()
+      ..moveTo(cx - 18, cy - r + 3)
+      ..cubicTo(cx - 12, cy - r, cx + 12, cy - r, cx + 18, cy - r + 3)
+      ..lineTo(cx + 16, cy - r + 5)
+      ..cubicTo(cx + 9, cy - r + 2, cx - 9, cy - r + 2, cx - 16, cy - r + 5)
+      ..close();
+    canvas.drawPath(brimPath, ghostPaint);
+
+    final beardPath = Path()
+      ..moveTo(cx - r + 3, cy + 5)
+      ..cubicTo(cx - r, cy + 20, cx + r, cy + 20, cx + r - 3, cy + 5)
+      ..cubicTo(cx + 5, cy + 10, cx - 5, cy + 10, cx - r + 3, cy + 5)
+      ..close();
+    canvas.drawPath(beardPath, ghostPaint);
+    
+    final beakPath = Path()
+      ..moveTo(cx - 2, cy + 1)
+      ..lineTo(cx + 4, cy + 4)
+      ..lineTo(cx - 1, cy + 6)
+      ..close();
+    canvas.drawPath(beakPath, ghostPaint);
+  }
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
 
