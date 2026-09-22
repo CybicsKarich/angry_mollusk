@@ -141,17 +141,21 @@ static Future<void> playPaperRustle() async {
     }
   }
 
-  static Future<void> startCastleDrops() async {
+    static Future<void> startCastleDrops() async {
     try {
       await _fxPlayer.stop();
       await _finalMenuPlayer.stop();
 
+      // ИСПРАВЛЕНО ЖЕЛЕЗОБЕТОННО: Принудительный стоп, деструктор и зануление плеера дождя!
       if (_rainPlayer != null) {
-        await _rainPlayer!.stop();
-        await _rainPlayer!.release(); 
+        try {
+          await _rainPlayer!.stop();
+          await _rainPlayer!.release();
+          _rainPlayer = null; // Полностью стираем объект из памяти
+        } catch (_) {}
       }
 
-      await _finalMenuPlayer.release(); // Сброс кэша музыки перед каплями
+      await _finalMenuPlayer.release(); 
 
       await _finalMenuPlayer.setVolume(1.0);
       await _finalMenuPlayer.play(AssetSource('audio/castle_drops.mp3'));
@@ -159,6 +163,7 @@ static Future<void> playPaperRustle() async {
       print("Ошибка при запуске капель замка: $e");
     }
   }
+
 
 
 
