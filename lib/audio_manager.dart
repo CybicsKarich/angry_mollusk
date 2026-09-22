@@ -122,61 +122,83 @@ static Future<void> playPaperRustle() async {
   // =========================================================================
     
 
-         // 1. ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД ВЫХОДА В МЕНЮ В КЛАССЕ AudioManager:
   static Future<void> stopLevelAudioAndPlayMenu() async {
     try {
+      // Начисто и жестко тушим игровой плеер, где сидят дождь и эффекты
+      await _rainPlayer.stop();
       await _fxPlayer.stop();
-      await _finalMenuPlayer.stop(); 
       
-      // Намертво выгружаем и останавливаем плеер дождя 5 уровня
-      if (_rainPlayer != null) {
-        try {
-          await _rainPlayer!.stop();
-          await _rainPlayer!.release(); 
-        } catch (_) {}
-      }
+      // Принудительно останавливаем плеер меню, чтобы сбросить дорожку на 0 секунду
+      await _finalMenuPlayer.stop();
+      
+      // Глубокая очистка буфера, чтобы убрать зависшие хвосты старых треков
+      await _finalMenuPlayer.release();
 
-      // ИСПРАВЛЕНО: Полностью очищаем глобальный кэш аудио-файлов во Flutter,
-      // чтобы убрать застрявшие в памяти буферы ливня и старой музыки!
-      await AudioCache.instance.clearAll();
-
-      // Даём плееру микросекунду прийти в себя после очистки кэша
-      await Future.delayed(const Duration(milliseconds: 50));
-
-      await _finalMenuPlayer.setVolume(0.85);
-      await _finalMenuPlayer.play(AssetSource('audio/menu_theme.mp3')); // Теперь точно заиграет!
+      // Усердная настройка параметров перед стартом
+      await _finalMenuPlayer.setVolume(0.40); // Твой каноничный уровень громкости!
+      await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
+      
+      // ЗАПУСК: Используем твой точный рабочий путь 'music/menu_theme.mp3'
+      await _finalMenuPlayer.play(AssetSource('music/menu_theme.mp3')); 
+      print("Игровые эмбиенты остановлены. Фоновая музыка меню возобновлена.");
     } catch (e) {
-      print("Ошибка очистки звуков меню: $e");
+      print("Ошибка при возврате к музыке меню: $e");
     }
   }
 
-  // 2. ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД ЗАПУСКА КАПЕЛЬ 6 УРОВНЯ В КЛАССЕ AudioManager:
+    // ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД ЗАПУСКА КАПЕЛЬ 6 УРОВНЯ В КЛАССЕ AudioManager:
   static Future<void> startCastleDrops() async {
     try {
+      // Начисто тушим дождь 5 уровня и звуковые эффекты
+      await _rainPlayer.stop();
       await _fxPlayer.stop();
+      
+      // ИСПРАВЛЕНО: Глубоко очищаем и сбрасываем кэш плеера дождя,
+      // чтобы намертво стереть хвосты ливня из оперативной памяти Android!
+      await _rainPlayer.release();
+
+      // Сбрасываем и очищаем плеер фоновой музыки перед включением капель
       await _finalMenuPlayer.stop();
+      await _finalMenuPlayer.release();
 
-      // Намертво выгружаем плеер дождя 5 уровня
-      if (_rainPlayer != null) {
-        try {
-          await _rainPlayer!.stop();
-          await _rainPlayer!.release(); 
-        } catch (_) {}
-      }
-
-      // ИСПРАВЛЕНО: Очищаем кэш перед включением мистического эмбиента капель замка,
-      // освобождая звуковые каналы операционной системы Android
-      await AudioCache.instance.clearAll();
-
-      // Краткая пауза для стабильной перезагрузки аудио-декодера телефона
-      await Future.delayed(const Duration(milliseconds: 50));
-
-      await _finalMenuPlayer.setVolume(1.0);
-      await _finalMenuPlayer.play(AssetSource('audio/castle_drops.mp3')); // Теперь капли железно зазвучат!
+      // Усердная настройка под мистическую атмосферу логова Дона Моллюска
+      await _finalMenuPlayer.setVolume(1.0); // Капли должны звучать сочно и отчётливо
+      await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
+      
+      // ЗАПУСК: Капли лежат в папке audio, запускаем их принудительно
+      await _finalMenuPlayer.play(AssetSource('audio/castle_drops.mp3')); 
+      print("Звук дождя потушен и очищен из кэша. Эмбиент капель тронного зала запущен.");
     } catch (e) {
       print("Ошибка при запуске капель замка: $e");
     }
   }
+
+    // ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД ЗАПУСКА КАПЕЛЬ 6 УРОВНЯ В КЛАССЕ AudioManager:
+  static Future<void> startCastleDrops() async {
+    try {
+      // Начисто тушим дождь 5 уровня и звуковые эффекты
+      await _rainPlayer.stop();
+      await _fxPlayer.stop();
+      
+      // Очищаем кэш плеера дождя, намертво стирая шторм из памяти
+      await _rainPlayer.release();
+
+      // Сбрасываем и очищаем плеер фоновой музыки перед включением капель
+      await _finalMenuPlayer.stop();
+      await _finalMenuPlayer.release();
+
+      // Усердная настройка под мистическую атмосферу логова Дона Моллюска
+      await _finalMenuPlayer.setVolume(1.0); 
+      await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
+      
+      // ИСПРАВЛЕНО СТРОГО ТОЧЕЧНО: Капли лежат там же, где и музыка — в папке music/
+      await _finalMenuPlayer.play(AssetSource('music/castle_drops.mp3')); 
+      print("Звук дождя потушен и очищен. Эмбиент капель из папки music запущен.");
+    } catch (e) {
+      print("Ошибка при запуске капель замка: $e");
+    }
+  }
+
 
 
 
