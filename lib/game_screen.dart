@@ -2098,15 +2098,20 @@ class Bunnyhop {
     }
 
 
-        for (var pig in pigs) {
-      double dx = position.dx - pig.x;
-      double dy = position.dy - pig.y;
-      if (sqrt(dx * dx + dy * dy) < 0.03) {
-        pig.hit(velocity);
-        pig.shouldRemove = true; // ИСПРАВЛЕНО: Баннихоп мгновенно уничтожает свинью при таране!
-        AngryMolluskGame.score += 50; // Сразу начисляем пацанские очки
-      }
-    }
+        // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО В МЕТОДЕ update КЛАССА Bunnyhop:
+for (var pig in pigs) {
+  double dx = position.dx - pig.x;
+  double dy = position.dy - pig.y;
+  if (sqrt(dx * dx + dy * dy) < 0.03) {
+    pig.hit(velocity);
+    pig.shouldRemove = true; // Ваня мгновенно уничтожает свинью при таране!
+    
+    // ИСПРАВЛЕНО: Свинья теперь тоже забирает импульс Вани! Скорость гасится на 30%
+    velocity = Offset(velocity.dx * 0.70, velocity.dy * 0.70);
+    
+    AngryMolluskGame.score += 50; // Начисляем пацанские очки
+  }
+}
   }
 
 
@@ -2160,12 +2165,32 @@ class MolluskMaksim {
 
   MolluskMaksim(this.x, this.y);
 
-    void hit(Offset birdVelocity) {
-    AudioManager.playPigHit(); // Выбирает случайный крик pig_hit 1, 2 или 3!
-    vx = birdVelocity.dx * 0.5;
-    vy = birdVelocity.dy * 0.5;
+  // 1. ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД hit В КЛАССЕ MolluskMaksim:
+  void hit(Offset birdVelocity) {
+    AudioManager.playPigHit(); 
+    // ИСПРАВЛЕНО: Коэффициент отскока увеличен до 0.72 + добавлена вертикальная упругость вверх
+    vx = birdVelocity.dx * 0.72;
+    vy = birdVelocity.dy * -0.65; // Свинья сочно отпружинивает вверх-вбок от удара!
     isFalling = true;
   }
+
+  // 2. ТОЧЕЧНО НАЙТИ В update() БЛОК "ПРИЗЕМЛЕНИЕ НА ЗЕМЛЮ ОСТРОВА" И ЗАМЕНИТЬ НА:
+  if (y >= groundY - 0.022) {
+    y = groundY - 0.022;
+    if (vy.abs() > 0.35) {
+      // ИСПРАВЛЕНО: Свинья чувствительно пружинит от земли, а не прилипает к ней сразу!
+      vy = -vy * 0.45; // Отскок вверх
+      vx = vx * 0.6;   // Небольшое торможение о землю
+    } else if (vy.abs() > 0.6) {
+      AngryMolluskGame.score += 50;
+      shouldRemove = true;
+    } else {
+      vx = 0;
+      vy = 0;
+      isFalling = false;
+    }
+  }
+
 
 
       void update(double dt, List<GameBlock> blocks, double groundY) {
