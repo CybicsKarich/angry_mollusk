@@ -2167,28 +2167,24 @@ class MolluskMaksim {
 
   void hit(Offset birdVelocity) {
     AudioManager.playPigHit(); 
-    // ИСПРАВЛЕНО: Коэффициент отскока увеличен до 0.72 + добавлена вертикальная упругость вверх
+    // Упругость при прямом ударе птицы сохранена: сочный отлёт вверх-вбок!
     vx = birdVelocity.dx * 0.72;
-    vy = birdVelocity.dy * -0.65; // Свинья сочно отпружинивает вверх-вбок от удара!
+    vy = birdVelocity.dy * -0.65; 
     isFalling = true;
   }
 
   void update(double dt, List<GameBlock> blocks, double groundY) {
-    // ИСПРАВЛЕНО: Счётчик блоков, которые задели свинью в этом кадре
     int hittingBlocksCount = 0;
 
     for (var block in blocks) {
       if (!block.isBroken && !block.shouldRemove && !block.isSleeping) {
-        // Проверяем, пересекаются ли хитбоксы свиньи и движущегося кубика
         if (x >= block.x - 0.01 && x <= block.x + block.w + 0.01 &&
             y >= block.y - 0.01 && y <= block.y + block.h + 0.01) {
           
-          hittingBlocksCount++; // Нашли соприкосновение с падающим блоком!
+          hittingBlocksCount++; 
 
-          // Считаем скорость конкретного летящего кубика
           double blockSpeed = sqrt(block.vx * block.vx + block.vy * block.vy);
           
-          // ТАКТИКА 1: Одиночный блок убивает, если его скорость выше порога 0.20
           if (blockSpeed > 0.20) {
             AudioManager.playPigHit(); 
             AngryMolluskGame.score += 50;
@@ -2199,7 +2195,6 @@ class MolluskMaksim {
       }
     }
 
-    // ТАКТИКА 2: Автоматическая смерть от завала лавиной (если упало 2 или больше блоков одновременно)
     if (hittingBlocksCount >= 2 && !shouldRemove) {
       AudioManager.playPigHit(); 
       AngryMolluskGame.score += 50;
@@ -2207,27 +2202,18 @@ class MolluskMaksim {
       return;
     }
 
-    // Физика падения самой свиньи
+    // Физика падения свиньи
     if (isFalling) {
       vy += 1.8 * dt; 
       x += vx * dt;
       y += vy * dt;
 
-      // ИСПРАВЛЕНО СТРОГО ТОЧЕЧНО: Логика упругости интегрирована прямо внутрь проверки падения!
+      // ИСПРАВЛЕНО: Свинья умирает сразу при касании земли, без прыжков!
       if (y >= groundY - 0.022) {
         y = groundY - 0.022;
-        if (vy.abs() > 0.35) {
-          // Свинья чувствительно пружинит от земли, а не прилипает к ней сразу!
-          vy = -vy * 0.45; // Отскок вверх
-          vx = vx * 0.6;   // Небольшое торможение о землю
-        } else if (vy.abs() > 0.6) {
-          AngryMolluskGame.score += 50;
-          shouldRemove = true;
-        } else {
-          vx = 0;
-          vy = 0;
-          isFalling = false;
-        }
+        AngryMolluskGame.score += 50;
+        shouldRemove = true; // Мгновенная смерть при шлепке о землю
+        return;
       }
             
       if (y >= groundY + 0.05) {
