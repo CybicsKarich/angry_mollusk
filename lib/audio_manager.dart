@@ -120,27 +120,54 @@ static Future<void> playPaperRustle() async {
   // =========================================================================
   // ЖУТКИЙ ЗВУК КАПЕЛЬ ДЛЯ 6 УРОВНЯ (ГЛУШИТ СТАРЫЕ, НО УСТУПАЕТ НОВЫМ)
   // =========================================================================
-  static Future<void> startCastleDrops() async {
+    // 1. ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД ВЫХОДА В МЕНЮ В КЛАССЕ AudioManager:
+  static Future<void> stopLevelAudioAndPlayMenu() async {
     try {
-      // 1. Принудительно тушим фоновую музыку меню и ливень 5 уровня, если они играли
-      await _finalMenuPlayer.stop();
-      await _rainPlayer.stop();
+      // Жестко глушим абсолютно все плееры звуков, эффектов и эмбиентов
+      await _bgPlayer.stop();
+      await _fxPlayer.stop();
       
-      // 2. Настраиваем плеер капель на среднюю, гнетущую громкость
-      await _rainPlayer.setVolume(0.35); 
-      await _rainPlayer.setReleaseMode(ReleaseMode.loop);
-      
-      // 3. Запускаем капли в режиме lowLatency, чтобы нативная система ОС 
-      // автоматически приглушила этот поток, как только появится любой новый эффект!
-      await _rainPlayer.play(
-        AssetSource('music/castle_drops.mp3'), 
-        mode: PlayerMode.lowLatency
-      );
-      print("Жуткий эмбиент капель замка запущен.");
+      // ИСПРАВЛЕНО: Намертво глушим и очищаем плеер дождя 5 уровня
+      if (_rainPlayer != null) {
+        await _rainPlayer!.stop();
+        await _rainPlayer!.release(); // Полностью очищаем кэш и ресурсы аудио-потока дождя!
+      }
+
+      // Полностью освобождаем ресурсы фонового плеера перед перезапуском
+      await _bgPlayer.release(); 
+
+      // Заводим чистую музыку главного меню карточек с нулевого тайминга
+      await _bgPlayer.setVolume(0.85);
+      await _bgPlayer.play(AssetSource('audio/menu_theme.mp3'));
     } catch (e) {
-      print("Ошибка запуска звука капель замка: $e");
+      print("Ошибка при тотальной очистке звуков меню: $e");
     }
   }
+
+  // 2. ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД ЗАПУСКА КАПЕЛЬ 6 УРОВНЯ В КЛАССЕ AudioManager:
+  static Future<void> startCastleDrops() async {
+    try {
+      // Жестко глушим старую музыку и эффекты, чтобы они не наслаивались на финал
+      await _bgPlayer.stop();
+      await _fxPlayer.stop();
+
+      // ИСПРАВЛЕНО: Намертво глушим и сбрасываем кэш ливня 5 уровня, если игрок перешёл оттуда
+      if (_rainPlayer != null) {
+        await _rainPlayer!.stop();
+        await _rainPlayer!.release(); 
+      }
+
+      // Полностью очищаем кэш фоновой музыки перед включением капель
+      await _bgPlayer.release();
+
+      // Запускаем чистый эмбиент капель замка
+      await _bgPlayer.setVolume(1.0);
+      await _bgPlayer.play(AssetSource('audio/castle_drops.mp3'));
+    } catch (e) {
+      print("Ошибка при запуске капель замка: $e");
+    }
+  }
+
 
       static Future<void> pauseAll() async {
     try {
@@ -165,26 +192,26 @@ static Future<void> playPaperRustle() async {
   }
 
 
-      static Future<void> stopLevelAudioAndPlayMenu() async {
+  static Future<void> stopLevelAudioAndPlayMenu() async {
     try {
-      // 1. Мгновенно глушим все игровые эффекты и звуки уровня
-      _isStretching = false;
-      await _stretchPlayer.stop();
+      // Жестко глушим абсолютно все плееры звуков, эффектов и эмбиентов
+      await _bgPlayer.stop();
       await _fxPlayer.stop();
-      await _rainPlayer.stop();
-      await stopRage();
       
-      // 2. СБРАСЫВАЕМ плеер фона, чтобы снять любые зависания состояния
-      await _finalMenuPlayer.stop();
-      
-      // 3. Выставляем настройки и запускаем принудительно (без проверок state)
-      await _finalMenuPlayer.setVolume(0.40);
-      await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
-      await _finalMenuPlayer.play(AssetSource('music/bg_music.mp3')); 
-      
-      print("Все игровые звуки заглушены. Фоновая музыка меню запущена принудительно.");
+      // ИСПРАВЛЕНО: Намертво глушим и очищаем плеер дождя 5 уровня
+      if (_rainPlayer != null) {
+        await _rainPlayer!.stop();
+        await _rainPlayer!.release(); // Полностью очищаем кэш и ресурсы аудио-потока дождя!
+      }
+
+      // Полностью освобождаем ресурсы фонового плеера перед перезапуском
+      await _bgPlayer.release(); 
+
+      // Заводим чистую музыку главного меню карточек с нулевого тайминга
+      await _bgPlayer.setVolume(0.85);
+      await _bgPlayer.play(AssetSource('audio/menu_theme.mp3'));
     } catch (e) {
-      print("Ошибка при принудительном возврате к музыке меню: $e");
+      print("Ошибка при тотальной очистке звуков меню: $e");
     }
   }
 
