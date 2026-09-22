@@ -180,10 +180,13 @@ if (game.currentLevel == 3) {
   );
 } 
 else if (game.currentLevel == 5) {
-  Navigator.pop(context); // Выходим из игрового экрана
+  // ИСПРАВЛЕНО: Перед переходом на 6 уровень принудительно выключаем дождь 5-го!
+  AudioManager.stopLevel5Rain(); 
+  game.isPaused = true; // Замораживаем апдейты
+  Navigator.pop(context); 
   Navigator.push(
     context,
-    MaterialPageRoute(builder: (context) => const Level6ComicScreen()), // В логово Дона Моллюска!
+    MaterialPageRoute(builder: (context) => const Level6ComicScreen()), 
   );
 }                             
 else if (game.currentLevel < 4) {
@@ -311,6 +314,7 @@ else if (game.currentLevel < 4) {
                             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                             onPressed: () {
   game.overlays.remove('PauseMenu');
+  game.isPaused = true;
   game.resumeEngine();
   
   // Принудительно включаем фоновую музыку при выходе из паузы в меню
@@ -780,7 +784,7 @@ if (currentLevel == 2 || currentLevel == 3) {
     if (currentLevel == 5) {
       _lightningTimer += dt;
       
-      if (!AudioManager.isRainPlaying && !levelCleared && !levelFailed) {
+      if (!AudioManager.isRainPlaying && !levelCleared && !levelFailed && !isPaused && !isVictorySequenceStarted) {
         AudioManager.startLevel5Rain();
       }
         // Каждые 5 секунд бьет ослепляющая молния
@@ -2165,13 +2169,15 @@ class MolluskMaksim {
 
   MolluskMaksim(this.x, this.y);
 
+    // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО В КЛАССЕ MolluskMaksim:
   void hit(Offset birdVelocity) {
     AudioManager.playPigHit(); 
-    // Упругость при прямом ударе птицы сохранена: сочный отлёт вверх-вбок!
-    vx = birdVelocity.dx * 0.72;
-    vy = birdVelocity.dy * -0.65; 
+    // ПОЛНОСТЬЮ ОЧИЩЕНО: Возвращён твой классический каноничный отлёт по вектору
+    vx = birdVelocity.dx * 0.5;
+    vy = birdVelocity.dy * 0.5;
     isFalling = true;
   }
+
 
   void update(double dt, List<GameBlock> blocks, double groundY) {
     int hittingBlocksCount = 0;
