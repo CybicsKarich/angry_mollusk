@@ -146,32 +146,7 @@ static Future<void> playPaperRustle() async {
     }
   }
 
-    // ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД ЗАПУСКА КАПЕЛЬ 6 УРОВНЯ В КЛАССЕ AudioManager:
-  static Future<void> startCastleDrops() async {
-    try {
-      // Начисто тушим дождь 5 уровня и звуковые эффекты
-      await _rainPlayer.stop();
-      await _fxPlayer.stop();
-      
-      // ИСПРАВЛЕНО: Глубоко очищаем и сбрасываем кэш плеера дождя,
-      // чтобы намертво стереть хвосты ливня из оперативной памяти Android!
-      await _rainPlayer.release();
-
-      // Сбрасываем и очищаем плеер фоновой музыки перед включением капель
-      await _finalMenuPlayer.stop();
-      await _finalMenuPlayer.release();
-
-      // Усердная настройка под мистическую атмосферу логова Дона Моллюска
-      await _finalMenuPlayer.setVolume(1.0); // Капли должны звучать сочно и отчётливо
-      await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
-      
-      // ЗАПУСК: Капли лежат в папке audio, запускаем их принудительно
-      await _finalMenuPlayer.play(AssetSource('audio/castle_drops.mp3')); 
-      print("Звук дождя потушен и очищен из кэша. Эмбиент капель тронного зала запущен.");
-    } catch (e) {
-      print("Ошибка при запуске капель замка: $e");
-    }
-  }
+    
 
     // ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД ЗАПУСКА КАПЕЛЬ 6 УРОВНЯ В КЛАССЕ AudioManager:
   static Future<void> startCastleDrops() async {
