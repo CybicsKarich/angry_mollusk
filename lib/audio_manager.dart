@@ -120,48 +120,54 @@ static Future<void> playPaperRustle() async {
   // =========================================================================
   // ЖУТКИЙ ЗВУК КАПЕЛЬ ДЛЯ 6 УРОВНЯ (ГЛУШИТ СТАРЫЕ, НО УСТУПАЕТ НОВЫМ)
   // =========================================================================
-      // ТОЧЕЧНО ВСТАВИТЬ В КЛАСС AudioManager:
+    
+
+       // 1. ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД ВЫХОДА В МЕНЮ В КЛАССЕ AudioManager:
   static Future<void> stopLevelAudioAndPlayMenu() async {
     try {
-      // Глушим эффекты и твой основной плеер меню
       await _fxPlayer.stop();
-      await _finalMenuPlayer.stop();
+      await _finalMenuPlayer.stop(); // Просто останавливаем и сбрасываем на 0 секунду
       
+      // Намертво выгружаем и очищаем именно плеер дождя 5 уровня
       if (_rainPlayer != null) {
-        await _rainPlayer!.stop();
-        await _rainPlayer!.release(); // Сброс кэша дождя
+        try {
+          await _rainPlayer!.stop();
+          await _rainPlayer!.release(); // Плеер дождя очищать можно и нужно
+        } catch (_) {}
       }
 
-      await _finalMenuPlayer.release(); // Очистка кэша плеера меню
+      // УДАЛЕНО: _finalMenuPlayer.release() больше не вызывается, ресурсы целы!
 
       await _finalMenuPlayer.setVolume(0.85);
-      await _finalMenuPlayer.play(AssetSource('audio/menu_theme.mp3'));
+      await _finalMenuPlayer.play(AssetSource('audio/menu_theme.mp3')); // Теперь железно заиграет!
     } catch (e) {
       print("Ошибка очистки звуков меню: $e");
     }
   }
 
-      static Future<void> startCastleDrops() async {
+  // 2. ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД ЗАПУСКА КАПЕЛЬ 6 УРОВНЯ В КЛАССЕ AudioManager:
+  static Future<void> startCastleDrops() async {
     try {
       await _fxPlayer.stop();
       await _finalMenuPlayer.stop();
 
-      // ИСПРАВЛЕНО: Безопасно глушим и очищаем кэш ливня без обнуления final-переменной
+      // Намертво выгружаем плеер дождя 5 уровня, чтобы он не лез на 6 уровень
       if (_rainPlayer != null) {
         try {
           await _rainPlayer!.stop();
-          await _rainPlayer!.release(); // Это полностью стирает аудио-ресурс из памяти телефона!
+          await _rainPlayer!.release(); 
         } catch (_) {}
       }
 
-      await _finalMenuPlayer.release(); 
+      // УДАЛЕНО: _finalMenuPlayer.release() больше не вызывается, ресурсы целы!
 
       await _finalMenuPlayer.setVolume(1.0);
-      await _finalMenuPlayer.play(AssetSource('audio/castle_drops.mp3'));
+      await _finalMenuPlayer.play(AssetSource('audio/castle_drops.mp3')); // Теперь капли железно зазвучат!
     } catch (e) {
       print("Ошибка при запуске капель замка: $e");
     }
   }
+
 
 
       static Future<void> pauseAll() async {
