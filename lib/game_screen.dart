@@ -2179,6 +2179,7 @@ class MolluskMaksim {
   }
 
 
+ // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО МЕТОД update В КЛАССЕ MolluskMaksim:
   void update(double dt, List<GameBlock> blocks, double groundY) {
     int hittingBlocksCount = 0;
 
@@ -2191,7 +2192,9 @@ class MolluskMaksim {
 
           double blockSpeed = sqrt(block.vx * block.vx + block.vy * block.vy);
           
-          if (blockSpeed > 0.20) {
+          // ТАКТИКА 1: ИСПРАВЛЕНО! Порог скорости летящего блока увеличен с 0.20 до 0.55!
+          // От слабо катящихся или слегка упавших балок свинья теперь НЕ умирает, а выживает!
+          if (blockSpeed > 0.55) {
             AudioManager.playPigHit(); 
             AngryMolluskGame.score += 50;
             shouldRemove = true;
@@ -2208,17 +2211,25 @@ class MolluskMaksim {
       return;
     }
 
-    // Физика падения свиньи
     if (isFalling) {
       vy += 1.8 * dt; 
       x += vx * dt;
       y += vy * dt;
 
-      // ИСПРАВЛЕНО: Свинья умирает сразу при касании земли, без прыжков!
       if (y >= groundY - 0.022) {
         y = groundY - 0.022;
-        AngryMolluskGame.score += 50;
-        shouldRemove = true; // Мгновенная смерть при шлепке о землю
+        
+        // ТАКТИКА 2: ИСПРАВЛЕНО! Порог скорости шлепка о землю повышен с 0.6 до 1.35!
+        // Если свинья просто упала с невысокой полки, она выживает, vx и vy зануляются, и она остаётся жить на траве!
+        // Она погибнет только если прилетит в землю на огромной скорости!
+        if (vy.abs() > 1.35) {
+          AngryMolluskGame.score += 50;
+          shouldRemove = true;
+        } else {
+          vx = 0;
+          vy = 0;
+          isFalling = false;
+        }
         return;
       }
             
