@@ -122,32 +122,26 @@ static Future<void> playPaperRustle() async {
   // =========================================================================
     
 
-    // ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД ВЫХОДА В МЕНЮ В КЛАССЕ AudioManager:
-  static Future<void> stopLevelAudioAndPlayMenu() async {
+    static Future<void> stopLevelAudioAndPlayMenu() async {
     try {
-      // Начисто и жестко тушим игровой плеер дождя и эффекты
-      await _rainPlayer.stop();
+      // 1. Мгновенно глушим все игровые эффекты и звуки уровня
+      _isStretching = false;
+      await _stretchPlayer.stop();
       await _fxPlayer.stop();
+      await _rainPlayer.stop();
+      await stopRage();
       
-      // Принудительно останавливаем плеер меню
+      // 2. СБРАСЫВАЕМ плеер фона, чтобы снять любые зависания состояния
       await _finalMenuPlayer.stop();
       
-      // ИСПРАВЛЕНО СТРОГО ТОЧЕЧНО: Добавляем await, чтобы дождаться ПОЛНОЙ очистки кэша,
-      // и только потом давать команду на воспроизведение!
-      await _finalMenuPlayer.release();
-
-      // Усердная настройка параметров перед стартом
-      await _finalMenuPlayer.setVolume(0.40); // Твой каноничный уровень громкости
+      // 3. Выставляем настройки и запускаем принудительно (без проверок state)
+      await _finalMenuPlayer.setVolume(0.40);
       await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
+      await _finalMenuPlayer.play(AssetSource('music/bg_music.mp3')); 
       
-      // Даем микросхеме звука микропаузу, чтобы Android окончательно освободил каналы
-      await Future.delayed(const Duration(milliseconds: 100));
-      
-      // ЗАПУСК: Теперь музыка включится на 100% успешно и без пропусков!
-      await _finalMenuPlayer.play(AssetSource('music/menu_theme.mp3')); 
-      print("Игровые эмбиенты остановлены. Фоновая музыка меню возобновлена.");
+      print("Все игровые звуки заглушены. Фоновая музыка меню запущена принудительно.");
     } catch (e) {
-      print("Ошибка при возврате к музыке меню: $e");
+      print("Ошибка при принудительном возврате к музыке меню: $e");
     }
   }
 
