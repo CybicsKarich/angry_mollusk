@@ -38,14 +38,16 @@ class GameScreen extends StatelessWidget {
                   });
                 }
                   
+                // ТОЧЕЧНО ЗАМЕНИТЬ В ВЕРХНЕЙ ЧАСТИ VictoryMenu:
                   int starsCount = 0;
-                if (.score >= game.targetScore3Stars) {
+                if (AngryMolluskGame.score >= game.targetScore3Stars) { // <-- ДОПИСАЛИ ИМЯ КЛАССА
                   starsCount = 3;
-                } else if (.score >= game.targetScore2Stars) {
+                } else if (AngryMolluskGame.score >= game.targetScore2Stars) { // <-- ДОПИСАЛИ ИМЯ КЛАССА
                   starsCount = 2;
-                } else if (.score >= game.targetScore1Star) {
+                } else if (AngryMolluskGame.score >= game.targetScore1Star) { // <-- ДОПИСАЛИ ИМЯ КЛАССА
                   starsCount = 1;
                 }
+
 
                 return Center(
                   child: Container(
@@ -84,8 +86,9 @@ class GameScreen extends StatelessWidget {
                             );
                           }),
                         ),
+                        // ТОЧЕЧНО ЗАМЕНИТЬ В СТРОКЕ ИТОГОВОГО СЧЕТА:
                         Text(
-                          "ИТОГОВЫЙ СЧЁТ: ${.score}",
+                          "ИТОГОВЫЙ СЧЁТ: ${AngryMolluskGame.score}", // <-- ДОПИСАЛИ ИМЯ КЛАССА
                           style: const TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -120,9 +123,10 @@ Container(
                               decoration: const BoxDecoration(color: Color(0xFFFF9800), shape: BoxShape.circle),
                               child: RawMaterialButton(
                                 shape: const CircleBorder(),
+                                // ТОЧЕЧНО В КНОПКЕ ЗАНОВО:
                                 onPressed: () {
                                   game.overlays.remove('VictoryMenu');
-                                  .score = 0; 
+                                  AngryMolluskGame.score = 0; // <-- ДОПИСАЛИ ИМЯ КЛАССА
                                   game.isVictorySequenceStarted = false;
                                   game.levelCleared = false;
                                   game.buildLevelStructures(); // Перестраивает этот же уровень с нуля
@@ -152,9 +156,8 @@ Container(
 
   // 2. ХАРДКОРНАЯ ПРОВЕРКА: Если звёзд меньше 2 — стрелка блокируется!
   if (currentRoundStars < 2) {
-    // Вместо перехода закрываем оверлей победы и перезапускаем этот же уровень, заставляя переигрывать!
     game.overlays.remove('VictoryMenu');
-    .score = 0; 
+    AngryMolluskGame.score = 0; // <-- ДОПИСАЛИ ИМЯ КЛАССА
     game.isVictorySequenceStarted = false;
     game.levelCleared = false;
     game.buildLevelStructures(); 
@@ -195,7 +198,7 @@ else if (game.currentLevel < 4) {
 }
 
 
-  .score = 0;
+  AngryMolluskGame.score = 0;
   game.worldScrollX = 0.0;
   game.isVictorySequenceStarted = false;
   game.levelCleared = false;
@@ -298,7 +301,7 @@ else if (game.currentLevel < 4) {
                             onPressed: () {
                               game.overlays.remove('PauseMenu');
                               game.resumeEngine();
-                              .score = 0;
+                              AngryMolluskGame.score = 0;
                               game.isVictorySequenceStarted = false;
                               game.levelCleared = false;
                               game.buildLevelStructures();
@@ -369,7 +372,7 @@ else if (game.currentLevel < 4) {
                               icon: const Icon(Icons.refresh_rounded, color: Colors.white, size: 32),
                               onPressed: () {
                                 game.overlays.remove('GameOverMenu');
-                                .score = 0; 
+                                AngryMolluskGame.score = 0;  
                                 game.isVictorySequenceStarted = false;
                                 game.levelCleared = false;
                                 game.buildLevelStructures(); 
@@ -437,8 +440,9 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   double _lightningTimer = 0.0;     // Таймер для отсчета 3 секунд между молниями
   bool _showLightningFlash = false; // Флаг, включающий белую вспышку на экране
   double _rainAnimationTimer = 0.0; // НАШ НОВЫЙ ТАЙМЕР ДЛЯ БЕШЕНОГО ЖИВОГО ЛИВНЯ
-  final Random _rainStaticRand = Random(99); // Вынесли сид живого ливня из render наружу
-  final Random _stormStaticRand = Random(13); // Вынесли сид обычного дождя из render наружу
+  final Random _rainStaticRand = Random(99); 
+  final Random _stormStaticRand = Random(13); 
+
 
 
 
