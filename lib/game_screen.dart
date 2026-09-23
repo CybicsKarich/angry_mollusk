@@ -146,14 +146,13 @@ Container(
                               onPressed: () {
                               // 1. ПЕРВЫМ ДЕЛОМ СЧИТАЕМ ЗВЁЗДЫ ЗА ТОЛЬКО ЧТО ПРОЙДЕННЫЙ БОЙ
                               int currentRoundStars = 0;
-                              if (.score >= game.targetScore3Stars) {
+                              if (AngryMolluskGame.score >= game.targetScore3Stars) { // <-- ИСПРАВЛЕНО ТОЧЕЧНО
                               currentRoundStars = 3;
-                              } else if (.score >= game.targetScore2Stars) {
+                              } else if (AngryMolluskGame.score >= game.targetScore2Stars) { // <-- ИСПРАВЛЕНО ТОЧЕЧНО
                               currentRoundStars = 2;
-                              } else if (.score >= game.targetScore1Star) {
+                              } else if (AngryMolluskGame.score >= game.targetScore1Star) { // <-- ИСПРАВЛЕНО ТОЧЕЧНО
                                 currentRoundStars = 1;
                                 }
-
   // 2. ХАРДКОРНАЯ ПРОВЕРКА: Если звёзд меньше 2 — стрелка блокируется!
   if (currentRoundStars < 2) {
     game.overlays.remove('VictoryMenu');
