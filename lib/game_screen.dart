@@ -39,11 +39,11 @@ class GameScreen extends StatelessWidget {
                 }
                   
                   int starsCount = 0;
-                if (AngryMolluskGame.score >= game.targetScore3Stars) {
+                if (.score >= game.targetScore3Stars) {
                   starsCount = 3;
-                } else if (AngryMolluskGame.score >= game.targetScore2Stars) {
+                } else if (.score >= game.targetScore2Stars) {
                   starsCount = 2;
-                } else if (AngryMolluskGame.score >= game.targetScore1Star) {
+                } else if (.score >= game.targetScore1Star) {
                   starsCount = 1;
                 }
 
@@ -85,7 +85,7 @@ class GameScreen extends StatelessWidget {
                           }),
                         ),
                         Text(
-                          "ИТОГОВЫЙ СЧЁТ: ${AngryMolluskGame.score}",
+                          "ИТОГОВЫЙ СЧЁТ: ${.score}",
                           style: const TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -122,7 +122,7 @@ Container(
                                 shape: const CircleBorder(),
                                 onPressed: () {
                                   game.overlays.remove('VictoryMenu');
-                                  AngryMolluskGame.score = 0; 
+                                  .score = 0; 
                                   game.isVictorySequenceStarted = false;
                                   game.levelCleared = false;
                                   game.buildLevelStructures(); // Перестраивает этот же уровень с нуля
@@ -142,11 +142,11 @@ Container(
                               onPressed: () {
                               // 1. ПЕРВЫМ ДЕЛОМ СЧИТАЕМ ЗВЁЗДЫ ЗА ТОЛЬКО ЧТО ПРОЙДЕННЫЙ БОЙ
                               int currentRoundStars = 0;
-                              if (AngryMolluskGame.score >= game.targetScore3Stars) {
+                              if (.score >= game.targetScore3Stars) {
                               currentRoundStars = 3;
-                              } else if (AngryMolluskGame.score >= game.targetScore2Stars) {
+                              } else if (.score >= game.targetScore2Stars) {
                               currentRoundStars = 2;
-                              } else if (AngryMolluskGame.score >= game.targetScore1Star) {
+                              } else if (.score >= game.targetScore1Star) {
                                 currentRoundStars = 1;
                                 }
 
@@ -154,7 +154,7 @@ Container(
   if (currentRoundStars < 2) {
     // Вместо перехода закрываем оверлей победы и перезапускаем этот же уровень, заставляя переигрывать!
     game.overlays.remove('VictoryMenu');
-    AngryMolluskGame.score = 0; 
+    .score = 0; 
     game.isVictorySequenceStarted = false;
     game.levelCleared = false;
     game.buildLevelStructures(); 
@@ -195,7 +195,7 @@ else if (game.currentLevel < 4) {
 }
 
 
-  AngryMolluskGame.score = 0;
+  .score = 0;
   game.worldScrollX = 0.0;
   game.isVictorySequenceStarted = false;
   game.levelCleared = false;
@@ -218,7 +218,7 @@ else if (game.currentLevel < 4) {
                             
               
               // ИСПРАВЛЕНО: НОВОЕ ВСПЛЫВАЮЩЕЕ ОКНО ДОСТИЖЕНИЙ (ТОСТ НА 5 СЕКУНД)
-              'AchievementToast': (BuildContext context, AngryMolluskGame game) {
+              'AchievementToast': (BuildContext context,  game) {
                 return Positioned(
                   top: 24,
                   left: MediaQuery.of(context).size.width * 0.25,
@@ -257,7 +257,7 @@ else if (game.currentLevel < 4) {
               },
 
               // 2. ОВЕРЛЕЙ МЕНЮ ПАУЗЫ
-              'PauseMenu': (BuildContext context, AngryMolluskGame game) {
+              'PauseMenu': (BuildContext context,  game) {
                 return Center(
                   child: Container(
                     width: 280,
@@ -298,7 +298,7 @@ else if (game.currentLevel < 4) {
                             onPressed: () {
                               game.overlays.remove('PauseMenu');
                               game.resumeEngine();
-                              AngryMolluskGame.score = 0;
+                              .score = 0;
                               game.isVictorySequenceStarted = false;
                               game.levelCleared = false;
                               game.buildLevelStructures();
@@ -332,7 +332,7 @@ else if (game.currentLevel < 4) {
               },        
                      
                 // 3. ОВЕРЛЕЙ ПРОИГРЫША (GAME OVER)
-                'GameOverMenu': (BuildContext context, AngryMolluskGame game) {
+                'GameOverMenu': (BuildContext context,  game) {
                 return Center(
                   child: Container(
                     width: 300,
@@ -369,7 +369,7 @@ else if (game.currentLevel < 4) {
                               icon: const Icon(Icons.refresh_rounded, color: Colors.white, size: 32),
                               onPressed: () {
                                 game.overlays.remove('GameOverMenu');
-                                AngryMolluskGame.score = 0; 
+                                .score = 0; 
                                 game.isVictorySequenceStarted = false;
                                 game.levelCleared = false;
                                 game.buildLevelStructures(); 
@@ -426,7 +426,6 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   double losePhotoScale = 0.0;     // Размер фотки (растёт от 0.0 до 0.5)
   static int pillsRemaining = 3;
   double acidBackgroundTimer = 0.0;
-  // ИСПРАВЛЕНО: Переменные для интерактивной анимации шляпы шерифа на 1 уровне!
   double hatAnimTimer = 0.0;     // Общий таймер анимации полёта и сползания
   bool isHatSplatSoundPlayed = false; // Флаг, чтобы звук шлепка бахнул ровно один раз
   bool hasWantedPoster = false;       // Сгенерировался ли плакат на уровне
@@ -438,6 +437,9 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   double _lightningTimer = 0.0;     // Таймер для отсчета 3 секунд между молниями
   bool _showLightningFlash = false; // Флаг, включающий белую вспышку на экране
   double _rainAnimationTimer = 0.0; // НАШ НОВЫЙ ТАЙМЕР ДЛЯ БЕШЕНОГО ЖИВОГО ЛИВНЯ
+  final Random _rainStaticRand = Random(99); // Вынесли сид живого ливня из render наружу
+  final Random _stormStaticRand = Random(13); // Вынесли сид обычного дождя из render наружу
+
 
 
  
@@ -1178,10 +1180,11 @@ if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictor
       final rainPaint = Paint()
         ..color = Colors.blue.shade100.withOpacity(0.25)
         ..strokeWidth = 1.2;
-      final randRain = Random(13); // Сид фиксирован, чтобы капли не дергались хаотично
+            // Было: final randRain = Random(13);
+      // СТАЛО: Оптимизировано под статичную переменную
       for (int i = 0; i < 60; i++) {
-        double rx = randRain.nextDouble() * size.width * worldWidthFactor;
-        double ry = randRain.nextDouble() * size.height * 0.83;
+        double rx = _stormStaticRand.nextDouble() * size.width * worldWidthFactor;
+        double ry = _stormStaticRand.nextDouble() * size.height * 0.83;
         canvas.drawLine(Offset(rx, ry), Offset(rx + 8, ry + 25), rainPaint); // Косые капли ливня
       }
     } else {
@@ -1425,7 +1428,6 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
 }
    
       
-      // ПТИЦА С ТРАЕКТОРИЕЙ! (ИСПРАВЛЕНО: Синий шлейф, шипастая подложка по картинке, звезды и молнии!)
       if (currentBird != null && (!currentBird!.isLaunched || !currentBird!.shouldRemove)) {
         canvas.save();
         
@@ -1433,7 +1435,8 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
         double birdScreenY = currentBird!.position.dy * size.height;
         final double birdRadius = (size.height * 0.024);
 
-        if (currentBird!.isAngryMode) {
+        // ИСПРАВЛЕНО: Эффекты таблетки считаются и рисуются ТОЛЬКО если птица реально ЛЕТИТ!
+        if (currentBird!.isAngryMode && currentBird!.isLaunched) { 
           // =========================================================================
           // А) АНИМИРОВАННЫЙ СИНИЙ ШЛЕЙФ ЗА СПИНОЙ БАННИХОПА
           // =========================================================================
@@ -1856,10 +1859,9 @@ if (hasWantedPoster && !showWantedBig) {
       ..color = Colors.blue.shade100.withOpacity(0.35)
       ..strokeWidth = 1.4;
         
-    final randRain = Random(99); 
     for (int i = 0; i < 65; i++) {
-      double baseX = randRain.nextDouble() * size.width * worldWidthFactor;
-      double baseY = randRain.nextDouble() * size.height * 0.83;
+    double baseX = _rainStaticRand.nextDouble() * size.width * worldWidthFactor;
+    double baseY = _rainStaticRand.nextDouble() * size.height * 0.83;
       
       // ИСПРАВЛЕНО: Движение завязано на _rainAnimationTimer, ливень оживёт и полетит!
       double liveX = (baseX + _rainAnimationTimer * 400) % (size.width * worldWidthFactor);
@@ -2649,6 +2651,8 @@ class WantedPosterPainter {
   final double animTimer;
   WantedPosterPainter({required this.animTimer});
 
+  static final Random _posterStaticRand = Random(42);
+
   void paint(Canvas canvas, Size size) {
     final double w = size.width;
     final double h = size.height;
@@ -2691,11 +2695,12 @@ class WantedPosterPainter {
     // 3. ТЕКСТУРА СТАРЕНИЯ: НЕБОЛЬШИЕ ГРЯЗНЫЕ ПЯТНА ПО ВСЕМУ ЛИСТУ
     // =========================================================================
     final spotPaint = Paint()..color = const Color(0xFF5D4037).withOpacity(0.12);
-    final randSpots = Random(42); // Фиксированный сид, чтобы пятна не прыгали
+    
     for (int i = 0; i < 15; i++) {
-      double sx = (randSpots.nextDouble() - 0.5) * w;
-      double sy = (randSpots.nextDouble() - 0.5) * h;
-      double sRadius = randSpots.nextDouble() * 12 + 3;
+      // Используем статичный рандом плеера плаката
+      double sx = (_posterStaticRand.nextDouble() - 0.5) * w;
+      double sy = (_posterStaticRand.nextDouble() - 0.5) * h;
+      double sRadius = _posterStaticRand.nextDouble() * 12 + 3;
       canvas.drawCircle(Offset(sx, sy), sRadius, spotPaint);
       // Парочка вытянутых клякс
       if (i % 4 == 0) {
