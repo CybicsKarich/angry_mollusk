@@ -1347,18 +1347,60 @@ function loadGame() {
             document.getElementById('promo-btn').style.display = 'block';
         }
 
-        function checkDailyTimer() {
-            const timerEl = document.getElementById('daily-timer-ui');
-            const sBtn = document.getElementById('spin-main-btn'), fBtn = document.getElementById('spin-fast-btn');
-            if (curCase !== 'daily') { timerEl.style.display = 'none'; sBtn.disabled = fBtn.disabled = false; return; }
-            const diff = (dailyLastOpen + 36000000) - Date.now();
-            if (diff > 0) {
-                timerEl.style.display = 'block'; sBtn.disabled = fBtn.disabled = true;
-                let h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
-                timerEl.innerText = `СЛЕДУЮЩИЙ ЧЕРЕЗ: ${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-                setTimeout(checkDailyTimer, 1000);
-            } else { timerEl.style.display = 'none'; sBtn.disabled = fBtn.disabled = false; }
+        // ПОЛНОСТЬЮ ЗАМЕНИ СВОЮ ФУНКЦИЮ checkDailyTimer() НА ЭТОТ КОРРЕКТНЫЙ ВАРИАНТ:
+function checkDailyTimer() {
+    const timerEl = document.getElementById('daily-timer-ui');
+    const sBtn = document.getElementById('spin-main-btn'), fBtn = document.getElementById('spin-fast-btn');
+    
+    if (curCase !== 'daily') { 
+        timerEl.style.display = 'none'; 
+        sBtn.disabled = fBtn.disabled = false; 
+        return; 
+    }
+
+    // Если играем внутри Flutter приложения на смартфоне
+    if (window.FlutterIvanDrop) {
+        window.FlutterIvanDrop.postMessage('try_open_daily');
+    } else {
+        // Подстраховка для тестов на ПК в браузере (старая логика)
+        const diff = (dailyLastOpen + 36000000) - Date.now();
+        if (diff > 0) {
+            timerEl.style.display = 'block'; sBtn.disabled = fBtn.disabled = true;
+            let h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
+            timerEl.innerText = `СЛЕДУЮЩИЙ ЧЕРЕЗ: ${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            setTimeout(checkDailyTimer, 1000);
+        } else { 
+            timerEl.style.display = 'none'; 
+            sBtn.disabled = fBtn.disabled = false; 
         }
+    }
+}
+
+// ЭТУ НОВУЮ ФУНКЦИЮ АВТОМАТИЧЕСКИ ВЫЗОВЕТ FLUTTER КАЖДЫЙ РАЗ ПРИ ПРОВЕРКЕ ТАЙМЕРА
+function onDailyCaseResult(success, remainingSeconds) {
+    const timerEl = document.getElementById('daily-timer-ui');
+    const sBtn = document.getElementById('spin-main-btn'), fBtn = document.getElementById('spin-fast-btn');
+
+    if (success) {
+        // 10 часов прошли! Кейс DAILY разблокирован
+        timerEl.style.display = 'none';
+        sBtn.disabled = fBtn.disabled = false;
+    } else {
+        // Кейс заблокирован. Вычисляем тикающие часы, минуты и секунды из Flutter
+        timerEl.style.display = 'block';
+        sBtn.disabled = fBtn.disabled = true;
+
+        let h = Math.floor(remainingSeconds / 3600).toString().padStart(2, '0');
+        let minutes = Math.floor((remainingSeconds % 3600) / 60).toString().padStart(2, '0');
+        let seconds = (remainingSeconds % 60).toString().padStart(2, '0');
+
+        timerEl.innerText = `СЛЕДУЮЩИЙ ЧЕРЕЗ: ${h}:${minutes}:${seconds}`;
+        
+        // Перезапускаем проверку через 1 секунду для плавного тикания таймера
+        setTimeout(checkDailyTimer, 1000);
+    }
+}
+
 
         function selectCase(k) {
             curCase = k;
@@ -1672,28 +1714,62 @@ function loadGame() {
 
         function resetCrashUI() { clearInterval(crashInterval); document.getElementById('crash-start-btn').style.display = 'block'; document.getElementById('crash-take-btn').style.display = 'none'; document.getElementById('crash-mult-display').style.color = 'white'; updateUI(); }
 
-                function openPromo() {
-            const now = Date.now(); 
-            if(now < promoLastTime + 10800000) return alert("Ждите 3 часа!");
-            let p = prompt("Промокод:"); 
-            let r = 0;
-            
-            if(p === "START") r = 100; 
-            if(p === "BETA") r = 4444; 
-            if(p === "KNIFE") r = 10000;
-            if(p === "SECRET") r = 100000;
-            
-            // ПРОВЕРКА НОВОГО ПРОМОКОДА
-            if(p === "VANYALYCHIY") {
-                freeHackerOpens += qty; // Начисляем бесплатное открытие (учитываем текущее выбранное количество qty)
-                promoLastTime = now;
-                updateUI();
-                alert("Промокод активирован! Ваше следующее открытие кейса HACKER будет бесплатным.");
-                return;
-            }
+                // ПОЛНОСТЬЮ ЗАМЕНИ СВОЮ ФУНКЦИЮ openPromo() НА ЭТОТ КОРРЕКТНЫЙ ВАРИАНТ:
+function openPromo() {
+    // 1. Проверяем, запущена ли игра внутри Flutter на телефоне
+    if (window.FlutterIvanDrop) {
+        // Отправляем сигнал во Flutter. Он сам проверит SharedPreferences и вернет ответ!
+        window.FlutterIvanDrop.postMessage('try_activate_promo');
+    } else {
+        // Подстраховка, если ты тестируешь код на ПК в обычном браузере
+        let p = prompt("Промокод (Режим теста на ПК):");
+        processPromoLogic(p);
+    }
+}
 
-            if(r > 0) { bal += r; promoLastTime = now; updateUI(); alert(`+${r}$`); } else alert("Неверно!");
-        }
+// ЭТУ НОВУЮ ФУНКЦИЮ ВЫЗОВЕТ САМ FLUTTER И ПЕРЕДАСТ РЕЗУЛЬТАТ ПРОВЕРКИ ВРЕМЕНИ
+function onPromoResult(success, remainingSeconds) {
+    if (success) {
+        // Время прошло! Запрашиваем ввод промокода
+        let p = prompt("Промокод:");
+        if (!p) return; // Игрок нажал отмену
+        
+        processPromoLogic(p);
+    } else {
+        // Время еще не прошло. Рассчитываем часы и минуты из секунд, прилетевших из Flutter
+        let hours = Math.floor(remainingSeconds / 3600).toString().padStart(2, '0');
+        let minutes = Math.floor((remainingSeconds % 3600) / 60).toString().padStart(2, '0');
+        let seconds = (remainingSeconds % 60).toString().padStart(2, '0');
+        
+        alert(`Ждите! Следующий промокод будет доступен через: ${hours}:${minutes}:${seconds}`);
+    }
+}
+
+// ВСЯ ТВОЯ ОРИГИНАЛЬНАЯ ЛОГИКА НАЧИСЛЕНИЙ БАЛАНСА ВЫНЕСЕНА СЮДА
+function processPromoLogic(p) {
+    let r = 0;
+    
+    if (p === "START") r = 100; 
+    if (p === "BETA") r = 4444; 
+    if (p === "KNIFE") r = 10000;
+    if (p === "SECRET") r = 100000;
+    
+    // Твой промокод Вани Лихого
+    if (p === "VANYALYCHIY") {
+        freeHackerOpens += qty; // Начисляем бесплатное открытие (учитываем qty)
+        updateUI();
+        alert("Промокод активирован! Ваше следующее открытие кейса HACKER будет бесплатным.");
+        return;
+    }
+
+    if (r > 0) { 
+        bal += r; 
+        updateUI(); 
+        alert(`+${r}$`); 
+    } else {
+        alert("Неверно!");
+    }
+}
 
         function toggleModal(id) {
             if(document.getElementById('result-summary').style.display === 'flex') resetUI();
