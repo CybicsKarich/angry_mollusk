@@ -439,8 +439,6 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
   double _lightningTimer = 0.0;     // Таймер для отсчета 3 секунд между молниями
   bool _showLightningFlash = false; // Флаг, включающий белую вспышку на экране
   double _rainAnimationTimer = 0.0; // НАШ НОВЫЙ ТАЙМЕР ДЛЯ БЕШЕНОГО ЖИВОГО ЛИВНЯ
-  final Random _rainStaticRand = Random(99); 
-  final Random _stormStaticRand = Random(13); 
 
 
 
@@ -1179,15 +1177,16 @@ if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictor
       canvas.drawCircle(Offset(stormX + 45, size.height * 0.09), 55, stormCloudPaint);
       canvas.drawCircle(Offset(stormX + 95, size.height * 0.12), 42, stormCloudPaint);
 
-      // НЕПРЕРЫВНЫЙ ЛИВЕНЬ: Рисуем косые нити дождя, бегущие по экрану
+            // НЕПРЕРЫВНЫЙ ЛИВЕНЬ: Рисуем косые нити дождя, бегущие по экрану
       final rainPaint = Paint()
         ..color = Colors.blue.shade100.withOpacity(0.25)
         ..strokeWidth = 1.2;
-            // Было: final randRain = Random(13);
-      // СТАЛО: Оптимизировано под статичную переменную
+            
+      // ИСПРАВЛЕНО ТОЧЕЧНО: Возвращён твой оригинальный локальный Random(13)
+      final randRain = Random(13);
       for (int i = 0; i < 60; i++) {
-        double rx = _stormStaticRand.nextDouble() * size.width * worldWidthFactor;
-        double ry = _stormStaticRand.nextDouble() * size.height * 0.83;
+        double rx = randRain.nextDouble() * size.width * worldWidthFactor;
+        double ry = randRain.nextDouble() * size.height * 0.83;
         canvas.drawLine(Offset(rx, ry), Offset(rx + 8, ry + 25), rainPaint); // Косые капли ливня
       }
     } else {
@@ -1438,8 +1437,8 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
         double birdScreenY = currentBird!.position.dy * size.height;
         final double birdRadius = (size.height * 0.024);
 
-        // ИСПРАВЛЕНО: Эффекты таблетки считаются и рисуются ТОЛЬКО если птица реально ЛЕТИТ!
-        if (currentBird!.isAngryMode && currentBird!.isLaunched) { 
+        // ИСПРАВЛЕНО ТОЧЕЧНО: Возвращено изначальное условие, эффекты больше не привязаны к полёту!
+        if (currentBird!.isAngryMode) { 
           // =========================================================================
           // А) АНИМИРОВАННЫЙ СИНИЙ ШЛЕЙФ ЗА СПИНОЙ БАННИХОПА
           // =========================================================================
@@ -1858,13 +1857,15 @@ if (hasWantedPoster && !showWantedBig) {
     canvas.drawCircle(Offset(stormX + 45, size.height * 0.09), 55, stormCloudPaint);
     canvas.drawCircle(Offset(stormX + 95, size.height * 0.12), 42, stormCloudPaint);
 
-    final rainPaint = Paint()
+     final rainPaint = Paint()
       ..color = Colors.blue.shade100.withOpacity(0.35)
       ..strokeWidth = 1.4;
         
+    // ИСПРАВЛЕНО ТОЧЕЧНО: Возвращён твой оригинальный локальный Random(99)
+    final randRain = Random(99);
     for (int i = 0; i < 65; i++) {
-    double baseX = _rainStaticRand.nextDouble() * size.width * worldWidthFactor;
-    double baseY = _rainStaticRand.nextDouble() * size.height * 0.83;
+      double baseX = randRain.nextDouble() * size.width * worldWidthFactor;
+      double baseY = randRain.nextDouble() * size.height * 0.83;
       
       // ИСПРАВЛЕНО: Движение завязано на _rainAnimationTimer, ливень оживёт и полетит!
       double liveX = (baseX + _rainAnimationTimer * 400) % (size.width * worldWidthFactor);
@@ -2699,8 +2700,9 @@ class WantedPosterPainter {
     // =========================================================================
     final spotPaint = Paint()..color = const Color(0xFF5D4037).withOpacity(0.12);
     
+    // ИСПРАВЛЕНО ТОЧЕЧНО: Возвращено локальное создание Random(42) внутрь paint
+    final _posterStaticRand = Random(42);
     for (int i = 0; i < 15; i++) {
-      // Используем статичный рандом плеера плаката
       double sx = (_posterStaticRand.nextDouble() - 0.5) * w;
       double sy = (_posterStaticRand.nextDouble() - 0.5) * h;
       double sRadius = _posterStaticRand.nextDouble() * 12 + 3;
