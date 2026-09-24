@@ -50,9 +50,9 @@ class MyApp extends StatelessWidget {
 class MainMenuScreen extends StatefulWidget {
   const MainMenuScreen({super.key});
 
-  // ГЛОБАЛЬНЫЕ ТАЙМЕРЫ И ПЕРЕМЕННЫЕ ДЛЯ КОНТРОЛЯ ИГРЫ IVANDROP
-  static const Duration promoCooldown = Duration(hours: 3); // 3 часа КД на промокоды
-  static const Duration dailyCaseCooldown = Duration(hours: 24); // КД на бесплатный кейс DAILY
+  // ТОЧЕЧНО ОТРЕДАКТИРОВАТЬ ВНУТРИ КЛАССА MainMenuScreen В LIB/MAIN.DART:
+  static const Duration promoCooldown = Duration(hours: 3); // 3 часа на промокоды
+  static const Duration dailyCaseCooldown = Duration(hours: 10); // ИСПРАВЛЕНО: строго 10 часов КД на DAILY кейс!
 
   // 1. Проверка доступности ввода промокода (3 часа)
   static Future<bool> canActivatePromo() async {
@@ -839,15 +839,19 @@ class _HtmlGameScreenState extends State<HtmlGameScreen> {
             }
           }
           
-          // Если JS запросил кулдаун DAILY кейса
+          // ТОЧЕЧНО ПРОПИСАТЬ ВНУТРИ КАНАЛА addJavaScriptChannel В LIB/MAIN.DART:
           if (message.message == 'try_open_daily') {
             final remaining = await MainMenuScreen.getRemainingDailyCaseTime();
             if (remaining.inSeconds == 0) {
-              await MainMenuScreen.saveDailyCaseOpenTime();
               _controller.runJavaScript('onDailyCaseResult(true, 0);');
             } else {
               _controller.runJavaScript('onDailyCaseResult(false, ${remaining.inSeconds});');
             }
+          }
+          
+          // Ловим сигнал о том, что рулетка реально закрутилась, и пишем время на диск
+          if (message.message == 'save_daily_click') {
+            await MainMenuScreen.saveDailyCaseOpenTime();
           }
         },
       )
