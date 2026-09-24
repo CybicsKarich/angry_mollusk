@@ -814,15 +814,46 @@ class HtmlGameScreen extends StatefulWidget {
 class _HtmlGameScreenState extends State<HtmlGameScreen> {
   late final WebViewController _controller;
 
+ // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО ВНУТРИ _HtmlGameScreenState В LIB/MAIN.DART:
   @override
   void initState() {
     super.initState();
-    // Инициализируем контроллер встроенного браузера
     _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted) // Включаем JS, чтобы HTML игра работала корректно
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(Colors.black)
-      ..loadFlutterAsset('assets/web/index.html'); // Загружаем твой локальный файл игры!
+      // Добавляем канал связи с IvanDrop
+      ..addJavaScriptChannel(
+        'FlutterIvanDrop',
+        onMessageReceived: (JavaScriptMessage message) async {
+          // Если JS запросил активацию промокода
+          if (message.message == 'try_activate_promo') {
+            bool canActivate = await MainMenuScreen.canActivatePromo();
+            if (canActivate) {
+              await MainMenuScreen.savePromoActivationTime();
+              // Передаем в JS команду: "успех, зачислить баланс"
+              _controller.runJavaScript('onPromoResult(true, 0);');
+            } else {
+              final remaining = await MainMenuScreen.getRemainingPromoTime();
+              // Передаем в JS команду: "отказ, осталось столько-то секунд КД"
+              _controller.runJavaScript('onPromoResult(false, ${remaining.inSeconds});');
+            }
+          }
+          
+          // Если JS запросил кулдаун DAILY кейса
+          if (message.message == 'try_open_daily') {
+            final remaining = await MainMenuScreen.getRemainingDailyCaseTime();
+            if (remaining.inSeconds == 0) {
+              await MainMenuScreen.saveDailyCaseOpenTime();
+              _controller.runJavaScript('onDailyCaseResult(true, 0);');
+            } else {
+              _controller.runJavaScript('onDailyCaseResult(false, ${remaining.inSeconds});');
+            }
+          }
+        },
+      )
+      ..loadFlutterAsset('assets/web/index.html');
   }
+
 
   @override
   Widget build(BuildContext context) {
