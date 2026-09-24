@@ -46,12 +46,64 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО В LIB/MAIN.DART (Район строки 42):
 class MainMenuScreen extends StatefulWidget {
   const MainMenuScreen({super.key});
+
+  // ГЛОБАЛЬНЫЕ ТАЙМЕРЫ И ПЕРЕМЕННЫЕ ДЛЯ КОНТРОЛЯ ИГРЫ IVANDROP
+  static const Duration promoCooldown = Duration(hours: 3); // 3 часа КД на промокоды
+  static const Duration dailyCaseCooldown = Duration(hours: 24); // КД на бесплатный кейс DAILY
+
+  // 1. Проверка доступности ввода промокода (3 часа)
+  static Future<bool> canActivatePromo() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastTimeStr = prefs.getString('ivandrop_last_promo_time');
+    if (lastTimeStr == null) return true;
+    
+    final lastTime = DateTime.parse(lastTimeStr);
+    return DateTime.now().difference(lastTime) >= promoCooldown;
+  }
+
+  // 2. Расчет оставшихся секунд КД промокода для тикающего таймера в IvanDrop
+  static Future<Duration> getRemainingPromoTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastTimeStr = prefs.getString('ivandrop_last_promo_time');
+    if (lastTimeStr == null) return Duration.zero;
+    
+    final lastTime = DateTime.parse(lastTimeStr);
+    final timePassed = DateTime.now().difference(lastTime);
+    final remaining = promoCooldown - timePassed;
+    return remaining.isNegative ? Duration.zero : remaining;
+  }
+
+  // 3. Фиксация времени успешной активации промокода на диск телефона
+  static Future<void> savePromoActivationTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('ivandrop_last_promo_time', DateTime.now().toIso8601String());
+  }
+
+  // 4. Проверка кулдауна для бесплатного кейса DAILY (24 часа)
+  static Future<Duration> getRemainingDailyCaseTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastTimeStr = prefs.getString('ivandrop_last_daily_case_time');
+    if (lastTimeStr == null) return Duration.zero;
+    
+    final lastTime = DateTime.parse(lastTimeStr);
+    final timePassed = DateTime.now().difference(lastTime);
+    final remaining = dailyCaseCooldown - timePassed;
+    return remaining.isNegative ? Duration.zero : remaining;
+  }
+
+  // 5. Фиксация времени открытия бесплатного кейса DAILY
+  static Future<void> saveDailyCaseOpenTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('ivandrop_last_daily_case_time', DateTime.now().toIso8601String());
+  }
 
   @override
   State<MainMenuScreen> createState() => _MainMenuScreenState();
 }
+
 
 class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObserver {
   // Оставляем плеер nullable, чтобы избежать заиканий при камбэке
