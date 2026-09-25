@@ -507,48 +507,71 @@ Widget _buildAdvanced3DFrame({required Widget child, required bool hasHole}) {
       child: ClipOval(child: Image.asset(assetPath, fit: BoxFit.cover)),
     );
   }
-// ТОЧЕЧНО ДОБАВИТЬ В КОНЕЦ КЛАССА _Level6BadRouteScreenState:
+  // =========================================================================
+  // ⚡ ПОЛНОСТЬЮ СКОРРЕКТИРОВАННЫЙ ЭКРАН ПЛОХОЙ КОНЦОВКИ («ДЕЛО №06»)
+  // =========================================================================
   Widget _buildBadEndingInterface() {
     double loopTime = _endingTimer % 12.0;
     bool showGrandpaFlash = loopTime >= 0.0 && loopTime <= 0.15;
 
-    // Грохот грома синхронно со вспышкой молнии деда
+    // Грохот грома синхронно со вспышкой молнии
     if (loopTime >= 0.0 && loopTime <= 0.02) {
       AudioManager.playThunderStrike();
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF020204),
+      backgroundColor: const Color(0xFF020204), // Абсолютная темнота вокруг экрана
       body: Stack(
         children: [
-          // 🏛️ 1. ГЛАВНЫЙ ЗАЛ В ОБРАТНОЙ ПЕРСПЕКТИВЕ С СИНЕЙ ДЫРОЙ В ПОТОЛКЕ
+          // 🏛️ 1. ГЛАВНЫЙ ЗАЛ КРЕПОСТИ НА ВЕСЬ ЭКРАН В ОБРАТНОЙ ПЕРСПЕКТИВЕ
           Positioned.fill(
             child: CustomPaint(
-              painter: _EndingRoomBackgroundPainter(hasHole: true, showLightning: showGrandpaFlash),
+              painter: _EndingRoomBackgroundPainter(
+                hasHole: true, 
+                showLightning: showGrandpaFlash,
+              ),
+              // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО ВНУТРИ МЕТОДА _buildBadEndingInterface():
               child: Stack(
-                alignment: Alignment.center,
+                clipBehavior: Clip.none,
                 children: [
+                  // Потолок с поддержкой дыры в обратной перспективе
                   Positioned(top: 0, left: 0, right: 0, child: CustomPaint(size: const Size(double.infinity, 35), painter: _CeilingPainter(drawHole: true))),
+                  // 3D-плитка пола в обратной перспективе
                   Positioned(bottom: 0, left: 0, right: 0, child: CustomPaint(size: const Size(double.infinity, 24), painter: _FloorTilesPainter())),
 
-                  // Косой ливень, хлещущий из пролома крыши внутрь зала
-                  ..._rainDrops.map((pos) => Positioned(
-                        left: pos.dx, top: pos.dy,
-                        child: Container(width: 1.2, height: 10, color: Colors.blueGrey.shade100.withOpacity(0.35)),
-                      )),
+                  // УДАЛЕНО: Сквозной косой ливень полностью вырезан из кода по твоему запросу!
 
-                  // Падающие капли, бьющие о пол под звук castle_drops
-                  ..._castleFloorDrops.map((pos) => Positioned(
-                        left: pos.dx, top: pos.dy,
-                        child: Container(width: 2.0, height: 2.0, decoration: BoxDecoration(color: Colors.white.withOpacity(0.4), shape: BoxShape.circle)),
-                      )),
+                  // ОДИНОЧНЫЕ КАПЛИ С ПОТОЛКА С ПЛАВНОЙ КИНЕМАТОГРАФИЧНОЙ АНИМАЦИЕЙ ПАДЕНИЯ
+                  ..._castleFloorDrops.asMap().entries.map((entry) {
+                    int index = entry.key;
+                    Offset pos = entry.value;
+                    double floorY = MediaQuery.of(context).size.height - 24;
+                    
+                    double dropProgress = (_endingTimer * 1.8 + (index * 0.25)) % 1.0;
+                    double liveDropY = 35.0 + (dropProgress * (floorY - 35.0));
+                    
+                    return Positioned(
+                      left: pos.dx, 
+                      top: liveDropY,
+                      child: Container(
+                        width: 1.8, 
+                        height: 4.0, 
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(dropProgress > 0.95 ? 0.0 : 0.4), 
+                          shape: BoxShape.circle
+                        ),
+                      ),
+                    );
+                  }),
 
-                  // 🪨 2. МАЛЕНЬКИЙ АККУРАТНЫЙ ЗАВАЛ КАМНЕЙ ИЗ КОМИКСА НА ПОЛУ
+                  // 🪨 ЗАВАЛ КАМНЕЙ ИЗ КОМИКСА НА ПОЛУ ВНИЗУ (БЕЗ ШЛЯПЫ ШЕРИФА НА ПЛИТКЕ)
                   Positioned(
-                    bottom: 22, left: 110,
+                    bottom: 22, 
+                    left: MediaQuery.of(context).size.width * 0.5 - 30, // Центрируем завал строго под дырой
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
+                        // Закрытые глаза Вани сиротливо выглядывают из-под камня
                         Container(
                           width: 48, height: 48,
                           decoration: const BoxDecoration(color: Color(0xFFE53935), shape: BoxShape.circle),
@@ -563,6 +586,7 @@ Widget _buildAdvanced3DFrame({required Widget child, required bool hasHole}) {
                             ),
                           ),
                         ),
+                        // Серый обломок крыши
                         Container(
                           width: 60, height: 42,
                           decoration: BoxDecoration(
@@ -571,17 +595,19 @@ Widget _buildAdvanced3DFrame({required Widget child, required bool hasHole}) {
                             borderRadius: BorderRadius.circular(3),
                           ),
                         ),
+                        // ИСПРАВЛЕНО ТОЧЕЧНО: Код упавшей ковбойской шляпы шерифа полностью стёрт!
                       ],
                     ),
                   ),
 
-                  // 👻 3. ЧЁРНАЯ ЧЁТКАЯ ТЕНЬ ДЕДА С БОРОДОЙ В СЕКУНДУ МОЛНИИ
+                  // 👻 3. ЧЁРНАЯ ЧЁТКАЯ ТЕНЬ ДЕДА В ШЛЯПЕ И С БОРОДОЙ В СЕКУНДУ МОЛНИИ (ОСТАВЛЕНА!)
                   if (showGrandpaFlash)
                     Positioned(
-                      top: 12, left: 105,
+                      top: 14, 
+                      left: MediaQuery.of(context).size.width * 0.5 - 30, // Выровнена чётко по центру пролома крыши
                       child: CustomPaint(
-                        size: const Size(60, 50),
-                        painter: _GrandpaGhostPainter(),
+                        size: const Size(60, 52),
+                        painter: _GrandpaGhostPainter(), 
                       ),
                     ),
                 ],
@@ -591,54 +617,60 @@ Widget _buildAdvanced3DFrame({required Widget child, required bool hasHole}) {
 
           // 🌫️ 4. ПЛАВНО СТЕЛЮЩИЙСЯ ТЁМНО-СИНИЙ ТУМАН В НИЖНЕЙ ЧАСТИ ЭКРАНА
           Positioned(
-            bottom: 0, left: 0, right: 0, height: 75,
+            bottom: 0, left: 0, right: 0, height: 65,
             child: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, const Color(0xFF0F1424).withOpacity(0.65), const Color(0xFF040407)],
+                  colors: [Colors.transparent, const Color(0xFF0F1424).withOpacity(0.5), const Color(0xFF040407)],
                 ),
               ),
             ),
           ),
 
-          // 📜 5. ОФИЦИАЛЬНЫЙ СУХОЙ АРХИВНЫЙ ТЕКСТ ДЕЛА №06 ПО ЦЕНТРУ
+          // 📜 5. КОРРЕКТИРОВКА: НАДПИСЬ КОНЕЦ И ДЕЛО №06 ПЕРЕНЕСЕНЫ НАВЕРХ ПОД ПОТОЛОК
           Positioned(
-            left: 24, right: 24, bottom: 90,
+            left: 24, right: 24, top: 45, // Смещено наверх под потолок
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 const Text(
                   "КОНЕЦ ИГРЫ",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Color(0xFFB71C1C), letterSpacing: 3.0),
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Color(0xFFB71C1C), letterSpacing: 3.0),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(color: Colors.black45, borderRadius: BorderRadius.circular(8)),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.white10, width: 0.8)),
                   child: const Text(
                     "Дело №06: Шериф Ваня Баннихоп объявлен пропавшим без вести в замке Дона Моллюска. Расследование прекращено.",
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontFamily: 'serif', fontSize: 11.5, fontWeight: FontWeight.bold, color: Colors.white70, height: 1.4),
+                    style: TextStyle(fontFamily: 'serif', fontSize: 11.0, fontWeight: FontWeight.bold, color: Colors.white70, height: 1.35),
                   ),
                 ),
               ],
             ),
           ),
 
-          // 🏠 6. КНОПКА ВОЗВРАТА В МЕНЮ КАРТОЧЕК ДЛЯ ПЕРЕПРОХОЖДЕНИЯ
+          // 🏠 6. КОРРЕКТИРОВКА: КНОПКА НАВИГАЦИИ СМЕЩЕНА ЛЕВЕЕ В НИЖНИЙ УГОЛ СМАРТФОНА
           Positioned(
-            bottom: 24, left: MediaQuery.of(context).size.width * 0.38,
+            bottom: 16, 
+            left: 24, // Увеличенный левый отступ сместил кнопку в нижний левый угол
             child: SizedBox(
-              width: 160, height: 42,
+              width: 155, height: 38,
               child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF37474F), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF37474F), 
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  elevation: 4,
+                ),
                 onPressed: () {
-                  AudioManager.stopLevelAudioAndPlayMenu(); 
+                  AudioManager.stopLevelAudioAndPlayMenu();
                   Navigator.pop(context); 
                 },
-                icon: const Icon(Icons.home_rounded, color: Colors.white, size: 18),
-                label: const Text("В МЕНЮ УРОВНЕЙ", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white)),
+                icon: const Icon(Icons.home_rounded, color: Colors.white, size: 16),
+                label: const Text("В МЕНЮ УРОВНЕЙ", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
               ),
             ),
           ),
@@ -646,7 +678,7 @@ Widget _buildAdvanced3DFrame({required Widget child, required bool hasHole}) {
       ),
     );
   }
-}
+
 
 // ЗАМЕНИТЬ ТОЧЕЧНО В LIB/LEVEL6_COMIC_SCREEN.DART:
 class _CeilingPainter extends CustomPainter {
@@ -1128,47 +1160,66 @@ class _EndingRoomBackgroundPainter extends CustomPainter {
   bool shouldRepaint(covariant _EndingRoomBackgroundPainter oldDelegate) => true;
 }
 
+// ЗАМЕНИТЬ ЦЕЛИКОМ СТРОГО ТОЧЕЧНО В САМОМ КОНЦЕ ФАЙЛА LEVEL6_BAD_ROUTE_SCREEN.DART:
+
 class _GrandpaGhostPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final ghostPaint = Paint()..color = const Color(0xEE000000)..style = PaintingStyle.fill;
+    // Угольно-чёрная плотная зловещая тень предка-шерифа птиц
+    final ghostPaint = Paint()..color = const Color(0xFF000000)..style = PaintingStyle.fill;
+    
     double cx = size.width / 2;
     double cy = size.height / 2;
-    double r = 14.0; 
+    double r = 13.0; // Радиус головы птицы
 
+    // 1. Голова-круг птицы
     canvas.drawCircle(Offset(cx, cy), r, ghostPaint);
 
+    // 2. ПОЛНОЦЕННАЯ ВЫСОКАЯ КОВБОЙСКАЯ ТУЛЬЯ ШЛЯПЫ ДЕДА (С каноничной впадиной сверху)
     final hatPath = Path()
-      ..moveTo(cx - 9, cy - r + 3)
-      ..lineTo(cx - 7, cy - r - 9)
-      ..cubicTo(cx - 3, cy - r - 13, cx + 3, cy - r - 13, cx + 7, cy - r - 9)
-      ..lineTo(cx - 9, cy - r + 3)
+      ..moveTo(cx - 9, cy - r + 2)
+      ..lineTo(-size.width * 0.05 + cx - 5, cy - r - 10)
+      // Рисуем характерный ковбойский прогиб на макушке шляпы шерифа
+      ..cubicTo(cx - 3, cy - r - 14, cx + 3, cy - r - 14, size.width * 0.05 + cx + 5, cy - r - 10)
+      ..lineTo(cx + 9, cy - r + 2)
       ..close();
     canvas.drawPath(hatPath, ghostPaint);
 
+    // ПОЛНОЦЕННЫЕ ШИРОКИЕ ИЗОГНУТЫЕ КОВБОЙСКИЕ ПОЛЯ ШЛЯПЫ
     final brimPath = Path()
-      ..moveTo(cx - 18, cy - r + 3)
-      ..cubicTo(cx - 12, cy - r, cx + 12, cy - r, cx + 18, cy - r + 3)
-      ..lineTo(cx + 16, cy - r + 5)
-      ..cubicTo(cx + 9, cy - r + 2, cx - 9, cy - r + 2, cx - 16, cy - r + 5)
+      ..moveTo(cx - 19, cy - r + 2)
+      ..cubicTo(cx - 11, cy - r - 1, cx + 11, cy - r - 1, cx + 19, cy - r + 2) // Сильный изгиб краев вверх
+      ..lineTo(cx + 17, cy - r + 4.5)
+      ..cubicTo(cx + 9, cy - r + 1.5, cx - 9, cy - r + 1.5, cx - 17, cy - r + 4.5)
       ..close();
     canvas.drawPath(brimPath, ghostPaint);
 
+    // 3. ПОЛНОЦЕННАЯ ГУСТАЯ ИЗРЕЗАННАЯ ПТИЧЬЯ БОРОДА (Свисает треугольными прядями вниз)
     final beardPath = Path()
-      ..moveTo(cx - r + 3, cy + 5)
-      ..cubicTo(cx - r, cy + 20, cx + r, cy + 20, cx + r - 3, cy + 5)
-      ..cubicTo(cx + 5, cy + 10, cx - 5, cy + 10, cx - r + 3, cy + 5)
+      ..moveTo(cx - r + 2.5, cy + 4)
+      // Левая прядь бороды деда
+      ..lineTo(cx - 8, cy + 18)
+      ..lineTo(cx - 4, cy + 12)
+      // Центральная длинная седая прядь
+      ..lineTo(cx, cy + 23)
+      ..lineTo(cx + 4, cy + 12)
+      // Правая прядь бороды
+      ..lineTo(cx + 8, cy + 18)
+      ..lineTo(cx + r - 2.5, cy + 4)
       ..close();
     canvas.drawPath(beardPath, ghostPaint);
     
+    // Птичий загнутый клюв, выступающий на силуэте лица сквозь бороду
     final beakPath = Path()
-      ..moveTo(cx - 2, cy + 1)
-      ..lineTo(cx + 4, cy + 4)
+      ..moveTo(cx - 2, cy)
+      ..lineTo(cx + 6, cy + 3)
       ..lineTo(cx - 1, cy + 6)
       ..close();
     canvas.drawPath(beakPath, ghostPaint);
   }
+
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
+
 
