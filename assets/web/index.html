@@ -1376,30 +1376,35 @@ function checkDailyTimer() {
     }
 }
 
-// ЭТУ НОВУЮ ФУНКЦИЮ АВТОМАТИЧЕСКИ ВЫЗОВЕТ FLUTTER КАЖДЫЙ РАЗ ПРИ ПРОВЕРКЕ ТАЙМЕРА
+// ТОЧЕЧНО ЗАМЕНИТЬ ФУНКЦИЮ onDailyCaseResult В ТВОЕМ JAVASCRIPT-КОДЕ IVANDROP:
+
 function onDailyCaseResult(success, remainingSeconds) {
     const timerEl = document.getElementById('daily-timer-ui');
     const sBtn = document.getElementById('spin-main-btn'), fBtn = document.getElementById('spin-fast-btn');
 
     if (success) {
-        // 10 часов прошли! Кейс DAILY разблокирован
+        // 10 часов прошли! Кейс DAILY разблокирован, скрываем таймер
         timerEl.style.display = 'none';
         sBtn.disabled = fBtn.disabled = false;
     } else {
-        // Кейс заблокирован. Вычисляем тикающие часы, минуты и секунды из Flutter
+        // Кейс заблокирован! Включаем отображение плашки таймера и отключаем кнопки крутилки
         timerEl.style.display = 'block';
         sBtn.disabled = fBtn.disabled = true;
 
+        // Рассчитываем тикающие часы, минуты и секунды из секунд, прилетевших из Flutter ядра
         let h = Math.floor(remainingSeconds / 3600).toString().padStart(2, '0');
         let minutes = Math.floor((remainingSeconds % 3600) / 60).toString().padStart(2, '0');
         let seconds = (remainingSeconds % 60).toString().padStart(2, '0');
 
+        // Выводим каноничный текст на UI-элемент экрана
         timerEl.innerText = `СЛЕДУЮЩИЙ ЧЕРЕЗ: ${h}:${minutes}:${seconds}`;
         
-        // Перезапускаем проверку через 1 секунду для плавного тикания таймера
+        // ТОЧЕЧНО ВОЗВРАЩЕНО: Запускаем принудительный перезапуск проверки через 1 секунду,
+        // чтобы таймер плавно и непрерывно тикал на глазах у игрока!
         setTimeout(checkDailyTimer, 1000);
     }
 }
+
 
 
         function selectCase(k) {
