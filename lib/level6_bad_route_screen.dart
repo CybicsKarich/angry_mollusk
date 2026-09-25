@@ -369,23 +369,19 @@ class _Level6BadRouteScreenState extends State<Level6BadRouteScreen> with Ticker
     });
   }
 },
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center, 
-        children: [
-          Expanded(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                _currentFrame == 3 ? "КОНЕЦ", 
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ), 
-          const SizedBox(width: 6), 
-          Icon(_currentFrame == 3 ? Icons.lock_rounded : Icons.arrow_forward_ios_rounded, size: 14, color: Colors.white),
-        ],
-      ),
+      // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО ВНУТРИ МЕТОДА _buildNavigationButton():
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center, 
+          children: [
+            Text(
+              // ИСПРАВЛЕНО ТОЧЕЧНО: Текст "ЗАБЛОКИРОВАНО" полностью удален с кнопки!
+              _currentFrame == 3 ? "КОНЕЦ" : "ДАЛЬШЕ", 
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)
+            ), 
+            const SizedBox(width: 8), 
+            Icon(_currentFrame == 3 ? Icons.disabled_by_default_rounded : Icons.arrow_forward_ios_rounded, size: 16, color: Colors.white)
+          ]
+        ),
     ),
   );
 }
