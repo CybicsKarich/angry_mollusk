@@ -376,7 +376,7 @@ class _Level6BadRouteScreenState extends State<Level6BadRouteScreen> with Ticker
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
-                _currentFrame == 3 ? "КОНЕЦ (ЗАБЛОКИРОВАНО)" : "ДАЛЬШЕ", 
+                _currentFrame == 3 ? "КОНЕЦ", 
                 style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
                 textAlign: TextAlign.center,
               ),
