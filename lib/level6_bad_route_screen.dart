@@ -503,14 +503,16 @@ Widget _buildAdvanced3DFrame({required Widget child, required bool hasHole}) {
       child: ClipOval(child: Image.asset(assetPath, fit: BoxFit.cover)),
     );
   }
+
   // =========================================================================
   // ⚡ ПОЛНОСТЬЮ СКОРРЕКТИРОВАННЫЙ ЭКРАН ПЛОХОЙ КОНЦОВКИ («ДЕЛО №06»)
   // =========================================================================
   Widget _buildBadEndingInterface() {
+    // Вспышка молнии деда срабатывает каждые 12 секунд на 150 миллисекунд
     double loopTime = _endingTimer % 12.0;
     bool showGrandpaFlash = loopTime >= 0.0 && loopTime <= 0.15;
 
-    // Грохот грома синхронно со вспышкой молнии
+    // Включаем звук грома параллельно с циклом вспышки
     if (loopTime >= 0.0 && loopTime <= 0.02) {
       AudioManager.playThunderStrike();
     }
@@ -526,7 +528,6 @@ Widget _buildAdvanced3DFrame({required Widget child, required bool hasHole}) {
                 hasHole: true, 
                 showLightning: showGrandpaFlash,
               ),
-              // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО ВНУТРИ МЕТОДА _buildBadEndingInterface():
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
@@ -535,7 +536,7 @@ Widget _buildAdvanced3DFrame({required Widget child, required bool hasHole}) {
                   // 3D-плитка пола в обратной перспективе
                   Positioned(bottom: 0, left: 0, right: 0, child: CustomPaint(size: const Size(double.infinity, 24), painter: _FloorTilesPainter())),
 
-                  // УДАЛЕНО: Сквозной косой ливень полностью вырезан из кода по твоему запросу!
+                  // УДАЛЕНО ПО ТЗ: Сквозной косой ливень полностью вырезан из кода!
 
                   // ОДИНОЧНЫЕ КАПЛИ С ПОТОЛКА С ПЛАВНОЙ КИНЕМАТОГРАФИЧНОЙ АНИМАЦИЕЙ ПАДЕНИЯ
                   ..._castleFloorDrops.asMap().entries.map((entry) {
@@ -543,6 +544,7 @@ Widget _buildAdvanced3DFrame({required Widget child, required bool hasHole}) {
                     Offset pos = entry.value;
                     double floorY = MediaQuery.of(context).size.height - 24;
                     
+                    // Капли летят со смещением по времени, чтобы падать по очереди
                     double dropProgress = (_endingTimer * 1.8 + (index * 0.25)) % 1.0;
                     double liveDropY = 35.0 + (dropProgress * (floorY - 35.0));
                     
@@ -560,7 +562,7 @@ Widget _buildAdvanced3DFrame({required Widget child, required bool hasHole}) {
                     );
                   }),
 
-                  // 🪨 ЗАВАЛ КАМНЕЙ ИЗ КОМИКСА НА ПОЛУ ВНИЗУ (БЕЗ ШЛЯПЫ ШЕРИФА НА ПЛИТКЕ)
+                  // 🪨 2. ЗАВАЛ КАМНЕЙ ИЗ КОМИКСА НА ПОЛУ ВНИЗУ (ОЧИЩЕН ОТ ШЛЯПЫ)
                   Positioned(
                     bottom: 22, 
                     left: MediaQuery.of(context).size.width * 0.5 - 30, // Центрируем завал строго под дырой
@@ -591,12 +593,11 @@ Widget _buildAdvanced3DFrame({required Widget child, required bool hasHole}) {
                             borderRadius: BorderRadius.circular(3),
                           ),
                         ),
-                        // ИСПРАВЛЕНО ТОЧЕЧНО: Код упавшей ковбойской шляпы шерифа полностью стёрт!
                       ],
                     ),
                   ),
 
-                  // 👻 3. ЧЁРНАЯ ЧЁТКАЯ ТЕНЬ ДЕДА В ШЛЯПЕ И С БОРОДОЙ В СЕКУНДУ МОЛНИИ (ОСТАВЛЕНА!)
+                  // 👻 3. ЧЁРНАЯ ЧЁТКАЯ ТЕНЬ ДЕДА В ШЛЯПЕ И С БОРОДОЙ В СЕКУНДУ МОЛНИИ
                   if (showGrandpaFlash)
                     Positioned(
                       top: 14, 
@@ -625,9 +626,9 @@ Widget _buildAdvanced3DFrame({required Widget child, required bool hasHole}) {
             ),
           ),
 
-          // 📜 5. КОРРЕКТИРОВКА: НАДПИСЬ КОНЕЦ И ДЕЛО №06 ПЕРЕНЕСЕНЫ НАВЕРХ ПОД ПОТОЛОК
+          // 📜 5. ИСПРАВЛЕНО: НАДПИСЬ КОНЕЦ И ДЕЛО №06 ПЕРЕНЕСЕНЫ НАВЕРХ ПОД ПОТОЛОК
           Positioned(
-            left: 24, right: 24, top: 45, // Смещено наверх под потолок
+            left: 24, right: 24, top: 45, 
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -649,10 +650,10 @@ Widget _buildAdvanced3DFrame({required Widget child, required bool hasHole}) {
             ),
           ),
 
-          // 🏠 6. КОРРЕКТИРОВКА: КНОПКА НАВИГАЦИИ СМЕЩЕНА ЛЕВЕЕ В НИЖНИЙ УГОЛ СМАРТФОНА
+          // 🏠 6. ИСПРАВЛЕНО: КНОПКА НАВИГАЦИИ СМЕЩЕНА ЛЕВЕЕ В НИЖНИЙ УГОЛ СМАРТФОНА
           Positioned(
             bottom: 16, 
-            left: 24, // Увеличенный левый отступ сместил кнопку в нижний левый угол
+            left: 24, 
             child: SizedBox(
               width: 155, height: 38,
               child: ElevatedButton.icon(
@@ -674,6 +675,7 @@ Widget _buildAdvanced3DFrame({required Widget child, required bool hasHole}) {
       ),
     );
   }
+} 
 
 
 // ЗАМЕНИТЬ ТОЧЕЧНО В LIB/LEVEL6_COMIC_SCREEN.DART:
