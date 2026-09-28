@@ -641,7 +641,7 @@ Widget _buildAdvanced3DFrame({required Widget child, required bool hasHole}) {
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.white10, width: 0.8)),
                   child: const Text(
-                    "Дело №06: Шериф Ваня Баннихоп объявлен пропавшим без вести в замке Дона Моллюска. Расследование прекращено.",
+                    "Дело №06: Шериф Ваня Баннихоп объявлен пропавшим без вести на лугу свиней. Расследование прекращено.",
                     textAlign: TextAlign.center,
                     style: TextStyle(fontFamily: 'serif', fontSize: 11.0, fontWeight: FontWeight.bold, color: Colors.white70, height: 1.35),
                   ),
