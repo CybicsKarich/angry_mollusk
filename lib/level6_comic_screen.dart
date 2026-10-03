@@ -849,18 +849,24 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
     );
   }  
 
+  // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО В КОНЦЕ КЛАССА СОСТОЯНИЯ (МЕТОД _buildCharacter):
   Widget _buildCharacter(String assetPath, double size) {
     return Container(
-      width: size, height: size, 
-      decoration: BoxDecoration(color: const Color(0xFFE53935), shape: BoxShape.circle, border: Border.all(color: Colors.black, width: 2.0)), 
-      child: ClipOval(child: Image.asset(assetPath, fit: BoxFit.cover)),
+      width: size, 
+      height: size, 
+      decoration: BoxDecoration(
+        color: assetPath.contains('bunnyhop') ? const Color(0xFFE53935) : const Color(0xFF7CB342), 
+        shape: BoxShape.circle, 
+        border: Border.all(color: Colors.black, width: 2.0),
+      ), 
+      child: ClipOval(
+        child: Image.asset(assetPath, fit: BoxFit.cover),
+      ),
     );
   }
 } // <--- ЗАКРЫТИЕ КЛАССА СОСТОЯНИЯ ЭКРАНА СТРАНИЦЫ _Level6GoodRouteScreenState
 
-// =========================================================================
-// ВЕКТОРНЫЕ КЛАССЫ ХУДОЖНИКОВ (СТРУКТУРА ОКРУЖЕНИЯ, БОССА И СВОДОВ ЗАЛА)
-// =========================================================================
+// ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО В САМОМ КОНЦЕ ФАЙЛА (КЛАСС _CeilingPainter):
 class _CeilingPainter extends CustomPainter {
   final bool drawHole;
   _CeilingPainter({required this.drawHole});
@@ -871,11 +877,13 @@ class _CeilingPainter extends CustomPainter {
     final beamPaint = Paint()..color = const Color(0xFF09090D)..style = PaintingStyle.stroke..strokeWidth = 2.2;
     
     if (!drawHole) {
+      // Сплошной потолок
       canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), ceilPaint);
       for (int i = 0; i <= 6; i++) {
         canvas.drawLine(Offset(size.width * 0.5, 0), Offset(size.width * (i / 6), size.height), beamPaint);
       }
     } else {
+      // Крыша обвалилась
       final leftPath = Path()
         ..moveTo(0, 0)..lineTo(size.width * 0.42, 0)
         ..lineTo(size.width * 0.35, size.height)..lineTo(0, size.height)..close();
@@ -891,8 +899,10 @@ class _CeilingPainter extends CustomPainter {
     canvas.drawLine(Offset(0, size.height), Offset(size.width, size.height), beamPaint);
   }
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant _CeilingPainter oldDelegate) => true;
 }
+
+
 
 class _FloorTilesPainter extends CustomPainter {
   @override
