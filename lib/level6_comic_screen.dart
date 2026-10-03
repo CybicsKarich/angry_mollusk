@@ -204,6 +204,189 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
     );
   }
 
+   // =========================================================================
+  // ХОРОШАЯ ЛИНИЯ - КАДР 1: Спокойствие шерифа против ухмылки босса
+  // =========================================================================
+  Widget _buildGoodFrame1() {
+    return Expanded(
+      child: _buildAdvanced3DFrame(
+        hasHole: false,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned(bottom: 22, right: 10, child: Transform.scale(scale: 1.25, child: _buildThrone())),    
+            Positioned(bottom: 22, right: 95, child: _buildGoldTotem(38)),
+            Positioned(bottom: 22, left: 16, child: _buildCharacter('assets/images/bunnyhop.png', 56)),
+            Positioned(bottom: 12, right: 8, child: _buildDonMollusk(68)),
+
+            // Облачко слов Вани
+            Positioned(
+              top: 20, left: 6, width: 105,
+              child: CustomPaint(
+                painter: SpeechBubblePainter(tailXFactor: 0.25),
+                child: const Padding(
+                  padding: EdgeInsets.all(6.0),
+                  child: Text(
+                    "Творя власть на лугу птиц окончена, Моллюск. Отдай тотем гнева, освободи луг и мы закончим это.",
+                    style: TextStyle(fontSize: 7.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
+
+            // Ответ Дона Моллюска
+            Positioned(
+              top: 75, right: 6, width: 110,
+              child: CustomPaint(
+                painter: SpeechBubblePainter(tailXFactor: 0.8),
+                child: const Padding(
+                  padding: EdgeInsets.all(6.0),
+                  child: Text(
+                    "Ты слишком самоуверен для того, кто ползает по земле! Жалкая птица. Я следил за тобой с самого первого дня твоего путешествия, видел все твои битвы, я думал ты прибежишь сюда в ярости!",
+                    style: TextStyle(fontSize: 6.8, fontWeight: FontWeight.bold, color: Colors.black, height: 1.1),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // =========================================================================
+  // ХОРОШАЯ ЛИНИЯ - КАДР 2: Спокойное разоблачение планов босса
+  // =========================================================================
+  Widget _buildGoodFrame2() {
+    return Expanded(
+      child: _buildAdvanced3DFrame(
+        hasHole: false,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned(bottom: 22, left: 12, child: _buildCharacter('assets/images/bunnyhop.png', 48)),
+            Positioned(bottom: 12, right: 8, child: _buildDonMollusk(68)),
+
+            // Ваня парирует психологическое давление
+            Positioned(
+              top: 20, left: 4, width: 110,
+              child: CustomPaint(
+                painter: SpeechBubblePainter(tailXFactor: 0.25),
+                child: const Padding(
+                  padding: EdgeInsets.all(6.0),
+                  child: Text(
+                    "Я видел все твои знаки и тени. Но они меня не напугали, а лишь привели к твоей двери. Твой план провалился.",
+                    style: TextStyle(fontSize: 7.5, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
+
+            // Взрыв эмоций Дона Моллюска
+            Positioned(
+              top: 72, right: 4, width: 110,
+              child: CustomPaint(
+                painter: SpeechBubblePainter(tailXFactor: 0.75),
+                child: const Padding(
+                  padding: EdgeInsets.all(6.0),
+                  child: Text(
+                    "Ах ты наглая птица! Ты думаешь, раз выжил и разрушил все постройки, то сможешь одолеть меня?! Хрю-выкуси!",
+                    style: TextStyle(fontSize: 7.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.1),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGoodFrame3() {
+    return Expanded(
+      child: _buildAdvanced3DFrame(
+        hasHole: true, // ВКЛЮЧАЕТ ТЕМНО-СИНЕЕ НЕБО И ДЫРУ В КРЫШЕ
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned(bottom: 22, left: 12, child: _buildCharacter('assets/images/bunnyhop.png', 48)),
+            Positioned(bottom: 12, right: 8, child: _buildDonMollusk(64)),
+
+            // =================================================================
+            // НОВЫЙ БЛОК: АНИМИРОВАННЫЕ ОБЛОМКИ С ФИЗИКОЙ ОТСКОКА
+            // =================================================================
+            AnimatedBuilder(
+              animation: _fallAnimation,
+              builder: (context, child) {
+                // fallValue идет от 0.0 (наверху) до 1.0 (на полу) с эффектом отскока
+                final fallValue = _fallAnimation.value;
+                
+                return Stack(
+                  children: [
+                    // 1. Главная каменная глыба-баррикада
+                    Positioned(
+                      // Падает с высоты 150 вниз и останавливается на координате 20 (на полу)
+                      bottom: 150 - (fallValue * 130), 
+                      left: 62,
+                      child: Container(
+                        width: 25, height: 45,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF37474F),
+                          border: Border.all(color: Colors.black, width: 1.5),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ),
+                    
+                    // 2. Мелкий осколок 1 (летит с вращением и отлетает влево)
+                    Positioned(
+                      bottom: 140 - (fallValue * 120), 
+                      left: 68 - (fallValue * 12), // Смещается влево при падении
+                      child: Transform.rotate(
+                        angle: fallValue * pi * 4, // Реалистично крутится (нужен import 'dart:math'; - он у тебя есть)
+                        child: _buildFallingDebris(6, 10),
+                      ),
+                    ),
+
+                    // 3. Мелкий осколок 2 (летит с другой скоростью и отлетает вправо)
+                    Positioned(
+                      bottom: 160 - (fallValue * 140), 
+                      left: 74 + (fallValue * 18), // Смещается вправо
+                      child: Transform.rotate(
+                        angle: -fallValue * pi * 3, // Крутится в обратную сторону
+                        child: _buildFallingDebris(8, 8),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+
+            // Облачко слов Вани (остается без изменений)
+            Positioned(
+              top: 25, left: 6, right: 6,
+              child: CustomPaint(
+                painter: SpeechBubblePainter(tailXFactor: 0.25),
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    "Похоже твой замок разваливается сам, Моллюск! Ничего, сейчас я его доломаю и убью тебя!",
+                    style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
     // =========================================================================
   // ⚡ ЖИВАЯ ИНТЕРАКТИВНАЯ АРЕНА ХОРОШЕГО ПУТИ (КНОПКИ, СЕРДЦА, БОСС, ФИЗИКА)
   // =========================================================================
@@ -579,7 +762,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
     );
   }
 
-    Widget _buildDonMollusk(double size) {
+  Widget _buildDonMollusk(double size) {
     return SizedBox(
       width: size,
       height: size,
@@ -587,22 +770,22 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
         alignment: Alignment.center,
         clipBehavior: Clip.none,
         children: [
-          // 🐙 1. ЩУПАЛЬЦА СТАЛИ НА КАПЛЮ БOЛЬШЕ (size * 0.28) И ЗАЛЕЗАЮТ ПОД ЗЕЛЁHЫЙ КРУГ
+          // 🐙 1. ЩУПАЛЬЦА СТАЛИ НА КАПЛЮ БОЛЬШЕ (size * 0.28) И ЗАЛЕЗАЮТ ПОД ЗЕЛЁHЫЙ КРУГ
           Positioned(bottom: size * 0.24, left: size * 0.04, child: Transform.rotate(angle: -0.3, child: CustomPaint(size: Size(size * 0.28, size * 0.58), painter: _DetailedTentaclePainter(isLeft: true)))),
           Positioned(top: size * 0.06, left: size * 0.12, child: Transform.rotate(angle: -1.3, child: CustomPaint(size: Size(size * 0.25, size * 0.53), painter: _DetailedTentaclePainter(isLeft: true)))),
           Positioned(top: size * 0.06, right: size * 0.12, child: Transform.rotate(angle: 1.3, child: CustomPaint(size: Size(size * 0.25, size * 0.53), painter: _DetailedTentaclePainter(isLeft: false)))),
           Positioned(bottom: size * 0.24, right: size * 0.04, child: Transform.rotate(angle: 0.4, child: CustomPaint(size: Size(size * 0.28, size * 0.58), painter: _DetailedTentaclePainter(isLeft: false)))),
 
-          // 🐷 2. УШКИ СТАЛИ ПОДЛИННЕЕ (ОВАЛЫ) И ЗАЛЕЗАЮТ ПРЯМО НА ТЕЛО БОССА
+          // 🐷 2. ИСПРАВЛЕНО: УШКИ СТАЛИ ПОДЛИННЕЕ (ОВАЛЫ) И ЗАЛЕЗАЮТ ПРЯМО НА ТЕЛО БОССА
           Positioned(
             top: size * 0.10, left: size * 0.08, 
             child: Transform.rotate(
               angle: -0.2,
               child: Container(
-                width: size * 0.18, height: size * 0.26, 
+                width: size * 0.18, height: size * 0.26, // Сделали уши длинными вытянутыми овалами
                 decoration: BoxDecoration(
                   color: const Color(0xFF689F38),
-                  borderRadius: BorderRadius.circular(size * 0.09), 
+                  borderRadius: BorderRadius.circular(size * 0.09), // Скругление под длинный овал
                   border: Border.all(color: Colors.black, width: 1.8),
                 ),
                 child: Center(child: Container(width: size * 0.08, height: size * 0.14, decoration: BoxDecoration(color: const Color(0xFF558B2F), borderRadius: BorderRadius.circular(size * 0.05)))),
@@ -641,6 +824,8 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
             child: CustomPaint(size: Size(size * 0.34, size * 0.34), painter: _DetailedCrabClawPainter(isOpen: true)),
           ),
 
+          // ИСПРАВЛЕНО: Красное пятно крови и обрубок полностью УДАЛЕНЫ с тела Босса по ТЗ!
+
           // 🟢 5. ЦЕНТРАЛЬНОЕ ЗЕЛИКОВОЕ ТЕЛО БОССА (Ложится ПОВЕРХ всех залезших конечностей)
           Container(
             width: size * 0.70,
@@ -649,6 +834,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
               color: const Color(0xFF558B2F),
               shape: BoxShape.circle,
               border: Border.all(color: const Color(0xFF1B5E20), width: 2.2),
+              boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 4, offset: Offset(0, 2))],
             ),
             child: ClipOval(
               child: Image.asset(
@@ -661,7 +847,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
         ],
       ),
     );
-  }
+  }  
 
   Widget _buildCharacter(String assetPath, double size) {
     return Container(
