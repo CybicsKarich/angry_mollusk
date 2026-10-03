@@ -616,7 +616,11 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
             Center(
               child: Container(
                 padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(color: Colors.black90, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.orange, width: 2)),
+                decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.9), 
+            borderRadius: BorderRadius.circular(16), 
+            border: Border.all(color: Colors.orange, width: 2),
+          ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -1072,6 +1076,22 @@ class _EndingRoomBackgroundPainter extends CustomPainter {
   }
   @override
   bool shouldRepaint(covariant _EndingRoomBackgroundPainter oldDelegate) => true;
+}
+
+// ТОЧЕЧНО ВСТАВИТЬ В САМЫЙ КОНЕЦ ФАЙЛА ПОСЛЕ ВСЕХ КЛАССОВ И РИСОВАЛЬЩИКОВ:
+
+extension _Level6CanvasTriangleExt on Canvas {
+  void drawTriangle(Offset p1, Offset p2, Offset p3, Paint paint) {
+    final path = Path()
+      ..moveTo(p1.dx, p1.dy)
+      ..lineTo(p2.dx, p2.dy)
+      ..lineTo(p3.dx, p3.dy)
+      ..close();
+    drawPath(path, paint);
+    
+    // Контрастный чёрный контур на каждый зубчик для бритвенной чёткости
+    drawPath(path, Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 0.5);
+  }
 }
 
   
