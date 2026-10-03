@@ -7,9 +7,8 @@ class AudioManager {
   static final AudioPlayer _finalMenuPlayer = AudioPlayer();
   static final AudioPlayer _fxPlayer = AudioPlayer();
   static final AudioPlayer _rainPlayer = AudioPlayer();
-  // ТОЧЕЧНО В НАЧАЛО КЛАССА В LIB/AUDIO_MANAGER.DART:
   static DateTime? _lastMainSoundStartTime; 
-  static String _currentMainSound = ""; // 'drops', 'rage', 'boss_phase2', 'menu'
+  static String _currentMainSound = ""; // Теперь только 'drops', 'boss_phase2' или 'menu'
 
   static bool _canInterruptCurrentMainSound(String newSound) {
     if (_lastMainSoundStartTime == null || _currentMainSound == "") return true;
@@ -69,33 +68,31 @@ class AudioManager {
   // Возвращаем статус аудио-замка, чтобы другие методы могли его считывать
   static bool get isRageSoundPlaying => _isRageSoundPlaying;
 
-  // ТОЧЕЧНО ЗАМЕНИТЬ ИЛИ ДОБАВИТЬ МЕТОД ЯРОСТИ ВИАГРА-ТАЙМ:
-  static Future<void> playRage() async {
-    if (!_canInterruptCurrentMainSound('rage')) return;
-    try {
-      await _finalMenuPlayer.stop();
-      await _finalMenuPlayer.release();
-
-      await _finalMenuPlayer.setVolume(0.75);
-      await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
-      
-      // ИСПРАВЛЕНО: Теперь трек таблетки берется из папки audio/ по твоему ТЗ!
-      await _finalMenuPlayer.play(AssetSource('audio/rage_theme.mp3'));
-      
-      _lastMainSoundStartTime = DateTime.now();
-      _currentMainSound = "rage";
-    } catch (e) {
-      print("Ошибка запуска ярости таблетки: $e");
-    }
-  }
+    // ТОЧЕЧНО ЗАМЕНИТЬ МЕТОДЫ ЯРОСТИ В LIB/AUDIO_MANAGER.DART:
   
-
- static Future<void> stopRage() async {
-    if (_currentMainSound == "rage") {
-      await _finalMenuPlayer.stop();
-      _currentMainSound = "";
+  // Звук ярости таблетки виагры — играет ВТОРЫМ ПОТОКОМ как эффект!
+  static Future<void> playRage() async {
+    try {
+      await _fxPlayer.stop();
+      await _fxPlayer.setVolume(0.85); // Делаем ор ярости громким и сочным
+      
+      // ИСПРАВЛЕНО: Твой оригинальный файл ярости из папки audio/
+      await _fxPlayer.play(AssetSource('audio/bunnyhop_rage.mp3'));
+      print("Эффект ярости Шерифа 'bunnyhop_rage' запущен вторым потоком.");
+    } catch (e) {
+      print("Ошибка воспроизведения эффекта ярости: $e");
     }
   }
+
+  // Остановка ярости (например, когда Ваня нанёс удар боссу)
+  static Future<void> stopRage() async {
+    try {
+      await _fxPlayer.stop();
+    } catch (e) {
+      print("Ошибка остановки эффекта ярости: $e");
+    }
+  }
+
 
     // Звук 1: Бешеное кручение/замах щупальца или клешни босса (700-800мс)
   static Future<void> playBossWhip() async {
