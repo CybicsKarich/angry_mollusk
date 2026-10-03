@@ -94,12 +94,15 @@ class AudioManager {
   }
 
 
-    // Звук 1: Бешеное кручение/замах щупальца или клешни босса (700-800мс)
+      // ТОЧЕЧНО ДОБАВИТЬ В КЛАСС К ОСТАЛЬНЫМ ЭФФЕКТАМ ДЛЯ 6 УРОВНЯ:
+
+  // Звук 1: Бешеное кручение/замах щупальца или клешни босса в воздухе (700-800мс)
   static Future<void> playBossWhip() async {
     try {
-      await _fxPlayer.stop();
-      await _fxPlayer.setVolume(0.70);
+      await _fxPlayer.stop(); // Глушим прошлый эффект, чтобы не было каши
+      await _fxPlayer.setVolume(0.75); // Настраиваем сочную громкость замаха
       await _fxPlayer.play(AssetSource('audio/boss_whip.mp3'));
+      print("Эффект замаха босса запущен успешно.");
     } catch (e) {
       print("Ошибка воспроизведения звука замаха босса: $e");
     }
@@ -108,13 +111,15 @@ class AudioManager {
   // Звук 2: Сокрушительный удар щупальца по полу или клешни по верху (1 сек)
   static Future<void> playBossStrike() async {
     try {
-      await _fxPlayer.stop();
-      await _fxPlayer.setVolume(0.95);
+      await _fxPlayer.stop(); // Мгновенно сбрасываем канал под удар
+      await _fxPlayer.setVolume(1.0); // Удар Дона должен греметь на максимум!
       await _fxPlayer.play(AssetSource('audio/boss_strike.mp3'));
+      print("Эффект удара босса запущен успешно.");
     } catch (e) {
       print("Ошибка воспроизведения звука удара босса: $e");
     }
   }
+
 
 
   
@@ -179,41 +184,40 @@ static Future<void> playPaperRustle() async {
     }
   }
 
- static Future<void> startCastleDrops() async {
-    if (!_canInterruptCurrentMainSound('drops')) return;
+   // ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД ЗАПУСКА КАПЕЛЬ 6 УРОВНЯ В КЛАССЕ AudioManager:
+  static Future<void> startCastleDrops() async {
     try {
-      await _fxPlayer.stop();
+      // Начисто тушим дождь 5 уровня и звуковые эффекты эффектов
       await _rainPlayer.stop();
-      await _rainPlayer.release(); 
+      await _fxPlayer.stop();
+      
+      // Сбрасываем плеер фоновой музыки перед включением капель (БЕЗ .release()!)
       await _finalMenuPlayer.stop();
-      await _finalMenuPlayer.release();
 
+      // Усердная настройка под мистическую атмосферу логова Дона Моллюска
       await _finalMenuPlayer.setVolume(1.0); 
       await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
-      await _finalMenuPlayer.play(AssetSource('music/castle_drops.mp3'));
       
-      _lastMainSoundStartTime = DateTime.now();
-      _currentMainSound = "drops";
+      // Капли лежат там же, где и музыка — в папке music/
+      await _finalMenuPlayer.play(AssetSource('music/castle_drops.mp3')); 
+      print("Звук дождя потушен. Бронебойный эмбиент капель из папки music запущен.");
     } catch (e) {
       print("Ошибка при запуске капель замка: $e");
     }
   }
 
-  // Б) НОВЫЙ МЕТОД: ТЯЖЁЛАЯ МУЗЫКА БЕРСЕРКА (ВКЛЮЧАЕТСЯ НА СТРОГО 4 ХП БОССА)
+    // ТОЧЕЧНО ДОБАВИТЬ ДЛЯ ВТОРОЙ ФАЗЫ БОССА НА 4 ХП:
   static Future<void> startBossPhase2Music() async {
-    if (!_canInterruptCurrentMainSound('boss_phase2')) return;
     try {
+      // Останавливаем капли тронного зала
       await _finalMenuPlayer.stop();
-      await _finalMenuPlayer.release();
 
-      await _finalMenuPlayer.setVolume(0.90); 
+      // Выставляем боевые параметры
+      await _finalMenuPlayer.setVolume(0.90); // Музыка босса должна качать!
       await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
       
       // Название трека для второй фазы, лежит строго в music/
       await _finalMenuPlayer.play(AssetSource('music/boss_battle.mp3'));
-      
-      _lastMainSoundStartTime = DateTime.now();
-      _currentMainSound = "boss_phase2";
       print("ВТОРАЯ ФАЗА! Запущена динамичная музыка босса из папки music.");
     } catch (e) {
       print("Ошибка запуска боевой музыки фазы 2: $e");
