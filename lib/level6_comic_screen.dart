@@ -13,43 +13,165 @@ class Level6GoodRouteScreen extends StatefulWidget {
 
 class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with TickerProviderStateMixin {
   int _currentFrame = 1; // Текущий видимый кадр (1, 2 или 3)
+  bool _isGameplayActive = false; // Переключатель: комикс -> живая арена боссфайта
   late AnimationController _debrisController;
   late Animation<double> _fallAnimation;
+  
+  // =========================================================================
+  // 🎮 ПЕРЕМЕННЫЕ СОСТОЯНИЯ ТЕСТОВОГО ГЕЙМПЛЕЯ 6 УРОВНЯ
+  // =========================================================================
+  late final Ticker _gameLoopTicker;
+  
+  // Физика Шерифа
+  double _vanyaX = 0.15; // Позиция X (в процентах от ширины арены)
+  double _vanyaY = 0.73 - 0.04; // Позиция Y (высота на полу у рогатки)
+  double _vanyaVx = 0.0;
+  double _vanyaVy = 0.0;
+  bool _vanyaIsJumping = false;
+  int _vanyaHearts = 1; // Стартовое количество жизней по нашему уговору
+  
+  // Флаги зажатия экранных кнопок для левой и правой руки
+  bool _btnLeftPressed = false;
+  bool _btnRightPressed = false;
+  bool _btnJumpPressed = false;
+
+  // Окружение арены
+  final double _groundYPercent = 0.73;
+  bool _isBarricadeAlive = true; // Каменная глыба на полу с 1 ХП
+  
+  // Статичный гигантский Дон Моллюск (в 3-4 раза крупнее Шерифа)
+  final double _bossX = 0.72;
+  double _bossCurrentHp = 8.0; // 8 единиц здоровья
+  final double _bossMaxHp = 8.0;
 
   @override
   void initState() {
     super.initState();
-    // Настраиваем контроллер на 1.5 секунды для сочного падения и отскока
     _debrisController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500), 
     );
     
-    // Используем кривую bounceOut — она идеально имитирует гравитацию и физический отскок от пола!
     _fallAnimation = CurvedAnimation(
       parent: _debrisController,
       curve: Curves.bounceOut,
     );
+
+    // Главный движковый тикер игрового процесса (60 кадров в секунду)
+    _gameLoopTicker = createTicker((elapsed) {
+      if (_isGameplayActive && mounted) {
+        _updatePhysics(0.016); // Фиксированный шаг dt (~16 мс)
+      }
+    });
+    _gameLoopTicker.start();
+  }
+
+  // =========================================================================
+  // 📐 ДВИЖОК ОБСЛУЖИВАНИЯ ФИЗИКИ БЕГА, КОМБО-ПАРАБОЛЫ И ТЕСТОВЫХ УДАРОВ
+  // =========================================================================
+  void _updatePhysics(double dt) {
+    setState(() {
+      // 1. Горизонтальный бег Шерифа ногами по кнопкам
+      if (_btnLeftPressed) {
+        _vanyaVx = -0.32; // Умеренная скорость назад
+      } else if (_btnRightPressed) {
+        _vanyaVx = 0.32; // Умеренная скорость вперед
+      } else {
+        _vanyaVx = 0.0; // Мгновенный сброс скорости без зажатия
+      }
+
+      // Применяем горизонтальное смещение
+      _vanyaX += _vanyaVx * dt;
+
+      // 2. Вертикальная гравитация и одиночный/комбо прыжок
+      if (_vanyaIsJumping) {
+        _vanyaVy += 1.6 * dt; // Сила тяжести, тянущая птицу вниз
+        _vanyaY += _vanyaVy * dt;
+
+        // Фиксация приземления на каменную плитку пола
+        if (_vanyaY >= _groundYPercent - 0.04) {
+          _vanyaY = _groundYPercent - 0.04;
+          _vanyaVy = 0.0;
+          _vanyaIsJumping = false;
+        }
+      }
+
+      // Ограничение передвижения границами экрана смартфона
+      if (_vanyaX < 0.02) _vanyaX = 0.02;
+      if (_vanyaX > 0.94) _vanyaX = 0.94;
+
+      // 3. Тестирование осязаемости каменной баррикады с 1 ХП
+      if (_isBarricadeAlive) {
+        // Координаты упавшего блока соответствуют третьем кадру комикса
+        if (_vanyaX >= 0.58 && _vanyaX <= 0.68 && _vanyaY >= _groundYPercent - 0.12) {
+          // Если Ваня падает на неё сверху — он стоит на преграде ногами
+          if (_vanyaVy > 0 && _vanyaY < _groundYPercent - 0.08) {
+            _vanyaY = _groundYPercent - 0.12;
+            _vanyaVy = 0.0;
+            _vanyaIsJumping = false;
+          } else {
+            // Иначе блок упирается и не дает Ване пробежать сквозь себя
+            _vanyaX = _vanyaVx > 0 ? 0.57 : 0.69;
+          }
+        }
+      }
+
+      // 4. ТЕСТОВОЕ СТОЛКНОВЕНИЕ С ГИГАНТСКИМ ДОНОМ МОЛЛЮСКОМ
+      double dx = _vanyaX - _bossX;
+      double dy = _vanyaY - (_groundYPercent - 0.12);
+      double distance = sqrt(dx * dx + dy * dy);
+
+      // Если Шериф круглым хитбоксом коснулся макушки или тела босса
+      if (distance < 0.09 && _bossCurrentHp > 0) {
+        // Проверяем: это прыжок сверху на голову?
+        if (_vanyaVy > 0 && _vanyaY < _groundYPercent - 0.04) {
+          _bossCurrentHp -= 1.0; // Отнимаем здоровье
+          AudioManager.playPigHit(); // Включаем твой каноничный ор Вани при попадании по свинье!
+          
+          // ЭПИЧНЫЙ ДИНАМИЧЕСКИЙ ОТСКОК НАЗАД (предотвращает баги и застревание)
+          _vanyaVx = -0.45;
+          _vanyaVy = -0.8;
+          _vanyaIsJumping = true;
+          _vanyaX -= 0.12; // Отбрасываем Шерифа назад влево
+        } else {
+          // Если коснулись сбоку или снизу — Ваня теряет жизнь по уговору
+          if (_vanyaHearts > 0) {
+            _vanyaHearts--;
+            AudioManager.playMiss();
+            // Возврат на спавн рогатки
+            _vanyaX = 0.15;
+            _vanyaY = _groundYPercent - 0.04;
+          }
+        }
+      }
+    });
   }
 
   @override
   void dispose() {
-    _debrisController.dispose(); // Очищаем память
+    _gameLoopTicker.dispose();
+    _debrisController.dispose();
     super.dispose();
   }
   
-    @override
+  @override
   Widget build(BuildContext context) {
+    // ЕCЛИ НАЖАТA КHОПКА ПОГНАЛИ — ВКЛЮЧАЕМ ЖИВУЮ БОЕВУЮ АРЕНУ
+    if (_isGameplayActive) {
+      return _buildLiveGameplayArena();
+    }
+
+    // ИНАЧЕ — ИГРОК ПРОСМАТРИВАЕТ ТРИ КАДРА ПРЕДЫСТОРИИ
     return Scaffold(
       backgroundColor: const Color(0xFF040407), 
       body: SafeArea(
         child: Column(
           children: [
-            const SizedBox(height: 4), // Ужали верхний отступ с 12 до 4
+            const SizedBox(height: 4), 
             const Text(
               "ГЛАВА VI: ЛОГОВО ДОНА МОЛЛЮСКА",
               style: TextStyle(
-                fontSize: 18, // Сократили размер текста для экономии места
+                fontSize: 18, 
                 fontWeight: FontWeight.w900,
                 color: Color(0xFF455A64),
                 letterSpacing: 2.0,
@@ -72,7 +194,6 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
               ),
             ),
 
-            // ИСПРАВЛЕHО ДЛЯ ХОРОШЕЙ ЛИHИИ: Убрали Overflow полосу снизу намертво!
             Padding(
               padding: const EdgeInsets.only(bottom: 4.0, top: 2.0),
               child: _buildNavigationButton(),
@@ -83,235 +204,310 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
     );
   }
 
-
+    // =========================================================================
+  // ⚡ ЖИВАЯ ИНТЕРАКТИВНАЯ АРЕНА ХОРОШЕГО ПУТИ (КНОПКИ, СЕРДЦА, БОСС, ФИЗИКА)
   // =========================================================================
-  // ХОРОШАЯ ЛИНИЯ - КАДР 1: Спокойствие шерифа против ухмылки босса
-  // =========================================================================
-  Widget _buildGoodFrame1() {
-    return Expanded(
-      child: _buildAdvanced3DFrame(
-        hasHole: false,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Positioned(bottom: 22, right: 10, child: Transform.scale(scale: 1.25, child: _buildThrone())),    
-            Positioned(bottom: 22, right: 95, child: _buildGoldTotem(38)),
-            Positioned(bottom: 22, left: 16, child: _buildCharacter('assets/images/bunnyhop.png', 56)),
-            Positioned(bottom: 12, right: 8, child: _buildDonMollusk(68)),
+  Widget _buildLiveGameplayArena() {
+    final size = MediaQuery.of(context).size;
 
-            // Облачко слов Вани
-            Positioned(
-              top: 20, left: 6, width: 105,
-              child: CustomPaint(
-                painter: SpeechBubblePainter(tailXFactor: 0.25),
-                child: const Padding(
-                  padding: EdgeInsets.all(6.0),
-                  child: Text(
-                    "Творя власть на лугу птиц окончена, Моллюск. Отдай тотем гнева, освободи луг и мы закончим это.",
-                    style: TextStyle(fontSize: 7.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-            ),
+    return Scaffold(
+      backgroundColor: const Color(0xFF020204),
+      body: Stack(
+        children: [
+          // 🏛️ А) ФОН ТРОННОГО ЗАЛА В ОБРАТНОЙ ПЕРСПЕКТИВЕ (БЕЗ ТРОНА И ТОТЕМA)
+          Positioned.fill(
+            child: CustomPaint(
+              painter: _EndingRoomBackgroundPainter(hasHole: true, showLightning: false),
+              child: Stack(
+                children: [
+                  Positioned(top: 0, left: 0, right: 0, child: CustomPaint(size: const Size(double.infinity, 35), painter: _CeilingPainter(drawHole: true))),
+                  Positioned(bottom: 0, left: 0, right: 0, child: CustomPaint(size: const Size(double.infinity, 24), painter: _FloorTilesPainter())),
 
-            // Ответ Дона Моллюска
-            Positioned(
-              top: 75, right: 6, width: 110,
-              child: CustomPaint(
-                painter: SpeechBubblePainter(tailXFactor: 0.8),
-                child: const Padding(
-                  padding: EdgeInsets.all(6.0),
-                  child: Text(
-                    "Ты слишком самоуверен для того, кто ползает по земле! Жалкая птица. Я следил за тобой с самого первого дня твоего путешествия, видел все твои битвы, я думал ты прибежишь сюда в ярости!",
-                    style: TextStyle(fontSize: 6.8, fontWeight: FontWeight.bold, color: Colors.black, height: 1.1),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // =========================================================================
-  // ХОРОШАЯ ЛИНИЯ - КАДР 2: Спокойное разоблачение планов босса
-  // =========================================================================
-  Widget _buildGoodFrame2() {
-    return Expanded(
-      child: _buildAdvanced3DFrame(
-        hasHole: false,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Positioned(bottom: 22, left: 12, child: _buildCharacter('assets/images/bunnyhop.png', 48)),
-            Positioned(bottom: 12, right: 8, child: _buildDonMollusk(68)),
-
-            // Ваня парирует психологическое давление
-            Positioned(
-              top: 20, left: 4, width: 110,
-              child: CustomPaint(
-                painter: SpeechBubblePainter(tailXFactor: 0.25),
-                child: const Padding(
-                  padding: EdgeInsets.all(6.0),
-                  child: Text(
-                    "Я видел все твои знаки и тени. Но они меня не напугали, а лишь привели к твоей двери. Твой план провалился.",
-                    style: TextStyle(fontSize: 7.5, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-            ),
-
-            // Взрыв эмоций Дона Моллюска
-            Positioned(
-              top: 72, right: 4, width: 110,
-              child: CustomPaint(
-                painter: SpeechBubblePainter(tailXFactor: 0.75),
-                child: const Padding(
-                  padding: EdgeInsets.all(6.0),
-                  child: Text(
-                    "Ах ты наглая птица! Ты думаешь, раз выжил и разрушил все постройки, то сможешь одолеть меня?! Хрю-выкуси!",
-                    style: TextStyle(fontSize: 7.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.1),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGoodFrame3() {
-    return Expanded(
-      child: _buildAdvanced3DFrame(
-        hasHole: true, // ВКЛЮЧАЕТ ТЕМНО-СИНЕЕ НЕБО И ДЫРУ В КРЫШЕ
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Positioned(bottom: 22, left: 12, child: _buildCharacter('assets/images/bunnyhop.png', 48)),
-            Positioned(bottom: 12, right: 8, child: _buildDonMollusk(64)),
-
-            // =================================================================
-            // НОВЫЙ БЛОК: АНИМИРОВАННЫЕ ОБЛОМКИ С ФИЗИКОЙ ОТСКОКА
-            // =================================================================
-            AnimatedBuilder(
-              animation: _fallAnimation,
-              builder: (context, child) {
-                // fallValue идет от 0.0 (наверху) до 1.0 (на полу) с эффектом отскока
-                final fallValue = _fallAnimation.value;
-                
-                return Stack(
-                  children: [
-                    // 1. Главная каменная глыба-баррикада
+                  // 🪨 УПАВШАЯ ЧАСТЬ КРЫШИ (КАМЕННАЯ БАРРИКАДА ИЗ КОМИКСА С 1 ХП)
+                  if (_isBarricadeAlive)
                     Positioned(
-                      // Падает с высоты 150 вниз и останавливается на координате 20 (на полу)
-                      bottom: 150 - (fallValue * 130), 
-                      left: 62,
-                      child: Container(
-                        width: 25, height: 45,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF37474F),
-                          border: Border.all(color: Colors.black, width: 1.5),
-                          borderRadius: BorderRadius.circular(4),
+                      bottom: 24, 
+                      left: size.width * 0.62,
+                      child: GestureDetector(
+                        onTap: () {
+                          // Тестовый клик по баррикаде разламывает её со звуком крушения камня
+                          setState(() => _isBarricadeAlive = false);
+                          AudioManager.playBlockBreak(true);
+                        },
+                        child: Container(
+                          width: size.width * 0.04, 
+                          height: size.height * 0.22,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF37474F),
+                            border: Border.all(color: Colors.black, width: 2.0),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
                         ),
                       ),
                     ),
-                    
-                    // 2. Мелкий осколок 1 (летит с вращением и отлетает влево)
+
+                  // 🐷 ГИГАНТСКИЙ ДОН МОЛЛЮСК (В 3-4 РАЗА БОЛЬШЕ ОБЫЧНОГО, МИШЕНЬ ДЛЯ ТЕСТОВ)
+                  if (_bossCurrentHp > 0)
                     Positioned(
-                      bottom: 140 - (fallValue * 120), 
-                      left: 68 - (fallValue * 12), // Смещается влево при падении
-                      child: Transform.rotate(
-                        angle: fallValue * pi * 4, // Реалистично крутится (нужен import 'dart:math'; - он у тебя есть)
-                        child: _buildFallingDebris(6, 10),
+                      bottom: 22, 
+                      left: size.width * _bossX,
+                      child: Transform.scale(
+                        scale: 2.8, // Вырос в 3 раза по сравнению с комиксами!
+                        child: _buildDonMollusk(52),
                       ),
                     ),
 
-                    // 3. Мелкий осколок 2 (летит с другой скоростью и отлетает вправо)
-                    Positioned(
-                      bottom: 160 - (fallValue * 140), 
-                      left: 74 + (fallValue * 18), // Смещается вправо
-                      child: Transform.rotate(
-                        angle: -fallValue * pi * 3, // Крутится в обратную сторону
-                        child: _buildFallingDebris(8, 8),
+                  // 🔴 КРУГЛЫЙ ШЕРИФ С НАШЕЙ УПРАВЛЯЕМОЙ ФИЗИКОЙ
+                  Positioned(
+                    left: _vanyaX * size.width,
+                    top: _vanyaY * size.height,
+                    child: _buildCharacter('assets/images/bunnyhop.png', 46),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // 📜 Б) ВЕРХНЯЯ ПАНЕЛЬ: КНОПКА ПАУЗЫ, СЕРДЦА ЖИЗНЕЙ И КЛЁШНЫЙ HP-БАР БОССА
+          Positioned(
+            top: 14, left: 16, right: 16,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Пауза и Сердечки жизней под ней в левом верхнем углу
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    IconButton(
+                      style: IconButton.styleFrom(backgroundColor: Colors.black45, padding: const EdgeInsets.all(6)),
+                      icon: const Icon(Icons.pause_rounded, color: Colors.white, size: 22),
+                      onPressed: () {
+                        // Выход обратно в меню карточек
+                        AudioManager.stopLevelAudioAndPlayMenu();
+                        Navigator.pop(context);
+                      },
+                    ),
+                    const SizedBox(height: 6),
+                    // Ряд маленьких сердечек под паузой по твоему ТЗ
+                    Row(
+                      children: List.generate(
+                        _vanyaHearts > 0 ? _vanyaHearts : 1,
+                        (index) => Padding(
+                          padding: const EdgeInsets.only(right: 3.0),
+                          child: Icon(
+                            Icons.favorite_rounded,
+                            color: _vanyaHearts > 0 ? const Color(0xFFE53935) : Colors.grey,
+                            size: 18,
+                          ),
+                        ),
                       ),
                     ),
                   ],
-                );
-              },
-            ),
+                ),
+                
+                const Spacer(),
 
-            // Облачко слов Вани (остается без изменений)
-            Positioned(
-              top: 25, left: 6, right: 6,
-              child: CustomPaint(
-                painter: SpeechBubblePainter(tailXFactor: 0.25),
-                child: const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text(
-                    "Похоже твой замок разваливается сам, Моллюск! Ничего, сейчас я его доломаю и убью тебя!",
-                    style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
-                    textAlign: TextAlign.center,
+                // Кислотно-зелёный ХП-бар Дона Моллюска (8 ХП) в векторных клешнях
+                if (_bossCurrentHp > 0)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Левая векторная клешня зажима шкалы
+                      CustomPaint(size: const Size(20, 20), painter: _DetailedCrabClawPainter(isOpen: true)),
+                      const SizedBox(width: 4),
+                      // Сама кислотно-зелёная полоска здоровья босса
+                      Container(
+                        width: 140, height: 14,
+                        decoration: BoxDecoration(
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: const Color(0xFF1B5E20), width: 1.5),
+                        ),
+                        child: Stack(
+                          children: [
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 150),
+                              width: 140 * (_bossCurrentHp / _bossMaxHp),
+                              color: const Color(0xFF00E676), // Кислотно-зеленый неон
+                            ),
+                            Center(
+                              child: Text(
+                                "${_bossCurrentHp.toInt()} / 8 HP",
+                                style: const TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      // Правая векторная клешня зажима шкалы
+                      CustomPaint(size: const Size(20, 20), painter: _DetailedCrabClawPainter(isOpen: false)),
+                    ],
                   ),
+              ],
+            ),
+          ),
+
+          // 🕹️ В) ИНТЕРФЕЙС УПРАВЛЕНИЯ ПО НАШЕМУ УГОВОРУ
+          // Левая рука: Две полупрозрачные серые стрелки движения в нижнем левом углу
+          Positioned(
+            bottom: 16, left: 20,
+            child: Row(
+              children: [
+                // Стрелка НАЗАД (Левее)
+                GestureDetector(
+                  onTapDown: (_) => setState(() => _btnLeftPressed = true),
+                  onTapUp: (_) => setState(() => _btnLeftPressed = false),
+                  onTapCancel: () => setState(() => _btnLeftPressed = false),
+                  child: Container(
+                    width: 50, height: 50,
+                    decoration: BoxDecoration(
+                      color: _btnLeftPressed ? const Color(0xAAFF1744) : Colors.white12,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white60, width: 1.5),
+                    ),
+                    child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 22),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                // Стрелка ВПЕРЁД (Правее)
+                GestureDetector(
+                  onTapDown: (_) => setState(() => _btnRightPressed = true),
+                  onTapUp: (_) => setState(() => _btnRightPressed = false),
+                  onTapCancel: () => setState(() => _btnRightPressed = false),
+                  child: Container(
+                    width: 50, height: 50,
+                    decoration: BoxDecoration(
+                      color: _btnRightPressed ? const Color(0xAAFF1744) : Colors.white12,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white60, width: 1.5),
+                    ),
+                    child: const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 22),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Правая рука: Крупная полупрозрачная серая кнопка прыжка в нижнем правом углу
+          Positioned(
+            bottom: 16, right: 24,
+            child: GestureDetector(
+                            onTapDown: (_) {
+                if (!_vanyaIsJumping) {
+                  setState(() {
+                    _btnJumpPressed = true;
+                    _vanyaIsJumping = true;
+                    
+                    // УМНАЯ СВЯЗКА КНОПОК ПО УГОВОРУ:
+                    // Если при прыжке зажата стрелка ВПЕРЁД — игра швыряет Ваню по косой комбо-параболе!
+                    if (_btnRightPressed) {
+                      _vanyaVy = -11.5; 
+                    } else if (_btnLeftPressed) {
+                      _vanyaVy = -11.5;
+                      _vanyaVx = -0.35;
+                    } else {
+                      // Обычный прыжок строго вертикально вверх
+                      _vanyaVy = -10.0;
+                    }
+                  });
+                }
+              },
+              onTapUp: (_) => setState(() => _btnJumpPressed = false),
+              onTapCancel: () => setState(() => _btnJumpPressed = false),
+              child: Container(
+                width: 58, height: 58,
+                decoration: BoxDecoration(
+                  color: _btnJumpPressed ? const Color(0xAAFF1744) : Colors.white12,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white60, width: 1.8),
+                ),
+                child: const Icon(Icons.arrow_upward_rounded, color: Colors.white, size: 26),
+              ),
+            ),
+          ),
+
+          // Экран триумфа, если тестовый босс полностью повержен
+          if (_bossCurrentHp <= 0)
+            Center(
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(color: Colors.black90, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.orange, width: 2)),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text("ТЫ УБИЛ БОССА!", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.amber)),
+                    const SizedBox(height: 12),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                      onPressed: () {
+                        AudioManager.stopLevelAudioAndPlayMenu();
+                        Navigator.pop(context);
+                      },
+                      child: const Text("В МЕНЮ УРОВНЕЙ", style: TextStyle(color: Colors.white)),
+                    ),
+                  ],
                 ),
               ),
             ),
+        ],
+      ),
+    );
+  }
+
+  // =========================================================================
+  // РАЗБЛОКИРОВАННАЯ КНОПКА НАВИГАЦИИ С КОРОТКОЙ НАДПИСЬЮ «КОНЕЦ»
+  // =========================================================================
+  Widget _buildNavigationButton() {
+    return Container(
+      width: double.infinity,
+      constraints: const BoxConstraints(maxWidth: 240),
+      height: 38, 
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          backgroundColor: const Color(0xFF37474F), 
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        onPressed: () {
+          if (_currentFrame < 3) {
+            setState(() => _currentFrame++);
+            
+            if (_currentFrame == 3) {
+              AudioManager.playCastleCollapse();
+              _debrisController.forward(from: 0.0);
+            }
+          } else {
+            // Кнопка полностью РАЗБЛОКИРОВАНА и запускает живой тест геймплея арены!
+            AudioManager.startCastleDrops(); 
+            setState(() {
+              _isGameplayActive = true;
+            });
+          }
+        },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center, 
+          children: [
+            Expanded(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  _currentFrame == 3 ? "КОНЕЦ" : "ДАЛЬШЕ", 
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ), 
+            const SizedBox(width: 6), 
+            Icon(_currentFrame == 3 ? Icons.play_circle_filled_rounded : Icons.arrow_forward_ios_rounded, size: 14, color: Colors.white),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildNavigationButton() {
-  return Container(
-    width: double.infinity,
-    constraints: const BoxConstraints(maxWidth: 240),
-    height: 38, // Уменьшено с 46 до 38 для полного исключения overflow
-    child: ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        backgroundColor: _currentFrame == 3 ? Colors.grey.shade700 : const Color(0xFF37474F), 
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-      onPressed: () {
-        if (_currentFrame < 3) {
-          setState(() => _currentFrame++);
-          
-          if (_currentFrame == 3) {
-            AudioManager.playCastleCollapse();
-            _debrisController.forward(from: 0.0);
-          }
-        } else {
-          print("Кнопка 'ПОГНАЛИ!' заблокирована. Проектируем Action-битву.");
-        }
-      },
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center, 
-        children: [
-          Expanded(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                _currentFrame == 3 ? "ПОГНАЛИ! (ЗАБЛОКИРОВАНО)" : "ДАЛЬШЕ", 
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ), 
-          const SizedBox(width: 6), 
-          Icon(_currentFrame == 3 ? Icons.lock_rounded : Icons.arrow_forward_ios_rounded, size: 14, color: Colors.white),
-        ],
-      ),
-    ),
-  );
-}
-
-    Widget _buildAdvanced3DFrame({required Widget child, required bool hasHole}) {
+  Widget _buildAdvanced3DFrame({required Widget child, required bool hasHole}) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
@@ -322,7 +518,6 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
         borderRadius: BorderRadius.circular(11),
         child: Stack(
           children: [
-            // Гранитный фон стен тронного зала
             Positioned.fill(
               child: Container(
                 decoration: const BoxDecoration(
@@ -334,32 +529,13 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                 ),
               ),
             ),
-            
-            // Если крыша обвалилась — рисуем тёмно-синее ночное небо в проёме
             if (hasHole)
               Positioned(
                 top: 0, left: 45, right: 45, height: 18,
                 child: Container(color: const Color(0xFF0D1B2A)), 
               ),
-
-            // Потолок с поддержкой отрисовки дыры
-            Positioned(
-              top: 0, left: 0, right: 0, 
-              child: CustomPaint(
-                size: const Size(double.infinity, 35), 
-                painter: _CeilingPainter(drawHole: hasHole),
-              ),
-            ),
-
-            // 3D-плитка пола
-            Positioned(
-              bottom: 0, left: 0, right: 0, 
-              child: CustomPaint(
-                size: const Size(double.infinity, 24), 
-                painter: _FloorTilesPainter(),
-              ),
-            ),
-            
+            Positioned(top: 0, left: 0, right: 0, child: CustomPaint(size: const Size(double.infinity, 35), painter: _CeilingPainter(drawHole: hasHole))),
+            Positioned(bottom: 0, left: 0, right: 0, child: CustomPaint(size: const Size(double.infinity, 24), painter: _FloorTilesPainter())),
             child,
           ],
         ),
@@ -370,10 +546,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
   Widget _buildFallingDebris(double w, double h) {
     return Container(
       width: w, height: h,
-      decoration: BoxDecoration(
-        color: const Color(0xFF455A64),
-        border: Border.all(color: Colors.black, width: 1),
-      ),
+      decoration: BoxDecoration(color: const Color(0xFF455A64), border: Border.all(color: Colors.black, width: 1)),
     );
   }
 
@@ -382,17 +555,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
       width: 40, height: 58,
       child: Stack(
         children: [
-          Positioned(
-            bottom: 4, left: 4, right: 4, 
-            child: Container(
-              height: 54, 
-              decoration: BoxDecoration(
-                color: const Color(0xFF3E2723), 
-                borderRadius: const BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)), 
-                border: Border.all(color: const Color(0xFF1A0C00), width: 1.8),
-              ),
-            ),
-          ),
+          Positioned(bottom: 4, left: 4, right: 4, child: Container(height: 54, decoration: BoxDecoration(color: const Color(0xFF3E2723), borderRadius: const BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)), border: Border.all(color: const Color(0xFF1A0C00), width: 1.8)))),
           Positioned(bottom: 4, left: 0, child: Container(width: 5, height: 26, decoration: BoxDecoration(color: const Color(0xFF4E342E), border: Border.all(color: Colors.black, width: 0.8)))),
           Positioned(bottom: 4, right: 0, child: Container(width: 5, height: 26, decoration: BoxDecoration(color: const Color(0xFF4E342E), border: Border.all(color: Colors.black, width: 0.8)))),
           Positioned(bottom: 6, left: 3, right: 3, child: Container(height: 14, color: const Color(0xFF4E342E))),
@@ -410,23 +573,13 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
         children: [
           Positioned(bottom: 0, child: Container(width: size * 0.75, height: size * 0.16, decoration: BoxDecoration(color: const Color(0xFF111116), borderRadius: BorderRadius.circular(2), border: Border.all(color: Colors.black, width: 1.5)))),
           Positioned(bottom: size * 0.14, child: Container(width: size * 0.14, height: size * 0.32, decoration: const BoxDecoration(gradient: LinearGradient(colors: [Color(0xFFE5A632), Color(0xFFFFD54F), Color(0xFFB57C1E)])))),
-          Positioned(
-            bottom: size * 0.38, 
-            child: SizedBox(
-              width: size * 1.05, height: size * 0.65,
-              child: CustomPaint(painter: _WingsPainter()),
-            ),
-          ),
+          Positioned(bottom: size * 0.38, child: SizedBox(width: size * 1.05, height: size * 0.65, child: CustomPaint(painter: _WingsPainter()))),
         ],
       ),
     );
   }
 
-  
-  // =========================================================================
-  // ИСПРАВЛЕHО: АНАТОМИЧЕСКАЯ СБОРКА БОССА ВПЛОТHУЮ К ТЕЛУ И БЕЗ КРАСHОГО ПЯТHА
-  // =========================================================================
-  Widget _buildDonMollusk(double size) {
+    Widget _buildDonMollusk(double size) {
     return SizedBox(
       width: size,
       height: size,
@@ -434,22 +587,22 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
         alignment: Alignment.center,
         clipBehavior: Clip.none,
         children: [
-          // 🐙 1. ЩУПАЛЬЦА СТАЛИ НА КАПЛЮ БОЛЬШЕ (size * 0.28) И ЗАЛЕЗАЮТ ПОД ЗЕЛЁHЫЙ КРУГ
+          // 🐙 1. ЩУПАЛЬЦА СТАЛИ НА КАПЛЮ БOЛЬШЕ (size * 0.28) И ЗАЛЕЗАЮТ ПОД ЗЕЛЁHЫЙ КРУГ
           Positioned(bottom: size * 0.24, left: size * 0.04, child: Transform.rotate(angle: -0.3, child: CustomPaint(size: Size(size * 0.28, size * 0.58), painter: _DetailedTentaclePainter(isLeft: true)))),
           Positioned(top: size * 0.06, left: size * 0.12, child: Transform.rotate(angle: -1.3, child: CustomPaint(size: Size(size * 0.25, size * 0.53), painter: _DetailedTentaclePainter(isLeft: true)))),
           Positioned(top: size * 0.06, right: size * 0.12, child: Transform.rotate(angle: 1.3, child: CustomPaint(size: Size(size * 0.25, size * 0.53), painter: _DetailedTentaclePainter(isLeft: false)))),
           Positioned(bottom: size * 0.24, right: size * 0.04, child: Transform.rotate(angle: 0.4, child: CustomPaint(size: Size(size * 0.28, size * 0.58), painter: _DetailedTentaclePainter(isLeft: false)))),
 
-          // 🐷 2. ИСПРАВЛЕНО: УШКИ СТАЛИ ПОДЛИННЕЕ (ОВАЛЫ) И ЗАЛЕЗАЮТ ПРЯМО НА ТЕЛО БОССА
+          // 🐷 2. УШКИ СТАЛИ ПОДЛИННЕЕ (ОВАЛЫ) И ЗАЛЕЗАЮТ ПРЯМО НА ТЕЛО БОССА
           Positioned(
             top: size * 0.10, left: size * 0.08, 
             child: Transform.rotate(
               angle: -0.2,
               child: Container(
-                width: size * 0.18, height: size * 0.26, // Сделали уши длинными вытянутыми овалами
+                width: size * 0.18, height: size * 0.26, 
                 decoration: BoxDecoration(
                   color: const Color(0xFF689F38),
-                  borderRadius: BorderRadius.circular(size * 0.09), // Скругление под длинный овал
+                  borderRadius: BorderRadius.circular(size * 0.09), 
                   border: Border.all(color: Colors.black, width: 1.8),
                 ),
                 child: Center(child: Container(width: size * 0.08, height: size * 0.14, decoration: BoxDecoration(color: const Color(0xFF558B2F), borderRadius: BorderRadius.circular(size * 0.05)))),
@@ -488,8 +641,6 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
             child: CustomPaint(size: Size(size * 0.34, size * 0.34), painter: _DetailedCrabClawPainter(isOpen: true)),
           ),
 
-          // ИСПРАВЛЕНО: Красное пятно крови и обрубок полностью УДАЛЕНЫ с тела Босса по ТЗ!
-
           // 🟢 5. ЦЕНТРАЛЬНОЕ ЗЕЛИКОВОЕ ТЕЛО БОССА (Ложится ПОВЕРХ всех залезших конечностей)
           Container(
             width: size * 0.70,
@@ -498,7 +649,6 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
               color: const Color(0xFF558B2F),
               shape: BoxShape.circle,
               border: Border.all(color: const Color(0xFF1B5E20), width: 2.2),
-              boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 4, offset: Offset(0, 2))],
             ),
             child: ClipOval(
               child: Image.asset(
@@ -520,9 +670,11 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
       child: ClipOval(child: Image.asset(assetPath, fit: BoxFit.cover)),
     );
   }
-}
+} // <--- ЗАКРЫТИЕ КЛАССА СОСТОЯНИЯ ЭКРАНА СТРАНИЦЫ _Level6GoodRouteScreenState
 
-// ЗАМЕНИТЬ ТОЧЕЧНО В LIB/LEVEL6_COMIC_SCREEN.DART:
+// =========================================================================
+// ВЕКТОРНЫЕ КЛАССЫ ХУДОЖНИКОВ (СТРУКТУРА ОКРУЖЕНИЯ, БОССА И СВОДОВ ЗАЛА)
+// =========================================================================
 class _CeilingPainter extends CustomPainter {
   final bool drawHole;
   _CeilingPainter({required this.drawHole});
@@ -533,14 +685,11 @@ class _CeilingPainter extends CustomPainter {
     final beamPaint = Paint()..color = const Color(0xFF09090D)..style = PaintingStyle.stroke..strokeWidth = 2.2;
     
     if (!drawHole) {
-      // Сплошной потолок: линии сходятся НА ПЕРЕДНЕМ плане и расширяются ВДАЛЬ
       canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), ceilPaint);
       for (int i = 0; i <= 6; i++) {
-        // ОБРАТНАЯ ПЕРСПЕКТИВА: Старт из сжатого центра на переднем плане, уход в широкие края вдаль
         canvas.drawLine(Offset(size.width * 0.5, 0), Offset(size.width * (i / 6), size.height), beamPaint);
       }
     } else {
-      // КРЫША ОБВАЛИЛАСЬ: Пролом расширяется вглубь, левый и правый уцелевшие куски сужаются к переду
       final leftPath = Path()
         ..moveTo(0, 0)..lineTo(size.width * 0.42, 0)
         ..lineTo(size.width * 0.35, size.height)..lineTo(0, size.height)..close();
@@ -559,8 +708,6 @@ class _CeilingPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
-
-// ЗАМЕНИТЬ ТОЧЕЧНО В LIB/LEVEL6_COMIC_SCREEN.DART:
 class _FloorTilesPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -568,12 +715,10 @@ class _FloorTilesPainter extends CustomPainter {
     final linePaint = Paint()..color = const Color(0xFF111114)..style = PaintingStyle.stroke..strokeWidth = 1.6;
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), tilePaint);
     
-    // Горизонтальные плиты: сужаются (уплотняются) к нижнему краю экрана
     for (int i = 0; i < 5; i++) {
       double hY = size.height * (0.8 - (i * i * 0.8 / 16));
       canvas.drawLine(Offset(0, hY), Offset(size.width, hY), linePaint);
     }
-    // Вертикальные швы: ОБРАТНЫЙ ВЕЕР (расширяются от низа к верху)
     for (int i = 0; i <= 12; i++) {
       canvas.drawLine(Offset(size.width * (i / 12), 0), Offset(size.width * (0.3 + (i * 0.4 / 12)), size.height), linePaint);
     }
@@ -581,7 +726,6 @@ class _FloorTilesPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-
 
 class _WingsPainter extends CustomPainter {
   @override
@@ -596,7 +740,6 @@ class _WingsPainter extends CustomPainter {
     path.close();
     canvas.drawPath(path, goldPaint);
   }
-
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
@@ -610,28 +753,22 @@ class SpeechBubblePainter extends CustomPainter {
     final paint = Paint()..color = Colors.white..style = PaintingStyle.fill;
     final borderPaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.8;
     final path = Path()..addRRect(RRect.fromRectAndRadius(Rect.fromLTWH(0, 0, size.width, size.height), const Radius.circular(12)));
-    
     double startX = size.width * tailXFactor;
     path.moveTo(startX - 6, size.height);
     path.lineTo(startX, size.height + 10); 
     path.lineTo(startX + 6, size.height);
-    
     canvas.drawPath(path, paint);
     canvas.drawPath(path, borderPaint);
   }
-
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// =========================================================================
-// КЛАСС 1: ВЫСОКОДЕТАЛИЗИРОВАННЫЙ РИСОВАЛЬЩИК ЩУПАЛЬЦА ОСЬМИНОГА С ПРИСОСКАМИ
-// =========================================================================
 class _DetailedTentaclePainter extends CustomPainter {
   final bool isLeft;
   _DetailedTentaclePainter({required this.isLeft});
 
-    @override
+  @override
   void paint(Canvas canvas, Size size) {
     final tentaclePaint = Paint()..color = const Color(0xFF0288D1)..style = PaintingStyle.fill;
     final strokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.6;
@@ -643,7 +780,6 @@ class _DetailedTentaclePainter extends CustomPainter {
 
     final path = Path();
     path.moveTo(w * 0.5, h);
-    // ИСПРАВЛЕНО: Сильные радиальные кубические кривые для красивого круглого изгиба щупальца!
     path.cubicTo(isLeft ? -w * 0.7 : w * 1.7, h * 0.7, isLeft ? w * 0.1 : w * 0.9, h * 0.2, w * 0.5, 0);
     path.lineTo(w * 0.7, 0);
     path.cubicTo(isLeft ? w * 0.3 : w * 0.7, h * 0.2, isLeft ? -w * 0.4 : w * 1.4, h * 0.7, w * 0.8, h);
@@ -652,15 +788,11 @@ class _DetailedTentaclePainter extends CustomPainter {
     canvas.drawPath(path, tentaclePaint);
     canvas.drawPath(path, strokePaint);
 
-        // ПРОРАБОТКА: Расставляем присоски, сделав их на каплю МЕНЬШЕ для детализации
     for (int i = 1; i <= 6; i++) {
       double factor = i * 0.14;
       double cx = isLeft ? w * (0.32 - factor * 0.15) : w * (0.68 + factor * 0.15);
       double cy = h * factor;
-      
-      // ИСПРАВЛЕHО: Уменьшили базовый радиус присосок с 3.4 до 2.2!
       double radius = 2.2 - (i * 0.15); 
-      
       if (radius > 0.6) {
         canvas.drawCircle(Offset(cx, cy), radius, suctionPaint);
         canvas.drawCircle(Offset(cx, cy), radius, strokePaint..strokeWidth = 0.4);
@@ -668,47 +800,35 @@ class _DetailedTentaclePainter extends CustomPainter {
       }
     }
   }
-
-
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-// =========================================================================
-// КЛАСС 2: УЛЬТРА-ПРОРАБОТАНHЫЕ КРАБОВЫЕ КЛЕШHИ (СУСТАВЫ, ЗАЖИМЫ И ЗУБЦЫ)
-// =========================================================================
+
 class _DetailedCrabClawPainter extends CustomPainter {
   final bool isOpen;
   _DetailedCrabClawPainter({required this.isOpen});
 
-      @override
+  @override
   void paint(Canvas canvas, Size size) {
     final clawPaint = Paint()..color = const Color(0xFF2E6F22)..style = PaintingStyle.fill;
     final strokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.6;
-    
     final w = size.width;
     final h = size.height;
 
-    // 1. Прочный сустав-основание лапы (локоть)
     final jointPath = Path()
-      ..moveTo(w * 0.4, h)
-      ..lineTo(w * 0.3, h * 0.6)
-      ..lineTo(w * 0.7, h * 0.6)
-      ..lineTo(w * 0.6, h)
-      ..close();
+      ..moveTo(w * 0.4, h)..lineTo(w * 0.3, h * 0.6)
+      ..lineTo(w * 0.7, h * 0.6)..lineTo(w * 0.6, h)..close();
     canvas.drawPath(jointPath, clawPaint);
     canvas.drawPath(jointPath, strokePaint);
 
-    // 2. ИСПРАВЛЕНО: Правая створка зажима в виде идеального налитого полукруга
     final mainClawPath = Path()
       ..moveTo(w * 0.3, h * 0.6)
       ..cubicTo(w * 0.05, h * 0.4, w * 0.1, 0, w * 0.5, 0)
       ..lineTo(w * 0.45, h * 0.2)
-      ..cubicTo(w * 0.3, h * 0.3, w * 0.35, h * 0.5, w * 0.7, h * 0.6)
-      ..close();
+      ..cubicTo(w * 0.3, h * 0.3, w * 0.35, h * 0.5, w * 0.7, h * 0.6)..close();
     canvas.drawPath(mainClawPath, clawPaint);
     canvas.drawPath(mainClawPath, strokePaint);
 
-    // 3. ИСПРАВЛЕНО: Левая створка зажима тоже идет плавным полукругом
     final movingFingerPath = Path();
     if (isOpen) {
       movingFingerPath.moveTo(w * 0.45, h * 0.25);
@@ -723,66 +843,40 @@ class _DetailedCrabClawPainter extends CustomPainter {
     canvas.drawPath(movingFingerPath, clawPaint);
     canvas.drawPath(movingFingerPath, strokePaint);
 
-    // 4. ТЕКСТУРА: Ровно 2 мелких острых зубца
     final toothPaint = Paint()..color = Colors.white70..style = PaintingStyle.fill;
     canvas.drawTriangle(Offset(w * 0.38, h * 0.25), Offset(w * 0.34, h * 0.28), Offset(w * 0.42, h * 0.29), toothPaint);
     canvas.drawTriangle(Offset(w * 0.46, h * 0.32), Offset(w * 0.42, h * 0.35), Offset(w * 0.48, h * 0.36), toothPaint);
   }
-
-
-
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// =========================================================================
-// ВЕКТОРНЫЙ ХУДОЖНИК ЩУПАЛЬЦА С КРУГЛЫМИ ПРИСОСКАМИ ИЗНУТРИ
-// =========================================================================
-class _MolluskTentacleWithSuctionsPainter extends CustomPainter {
-  final bool isLeft;
-  _MolluskTentacleWithSuctionsPainter({required this.isLeft});
+class _EndingRoomBackgroundPainter extends CustomPainter {
+  final bool hasHole;
+  final bool showLightning;
+  _EndingRoomBackgroundPainter({required this.hasHole, required this.showLightning});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final tentaclePaint = Paint()..color = const Color(0xFF0288D1)..style = PaintingStyle.fill;
-    final strokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.5;
-    final suctionPaint = Paint()..color = Colors.white70..style = PaintingStyle.fill;
-    final suctionHolePaint = Paint()..color = const Color(0xFF01579B)..style = PaintingStyle.fill;
+    final wallPaint = Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color(0xFF14141E), Color(0xFF06060A)],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), wallPaint);
 
-    final path = Path();
-    path.moveTo(size.width * 0.5, size.height);
-    path.cubicTo(isLeft ? 0.0 : size.width, size.height * 0.6, isLeft ? size.width * 0.1 : size.width * 0.9, size.height * 0.2, size.width * 0.5, 0);
-    path.lineTo(size.width * 0.8, 0);
-    path.cubicTo(isLeft ? size.width * 0.4 : size.width * 0.6, size.height * 0.2, isLeft ? size.width * 0.3 : size.width * 0.7, size.height * 0.6, size.width * 0.8, size.height);
-    path.close();
-
-    canvas.drawPath(path, tentaclePaint);
-    canvas.drawPath(path, strokePaint);
-
-    // РАССЧИТЫВАЕМ И ОТРИСОВЫВАЕМ ПРИСОСКИ:
-    final suctionStrokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 0.5;
-
-    for (int i = 1; i < 5; i++) {
-      double hFactor = i * 0.22;
-      double sx = isLeft ? size.width * 0.25 : size.width * 0.75;
-      canvas.drawCircle(Offset(sx, size.height * hFactor), 3.0, suctionPaint);
-      canvas.drawCircle(Offset(sx, size.height * hFactor), 3.0, suctionStrokePaint);
-      canvas.drawCircle(Offset(sx, size.height * hFactor), 1.2, suctionHolePaint);
+    if (hasHole) {
+      final skyRect = Rect.fromLTWH(size.width * 0.25, 0, size.width * 0.5, 25);
+      canvas.drawRect(skyRect, Paint()..color = const Color(0xFF0D1B2A));
+      if (showLightning) {
+        canvas.drawRect(skyRect, Paint()..color = Colors.white.withOpacity(0.85));
+      }
     }
   }
-
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _EndingRoomBackgroundPainter oldDelegate) => true;
 }
 
-// =========================================================================
-// ХЕЛПЕР-РАСШИРЕНИЕ ДЛЯ УДОБНОЙ ОТРИСОВКИ ТРЕУГОЛЬНЫХ ЗУБЬЕВ КЛЕШНИ
-// =========================================================================
-extension _CanvasTriangleExt on Canvas {
-  void drawTriangle(Offset p1, Offset p2, Offset p3, Paint paint) {
-    final path = Path()..moveTo(p1.dx, p1.dy)..lineTo(p2.dx, p2.dy)..lineTo(p3.dx, p3.dy)..close();
-    drawPath(path, paint);
-    // Накладываем тонкий контрастный чёрный контур на каждый зубчик
-    drawPath(path, Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 0.5);
-  }
-}
+  
+
