@@ -7,6 +7,23 @@ class AudioManager {
   static final AudioPlayer _finalMenuPlayer = AudioPlayer();
   static final AudioPlayer _fxPlayer = AudioPlayer();
   static final AudioPlayer _rainPlayer = AudioPlayer();
+  // ТОЧЕЧНО В НАЧАЛО КЛАССА В LIB/AUDIO_MANAGER.DART:
+  static DateTime? _lastMainSoundStartTime; 
+  static String _currentMainSound = ""; // 'drops', 'rage', 'boss_phase2', 'menu'
+
+  static bool _canInterruptCurrentMainSound(String newSound) {
+    if (_lastMainSoundStartTime == null || _currentMainSound == "") return true;
+    if (_currentMainSound == newSound) return false; 
+
+    final elapsed = DateTime.now().difference(_lastMainSoundStartTime!);
+    if (elapsed.inMilliseconds < 1000) {
+      print("Защита звука: '$_currentMainSound' играет всего ${elapsed.inMilliseconds}мс. Перекрытие отклонено.");
+      return false;
+    }
+    return true;
+  }
+
+
   
     // Геттер для получения текущего состояния фонового плеера (нужен для main.dart)
   static AudioPlayer get menuPlayer => _finalMenuPlayer;
@@ -52,38 +69,58 @@ class AudioManager {
   // Возвращаем статус аудио-замка, чтобы другие методы могли его считывать
   static bool get isRageSoundPlaying => _isRageSoundPlaying;
 
-  // Звук ярости на максимальной громкости 1.0 из корня папки audio
+  // ТОЧЕЧНО ЗАМЕНИТЬ ИЛИ ДОБАВИТЬ МЕТОД ЯРОСТИ ВИАГРА-ТАЙМ:
   static Future<void> playRage() async {
-    if (_isRageSoundPlaying) return; // Защита от наложения
-    
-    _isRageSoundPlaying = true;
+    if (!_canInterruptCurrentMainSound('rage')) return;
     try {
-      _ragePlayer = AudioPlayer();
-      await _ragePlayer!.setVolume(1.0); // Выкручиваем громкость ярости на 100%
-      await _ragePlayer!.play(AssetSource('audio/bunnyhop_rage.mp3')); 
+      await _finalMenuPlayer.stop();
+      await _finalMenuPlayer.release();
+
+      await _finalMenuPlayer.setVolume(0.75);
+      await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
+      
+      // ИСПРАВЛЕНО: Теперь трек таблетки берется из папки audio/ по твоему ТЗ!
+      await _finalMenuPlayer.play(AssetSource('audio/rage_theme.mp3'));
+      
+      _lastMainSoundStartTime = DateTime.now();
+      _currentMainSound = "rage";
     } catch (e) {
-      print("Ошибка звука ярости: $e");
+      print("Ошибка запуска ярости таблетки: $e");
     }
+  }
+  
 
-    // Автоматический сброс замка через 2.5 секунды, если птица выжила
-    Future.delayed(const Duration(milliseconds: 2500), () {
-      _isRageSoundPlaying = false;
-      _ragePlayer = null;
-    });
+ static Future<void> stopRage() async {
+    if (_currentMainSound == "rage") {
+      await _finalMenuPlayer.stop();
+      _currentMainSound = "";
+    }
   }
 
-  // Метод мгновенной остановки гула при смерти Вани Баннихопа!
-  static Future<void> stopRage() async {
-    if (_ragePlayer != null) {
-      try {
-        await _ragePlayer!.stop(); // Выключаем звук намертво!
-      } catch (e) {
-        print("Ошибка остановки звука ярости: $e");
-      }
-      _ragePlayer = null;
+    // Звук 1: Бешеное кручение/замах щупальца или клешни босса (700-800мс)
+  static Future<void> playBossWhip() async {
+    try {
+      await _fxPlayer.stop();
+      await _fxPlayer.setVolume(0.70);
+      await _fxPlayer.play(AssetSource('audio/boss_whip.mp3'));
+    } catch (e) {
+      print("Ошибка воспроизведения звука замаха босса: $e");
     }
-    _isRageSoundPlaying = false; // Мгновенно открываем аудио-замок для других эффектов
   }
+
+  // Звук 2: Сокрушительный удар щупальца по полу или клешни по верху (1 сек)
+  static Future<void> playBossStrike() async {
+    try {
+      await _fxPlayer.stop();
+      await _fxPlayer.setVolume(0.95);
+      await _fxPlayer.play(AssetSource('audio/boss_strike.mp3'));
+    } catch (e) {
+      print("Ошибка воспроизведения звука удара босса: $e");
+    }
+  }
+
+
+  
 
 
     
@@ -145,36 +182,46 @@ static Future<void> playPaperRustle() async {
     }
   }
 
-
-    
-
-    // ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД ЗАПУСКА КАПЕЛЬ 6 УРОВНЯ В КЛАССЕ AudioManager:
-  static Future<void> startCastleDrops() async {
+ static Future<void> startCastleDrops() async {
+    if (!_canInterruptCurrentMainSound('drops')) return;
     try {
-      // Начисто тушим дождь 5 уровня и звуковые эффекты
-      await _rainPlayer.stop();
       await _fxPlayer.stop();
-      
-      // Очищаем кэш плеера дождя, намертво стирая шторм из памяти
-      await _rainPlayer.release();
-
-      // Сбрасываем и очищаем плеер фоновой музыки перед включением капель
+      await _rainPlayer.stop();
+      await _rainPlayer.release(); 
       await _finalMenuPlayer.stop();
       await _finalMenuPlayer.release();
 
-      // Усердная настройка под мистическую атмосферу логова Дона Моллюска
       await _finalMenuPlayer.setVolume(1.0); 
       await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
+      await _finalMenuPlayer.play(AssetSource('music/castle_drops.mp3'));
       
-      // ИСПРАВЛЕНО СТРОГО ТОЧЕЧНО: Капли лежат там же, где и музыка — в папке music/
-      await _finalMenuPlayer.play(AssetSource('music/castle_drops.mp3')); 
-      print("Звук дождя потушен и очищен. Эмбиент капель из папки music запущен.");
+      _lastMainSoundStartTime = DateTime.now();
+      _currentMainSound = "drops";
     } catch (e) {
       print("Ошибка при запуске капель замка: $e");
     }
   }
 
+  // Б) НОВЫЙ МЕТОД: ТЯЖЁЛАЯ МУЗЫКА БЕРСЕРКА (ВКЛЮЧАЕТСЯ НА СТРОГО 4 ХП БОССА)
+  static Future<void> startBossPhase2Music() async {
+    if (!_canInterruptCurrentMainSound('boss_phase2')) return;
+    try {
+      await _finalMenuPlayer.stop();
+      await _finalMenuPlayer.release();
 
+      await _finalMenuPlayer.setVolume(0.90); 
+      await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
+      
+      // Название трека для второй фазы, лежит строго в music/
+      await _finalMenuPlayer.play(AssetSource('music/boss_battle.mp3'));
+      
+      _lastMainSoundStartTime = DateTime.now();
+      _currentMainSound = "boss_phase2";
+      print("ВТОРАЯ ФАЗА! Запущена динамичная музыка босса из папки music.");
+    } catch (e) {
+      print("Ошибка запуска боевой музыки фазы 2: $e");
+    }
+  }
 
 
 
