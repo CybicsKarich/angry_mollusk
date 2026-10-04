@@ -155,10 +155,15 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
           _vanyaIsJumping = true;
           _vanyaX -= 0.06; 
         } else {
+          // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО НА СТРОКЕ ~161:
+        } else {
           // Удар в бок — минус жизнь и аккуратный респавн на пол у левого края
           if (_vanyaHearts > 0) {
             _vanyaHearts--;
-            AudioManager.popContext != null ? AudioManager.playMiss() : null; // Безопасный проигрыш эффекта
+            
+            // ИСПРАВЛЕНО ТОЧЕЧНО: Простой, чистый и рабочий вызов звука без лишних переменных
+            AudioManager.playMiss(); 
+            
             _vanyaX = 0.15;
             _vanyaY = realGroundY - 0.05;
           }
