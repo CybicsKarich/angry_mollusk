@@ -71,81 +71,94 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
   // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО ТЕЛО МЕТОДА _updatePhysics:
   void _updatePhysics(double dt) {
     setState(() {
-      // 1. Горизонтальный бег Шерифа ногами по кнопкам
+      // ИСПРАВЛЕНО: Линия реального пола опущена до 0.86, чтобы Ваня стоял чётко на плитке!
+      const double realGroundY = 0.86;
+
+      // 1. Горизонтальный бег Шерифа ногами по плитке пола
       if (_btnLeftPressed) {
-        _vanyaVx = -0.26; // Умеренная, комфортная скорость назад
+        _vanyaVx = -0.26; 
       } else if (_btnRightPressed) {
-        _vanyaVx = 0.26; // Умеренная скорость вперед
+        _vanyaVx = 0.26; 
       } else {
         _vanyaVx = 0.0; 
       }
 
       _vanyaX += _vanyaVx * dt;
 
-      // 2. Вертикальная гравитация и ИСПРАВЛЕННЫЙ СРЕДНИЙ ПРЫЖОК (Без вылета за экран!)
+      // 2. Вертикальная гравитация и ЕЩЁ МЕНЬШИЙ ПРЫЖОК (Идеальная средняя высота)
       if (_vanyaIsJumping) {
-        _vanyaVy += 1.8 * dt; // Чуть увеличили силу тяжести для плотного приземления
+        _vanyaVy += 1.9 * dt; // Плотная гравитация
         _vanyaY += _vanyaVy * dt;
 
-        // ЗАЩИТА ОТ ВЫЛЕТА ЗА ЭКРАН: Если Ваня взлетает слишком высоко, жестко гасим скорость
-        if (_vanyaY < 0.08) {
-          _vanyaY = 0.08;
-          _vanyaVy = 0.0;
-        }
-
-        // ИСПРАВЛЕНО ЖЕЛЕЗОБЕТОННО: Приземление ВСЕГДА происходит строго на пол!
-        if (_vanyaY >= _groundYPercent - 0.05) {
-          _vanyaY = _groundYPercent - 0.05;
+        // Фиксация приземления на реальный пол (с учётом радиуса Вани 0.05)
+        if (_vanyaY >= realGroundY - 0.05) {
+          _vanyaY = realGroundY - 0.05;
           _vanyaVy = 0.0;
           _vanyaIsJumping = false;
         }
       } else {
-        // Если Ваня не прыгает, он МOНOЛИTHO стоит и бегает только по поверхности пола!
-        _vanyaY = _groundYPercent - 0.05;
+        // УБРАН НИЖНИЙ БАРЬЕР: Ваня больше ни обо что не спотыкается и бегает СТРОГО по полу!
+        _vanyaY = realGroundY - 0.05;
       }
 
-      // Ограничение передвижения границами экрана смартфона по горизонтали
+      // Зажимаем Шерифа в жесткие рамки экрана по горизонтали
       if (_vanyaX < 0.02) _vanyaX = 0.02;
       if (_vanyaX > 0.94) _vanyaX = 0.94;
 
-      // 3. ИСПРАВЛЕНО: Баррикада больше НЕ привязывает Ваню к своей высоте!
-      // Теперь это просто плотная боковая стена-препятствие на полу
+      // 3. ИСПРАВЛЕНО ГЕHИАЛЬHО: Коллизией обладает ТОЛЬКО САМА баррикада! 
+      // Никаких невидимых стен до неба. Через неё можно перепрыгнуть или пройти НАД ней!
       if (_isBarricadeAlive) {
-        // Проверяем боковое столкновение, только если Ваня находится на уровне земли
-        if (_vanyaX >= _barricadeX - 0.02 && _vanyaX <= _barricadeX + 0.035) {
-          // Ваня просто упирается в неё боком и не может пройти насквозь
-          _vanyaX = _vanyaVx > 0 ? _barricadeX - 0.021 : _barricadeX + 0.036;
+        double баррикадаW = 0.025; // Соответствует её UI-ширине
+        double баррикадаH = 0.16;  // Соответствует её UI-высоте
+        double bLeft = _barricadeX;
+        double bRight = _barricadeX + 0.035;
+        double bTop = realGroundY - баррикадаH; // Верхняя грань куба на полу
+
+        // Проверяем пересечение с физическим телом блока
+        if (_vanyaX >= bLeft - 0.02 && _vanyaX <= bRight && _vanyaY >= bTop - 0.04) {
+          
+          // А) Если Ваня ПАДАЕТ СВЕРХУ — он честно приземляется НА баррикаду и может стоять НАД ней!
+          if (_vanyaVy > 0 && _vanyaY < bTop + 0.02) {
+            _vanyaY = bTop - 0.05; // Встаем ножками на крышу блока
+            _vanyaVy = 0.0;
+            _vanyaIsJumping = false;
+          } 
+          // Б) Если он бежит сбоку по полу — он просто упирается в неё, как в препятствие
+          else if (_vanyaY > bTop - 0.02) {
+            _vanyaX = _vanyaVx > 0 ? bLeft - 0.021 : bRight + 0.001;
+          }
         }
       }
 
-      // 4. СТОЛКНОВЕНИЕ С ГИГАНТСКИМ ДОНОМ НА ПРАВОМ КРАЮ
+      // 4. СТОЛКНОВЕНИЕ С ГИГАНТСКИМ ДОНОМ НА САМОМ ПРАВОМ КРАЮ
       double dx = _vanyaX - _bossX;
-      double dy = _vanyaY - (_groundYPercent - 0.12);
+      double dy = _vanyaY - (realGroundY - 0.12);
       double distance = sqrt(dx * dx + dy * dy);
 
       if (distance < 0.11 && _bossCurrentHp > 0) {
-        // Слэм сверху по макушке головы во время прыжка
-        if (_vanyaVy > 0 && _vanyaY < _groundYPercent - 0.03) {
+        // Чёткий слэм прыжком по макушке головы Дона
+        if (_vanyaVy > 0 && _vanyaY < realGroundY - 0.03) {
           _bossCurrentHp -= 1.0; 
-          AudioManager.playPigHit(); // Твой каноничный ор Вани!
+          AudioManager.playPigHit(); 
           
-          // Отскок назад влево средней интенсивности
-          _vanyaVx = -0.35;
-          _vanyaVy = -0.50; 
+          // Мягкий и динамичный отскок назад влево
+          _vanyaVx = -0.32;
+          _vanyaVy = -0.42; 
           _vanyaIsJumping = true;
-          _vanyaX -= 0.08; 
+          _vanyaX -= 0.06; 
         } else {
-          // Касание бока — минус жизнь и респавн жестко на пол к рогатке
+          // Удар в бок — минус жизнь и аккуратный респавн на пол у левого края
           if (_vanyaHearts > 0) {
             _vanyaHearts--;
             AudioManager.playMiss();
             _vanyaX = 0.15;
-            _vanyaY = _groundYPercent - 0.05;
+            _vanyaY = realGroundY - 0.05;
           }
         }
       }
     });
   }
+
 
 
   @override
@@ -645,21 +658,22 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
            Positioned(
             bottom: 16, right: 24,
             child: GestureDetector(
+              // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО ВНУТРИ КНОПКИ ПРЫЖКА (ПРАВАЯ РУКА):
               onTapDown: (_) {
                 if (!_vanyaIsJumping) {
                   setState(() {
                     _btnJumpPressed = true;
                     _vanyaIsJumping = true;
                     
-                    // ИСПРАВЛЕНО: Импульс уменьшен до средних -5.2, чтобы птица никогда не улетала за потолок!
+                    // ИСПРАВЛЕНО: Импульс прыжка уменьшен до средних -4.1! Высота идеальна
                     if (_btnRightPressed) {
-                      _vanyaVy = -5.2; 
-                      _vanyaVx = 0.26; // Плавно подхватывает инерцию бега вперёд
+                      _vanyaVy = -4.1; 
+                      _vanyaVx = 0.26; // Прыжок плавно подхватывает зажатую стрелку ВПЕРЁД
                     } else if (_btnLeftPressed) {
-                      _vanyaVy = -5.2;
-                      _vanyaVx = -0.26; // Плавно подхватывает инерцию бега назад
+                      _vanyaVy = -4.1;
+                      _vanyaVx = -0.26; // Прыжок плавно подхватывает зажатую стрелку НАЗАД
                     } else {
-                      _vanyaVy = -5.0; // Идеальный средний прыжок на месте
+                      _vanyaVy = -3.9; // Небольшой прыжок строго вверх на месте
                     }
                   });
                 }
