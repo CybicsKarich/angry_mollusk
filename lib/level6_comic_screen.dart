@@ -22,26 +22,28 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
   // =========================================================================
   late final Ticker _gameLoopTicker;
   
+ final double _groundYPercent = 0.73;
+
   // Физика Шерифа
-  double _vanyaX = 0.15; // Позиция X (в процентах от ширины арены)
-  double _vanyaY = 0.73 - 0.04; // Позиция Y (высота на полу у рогатки)
+  double _vanyaX = 0.15; 
+  // ИСПРАВЛЕНО: Птица теперь сидит чётко на полу, а не парит в воздухе! (радиус 0.05)
+  double _vanyaY = 0.73 - 0.05; 
   double _vanyaVx = 0.0;
   double _vanyaVy = 0.0;
   bool _vanyaIsJumping = false;
-  int _vanyaHearts = 1; // Стартовое количество жизней по нашему уговору
+  int _vanyaHearts = 1; 
   
-  // Флаги зажатия экранных кнопок для левой и правой руки
   bool _btnLeftPressed = false;
   bool _btnRightPressed = false;
   bool _btnJumpPressed = false;
 
-  // Окружение арены
-  final double _groundYPercent = 0.73;
-  bool _isBarricadeAlive = true; // Каменная глыба на полу с 1 ХП
-  
-  // Статичный гигантский Дон Моллюск (в 3-4 раза крупнее Шерифа)
-  final double _bossX = 0.72;
-  double _bossCurrentHp = 8.0; // 8 единиц здоровья
+  // ИСПРАВЛЕНО: Каменная баррикада смещена намного левее (на 0.45)
+  bool _isBarricadeAlive = true; 
+  final double _barricadeX = 0.45;
+
+  // ИСПРАВЛЕНО: Дон Моллюск смещен на самый правый край зала (на 0.84)
+  final double _bossX = 0.84;
+  double _bossCurrentHp = 8.0; 
   final double _bossMaxHp = 8.0;
 
   @override
@@ -66,81 +68,73 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
     _gameLoopTicker.start();
   }
 
-  // =========================================================================
-  // 📐 ДВИЖОК ОБСЛУЖИВАНИЯ ФИЗИКИ БЕГА, КОМБО-ПАРАБОЛЫ И ТЕСТОВЫХ УДАРОВ
-  // =========================================================================
   void _updatePhysics(double dt) {
     setState(() {
-      // 1. Горизонтальный бег Шерифа ногами по кнопкам
+      // 1. Горизонтальный бег Шерифа ногами по плитке пола
       if (_btnLeftPressed) {
-        _vanyaVx = -0.32; // Умеренная скорость назад
+        _vanyaVx = -0.28; 
       } else if (_btnRightPressed) {
-        _vanyaVx = 0.32; // Умеренная скорость вперед
+        _vanyaVx = 0.28; 
       } else {
-        _vanyaVx = 0.0; // Мгновенный сброс скорости без зажатия
+        _vanyaVx = 0.0; 
       }
 
-      // Применяем горизонтальное смещение
       _vanyaX += _vanyaVx * dt;
 
-      // 2. Вертикальная гравитация и одиночный/комбо прыжок
+      // 2. Вертикальная гравитация и ИСПРАВЛЕННЫЙ МЯГКИЙ ПРЫЖОК
       if (_vanyaIsJumping) {
-        _vanyaVy += 1.6 * dt; // Сила тяжести, тянущая птицу вниз
+        _vanyaVy += 1.4 * dt; // Сила тяжести тянет вниз
         _vanyaY += _vanyaVy * dt;
 
-        // Фиксация приземления на каменную плитку пола
-        if (_vanyaY >= _groundYPercent - 0.04) {
-          _vanyaY = _groundYPercent - 0.04;
+        // Фиксация приземления на каменную плитку пола (учитываем радиус тела 0.05)
+        if (_vanyaY >= _groundYPercent - 0.05) {
+          _vanyaY = _groundYPercent - 0.05;
           _vanyaVy = 0.0;
           _vanyaIsJumping = false;
         }
       }
 
-      // Ограничение передвижения границами экрана смартфона
+      // Жесткие рамки: Шериф физически больше не может улететь за границы экрана
       if (_vanyaX < 0.02) _vanyaX = 0.02;
       if (_vanyaX > 0.94) _vanyaX = 0.94;
 
-      // 3. Тестирование осязаемости каменной баррикады с 1 ХП
+      // 3. ИСПРАВЛЕНО: Осязаемость новой компактной баррикады слева
       if (_isBarricadeAlive) {
-        // Координаты упавшего блока соответствуют третьем кадру комикса
-        if (_vanyaX >= 0.58 && _vanyaX <= 0.68 && _vanyaY >= _groundYPercent - 0.12) {
-          // Если Ваня падает на неё сверху — он стоит на преграде ногами
-          if (_vanyaVy > 0 && _vanyaY < _groundYPercent - 0.08) {
+        // Проверяем хитбокс Шерифа относительно новых координат балки
+        if (_vanyaX >= _barricadeX - 0.02 && _vanyaX <= _barricadeX + 0.04 && _vanyaY >= _groundYPercent - 0.12) {
+          if (_vanyaVy > 0 && _vanyaY < _groundYPercent - 0.06) {
             _vanyaY = _groundYPercent - 0.12;
             _vanyaVy = 0.0;
             _vanyaIsJumping = false;
           } else {
-            // Иначе блок упирается и не дает Ване пробежать сквозь себя
-            _vanyaX = _vanyaVx > 0 ? 0.57 : 0.69;
+            _vanyaX = _vanyaVx > 0 ? _barricadeX - 0.021 : _barricadeX + 0.041;
           }
         }
       }
 
-      // 4. ТЕСТОВОЕ СТОЛКНОВЕНИЕ С ГИГАНТСКИМ ДОНОМ МОЛЛЮСКОМ
+      // 4. СТОЛКНОВЕНИЕ С ГИГАНТСКИМ ДОНОМ НА ПРАВОМ КРАЮ
       double dx = _vanyaX - _bossX;
       double dy = _vanyaY - (_groundYPercent - 0.12);
       double distance = sqrt(dx * dx + dy * dy);
 
-      // Если Шериф круглым хитбоксом коснулся макушки или тела босса
-      if (distance < 0.09 && _bossCurrentHp > 0) {
-        // Проверяем: это прыжок сверху на голову?
+      if (distance < 0.11 && _bossCurrentHp > 0) {
+        // Слэм сверху по макушке головы
         if (_vanyaVy > 0 && _vanyaY < _groundYPercent - 0.04) {
-          _bossCurrentHp -= 1.0; // Отнимаем здоровье
-          AudioManager.playPigHit(); // Включаем твой каноничный ор Вани при попадании по свинье!
+          _bossCurrentHp -= 1.0; 
+          AudioManager.playPigHit(); 
           
-          // ЭПИЧНЫЙ ДИНАМИЧЕСКИЙ ОТСКОК НАЗАД (предотвращает баги и застревание)
-          _vanyaVx = -0.45;
-          _vanyaVy = -0.8;
+          // Отбрасывание назад влево по дуге
+          _vanyaVx = -0.40;
+          _vanyaVy = -0.55; // Мягкий импульс отлёта вверх
           _vanyaIsJumping = true;
-          _vanyaX -= 0.12; // Отбрасываем Шерифа назад влево
+          _vanyaX -= 0.10; 
         } else {
-          // Если коснулись сбоку или снизу — Ваня теряет жизнь по уговору
+          // Касание бока — минус жизнь и респавн на пол
           if (_vanyaHearts > 0) {
             _vanyaHearts--;
             AudioManager.playMiss();
-            // Возврат на спавн рогатки
             _vanyaX = 0.15;
-            _vanyaY = _groundYPercent - 0.04;
+            _vanyaY = _groundYPercent - 0.05;
           }
         }
       }
@@ -406,36 +400,33 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                   Positioned(top: 0, left: 0, right: 0, child: CustomPaint(size: const Size(double.infinity, 35), painter: _CeilingPainter(drawHole: true))),
                   Positioned(bottom: 0, left: 0, right: 0, child: CustomPaint(size: const Size(double.infinity, 24), painter: _FloorTilesPainter())),
 
-                  // 🪨 УПАВШАЯ ЧАСТЬ КРЫШИ (КАМЕННАЯ БАРРИКАДА ИЗ КОМИКСА С 1 ХП)
                   if (_isBarricadeAlive)
                     Positioned(
                       bottom: 24, 
-                      left: size.width * 0.62,
+                      left: size.width * _barricadeX,
                       child: GestureDetector(
                         onTap: () {
-                          // Тестовый клик по баррикаде разламывает её со звуком крушения камня
                           setState(() => _isBarricadeAlive = false);
                           AudioManager.playBlockBreak(true);
                         },
                         child: Container(
-                          width: size.width * 0.04, 
-                          height: size.height * 0.22,
+                          width: size.width * 0.025, // Уменьшили длину
+                          height: size.height * 0.16, // Сделали аккуратнее по высоте
                           decoration: BoxDecoration(
                             color: const Color(0xFF37474F),
-                            border: Border.all(color: Colors.black, width: 2.0),
+                            border: Border.all(color: Colors.black, width: 1.8),
                             borderRadius: BorderRadius.circular(4),
                           ),
                         ),
                       ),
                     ),
 
-                  // 🐷 ГИГАНТСКИЙ ДОН МОЛЛЮСК (В 3-4 РАЗА БОЛЬШЕ ОБЫЧНОГО, МИШЕНЬ ДЛЯ ТЕСТОВ)
                   if (_bossCurrentHp > 0)
                     Positioned(
                       bottom: 22, 
                       left: size.width * _bossX,
                       child: Transform.scale(
-                        scale: 2.8, // Вырос в 3 раза по сравнению с комиксами!
+                        scale: 2.8, 
                         child: _buildDonMollusk(52),
                       ),
                     ),
@@ -462,13 +453,84 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // ТОЧЕЧНО ЗАМЕНИТЬ ИКОНКУ ПАУЗЫ ВНУТРИ _buildLiveGameplayArena:
                     IconButton(
                       style: IconButton.styleFrom(backgroundColor: Colors.black45, padding: const EdgeInsets.all(6)),
                       icon: const Icon(Icons.pause_rounded, color: Colors.white, size: 22),
                       onPressed: () {
-                        // Выход обратно в меню карточек
-                        AudioManager.stopLevelAudioAndPlayMenu();
-                        Navigator.pop(context);
+                        // ИСПРАВЛЕНО: Вместо вылета открываем оригинальное PauseMenu из game_screen.dart!
+                        // Создаём временный контекст-заглушку, чтобы вызвать твоё оригинальное меню оверлеев
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (BuildContext context) {
+                            // Вызываем точно такое же по дизайну меню паузы, как в game_screen.dart!
+                            return Center(
+                              child: Container(
+                                width: 280,
+                                padding: const EdgeInsets.all(24),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.9),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: Colors.orange, width: 4),
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text(
+                                      'ПАУЗА',
+                                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2, decoration: TextDecoration.none),
+                                    ),
+                                    const SizedBox(height: 20),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      height: 44,
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                                        onPressed: () => Navigator.pop(context), // ПРОДОЛЖИТЬ
+                                        child: const Text('ПРОДОЛЖИТЬ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      height: 44,
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                                        onPressed: () {
+                                          // ЗАНОВО: сбрасываем арену
+                                          Navigator.pop(context);
+                                          setState(() {
+                                            _vanyaX = 0.15;
+                                            _vanyaY = _groundYPercent - 0.05;
+                                            _bossCurrentHp = 8.0;
+                                            _isBarricadeAlive = true;
+                                            _vanyaHearts = 1;
+                                          });
+                                        },
+                                        child: const Text('ЗАНОВО', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      height: 44,
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                                        onPressed: () {
+                                          Navigator.pop(context); // закрываем паузу
+                                          AudioManager.stopLevelAudioAndPlayMenu();
+                                          Navigator.pop(context); // выходим в меню уровней
+                                        },
+                                        child: const Text('В МЕНЮ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        );
                       },
                     ),
                     const SizedBox(height: 6),
@@ -573,26 +635,24 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
             ),
           ),
 
-          // Правая рука: Крупная полупрозрачная серая кнопка прыжка в нижнем правом углу
-          Positioned(
+           Positioned(
             bottom: 16, right: 24,
             child: GestureDetector(
-                            onTapDown: (_) {
+              onTapDown: (_) {
                 if (!_vanyaIsJumping) {
                   setState(() {
                     _btnJumpPressed = true;
                     _vanyaIsJumping = true;
                     
-                    // УМНАЯ СВЯЗКА КНОПОК ПО УГОВОРУ:
-                    // Если при прыжке зажата стрелка ВПЕРЁД — игра швыряет Ваню по косой комбо-параболе!
+                    // Высота прыжка уменьшена с -10.0/-11.5 до комфортных -5.8
                     if (_btnRightPressed) {
-                      _vanyaVy = -11.5; 
+                      _vanyaVy = -5.8; 
+                      _vanyaVx = 0.28; // Подхватываем инерцию бега вперёд
                     } else if (_btnLeftPressed) {
-                      _vanyaVy = -11.5;
-                      _vanyaVx = -0.35;
+                      _vanyaVy = -5.8;
+                      _vanyaVx = -0.28; // Подхватываем инерцию бега назад
                     } else {
-                      // Обычный прыжок строго вертикально вверх
-                      _vanyaVy = -10.0;
+                      _vanyaVy = -5.5; // Обычный прыжок на месте
                     }
                   });
                 }
