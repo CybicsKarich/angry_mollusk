@@ -46,6 +46,24 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
   double _bossCurrentHp = 8.0; 
   final double _bossMaxHp = 8.0;
 
+  // ТОЧЕЧНО ДОБАВИТЬ К ОСТАЛЬНЫМ ПЕРЕМЕННЫМ КЛАССА СОСТОЯНИЯ:
+  // Переменные режима «Виагра-Тайм»
+  bool _isAngryMode = false; // Флаг абсолютного бессмертия и ярости Шерифа
+  double _angryTimer = 0.0; // Для циклической поп-арт анимации неба
+  
+  // Координаты и таймер спавна капсулы виагры
+  double _pillX = -1.0; 
+  double _pillY = -1.0;
+  bool _isPillSpawned = false;
+  double _pillSpawnTimer = 0.0; // Считает 5 секунд для тестового спавна
+  
+  // Анимация эффекта подбора таблетки
+  double _plusOneUiTimer = 0.0; // Управляет вспышкой неонового крестика «+1»
+  double _heartPulseTimer = 0.0; // Управляет пульсацией добавившегося сердечка
+
+  // Вспомогательный генератор случайных точек для спавна
+  final Random _gameRand = Random();
+
   @override
   void initState() {
     super.initState();
@@ -68,24 +86,40 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
     _gameLoopTicker.start();
   }
 
-    // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО ВНУТРИ МЕТОДА _updatePhysics:
+   // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО ТЕЛО МЕТОДА _updatePhysics:
   void _updatePhysics(double dt) {
     setState(() {
-      // ИСПРАВЛЕНО ТОЧЕЧНО: Пол опущен ещё чуть-чуть ниже для идеальной посадки на плитку!
       const double realGroundY = 0.88;
+
+      // Обновляем внутренние таймеры анимации ауры и эффектов подбора
+      if (_isAngryMode) _angryTimer += dt;
+      if (_plusOneUiTimer > 0) _plusOneUiTimer -= dt;
+      if (_heartPulseTimer > 0) _heartPulseTimer -= dt;
+
+      // ТЕСТОВЫЙ СПАВН КАПСУЛЫ: Строго раз в 5 секунд на арене появляется таблетка
+      if (!_isPillSpawned && _bossCurrentHp > 0) {
+        _pillSpawnTimer += dt;
+        if (_pillSpawnTimer >= 5.0) {
+          _pillSpawnTimer = 0.0;
+          _isPillSpawned = true;
+          // Таблетка спавнится моментально в случайной точке воздуха или земли
+          _pillX = 0.10 + _gameRand.nextDouble() * 0.50; // В зоне досягаемости игрока
+          _pillY = 0.40 + _gameRand.nextDouble() * (realGroundY - 0.45);
+        }
+      }
 
       // 1. Горизонтальный бег Шерифа ногами по кнопкам
       if (_btnLeftPressed) {
-        _vanyaVx = -0.26; 
+        _vanyaVx = _isAngryMode ? -0.42 : -0.26; // В режиме ярости скорость бега возрастает!
       } else if (_btnRightPressed) {
-        _vanyaVx = 0.26; 
+        _vanyaVx = _isAngryMode ? 0.42 : 0.26; 
       } else {
         _vanyaVx = 0.0; 
       }
 
       _vanyaX += _vanyaVx * dt;
 
-      // 2. Вертикальная гравитация и скорректированный прыжок
+      // 2. Вертикальная гравитация и прыжок
       if (_vanyaIsJumping) {
         _vanyaVy += 1.9 * dt; 
         _vanyaY += _vanyaVy * dt;
@@ -95,7 +129,6 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
           _vanyaVy = 0.0;
         }
 
-        // ИСПРАВЛЕНО ТОЧЕЧНО: Корректное приземление Шерифа на новую высоту пола
         if (_vanyaY >= realGroundY - 0.05) {
           _vanyaY = realGroundY - 0.05;
           _vanyaVy = 0.0;
@@ -105,17 +138,33 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
         _vanyaY = realGroundY - 0.05;
       }
 
-      // Зажимаем Шерифа в жесткие рамки экрана по горизонтали
       if (_vanyaX < 0.02) _vanyaX = 0.02;
       if (_vanyaX > 0.94) _vanyaX = 0.94;
 
-      // 3. Коллизия баррикады на новом уровне пола
+      // ПРОВЕРКА ПОДБОРА СИНЕЙ ТАБЛЕТКИ ШЕРИФОМ
+      if (_isPillSpawned) {
+        double pdx = _vanyaX - _pillX;
+        double pdy = _vanyaY - _pillY;
+        double pDist = sqrt(pdx * pdx + pdy * pdy);
+        
+        if (pDist < 0.06) {
+          _isPillSpawned = false; // Капсула сразу исчезает
+          _vanyaHearts += 1; // Дает +1 жизнь в верхний интерфейс
+          _plusOneUiTimer = 0.6; // Запускаем вспышку синего крестика «+1»
+          _heartPulseTimer = 0.8; // Запускаем плавную пульсацию сердечка
+          
+          _isAngryMode = true; // Активируем бессмертие и кислотное небо
+          AudioManager.playRage(); // Громко включаем твой андеграундный трек ярости вторым потоком!
+        }
+      }
+
+      // 3. Коллизия баррикады
       if (_isBarricadeAlive) {
         double barricadeW = 0.025; 
         double barricadeH = 0.16;  
         double bLeft = _barricadeX;
         double bRight = _barricadeX + 0.035;
-        double bTop = realGroundY - barricadeH; // Автоматически пересчиталось под новый пол!
+        double bTop = realGroundY - barricadeH;
 
         if (_vanyaX >= bLeft - 0.02 && _vanyaX <= bRight && _vanyaY >= bTop - 0.04) {
           if (_vanyaVy > 0 && _vanyaY < bTop + 0.02) {
@@ -129,26 +178,43 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
         }
       }
 
-      // 4. Столкновение с Доном Моллюском на новом уровне пола
+      // 4. СТОЛКНОВЕНИЕ С ДОНОМ МОЛЛЮСКОМ (С УЧЁТОМ РЕЖИМА ЯРОСТИ)
       double dx = _vanyaX - _bossX;
       double dy = _vanyaY - (realGroundY - 0.12);
       double distance = sqrt(dx * dx + dy * dy);
 
-      if (distance < 0.11 && _bossCurrentHp > 0) {
-        if (_vanyaVy > 0 && _vanyaY < realGroundY - 0.03) {
+      if (distance < 0.12 && _bossCurrentHp > 0) {
+        // ИНВЕРСИЯ БОЯ: Если Ваня под виагрой — он может бить Дона в ЛЮБУЮ точку тела с бессмертием!
+        if (_isAngryMode) {
           _bossCurrentHp -= 1.0; 
-          AudioManager.playPigHit(); 
+          AudioManager.playPigHit(); // Твой каноничный ор Вани!
           
-          _vanyaVx = -0.32;
-          _vanyaVy = -0.42; 
+          _isAngryMode = false; // Режим ярости и кислотное небо МГНОВЕННО ОТКЛЮЧАЮТСЯ после 1 удара!
+          AudioManager.stopRage(); // Тушим крик ярости
+          
+          // Отбрасывание назад влево по дуге для динамики
+          _vanyaVx = -0.36;
+          _vanyaVy = -0.46; 
           _vanyaIsJumping = true;
-          _vanyaX -= 0.06; 
+          _vanyaX -= 0.08;
         } else {
-          if (_vanyaHearts > 0) {
-            _vanyaHearts--;
-            AudioManager.playMiss(); 
-            _vanyaX = 0.15;
-            _vanyaY = realGroundY - 0.05;
+          // ОБЫЧНЫЙ РЕЖИМ БЕЗ ТАБЛЕТКИ: Урон наносится строго прыжком по макушке головы
+          if (_vanyaVy > 0 && _vanyaY < realGroundY - 0.03) {
+            _bossCurrentHp -= 1.0; 
+            AudioManager.playPigHit(); 
+            
+            _vanyaVx = -0.32;
+            _vanyaVy = -0.42; 
+            _vanyaIsJumping = true;
+            _vanyaX -= 0.06; 
+          } else {
+            // Касание бока без таблетки — минус жизнь и респавн
+            if (_vanyaHearts > 0) {
+              _vanyaHearts--;
+              AudioManager.playMiss(); 
+              _vanyaX = 0.15;
+              _vanyaY = realGroundY - 0.05;
+            }
           }
         }
       }
@@ -407,10 +473,15 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
       backgroundColor: const Color(0xFF020204),
       body: Stack(
         children: [
-          // 🏛️ А) ФОН ТРОННОГО ЗАЛА В ОБРАТНОЙ ПЕРСПЕКТИВЕ (БЕЗ ТРОНА И ТОТЕМA)
           Positioned.fill(
             child: CustomPaint(
-              painter: _EndingRoomBackgroundPainter(hasHole: true, showLightning: false),
+              painter: _EndingRoomBackgroundPainter(
+                hasHole: true, 
+                showLightning: false,
+                // Если активен режим ярости — передаем таймер для переливания цвета неба в проёме крыши
+                isAcidSky: _isAngryMode,
+                acidTimer: _angryTimer,
+              ),
               child: Stack(
                 children: [
                   Positioned(top: 0, left: 0, right: 0, child: CustomPaint(size: const Size(double.infinity, 35), painter: _CeilingPainter(drawHole: true))),
@@ -426,13 +497,32 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                           AudioManager.playBlockBreak(true);
                         },
                         child: Container(
-                          width: size.width * 0.025, // Уменьшили длину
-                          height: size.height * 0.16, // Сделали аккуратнее по высоте
+                          width: size.width * 0.025, 
+                          height: size.height * 0.16, 
                           decoration: BoxDecoration(
                             color: const Color(0xFF37474F),
                             border: Border.all(color: Colors.black, width: 1.8),
                             borderRadius: BorderRadius.circular(4),
                           ),
+                        ),
+                      ),
+                    ),
+
+                  // 💊 СИНЯЯ КАПСУЛА ВИАГРЫ С 4 УРОВНЯ (Генерируется на карте)
+                  if (_isPillSpawned)
+                    Positioned(
+                      left: _pillX * size.width,
+                      top: _pillY * size.height,
+                      child: Container(
+                        width: 14, height: 20,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF29B6F6), // Насыщенный синий цвет
+                          borderRadius: BorderRadius.circular(5),
+                          border: Border.all(color: const Color(0xFF0288D1), width: 1.5),
+                          boxShadow: const [BoxShadow(color: Colors.blueAccent, blurRadius: 6, spreadRadius: 1)],
+                        ),
+                        child: const Center(
+                          child: Text("V", style: TextStyle(fontSize: 8, fontWeight: FontWeight.black, color: Colors.white)),
                         ),
                       ),
                     ),
@@ -447,16 +537,36 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                       ),
                     ),
 
-                  // 🔴 КРУГЛЫЙ ШЕРИФ С НАШЕЙ УПРАВЛЯЕМОЙ ФИЗИКОЙ
+                  // 🔴 КРУГЛЫЙ ШЕРИФ + ИСПРАВЛЕННАЯ СИНЯЯ КРУТЯЩАЯСЯ АУРА ЯРОСТИ И ЗВЁЗДЫ
                   Positioned(
                     left: _vanyaX * size.width,
                     top: _vanyaY * size.height,
-                    child: _buildCharacter('assets/images/bunnyhop.png', 46),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      clipBehavior: Clip.none,
+                      children: [
+                        // Если активен Виагра-Тайм — рисуем под птицей неоновую ауру и звезды
+                        if (_isAngryMode)
+                          Positioned(
+                            top: -12, left: -12,
+                            child: Transform.rotate(
+                              angle: _angryTimer * pi * 3, // Бешеное кручение ауры
+                              child: CustomPaint(
+                                size: const Size(70, 70),
+                                painter: _ViagraAuraPainter(),
+                              ),
+                            ),
+                          ),
+                        _buildCharacter('assets/images/bunnyhop.png', 46),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
           ),
+
+
 
           // 📜 Б) ВЕРХНЯЯ ПАНЕЛЬ: КНОПКА ПАУЗЫ, СЕРДЦА ЖИЗНЕЙ И КЛЁШНЫЙ HP-БАР БОССА
           Positioned(
@@ -464,16 +574,16 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Пауза и Сердечки жизней под ней в левом верхнем углу
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ТОЧЕЧНО ЗАМЕНИТЬ ИКОНКУ ПАУЗЫ ВНУТРИ _buildLiveGameplayArena:
-                    IconButton(
-                      style: IconButton.styleFrom(backgroundColor: Colors.black45, padding: const EdgeInsets.all(6)),
-                      icon: const Icon(Icons.pause_rounded, color: Colors.white, size: 22),
-                      onPressed: () {
+                    Row(
+                      children: [
+                        IconButton(
+                          style: IconButton.styleFrom(backgroundColor: Colors.black45, padding: const EdgeInsets.all(6)),
+                          icon: const Icon(Icons.pause_rounded, color: Colors.white, size: 22),
+                          onPressed: () {
                         // ИСПРАВЛЕНО: Вместо вылета открываем оригинальное PauseMenu из game_screen.dart!
                         // Создаём временный контекст-заглушку, чтобы вызвать твоё оригинальное меню оверлеев
                         showDialog(
@@ -548,20 +658,40 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                           },
                         );
                       },
+                        ),
+                        // ВСПЫШКА КРЕСТИКА «+1» НА ДОЛЮ СЕКУНДЫ НАД СЕРДЦАМИ ПО ТЗ!
+                        if (_plusOneUiTimer > 0)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: Text(
+                              "+1", 
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.black, color: Colors.blue.shade300, shadows: const [Shadow(color: Colors.blue, blurRadius: 4)]),
+                            ),
+                          ),
+                      ],
                     ),
                     const SizedBox(height: 6),
-                    // Ряд маленьких сердечек под паузой по твоему ТЗ
+                    // Ряд маленьких сердечек с эффектом плавной пульсации последнего сердца при подборе!
                     Row(
                       children: List.generate(
                         _vanyaHearts > 0 ? _vanyaHearts : 1,
-                        (index) => Padding(
-                          padding: const EdgeInsets.only(right: 3.0),
-                          child: Icon(
-                            Icons.favorite_rounded,
-                            color: _vanyaHearts > 0 ? const Color(0xFFE53935) : Colors.grey,
-                            size: 18,
-                          ),
-                        ),
+                        (index) {
+                          // Последнее добавившееся сердечко плавно увеличивается, если таймер пульса запущен
+                          bool isNewHeart = index == _vanyaHearts - 1 && _heartPulseTimer > 0;
+                          double heartScale = isNewHeart ? 1.4 : 1.0;
+
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 3.0),
+                            child: Transform.scale(
+                              scale: heartScale,
+                              child: Icon(
+                                Icons.favorite_rounded,
+                                color: _vanyaHearts > 0 ? const Color(0xFFE53935) : Colors.grey,
+                                size: 18,
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ],
@@ -1128,10 +1258,14 @@ class _DetailedCrabClawPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
+// 1. ПОЛНОСТЬЮ ЗАМЕНИТЬ КЛАСС ВНУТРИ _EndingRoomBackgroundPainter В САМОМ КОНЦЕ ФАЙЛА:
 class _EndingRoomBackgroundPainter extends CustomPainter {
   final bool hasHole;
   final bool showLightning;
-  _EndingRoomBackgroundPainter({required this.hasHole, required this.showLightning});
+  final bool isAcidSky; // Добавили поддержку Виагра-Тайм
+  final double acidTimer;
+  
+  _EndingRoomBackgroundPainter({required this.hasHole, required this.showLightning, this.isAcidSky = false, this.acidTimer = 0.0});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -1145,7 +1279,23 @@ class _EndingRoomBackgroundPainter extends CustomPainter {
 
     if (hasHole) {
       final skyRect = Rect.fromLTWH(size.width * 0.25, 0, size.width * 0.5, 25);
-      canvas.drawRect(skyRect, Paint()..color = const Color(0xFF0D1B2A));
+      
+      if (isAcidSky) {
+        // КИСЛОТНОЕ НЕБО: Переливается неоновым фиолетово-синим поп-арт градиентом по синусоиде времени!
+        double wave = (sin(acidTimer * pi * 2) + 1.0) / 2.0;
+        final acidPaint = Paint()
+          ..shader = LinearGradient(
+            colors: [
+              Color.lerp(const Color(0xFFD500F9), const Color(0xFF2979FF), wave)!,
+              Color.lerp(const Color(0xFF00E5FF), const Color(0xFFAA00FF), wave)!,
+            ],
+          ).createShader(skyRect);
+        canvas.drawRect(skyRect, acidPaint);
+      } else {
+        // Обычное спокойное темно-синее небо логова
+        canvas.drawRect(skyRect, Paint()..color = const Color(0xFF0D1B2A));
+      }
+
       if (showLightning) {
         canvas.drawRect(skyRect, Paint()..color = Colors.white.withOpacity(0.85));
       }
@@ -1155,7 +1305,40 @@ class _EndingRoomBackgroundPainter extends CustomPainter {
   bool shouldRepaint(covariant _EndingRoomBackgroundPainter oldDelegate) => true;
 }
 
-// ТОЧЕЧНО ВСТАВИТЬ В САМЫЙ КОНЕЦ ФАЙЛА ПОСЛЕ ВСЕХ КЛАССОВ И РИСОВАЛЬЩИКОВ:
+// 2. ДОБАВИТЬ НОВЫЙ ВЕКТОРНЫЙ КЛАСС АУРЫ В САМЫЙ КОНЕЦ ТВОЕГО ФАЙЛА:
+class _ViagraAuraPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double cx = size.width / 2;
+    final double cy = size.height / 2;
+    
+    // Неоновая сине-голубая шипастая подложка ауры
+    final auraPaint = Paint()
+      ..color = const Color(0x6600E5FF)
+      ..style = PaintingStyle.fill
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5); // Эффект неонового свечения
+    canvas.drawCircle(Offset(cx, cy), size.width * 0.45, auraPaint);
+
+    // Рисуем маленькие летящие вокруг Шерифа четырёхконечные звёздочки ярости
+    final starPaint = Paint()..color = Colors.white.withOpacity(0.9);
+    for (int i = 0; i < 4; i++) {
+      double angle = (i * pi / 2);
+      double sx = cx + cos(angle) * (size.width * 0.38);
+      double sy = cy + sin(angle) * (size.height * 0.38);
+      
+      final starPath = Path()
+        ..moveTo(sx, sy - 5)..lineTo(sx + 1.5, sy - 1.5)
+        ..lineTo(sx + 5, sy)..lineTo(sx + 1.5, sy + 1.5)
+        ..lineTo(sx, sy + 5)..lineTo(sx - 1.5, sy + 1.5)
+        ..lineTo(sx - 5, sy)..lineTo(sx - 1.5, sy - 1.5)
+        ..close();
+      canvas.drawPath(starPath, starPaint);
+    }
+  }
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+}
+
 
 extension _Level6CanvasTriangleExt on Canvas {
   void drawTriangle(Offset p1, Offset p2, Offset p3, Paint paint) {
