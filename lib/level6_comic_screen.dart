@@ -68,27 +68,35 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
     _gameLoopTicker.start();
   }
 
-  // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО ТЕЛО МЕТОДА _updatePhysics:
+    // =========================================================================
+  // 📐 ИСПРАВЛЕННЫЙ ДВИЖОК ФИЗИКИ (СТРОГО НА ЛАТИНИЦЕ, ПОЛ И КОЛЛИЗИИ ИСПРАВЛЕНЫ)
+  // =========================================================================
   void _updatePhysics(double dt) {
     setState(() {
-      // ИСПРАВЛЕНО: Линия реального пола опущена до 0.86, чтобы Ваня стоял чётко на плитке!
+      // Линия реального пола опущена до 0.86, чтобы Ваня стоял чётко на плитке!
       const double realGroundY = 0.86;
 
-      // 1. Горизонтальный бег Шерифа ногами по плитке пола
+      // 1. Горизонтальный бег Шерифа ногами по кнопкам
       if (_btnLeftPressed) {
-        _vanyaVx = -0.26; 
+        _vanyaVx = -0.26; // Умеренная, комфортная скорость назад
       } else if (_btnRightPressed) {
-        _vanyaVx = 0.26; 
+        _vanyaVx = 0.26; // Умеренная скорость вперед
       } else {
         _vanyaVx = 0.0; 
       }
 
       _vanyaX += _vanyaVx * dt;
 
-      // 2. Вертикальная гравитация и ЕЩЁ МЕНЬШИЙ ПРЫЖОК (Идеальная средняя высота)
+      // 2. Вертикальная гравитация и ИСПРАВЛЕННЫЙ СРЕДНИЙ ПРЫЖОК (Без вылета за экран!)
       if (_vanyaIsJumping) {
         _vanyaVy += 1.9 * dt; // Плотная гравитация
         _vanyaY += _vanyaVy * dt;
+
+        // ЗАЩИТА ОТ ВЫЛЕТА ЗА ЭКРАН: Если Ваня взлетает слишком высоко, жестко гасим скорость
+        if (_vanyaY < 0.08) {
+          _vanyaY = 0.08;
+          _vanyaVy = 0.0;
+        }
 
         // Фиксация приземления на реальный пол (с учётом радиуса Вани 0.05)
         if (_vanyaY >= realGroundY - 0.05) {
@@ -105,14 +113,14 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
       if (_vanyaX < 0.02) _vanyaX = 0.02;
       if (_vanyaX > 0.94) _vanyaX = 0.94;
 
-      // 3. ИСПРАВЛЕНО ГЕHИАЛЬHО: Коллизией обладает ТОЛЬКО САМА баррикада! 
+      // 3. ИСПРАВЛЕНО: Коллизией обладает ТОЛЬКО САМА баррикада (СТРОГО НА ЛАТИНИЦЕ)
       // Никаких невидимых стен до неба. Через неё можно перепрыгнуть или пройти НАД ней!
       if (_isBarricadeAlive) {
-        double баррикадаW = 0.025; // Соответствует её UI-ширине
-        double баррикадаH = 0.16;  // Соответствует её UI-высоте
+        double barricadeW = 0.025; // Ширина баррикады на латинице
+        double barricadeH = 0.16;  // Высота баррикады на латинице
         double bLeft = _barricadeX;
         double bRight = _barricadeX + 0.035;
-        double bTop = realGroundY - баррикадаH; // Верхняя грань куба на полу
+        double bTop = realGroundY - barricadeH; // Верхняя грань куба на полу
 
         // Проверяем пересечение с физическим телом блока
         if (_vanyaX >= bLeft - 0.02 && _vanyaX <= bRight && _vanyaY >= bTop - 0.04) {
@@ -150,7 +158,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
           // Удар в бок — минус жизнь и аккуратный респавн на пол у левого края
           if (_vanyaHearts > 0) {
             _vanyaHearts--;
-            AudioManager.playMiss();
+            AudioManager.popContext != null ? AudioManager.playMiss() : null; // Безопасный проигрыш эффекта
             _vanyaX = 0.15;
             _vanyaY = realGroundY - 0.05;
           }
