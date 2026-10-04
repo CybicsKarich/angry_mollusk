@@ -154,8 +154,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
           _vanyaVy = -0.42; 
           _vanyaIsJumping = true;
           _vanyaX -= 0.06; 
-        } else {
-          // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО НА СТРОКЕ ~161:
+        // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО НА СТРОКЕ ~161:
         } else {
           // Удар в бок — минус жизнь и аккуратный респавн на пол у левого края
           if (_vanyaHearts > 0) {
