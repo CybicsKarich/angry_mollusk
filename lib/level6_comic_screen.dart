@@ -522,7 +522,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                           boxShadow: const [BoxShadow(color: Colors.blueAccent, blurRadius: 6, spreadRadius: 1)],
                         ),
                         child: const Center(
-                          child: Text("V", style: TextStyle(fontSize: 8, fontWeight: FontWeight.black, color: Colors.white)),
+                          child: Text("V", style: TextStyle(fontSize: 8, fontWeight: FontWeight.w900, color: Colors.white)),
                         ),
                       ),
                     ),
@@ -665,7 +665,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                             padding: const EdgeInsets.only(left: 8.0),
                             child: Text(
                               "+1", 
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.black, color: Colors.blue.shade300, shadows: const [Shadow(color: Colors.blue, blurRadius: 4)]),
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue.shade300, shadows: const [Shadow(color: Colors.blue, blurRadius: 4)]),
                             ),
                           ),
                       ],
