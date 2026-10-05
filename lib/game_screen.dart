@@ -656,8 +656,8 @@ class AngryMolluskGame extends FlameGame with DragCallbacks {
 
       // ИСПРАВЛЕНО: Новый сбалансированный подсчёт звёзд для 4 уровня!
       targetScore1Star = 350;
-      targetScore2Stars = 400;
-      targetScore3Stars = 450;
+      targetScore2Stars = 360;
+      targetScore3Stars = 430;
 
 
       // 🏢 ЗДАНИЕ №1: ВЫСОКАЯ УЗКАЯ БАШНЯ ИЗ БРОНЕСТЕКЛА (Спереди на координате 1.22)
