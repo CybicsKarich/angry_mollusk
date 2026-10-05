@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'audio_manager.dart';
 import 'main.dart';
+import 'level6_bad_route_screen.dart';
 
 class Level6GoodRouteScreen extends StatefulWidget {
   const Level6GoodRouteScreen({super.key});
@@ -91,26 +92,38 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
     setState(() {
       const double realGroundY = 0.88;
 
-      // Обновляем внутренние таймеры анимации ауры и эффектов подбора
       if (_isAngryMode) _angryTimer += dt;
       if (_plusOneUiTimer > 0) _plusOneUiTimer -= dt;
       if (_heartPulseTimer > 0) _heartPulseTimer -= dt;
 
-      // ТЕСТОВЫЙ СПАВН КАПСУЛЫ: Строго раз в 5 секунд на арене появляется таблетка
-      if (!_isPillSpawned && _bossCurrentHp > 0) {
+      // ИСПРАВЛЕНО: Теперь капсула проверяется каждые 5 секунд с честным шансом 15%!
+      if (!_isPillSpawned && _bossCurrentHp > 0 && _vanyaHearts > 0) {
         _pillSpawnTimer += dt;
         if (_pillSpawnTimer >= 5.0) {
-          _pillSpawnTimer = 0.0;
-          _isPillSpawned = true;
-          // Таблетка спавнится моментально в случайной точке воздуха или земли
-          _pillX = 0.10 + _gameRand.nextDouble() * 0.50; // В зоне досягаемости игрока
-          _pillY = 0.40 + _gameRand.nextDouble() * (realGroundY - 0.45);
+          _pillSpawnTimer = 0.0; // Сбрасываем таймер в любом случае
+          
+          // Генерируем случайное число от 0 до 99. Если оно меньше 15 — спавним таблетку!
+          if (_gameRand.nextInt(100) < 15) {
+            _isPillSpawned = true;
+            _pillX = 0.10 + _gameRand.nextDouble() * 0.50; 
+            _pillY = 0.40 + _gameRand.nextDouble() * (realGroundY - 0.45);
+            print("Удача! Выпал шанс 15%, синяя таблетка материализовалась на арене.");
+          } else {
+            print("Проверка 5 секунд: шанс 15% не выпал, ждем следующего цикла.");
+          }
         }
+      }
+
+      // Если Шериф уже погиб — физику и управление полностью замораживаем
+      if (_vanyaHearts <= 0) {
+        _vanyaVx = 0.0;
+        _vanyaVy = 0.0;
+        return;
       }
 
       // 1. Горизонтальный бег Шерифа ногами по кнопкам
       if (_btnLeftPressed) {
-        _vanyaVx = _isAngryMode ? -0.42 : -0.26; // В режиме ярости скорость бега возрастает!
+        _vanyaVx = _isAngryMode ? -0.42 : -0.26; 
       } else if (_btnRightPressed) {
         _vanyaVx = _isAngryMode ? 0.42 : 0.26; 
       } else {
@@ -141,20 +154,20 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
       if (_vanyaX < 0.02) _vanyaX = 0.02;
       if (_vanyaX > 0.94) _vanyaX = 0.94;
 
-      // ПРОВЕРКА ПОДБОРА СИНЕЙ ТАБЛЕТКИ ШЕРИФОМ
+      // Проверка подбора синей таблетки
       if (_isPillSpawned) {
         double pdx = _vanyaX - _pillX;
         double pdy = _vanyaY - _pillY;
         double pDist = sqrt(pdx * pdx + pdy * pdy);
         
         if (pDist < 0.06) {
-          _isPillSpawned = false; // Капсула сразу исчезает
-          _vanyaHearts += 1; // Дает +1 жизнь в верхний интерфейс
-          _plusOneUiTimer = 0.6; // Запускаем вспышку синего крестика «+1»
-          _heartPulseTimer = 0.8; // Запускаем плавную пульсацию сердечка
+          _isPillSpawned = false; 
+          _vanyaHearts += 1; 
+          _plusOneUiTimer = 0.6; 
+          _heartPulseTimer = 0.8; 
           
-          _isAngryMode = true; // Активируем бессмертие и кислотное небо
-          AudioManager.playRage(); // Громко включаем твой андеграундный трек ярости вторым потоком!
+          _isAngryMode = true; 
+          AudioManager.playRage(); 
         }
       }
 
@@ -178,27 +191,24 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
         }
       }
 
-      // 4. СТОЛКНОВЕНИЕ С ДОНОМ МОЛЛЮСКОМ (С УЧЁТОМ РЕЖИМА ЯРОСТИ)
+      // 4. Столкновение с Доном Моллюском
       double dx = _vanyaX - _bossX;
       double dy = _vanyaY - (realGroundY - 0.12);
       double distance = sqrt(dx * dx + dy * dy);
 
       if (distance < 0.12 && _bossCurrentHp > 0) {
-        // ИНВЕРСИЯ БОЯ: Если Ваня под виагрой — он может бить Дона в ЛЮБУЮ точку тела с бессмертием!
         if (_isAngryMode) {
           _bossCurrentHp -= 1.0; 
-          AudioManager.playPigHit(); // Твой каноничный ор Вани!
+          AudioManager.playPigHit(); 
           
-          _isAngryMode = false; // Режим ярости и кислотное небо МГНОВЕННО ОТКЛЮЧАЮТСЯ после 1 удара!
-          AudioManager.stopRage(); // Тушим крик ярости
+          _isAngryMode = false; 
+          AudioManager.stopRage(); 
           
-          // Отбрасывание назад влево по дуге для динамики
           _vanyaVx = -0.36;
           _vanyaVy = -0.46; 
           _vanyaIsJumping = true;
           _vanyaX -= 0.08;
         } else {
-          // ОБЫЧНЫЙ РЕЖИМ БЕЗ ТАБЛЕТКИ: Урон наносится строго прыжком по макушке головы
           if (_vanyaVy > 0 && _vanyaY < realGroundY - 0.03) {
             _bossCurrentHp -= 1.0; 
             AudioManager.playPigHit(); 
@@ -208,18 +218,26 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
             _vanyaIsJumping = true;
             _vanyaX -= 0.06; 
           } else {
-            // Касание бока без таблетки — минус жизнь и респавн
+            // Касание бока без таблетки — минус жизнь
             if (_vanyaHearts > 0) {
               _vanyaHearts--;
-              AudioManager.playMiss(); 
-              _vanyaX = 0.15;
-              _vanyaY = realGroundY - 0.05;
+              if (_vanyaHearts > 0) {
+                // Если сердца еще есть — обычный респавн к левому краю пола
+                AudioManager.playMiss(); 
+                _vanyaX = 0.15;
+                _vanyaY = realGroundY - 0.05;
+              } else {
+                // ИСПРАВЛЕНО: Жизни на нуле! Намертво тушим музыку уровня и включаем проигрыш
+                AudioManager.playGameOver();
+                print("Шериф погиб. Открывается оверлей поражения с переходом в Плохую концовку.");
+              }
             }
           }
         }
       }
     });
   }
+
 
 
 
@@ -842,6 +860,72 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                       child: const Text("В МЕНЮ УРОВНЕЙ", style: TextStyle(color: Colors.white)),
                     ),
                   ],
+                ),
+              ),
+            ),
+           // ТОЧЕЧНО ВСТАВИТЬ В САМЫЙ КОНЕЦ СПИСКА CHILDREN В МЕТОДЕ _buildLiveGameplayArena:
+
+          // =========================================================================
+          // 🟥 ИСПРАВЛЕНО ПО ТЗ: ОВЕРЛЕЙ ПРОИГРЫША ПРИ ОБНУЛЕНИИ СЕРДЕЦ ШЕРИФА
+          // =========================================================================
+          if (_vanyaHearts <= 0)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.85), // Плотное зловещее затемнение арены
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+                    constraints: const BoxConstraints(maxWidth: 320),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1A0A0A), // Темно-бордовый оттенок проигрыша
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFB71C1C), width: 3),
+                      boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 15)],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          "ШЕРИФ ПОВЕРЖЕН",
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFFB71C1C), letterSpacing: 1.5, decoration: TextDecoration.none),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          "У вас закончились жизни. Замок Дона Моллюска обрушился...",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal, color: Colors.white70, decoration: TextDecoration.none),
+                        ),
+                        const SizedBox(height: 20),
+                        
+                        // РОДНАЯ И ЕДИНСТВЕННАЯ КНОПКА «КОНЕЦ» ДЛЯ ВЫЛЕТА В ПЛОХУЮ КОНЦОВКУ
+                        SizedBox(
+                          width: double.infinity,
+                          height: 44,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFB71C1C),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              elevation: 5,
+                            ),
+                            onPressed: () {
+                              // Полностью зачищаем звуки арены финала
+                              AudioManager.stopAllLevelSounds();
+                              
+                              // ПРИНУДИТЕЛЬНО И МОМЕНТАЛЬНО ПЕРЕНАПРАВЛЯЕМ ИГРОКА НА ЭКРАН ПЛОХОЙ КОНЦОВКИ!
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (context) => const Level6BadRouteScreen()), // Твой класс из level6_bad_route_screen.dart
+                              );
+                            },
+                            child: const Text(
+                              "КОНЕЦ", 
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.2),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
