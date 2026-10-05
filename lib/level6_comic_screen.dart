@@ -87,34 +87,33 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
     _gameLoopTicker.start();
   }
 
-   // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО ТЕЛО МЕТОДА _updatePhysics:
+     // =========================================================================
+  // 📐 ЧЕСТНЫЙ ДВИЖОК ФИЗИКИ: НИКАКИХ СКРЫТЫХ БАРЬЕРОВ И ВЕРТИКАЛЬНЫХ СТЕН!
+  // =========================================================================
   void _updatePhysics(double dt) {
     setState(() {
       const double realGroundY = 0.88;
 
+      // Обновляем внутренние таймеры анимации ауры и эффектов подбора
       if (_isAngryMode) _angryTimer += dt;
       if (_plusOneUiTimer > 0) _plusOneUiTimer -= dt;
       if (_heartPulseTimer > 0) _heartPulseTimer -= dt;
 
-      // ИСПРАВЛЕНО: Теперь капсула проверяется каждые 5 секунд с честным шансом 15%!
+      // Честный спавн капсулы каждые 5 секунд с шансом 15%
       if (!_isPillSpawned && _bossCurrentHp > 0 && _vanyaHearts > 0) {
         _pillSpawnTimer += dt;
         if (_pillSpawnTimer >= 5.0) {
-          _pillSpawnTimer = 0.0; // Сбрасываем таймер в любом случае
-          
-          // Генерируем случайное число от 0 до 99. Если оно меньше 15 — спавним таблетку!
+          _pillSpawnTimer = 0.0;
           if (_gameRand.nextInt(100) < 15) {
             _isPillSpawned = true;
             _pillX = 0.10 + _gameRand.nextDouble() * 0.50; 
             _pillY = 0.40 + _gameRand.nextDouble() * (realGroundY - 0.45);
-            print("Удача! Выпал шанс 15%, синяя таблетка материализовалась на арене.");
-          } else {
-            print("Проверка 5 секунд: шанс 15% не выпал, ждем следующего цикла.");
+            print("Удача! Выпал шанс 15%, синяя таблетка материализовалась.");
           }
         }
       }
 
-      // Если Шериф уже погиб — физику и управление полностью замораживаем
+      // Если Шериф погиб — полностью замораживаем симуляцию
       if (_vanyaHearts <= 0) {
         _vanyaVx = 0.0;
         _vanyaVy = 0.0;
@@ -132,66 +131,78 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
 
       _vanyaX += _vanyaVx * dt;
 
-      // 2. Вертикальная гравитация и прыжок
+      // 2. Вертикальная гравитация и скорректированный средний прыжок
       if (_vanyaIsJumping) {
         _vanyaVy += 1.9 * dt; 
         _vanyaY += _vanyaVy * dt;
 
-        if (_vanyaY < 0.08) {
-          _vanyaY = 0.08;
-          _vanyaVy = 0.0;
-        }
-
+        // Фиксация приземления на реальный пол (с учётом радиуса Вани 0.05)
         if (_vanyaY >= realGroundY - 0.05) {
           _vanyaY = realGroundY - 0.05;
           _vanyaVy = 0.0;
           _vanyaIsJumping = false;
         }
-      } else {
-        _vanyaY = realGroundY - 0.05;
       }
-
-      if (_vanyaX < 0.02) _vanyaX = 0.02;
-      if (_vanyaX > 0.94) _vanyaX = 0.94;
 
       // Проверка подбора синей таблетки
       if (_isPillSpawned) {
         double pdx = _vanyaX - _pillX;
         double pdy = _vanyaY - _pillY;
         double pDist = sqrt(pdx * pdx + pdy * pdy);
-        
         if (pDist < 0.06) {
           _isPillSpawned = false; 
           _vanyaHearts += 1; 
           _plusOneUiTimer = 0.6; 
           _heartPulseTimer = 0.8; 
-          
           _isAngryMode = true; 
           AudioManager.playRage(); 
         }
       }
 
-      // 3. Коллизия баррикады
+      // 3. ИСПРАВЛЕНО НАЧИСТО: Честная коробка баррикады (Без невидимых стен до неба!)
+      bool isStandingOnBarricade = false;
       if (_isBarricadeAlive) {
         double barricadeW = 0.025; 
         double barricadeH = 0.16;  
         double bLeft = _barricadeX;
         double bRight = _barricadeX + 0.035;
-        double bTop = realGroundY - barricadeH;
+        double bTop = realGroundY - barricadeH; // Верхняя крыша блока
 
-        if (_vanyaX >= bLeft - 0.02 && _vanyaX <= bRight && _vanyaY >= bTop - 0.04) {
-          if (_vanyaVy > 0 && _vanyaY < bTop + 0.02) {
-            _vanyaY = bTop - 0.05; 
+        // Коллизия обсчитывается ТОЛЬКО если Ваня пересекает физические габариты коробки
+        if (_vanyaX >= bLeft - 0.02 && _vanyaX <= bRight && _vanyaY >= bTop - 0.05 && _vanyaY <= realGroundY) {
+          
+          // А) Ваня падает сверху — он приземляется НА КРЫШУ баррикады и стоит НАД ней
+          if (_vanyaVy > 0 && _vanyaY <= bTop + 0.02) {
+            _vanyaY = bTop - 0.05; // Ножки ровно на крыше
             _vanyaVy = 0.0;
             _vanyaIsJumping = false;
+            isStandingOnBarricade = true;
           } 
-          else if (_vanyaY > bTop - 0.02) {
+          // Б) Ваня бежит сбоку по полу — он просто упирается в неё, как в кубик
+          else if (_vanyaY > bTop - 0.01) {
             _vanyaX = _vanyaVx > 0 ? bLeft - 0.021 : bRight + 0.001;
+          }
+        }
+
+        // Если Ваня стоял на баррикаде, но сделал шаг влево/вправо и сошёл с неё — он плавно падает
+        if (!isStandingOnBarricade && !_vanyaIsJumping && _vanyaY == bTop - 0.05) {
+          if (_vanyaX < bLeft - 0.02 || _vanyaX > bRight) {
+            _vanyaIsJumping = true;
+            _vanyaVy = 0.0; // Начинает падать вниз под действием гравитации
           }
         }
       }
 
-      // 4. Столкновение с Доном Моллюском
+      // Если Ваня не прыгает и не стоит на баррикаде — он монолитно бегает по полу
+      if (!_vanyaIsJumping && !isStandingOnBarricade && _vanyaY != (realGroundY - 0.16 - 0.05)) {
+        _vanyaY = realGroundY - 0.05;
+      }
+
+      // Ограничение передвижения краями экрана смартфона
+      if (_vanyaX < 0.02) _vanyaX = 0.02;
+      if (_vanyaX > 0.94) _vanyaX = 0.94;
+
+      // 4. СТОЛКНОВЕНИЕ С ДОНОМ МОЛЛЮСКОМ
       double dx = _vanyaX - _bossX;
       double dy = _vanyaY - (realGroundY - 0.12);
       double distance = sqrt(dx * dx + dy * dy);
@@ -200,7 +211,6 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
         if (_isAngryMode) {
           _bossCurrentHp -= 1.0; 
           AudioManager.playPigHit(); 
-          
           _isAngryMode = false; 
           AudioManager.stopRage(); 
           
@@ -218,18 +228,15 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
             _vanyaIsJumping = true;
             _vanyaX -= 0.06; 
           } else {
-            // Касание бока без таблетки — минус жизнь
             if (_vanyaHearts > 0) {
               _vanyaHearts--;
               if (_vanyaHearts > 0) {
-                // Если сердца еще есть — обычный респавн к левому краю пола
                 AudioManager.playMiss(); 
                 _vanyaX = 0.15;
                 _vanyaY = realGroundY - 0.05;
               } else {
-                // ИСПРАВЛЕНО: Жизни на нуле! Намертво тушим музыку уровня и включаем проигрыш
                 AudioManager.playGameOver();
-                print("Шериф погиб. Открывается оверлей поражения с переходом в Плохую концовку.");
+                print("Шериф потерял последнее сердце. Запускается оверлей поражения.");
               }
             }
           }
