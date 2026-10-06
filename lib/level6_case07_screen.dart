@@ -221,11 +221,13 @@ class _Case07FloorTilesPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
+// ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО ДВА КЛАССА В САМОМ КОНЦЕ ФАЙЛА LIB/LEVEL6_CASE07_SCREEN.DART:
+
 class _Case07MolluskSmilePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final whitePaint = Paint()..color = Colors.white..style = PaintingStyle.fill;
-    final linePaint = Paint()..color = Colors.white.withOpacity(0.5)..style = PaintingStyle.stroke..strokeWidth = 1.4;
+    // Делаем цвет зубов и глаз чуть приглушеннее, чтобы босс казался темнее и мрачнее
+    final whitePaint = Paint()..color = Colors.white.withOpacity(0.85)..style = PaintingStyle.fill;
 
     // 1. ДВА ЗЛОБНЫХ ГЛАЗА-РОМБА ДОНА МОЛЛЮСКА
     final leftEye = Path()
@@ -244,13 +246,9 @@ class _Case07MolluskSmilePainter extends CustomPainter {
       ..close();
     canvas.drawPath(rightEye, whitePaint);
 
-    // 2. ДУГА ЛИЦА ЗЛОДЕЯ
-    final faceOutline = Path()
-      ..moveTo(size.width * 0.02, size.height * 0.1)
-      ..cubicTo(size.width * 0.1, size.height * 0.95, size.width * 0.9, size.height * 0.95, size.width * 0.98, size.height * 0.1);
-    canvas.drawPath(faceOutline, linePaint);
+    // 2. ИСПРАВЛЕНО ТОЧЕЧНО: Дуга очертания лица полностью УДАЛЕНА сквозь весь метод!
 
-    // 3. ЗУБЫ-КВАДРАТИКИ, ВЫСТРОЕННЫЕ ПО УЛЫБКЕ
+    // 3. ЗУБЫ-КВАДРАТИКИ, ВЫСТРОЕННЫЕ ПО ЛИНИИ УЛЫБКИ СКВОЗЬ МРАК
     int teethCount = 7;
     for (int i = 0; i < teethCount; i++) {
       double offsetX = (size.width * 0.10) + (i * (size.width * 0.80 / (teethCount - 1)));
@@ -269,26 +267,25 @@ class _Case07DetailedSheriffHatPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final hatPaint = Paint()..color = const Color(0xFF795548)..style = PaintingStyle.fill;
     final brimPaint = Paint()..color = const Color(0xFF5D4037)..style = PaintingStyle.fill;
-    final ribbonPaint = Paint()..color = const Color(0xFF212121)..style = PaintingStyle.fill; // Черная лента ковбоя
+    final ribbonPaint = Paint()..color = const Color(0xFF212121)..style = PaintingStyle.fill; 
     final borderPaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.4;
-    final starPaint = Paint()..color = const Color(0xFFFFD54F)..style = PaintingStyle.fill; // Золотая звезда шерифа из комикса
+    final starPaint = Paint()..color = const Color(0xFFFFD54F)..style = PaintingStyle.fill; 
 
     canvas.save();
-    // Шляпа лежит на боку на плитке зала под красивым углом
+    // ИСПРАВЛЕНО ТОЧЕЧНО: Центрируем шляпу и удаляем наклон canvas.rotate, чтобы она лежала строго ГОРИЗОНТАЛЬНО!
     canvas.translate(size.width / 2, size.height / 2);
-    canvas.rotate(0.25);
 
-    // 1. Широкие изогнутые ковбойские поля шляпы
+    // 1. Широкие ровные ковбойские поля шляпы
     final brimPath = Path()
       ..moveTo(-size.width * 0.6, 4)
-      ..cubicTo(-size.width * 0.3, 1, size.width * 0.3, 1, size.width * 0.6, 4)
+      ..cubicTo(-size.width * 0.3, 2, size.width * 0.3, 2, size.width * 0.6, 4)
       ..lineTo(size.width * 0.5, 7)
-      ..cubicTo(size.width * 0.2, 4, -size.width * 0.2, 4, -size.width * 0.5, 7)
+      ..cubicTo(size.width * 0.2, 5, -size.width * 0.2, 5, -size.width * 0.5, 7)
       ..close();
     canvas.drawPath(brimPath, brimPaint);
     canvas.drawPath(brimPath, borderPaint);
 
-    // 2. Высокая тулья шляпы с характерной впадиной сверху по фото 1 уровня
+    // 2. Высокая тулья шляпы шерифа
     final hatPath = Path()
       ..moveTo(-12, 2)
       ..lineTo(-9, -10)
@@ -298,12 +295,12 @@ class _Case07DetailedSheriffHatPainter extends CustomPainter {
     canvas.drawPath(hatPath, hatPaint);
     canvas.drawPath(hatPath, borderPaint);
 
-    // 3. Черная стильная ковбойская лента в основании тульи
+    // 3. Черная ковбойская лента
     final ribbonRect = Rect.fromLTWH(-11.5, -1, 23, 3);
     canvas.drawRect(ribbonRect, ribbonPaint);
     canvas.drawRect(ribbonRect, borderPaint..strokeWidth = 0.5);
 
-    // 4. Полноценная золотая звезда шерифа по центру шляпы
+    // 4. Полноценная золотая звезда шерифа по центру
     final starPath = Path()
       ..moveTo(0, -9)
       ..lineTo(1.8, -5)
@@ -325,4 +322,5 @@ class _Case07DetailedSheriffHatPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
+
 
