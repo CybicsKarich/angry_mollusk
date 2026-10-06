@@ -9,7 +9,7 @@ class AudioManager {
   static final AudioPlayer _rainPlayer = AudioPlayer();
   static DateTime? _lastMainSoundStartTime; 
   static String _currentMainSound = ""; // Теперь только 'drops', 'boss_phase2' или 'menu'
-  static String currentZone = "menu";
+  
 
   static bool _canInterruptCurrentMainSound(String newSound) {
     if (_lastMainSoundStartTime == null || _currentMainSound == "") return true;
@@ -186,41 +186,37 @@ static Future<void> playPaperRustle() async {
     }
   }
 
-   // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО ТЕЛО МЕТОДА startCastleDrops():
-  static Future<void> startCastleDrops() async {
-    currentZone = "level6"; // Выставляем жетон 6 уровня
-    
+   static Future<void> startCastleDrops() async {
     try {
-      // Начисто тушим дождь 5 уровня из памяти телефона Android
+      // Начисто тушим дождь 5 уровня и звуковые эффекты эффектов
       await _rainPlayer.stop();
       await _fxPlayer.stop();
-
-      // Сбрасываем плеер фоновой музыки перед включением капель
+      
+      // Сбрасываем плеер фоновой музыки перед включением капель (БЕЗ .release()!)
       await _finalMenuPlayer.stop();
 
       // Усердная настройка под мистическую атмосферу логова Дона Моллюска
       await _finalMenuPlayer.setVolume(1.0); 
       await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
       
-      // Капли лежат в папке music/
+      // Капли лежат там же, где и музыка — в папке music/
       await _finalMenuPlayer.play(AssetSource('music/castle_drops.mp3')); 
-      print("Звук дождя 5 уровня полностью выключен. Эмбиент капель 6 уровня запущен.");
+      print("Звук дождя потушен. Бронебойный эмбиент капель из папки music запущен.");
     } catch (e) {
       print("Ошибка при запуске капель замка: $e");
     }
   }
 
-
-    // ТОЧЕЧНО ДОБАВИТЬ В КЛАСС ДЛЯ ВТОРОЙ ФАЗЫ БОССА НА 4 ХП:
-  static Future<void> startBossPhase2Music() async {
-    if (currentZone != "level6") return; // Включается строго на 6 уровне
+    static Future<void> startBossPhase2Music() async {
     try {
-      // Глушим капли замка
+      // Останавливаем капли тронного зала
       await _finalMenuPlayer.stop();
 
-      // Запускаем динамичный боевой рок
-      await _finalMenuPlayer.setVolume(0.90); 
+      // Выставляем боевые параметры
+      await _finalMenuPlayer.setVolume(0.90); // Музыка босса должна качать!
       await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
+      
+      // Название трека для второй фазы, лежит строго в music/
       await _finalMenuPlayer.play(AssetSource('music/boss_battle.mp3'));
       print("ВТОРАЯ ФАЗА! Запущена динамичная музыка босса из папки music.");
     } catch (e) {
@@ -382,17 +378,13 @@ static Future<void> playPaperRustle() async {
   // БЛОК ГРОЗЫ И ЛИВНЯ ДЛЯ ЭПИЧНОГО 5 УРОВНЯ
   // =========================================================================
 
-    // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО ТЕЛО МЕТОДА startLevel5Rain():
-  static Future<void> startLevel5Rain() async {
-    currentZone = "level5"; // Фиксируем зону 5 уровня
+    static Future<void> startLevel5Rain() async {
     try {
       await _finalMenuPlayer.stop(); // Гарантированно убираем музыку меню во время ливня
       await _rainPlayer.setVolume(0.45); 
       await _rainPlayer.setReleaseMode(ReleaseMode.loop); 
       await _rainPlayer.play(AssetSource('music/rain_ambient.mp3'), mode: PlayerMode.lowLatency);
-    } catch (e) {
-      print("Ошибка запуска звука капель кочка: $e");
-    }
+    } catch (e) {print("Ошибка запуска звука капель кочка: $e");}
   }
 
 
