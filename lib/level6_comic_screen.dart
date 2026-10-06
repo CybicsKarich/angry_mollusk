@@ -919,7 +919,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                             ),
                             onPressed: () {
                               // Полностью зачищаем звуки арены финала
-                              AudioManager.stopAllLevelSounds();
+                              AudioManager.startCastleDrops();
                               
                               // ПРИНУДИТЕЛЬНО И МОМЕНТАЛЬНО ПЕРЕНАПРАВЛЯЕМ ИГРОКА НА ЭКРАН ПЛОХОЙ КОНЦОВКИ!
                               Navigator.pushReplacement(
