@@ -9,6 +9,7 @@ class AudioManager {
   static final AudioPlayer _rainPlayer = AudioPlayer();
   static DateTime? _lastMainSoundStartTime; 
   static String _currentMainSound = ""; // Теперь только 'drops', 'boss_phase2' или 'menu'
+  static String currentZone = "menu";
 
   static bool _canInterruptCurrentMainSound(String newSound) {
     if (_lastMainSoundStartTime == null || _currentMainSound == "") return true;
@@ -162,7 +163,8 @@ static Future<void> playPaperRustle() async {
     
 
     static Future<void> stopLevelAudioAndPlayMenu() async {
-    try {
+    currentZone = "menu";
+      try {
       // 1. Мгновенно глушим все игровые эффекты и звуки уровня
       _isStretching = false;
       await _stretchPlayer.stop();
@@ -184,39 +186,41 @@ static Future<void> playPaperRustle() async {
     }
   }
 
-   // ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД ЗАПУСКА КАПЕЛЬ 6 УРОВНЯ В КЛАССЕ AudioManager:
+   // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО ТЕЛО МЕТОДА startCastleDrops():
   static Future<void> startCastleDrops() async {
+    currentZone = "level6"; // Выставляем жетон 6 уровня
+    
     try {
-      // Начисто тушим дождь 5 уровня и звуковые эффекты эффектов
+      // Начисто тушим дождь 5 уровня из памяти телефона Android
       await _rainPlayer.stop();
       await _fxPlayer.stop();
-      
-      // Сбрасываем плеер фоновой музыки перед включением капель (БЕЗ .release()!)
+
+      // Сбрасываем плеер фоновой музыки перед включением капель
       await _finalMenuPlayer.stop();
 
       // Усердная настройка под мистическую атмосферу логова Дона Моллюска
       await _finalMenuPlayer.setVolume(1.0); 
       await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
       
-      // Капли лежат там же, где и музыка — в папке music/
+      // Капли лежат в папке music/
       await _finalMenuPlayer.play(AssetSource('music/castle_drops.mp3')); 
-      print("Звук дождя потушен. Бронебойный эмбиент капель из папки music запущен.");
+      print("Звук дождя 5 уровня полностью выключен. Эмбиент капель 6 уровня запущен.");
     } catch (e) {
       print("Ошибка при запуске капель замка: $e");
     }
   }
 
-    // ТОЧЕЧНО ДОБАВИТЬ ДЛЯ ВТОРОЙ ФАЗЫ БОССА НА 4 ХП:
+
+    // ТОЧЕЧНО ДОБАВИТЬ В КЛАСС ДЛЯ ВТОРОЙ ФАЗЫ БОССА НА 4 ХП:
   static Future<void> startBossPhase2Music() async {
+    if (currentZone != "level6") return; // Включается строго на 6 уровне
     try {
-      // Останавливаем капли тронного зала
+      // Глушим капли замка
       await _finalMenuPlayer.stop();
 
-      // Выставляем боевые параметры
-      await _finalMenuPlayer.setVolume(0.90); // Музыка босса должна качать!
+      // Запускаем динамичный боевой рок
+      await _finalMenuPlayer.setVolume(0.90); 
       await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
-      
-      // Название трека для второй фазы, лежит строго в music/
       await _finalMenuPlayer.play(AssetSource('music/boss_battle.mp3'));
       print("ВТОРАЯ ФАЗА! Запущена динамичная музыка босса из папки music.");
     } catch (e) {
@@ -378,14 +382,19 @@ static Future<void> playPaperRustle() async {
   // БЛОК ГРОЗЫ И ЛИВНЯ ДЛЯ ЭПИЧНОГО 5 УРОВНЯ
   // =========================================================================
 
-    static Future<void> startLevel5Rain() async {
+    // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО ТЕЛО МЕТОДА startLevel5Rain():
+  static Future<void> startLevel5Rain() async {
+    currentZone = "level5"; // Фиксируем зону 5 уровня
     try {
       await _finalMenuPlayer.stop(); // Гарантированно убираем музыку меню во время ливня
       await _rainPlayer.setVolume(0.45); 
       await _rainPlayer.setReleaseMode(ReleaseMode.loop); 
       await _rainPlayer.play(AssetSource('music/rain_ambient.mp3'), mode: PlayerMode.lowLatency);
-    } catch (e) {print("Ошибка запуска звука капель кочка: $e");}
+    } catch (e) {
+      print("Ошибка запуска звука капель кочка: $e");
+    }
   }
+
 
 
   // 2. БЕЗОПАСНЫЙ ГЕТТЕР СТУСА ДЛЯ ИГРОВОГО ЦИКЛА (Защита от зависаний)
