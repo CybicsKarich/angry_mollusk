@@ -4,6 +4,7 @@ import 'package:flutter/scheduler.dart';
 import 'audio_manager.dart';
 import 'main.dart';
 import 'level6_bad_route_screen.dart';
+import 'level6_case07_screen.dart';
 
 class Level6GoodRouteScreen extends StatefulWidget {
   const Level6GoodRouteScreen({super.key});
@@ -923,7 +924,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                               // ПРИНУДИТЕЛЬНО И МОМЕНТАЛЬНО ПЕРЕНАПРАВЛЯЕМ ИГРОКА НА ЭКРАН ПЛОХОЙ КОНЦОВКИ!
                               Navigator.pushReplacement(
                                 context,
-                                MaterialPageRoute(builder: (context) => const Level6BadRouteScreen()), // Твой класс из level6_bad_route_screen.dart
+                                MaterialPageRoute(builder: (context) => const Level6Case07Screen()), // Твой класс из level6_bad_route_screen.dart
                               );
                             },
                             child: const Text(
