@@ -1962,8 +1962,65 @@ class Bunnyhop {
       return;
     }
 
+        // Применяем гравитацию (вместо первой удалённой строки)
     velocity = Offset(velocity.dx, velocity.dy + 0.35 * dt);
-    position = Offset(position.dx + velocity.dx * dt, position.dy + velocity.dy * dt);
+    
+    // Защита от Tunneling-эффекта: делим шаг на 2 под-шага, если летим быстро (под таблеткой)
+    double moveX = velocity.dx * dt;
+    double moveY = velocity.dy * dt;
+    int steps = (isAngryMode) ? 2 : 1;
+    
+    for (int step = 0; step < steps; step++) {
+      position = Offset(position.dx + moveX / steps, position.dy + moveY / steps);
+      
+      // Проверяем столкновения на каждом микро-шаге, чтобы гарантированно не пролететь сквозь стены
+      for (var block in blocks) { 
+        if (!block.isBroken && !block.shouldRemove &&
+            position.dx >= block.x && position.dx <= block.x + block.w &&
+            position.dy >= block.y && position.dy <= block.y + block.h) {
+
+          // Хак для сундука
+          if (block.isSecretChest) {
+            velocity = Offset.zero; 
+            position = Offset(block.x + block.w / 2, block.y - 0.02); 
+            block.chestCapturedBird = true; 
+            return; 
+          }
+
+          // ДЛЯ УРОВНЯ 5: ЗАМОК-МОНОЛИТ НЕУЯЗВИМ!
+          if (level == 5 && block.x >= 1.50) { 
+            velocity = Offset(-velocity.dx * 0.15, 0.25); 
+            continue; 
+          }
+
+          // Хак для железа
+          if (block.isIronShield) {
+            velocity = Offset(-velocity.dx * 0.2, 0.1); 
+            return;
+          }
+
+          // ЖЕЛЕЗНАЯ ФИЗИКА БРОНЕСТЕКЛА НА 4 УРОВНЕ!
+          if (block.isGlassBlock) {
+            if (!isAngryMode) {
+              velocity = Offset.zero; 
+              return; 
+            } else {
+              block.hit(velocity);
+              velocity = Offset(velocity.dx * 0.35, velocity.dy * 0.35); 
+              continue; 
+            }
+          }
+
+          block.hit(velocity); 
+          if (block.isStone) {
+            velocity = Offset(velocity.dx * 0.35, velocity.dy * 0.35);
+          } else {
+            velocity = Offset(velocity.dx * 0.65, velocity.dy * 0.65);
+          }
+        }
+      }
+    } // Конец безопасного цикла перемещения
+
 
     if (isInLoopRotation) {
       loopAngle += loopSpeed * dt;
@@ -2058,54 +2115,7 @@ class Bunnyhop {
       return;
     }
 
-        // Столкновение с кубиками замка
-    for (var block in blocks) { 
-        if (!block.isBroken && !block.shouldRemove &&
-          position.dx >= block.x && position.dx <= block.x + block.w &&
-          position.dy >= block.y && position.dy <= block.y + block.h) {
-
-        // Хак для сундука
-        if (block.isSecretChest) {
-          velocity = Offset.zero; 
-          position = Offset(block.x + block.w / 2, block.y - 0.02); 
-          block.chestCapturedBird = true; 
-          return; 
-        }
-
-        // ИСПРАВЛЕНО ДЛЯ УРОВНЯ 5: ЗАМОК-МОНОЛИТ НЕУЯЗВИМ!
-        if (level == 5 && block.x >= 1.50) { 
-          // Ваня врезается в стену замка, отскакивает назад и падает вниз к двери
-          velocity = Offset(-velocity.dx * 0.15, 0.25); 
-          continue; 
-        }
-            // Хак для железа
-        if (block.isIronShield) {
-          velocity = Offset(-velocity.dx * 0.2, 0.1); 
-          return;
-        }
-
-        // ИСПРАВЛЕНО: ЖЕЛЕЗНАЯ ФИЗИКА БРОНЕСТЕКЛА НА 4 УРОВНЕ!
-        if (block.isGlassBlock) {
-          if (!isAngryMode) {
-            // ТАКТИКА 1: ОБЫЧНЫЙ БАННИХОП. 0% пробиваемости, скорость падает в ноль, стекло целое!
-            velocity = Offset.zero; 
-            return; // Птица бессильно отлипает и падает вниз
-          } else {
-            // ТАКТИКА 2: ЗЛОЙ БАННИХОП ПОД ТАБЛЕТКОЙ. Прошибает стекло со скоростью камня!
-            block.hit(velocity);
-            velocity = Offset(velocity.dx * 0.35, velocity.dy * 0.35); // гасит скорость умеренно
-            continue; // Летит шибать замок дальше!
-          }
-        }
-
-        block.hit(velocity); 
-        if (block.isStone) {
-          velocity = Offset(velocity.dx * 0.35, velocity.dy * 0.35);
-        } else {
-          velocity = Offset(velocity.dx * 0.65, velocity.dy * 0.65);
-        }
-      }
-    }
+        
 
 
         // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО В МЕТОДЕ update КЛАССА Bunnyhop:
