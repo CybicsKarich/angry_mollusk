@@ -61,35 +61,50 @@ class MainMenuScreen extends StatefulWidget {
     if (lastTimeStr == null) return true;
     
     final lastTime = DateTime.parse(lastTimeStr);
-    return DateTime.now().difference(lastTime) >= promoCooldown;
+    final now = DateTime.now();
+
+    // Защита: если текущее время меньше сохраненного, значит часы перевели назад
+    if (now.isBefore(lastTime)) {
+      print("Обнаружен перевод времени назад! Блокировка.");
+      return false;
+    }
+
+    return now.difference(lastTime) >= promoCooldown;
   }
 
-  // 2. Расчет оставшихся секунд КД промокода для тикающего таймера в IvanDrop
+  // 2. Расчет времени для тикающего таймера с валидацией аномалий
   static Future<Duration> getRemainingPromoTime() async {
     final prefs = await SharedPreferences.getInstance();
     final lastTimeStr = prefs.getString('ivandrop_last_promo_time');
     if (lastTimeStr == null) return Duration.zero;
     
     final lastTime = DateTime.parse(lastTimeStr);
-    final timePassed = DateTime.now().difference(lastTime);
+    final now = DateTime.now();
+    
+    if (now.isBefore(lastTime)) return promoCooldown; // Наказываем максимальным КД
+
+    final timePassed = now.difference(lastTime);
     final remaining = promoCooldown - timePassed;
     return remaining.isNegative ? Duration.zero : remaining;
   }
-
   // 3. Фиксация времени успешной активации промокода на диск телефона
   static Future<void> savePromoActivationTime() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('ivandrop_last_promo_time', DateTime.now().toIso8601String());
   }
 
-  // 4. Проверка кулдауна для бесплатного кейса DAILY (24 часа)
+  // 4. Проверка кулдауна для бесплатного кейса DAILY (ЗАМЕНЕНА С ЗАЩИТОЙ)
   static Future<Duration> getRemainingDailyCaseTime() async {
     final prefs = await SharedPreferences.getInstance();
     final lastTimeStr = prefs.getString('ivandrop_last_daily_case_time');
     if (lastTimeStr == null) return Duration.zero;
     
     final lastTime = DateTime.parse(lastTimeStr);
-    final timePassed = DateTime.now().difference(lastTime);
+    final now = DateTime.now();
+
+    if (now.isBefore(lastTime)) return dailyCaseCooldown; 
+
+    final timePassed = now.difference(lastTime);
     final remaining = dailyCaseCooldown - timePassed;
     return remaining.isNegative ? Duration.zero : remaining;
   }
