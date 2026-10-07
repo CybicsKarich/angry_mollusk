@@ -165,7 +165,6 @@ static Future<void> playPaperRustle() async {
     
 
     static Future<void> stopLevelAudioAndPlayMenu() async {
-    currentZone = "menu";
       try {
       // 1. Мгновенно глушим все игровые эффекты и звуки уровня
       _isStretching = false;
