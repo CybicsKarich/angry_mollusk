@@ -5,7 +5,9 @@ class AudioManager {
   // Плееры для контролируемых звуков
   static final AudioPlayer _stretchPlayer = AudioPlayer();
   static final AudioPlayer _finalMenuPlayer = AudioPlayer();
-  static final AudioPlayer _fxPlayer = AudioPlayer();
+  static final AudioPlayer _fxPlayer = AudioPlayer(); 
+  static final List<AudioPlayer> _fxPool = List.generate(4, (_) => AudioPlayer());
+  static int _fxPoolIndex = 0;
   static final AudioPlayer _rainPlayer = AudioPlayer();
   static DateTime? _lastMainSoundStartTime; 
   static String _currentMainSound = ""; // Теперь только 'drops', 'boss_phase2' или 'menu'
@@ -360,17 +362,19 @@ static Future<void> playPaperRustle() async {
     }
   }
 
-    static void _playSingleEffect(String assetPath) async {
+      // ТОЧЕЧНО ЗАМЕНИТЬ СТАРЫЙ МЕТОД В САМОМ КОНЦЕ ФАЙЛА AUDIO_MANAGER.DART:
+  static void _playSingleEffect(String assetPath) async {
     try {
-      // Удален лишний вызов await _fxPlayer.stop(), плейеры полностью изолированы
-      final AudioPlayer temporaryPlayer = AudioPlayer();
-      await temporaryPlayer.setReleaseMode(ReleaseMode.release);
-      await temporaryPlayer.play(AssetSource(assetPath), mode: PlayerMode.lowLatency);
-      
-      temporaryPlayer.onPlayerComplete.listen((_) {
-        temporaryPlayer.dispose();
-      });
-    } catch (e) {print("Ошибка запуска звука капель кочка: $e");}
+      // Мелкие звуки (блоки, свиньи) крутятся в своем изолированном пуле
+      final AudioPlayer player = _fxPool[_fxPoolIndex];
+      _fxPoolIndex = (_fxPoolIndex + 1) % _fxPool.length;
+
+      await player.stop();
+      await player.setReleaseMode(ReleaseMode.release);
+      await player.play(AssetSource(assetPath), mode: PlayerMode.lowLatency);
+    } catch (e) {
+      print("Ошибка пула мелких эффектов: $e");
+    }
   }
 
 
