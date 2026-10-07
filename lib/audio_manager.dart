@@ -164,19 +164,16 @@ static Future<void> playPaperRustle() async {
   // =========================================================================
     
 
-    static Future<void> stopLevelAudioAndPlayMenu() async {
+        static Future<void> stopLevelAudioAndPlayMenu() async {
       try {
-      // 1. Мгновенно глушим все игровые эффекты и звуки уровня
       _isStretching = false;
       await _stretchPlayer.stop();
       await _fxPlayer.stop();
-      await _rainPlayer.stop();
+      
+      await stopLevel5Rain(); // ИСПРАВЛЕНО: Теперь при выходе в меню ливень и его кэш тоже уничтожаются!
       await stopRage();
       
-      // 2. СБРАСЫВАЕМ плеер фона, чтобы снять любые зависания состояния
       await _finalMenuPlayer.stop();
-      
-      // 3. Выставляем настройки и запускаем принудительно (без проверок state)
       await _finalMenuPlayer.setVolume(0.40);
       await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
       await _finalMenuPlayer.play(AssetSource('music/bg_music.mp3')); 
@@ -186,6 +183,7 @@ static Future<void> playPaperRustle() async {
       print("Ошибка при принудительном возврате к музыке меню: $e");
     }
   }
+
 
    static Future<void> startCastleDrops() async {
     try {
@@ -400,14 +398,29 @@ static Future<void> playPaperRustle() async {
       return false; // Если плеер занят инициализацией, мягко возвращаем false без вылета игры
     }
   }
-  // 2. Мгновенная остановка дождя при выходе из 5 уровня
+
+    // ТОЧЕЧНО ДОБАВИТЬ В КЛАСС AudioManager ПОД ГЕТТЕРОМ isRainPlaying:
+  static bool get isCastleDropsPlaying {
+    try {
+      // Так как капли замка запускаются на основном фоновом плеере _finalMenuPlayer
+      return _finalMenuPlayer.state == PlayerState.playing;
+    } catch (_) {
+      return false; // Защита от зависания при инициализации
+    }
+  }
+
+  
+  // ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД ОСТАНОВКИ ДОЖДЯ В LIB/AUDIO_MANAGER.DART:
   static Future<void> stopLevel5Rain() async {
     try {
       await _rainPlayer.stop();
+      await _rainPlayer.release(); // ИСПРАВЛЕНО: Полностью выжигаем кэш и освобождаем нативные ресурсы!
+      print("Звук ливня 5 уровня остановлен, нативный кэш плеера успешно зачищен.");
     } catch (e) {
-      print("Ошибка остановки дождя: $e");
+      print("Ошибка при полной зачистке кэша дождя: $e");
     }
   }
+
 
   // 3. Сочный раскат грома, который накладывается поверх дождя (вызывается вместе с молнией)
   static Future<void> playThunderStrike() async {
