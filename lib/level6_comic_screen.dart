@@ -34,6 +34,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
   double _vanyaVy = 0.0;
   bool _vanyaIsJumping = false;
   int _vanyaHearts = 1; 
+  Duration _lastElapsed = Duration.zero;
   
   bool _btnLeftPressed = false;
   bool _btnRightPressed = false;
@@ -79,10 +80,14 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
       curve: Curves.bounceOut,
     );
 
-    // Главный движковый тикер игрового процесса (60 кадров в секунду)
     _gameLoopTicker = createTicker((elapsed) {
       if (_isGameplayActive && mounted) {
-        _updatePhysics(0.016); // Фиксированный шаг dt (~16 мс)
+        // Вычисляем реальное время, прошедшее с прошлого кадра в секундах
+        double dt = (elapsed.inMicroseconds - _lastElapsed.inMicroseconds) / 10 microsecond; 
+        if (dt > 0.1) dt = 0.016; // Защита от гигантского скачка при лаге
+        _lastElapsed = elapsed;
+        
+        _updatePhysics(dt);
       }
     });
     _gameLoopTicker.start();
