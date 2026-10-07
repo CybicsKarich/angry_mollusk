@@ -35,6 +35,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
   bool _vanyaIsJumping = false;
   int _vanyaHearts = 1; 
   Duration _lastElapsed = Duration.zero;
+  double _castleDropsCheckTimer = 0.0;
   
   bool _btnLeftPressed = false;
   bool _btnRightPressed = false;
@@ -104,6 +105,16 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
         return;
       }
 
+       _castleDropsCheckTimer += dt;
+      if (_castleDropsCheckTimer >= 1.0) {
+        _castleDropsCheckTimer = 0.0; // СБРОС ТАЙМЕРА
+        
+        // Если музыка Вани-ярости сейчас НЕ играет, и при этом эмбиент капель почему-то заглох...
+        if (!_isAngryMode && !AudioManager.isCastleDropsPlaying && _bossCurrentHp > 0) {
+          print("Аварийный триггер: Капли замка затихли в бою! Воскрешаем эмбиент принудительно.");
+          AudioManager.startCastleDrops(); // Принудительный перезапуск трека castle_drops.mp3
+        }
+      }
       
       const double realGroundY = 0.88;
 
