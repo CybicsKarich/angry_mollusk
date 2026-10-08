@@ -415,7 +415,6 @@ static Future<void> playPaperRustle() async {
       await _rainPlayer.stop();
       // Вместо жесткого release, который ломает нативный девайс, 
       // мы принудительно сбрасываем источник звука в ноль, очищая ОЗУ
-      await _rainPlayer.setSource(BytesSource(Uint8List(0))); 
       print("Звук ливня 5 уровня полностью потушен, ОЗУ очищена.");
     } catch (e) {
       print("Ошибка при мягкой зачистке кэша дождя: $e");
