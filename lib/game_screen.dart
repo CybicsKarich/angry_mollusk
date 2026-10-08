@@ -183,7 +183,8 @@ if (game.currentLevel == 3) {
 } 
 else if (game.currentLevel == 5) {
   // ИСПРАВЛЕНО: Перед переходом на 6 уровень принудительно выключаем дождь 5-го!
-  AudioManager.stopLevel5Rain(); 
+  await AudioManager.stopLevel5Rain();
+  await AudioManager.startCastleDrops(); 
   game.isPaused = true; // Замораживаем апдейты
   Navigator.pop(context); 
   Navigator.push(
