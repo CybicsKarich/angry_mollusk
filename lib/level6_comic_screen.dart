@@ -258,6 +258,12 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
           // ОБЫЧНЫЙ РЕЖИМ БЕЗ ТАБЛЕТКИ: Урон наносится строго прыжком по макушке головы
           if (_vanyaVy > 0 && _vanyaY < realGroundY - 0.03) {
             _bossCurrentHp -= 1.0; 
+            if (_bossCurrentHp <= 4.0 && !_isPhase2Active && _bossCurrentHp > 0) {
+            _isPhase2Active = true; 
+            AudioManager.startBossPhase2Music(); 
+            print("ДОН МОЛЛЮСК В СЕКУНДЕ ЯРОСТИ! Активирован Кровавый режим.");
+          }
+            
             AudioManager.playPigHit(); 
             
             _vanyaVx = -0.32;
