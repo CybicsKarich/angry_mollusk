@@ -96,7 +96,21 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
     _gameLoopTicker.start();
   }
 
-    void _updatePhysics(double dt) {
+    // ТОЧЕЧНО ДОБАВИТЬ В КЛАСС _Level6GoodRouteScreenState:
+
+  void _rescueCastleDropsOnInput() {
+    // Если Шериф в обычном режиме (не орет под таблеткой) и босс жив
+    if (!_isAngryMode && _bossCurrentHp > 0) {
+      // И если системный плеер капель вдруг заглох — моментально воскрешаем его от тапа игрока
+      if (!AudioManager.isCastleDropsPlaying) {
+        print("Палец игрока спас атмосферу! Воскрешаем капли замка принудительно.");
+        AudioManager.startCastleDrops();
+      }
+    }
+  }
+
+  
+  void _updatePhysics(double dt) {
     setState(() {
       
       // ТОЧЕЧНО ДОБАВИТЬ В САМОЕ НАЧАЛО МЕТОДА _updatePhysics, ПОД setState(() {:
@@ -794,7 +808,10 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
               children: [
                 // Стрелка НАЗАД (Левее)
                 GestureDetector(
-                  onTapDown: (_) => setState(() => _btnLeftPressed = true),
+                  onTapDown: (_) {
+                    _rescueCastleDropsOnInput(); // ИСПРАВЛЕНО: Проверяем и включаем капли принудительно!
+                    setState(() => _btnLeftPressed = true);
+                  },
                   onTapUp: (_) => setState(() => _btnLeftPressed = false),
                   onTapCancel: () => setState(() => _btnLeftPressed = false),
                   child: Container(
@@ -810,7 +827,10 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                 const SizedBox(width: 16),
                 // Стрелка ВПЕРЁД (Правее)
                 GestureDetector(
-                  onTapDown: (_) => setState(() => _btnRightPressed = true),
+                  onTapDown: (_) {
+  _rescueCastleDropsOnInput(); // ИСПРАВЛЕНО: Проверяем и включаем капли принудительно!
+  setState(() => _btnRightPressed = true);
+},
                   onTapUp: (_) => setState(() => _btnRightPressed = false),
                   onTapCancel: () => setState(() => _btnRightPressed = false),
                   child: Container(
@@ -832,6 +852,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
             child: GestureDetector(
               // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО ВНУТРИ КНОПКИ ПРЫЖКА (ПРАВАЯ РУКА):
               onTapDown: (_) {
+                _rescueCastleDropsOnInput();
                 if (!_vanyaIsJumping) {
                   setState(() {
                     _btnJumpPressed = true;
