@@ -11,6 +11,7 @@ class AudioManager {
   static final AudioPlayer _rainPlayer = AudioPlayer();
   static DateTime? _lastMainSoundStartTime; 
   static String _currentMainSound = ""; // Теперь только 'drops', 'boss_phase2' или 'menu'
+  static DateTime? _lastCastleDropsStartTime;
   
 
   static bool _canInterruptCurrentMainSound(String newSound) {
@@ -185,19 +186,22 @@ static Future<void> playPaperRustle() async {
   }
 
 
-   // ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД STARTCASTLEDROPS В LIB/AUDIO_MANAGER.DART:
-  static Future<void> startCastleDrops() async {
+   static Future<void> startCastleDrops() async {
     try {
-      // Тушим старые эффекты, если они были
-      await _fxPlayer.stop();
-      
-      // Запускаем капли на абсолютно изолированном плеере _rainPlayer!
+      final now = DateTime.now();
+      // Анти-спам защита: если капли пытаются запуститься повторно быстрее чем за 1.2 секунды — жестко отклоняем вызов!
+      if (_lastCastleDropsStartTime != null && 
+          now.difference(_lastCastleDropsStartTime!).inMilliseconds < 1200 && 
+          _rainPlayer.state == PlayerState.playing) {
+        return; 
+      }
+      _lastCastleDropsStartTime = now;
+
       await _rainPlayer.stop();
       await _rainPlayer.setVolume(1.0); 
       await _rainPlayer.setReleaseMode(ReleaseMode.loop); 
       await _rainPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.lowLatency); 
-      
-      print("Бронебойный эмбиент капель запущен на изолированном канале плеера дождя.");
+      print("Бронебойный эмбиент капель успешно перезапущен с защитой от спама.");
     } catch (e) {
       print("Ошибка при запуске капель замка: $e");
     }
@@ -276,14 +280,24 @@ static Future<void> playPaperRustle() async {
     _playSingleEffect('audio/sling_launch$num.mp3'); 
   }
 
-  // 3. ПОПАДАНИЕ ПО СВИНЬЕ (Строго 1 раз за полет птицы)
-  static void playPigHit() {
+  static void playPigHit() async {
     if (_isRageSoundPlaying) return;
-    if (!hasPigHitToken) return; // Жетон сгорел — приглушаем все следующие повторы!
+    if (!hasPigHitToken) return; 
     hasPigHitToken = false; 
 
     int num = _random.nextInt(3) + 1;
-    _playSingleEffect('audio/pig_hit$num.MP3');
+    try {
+      // ИСПРАВЛЕНО: Звук удара по боссу создаёт мгновенный, чистый параллельный поток низкого приоритета задержки,
+      // полностью минуя пул эффектов блоков, поэтому он железно прозвучит при каждом таране!
+      final AudioPlayer hitPlayer = AudioPlayer();
+      await hitPlayer.setReleaseMode(ReleaseMode.release);
+      await hitPlayer.setVolume(1.0); // Удар по боссу должен быть максимально громким!
+      await hitPlayer.play(AssetSource('audio/pig_hit$num.MP3'), mode: PlayerMode.lowLatency);
+      
+      hitPlayer.onPlayerComplete.listen((_) => hitPlayer.dispose());
+    } catch (e) {
+      print("Ошибка внеочередного звука удара: $e");
+    }
   }
 
   // 4. ПРОМАХ БАННИХОПА (Строго 1 раз за полет птицы)
