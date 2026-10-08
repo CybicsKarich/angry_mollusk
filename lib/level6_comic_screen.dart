@@ -36,6 +36,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
   int _vanyaHearts = 1; 
   Duration _lastElapsed = Duration.zero;
   double _castleDropsCheckTimer = 0.0;
+  bool _isPhase2Active = false;
   
   bool _btnLeftPressed = false;
   bool _btnRightPressed = false;
@@ -237,6 +238,12 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
         // ИНВЕРСИЯ БОЯ: Если Ваня под виагрой — он может бить Дона в ЛЮБУЮ точку тела с бессмертием!
         if (_isAngryMode) {
           _bossCurrentHp -= 1.0; 
+          if (_bossCurrentHp <= 4.0 && !_isPhase2Active && _bossCurrentHp > 0) {
+            _isPhase2Active = true; 
+            AudioManager.startBossPhase2Music(); 
+            print("ДОН МОЛЛЮСК В СЕКУНДЕ ЯРОСТИ! Активирован Кровавый режим.");
+          }
+          
           AudioManager.playPigHit(); // Твой каноничный ор Вани!
           
           _isAngryMode = false; // Режим ярости и кислотное небо МГНОВЕННО ОТКЛЮЧАЮТСЯ после 1 удара!
@@ -541,6 +548,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                 // Если активен режим ярости — передаем таймер для переливания цвета неба в проёме крыши
                 isAcidSky: _isAngryMode,
                 acidTimer: _angryTimer,
+                isBloodMode: _isPhase2Active,
               ),
               child: Stack(
                 children: [
@@ -1210,24 +1218,23 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
   }
 } // <--- ЗАКРЫТИЕ КЛАССА СОСТОЯНИЯ ЭКРАНА СТРАНИЦЫ _Level6GoodRouteScreenState
 
-// ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО В САМОМ КОНЦЕ ФАЙЛА (КЛАСС _CeilingPainter):
 class _CeilingPainter extends CustomPainter {
   final bool drawHole;
-  _CeilingPainter({required this.drawHole});
+  final bool isBloodMode; // Добавили поддержку крови
+  _CeilingPainter({required this.drawHole, this.isBloodMode = false});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final ceilPaint = Paint()..color = const Color(0xFF15151D)..style = PaintingStyle.fill;
-    final beamPaint = Paint()..color = const Color(0xFF09090D)..style = PaintingStyle.stroke..strokeWidth = 2.2;
+    // Если вторая фаза — потолок окрашивается в кирпично-бордовый цвет нагара
+    final ceilPaint = Paint()..color = isBloodMode ? const Color(0xFF4A1414) : const Color(0xFF15151D)..style = PaintingStyle.fill;
+    final beamPaint = Paint()..color = isBloodMode ? const Color(0xFF1A0000) : const Color(0xFF09090D)..style = PaintingStyle.stroke..strokeWidth = 2.2;
     
     if (!drawHole) {
-      // Сплошной потолок
       canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), ceilPaint);
       for (int i = 0; i <= 6; i++) {
         canvas.drawLine(Offset(size.width * 0.5, 0), Offset(size.width * (i / 6), size.height), beamPaint);
       }
     } else {
-      // Крыша обвалилась
       final leftPath = Path()
         ..moveTo(0, 0)..lineTo(size.width * 0.42, 0)
         ..lineTo(size.width * 0.35, size.height)..lineTo(0, size.height)..close();
@@ -1246,13 +1253,15 @@ class _CeilingPainter extends CustomPainter {
   bool shouldRepaint(covariant _CeilingPainter oldDelegate) => true;
 }
 
-
-
 class _FloorTilesPainter extends CustomPainter {
+  final bool isBloodMode; // Добавили поддержку крови
+  _FloorTilesPainter({this.isBloodMode = false});
+
   @override
   void paint(Canvas canvas, Size size) {
-    final tilePaint = Paint()..color = const Color(0xFF1E1E24)..style = PaintingStyle.fill;
-    final linePaint = Paint()..color = const Color(0xFF111114)..style = PaintingStyle.stroke..strokeWidth = 1.6;
+    // Если вторая фаза — плитка пола заливается Кровавым неоном (угольно-красный 0xFF5C1616)
+    final tilePaint = Paint()..color = isBloodMode ? const Color(0xFF5C1616) : const Color(0xFF1E1E24)..style = PaintingStyle.fill;
+    final linePaint = Paint()..color = isBloodMode ? const Color(0xFF2D0000) : const Color(0xFF111114)..style = PaintingStyle.stroke..strokeWidth = 1.6;
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), tilePaint);
     
     for (int i = 0; i < 5; i++) {
@@ -1264,7 +1273,7 @@ class _FloorTilesPainter extends CustomPainter {
     }
   }
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
 class _WingsPainter extends CustomPainter {
@@ -1391,22 +1400,25 @@ class _DetailedCrabClawPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// 1. ПОЛНОСТЬЮ ЗАМЕНИТЬ КЛАСС ВНУТРИ _EndingRoomBackgroundPainter В САМОМ КОНЦЕ ФАЙЛА:
 class _EndingRoomBackgroundPainter extends CustomPainter {
   final bool hasHole;
   final bool showLightning;
-  final bool isAcidSky; // Добавили поддержку Виагра-Тайм
+  final bool isAcidSky; 
   final double acidTimer;
+  final bool isBloodMode; // Добавили поддержку крови
   
-  _EndingRoomBackgroundPainter({required this.hasHole, required this.showLightning, this.isAcidSky = false, this.acidTimer = 0.0});
+  _EndingRoomBackgroundPainter({required this.hasHole, required this.showLightning, this.isAcidSky = false, this.acidTimer = 0.0, this.isBloodMode = false});
 
   @override
   void paint(Canvas canvas, Size size) {
+    // Вторая фаза перекрашивает стены зала в адский тёмно-красный градиент!
     final wallPaint = Paint()
-      ..shader = const LinearGradient(
+      ..shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [Color(0xFF14141E), Color(0xFF06060A)],
+        colors: isBloodMode 
+          ? [const Color(0xFF2A0808), const Color(0xFF0D0202)] // Кровавые стены
+          : [const Color(0xFF14141E), const Color(0xFF06060A)], // Обычные стены
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), wallPaint);
 
@@ -1414,7 +1426,6 @@ class _EndingRoomBackgroundPainter extends CustomPainter {
       final skyRect = Rect.fromLTWH(size.width * 0.25, 0, size.width * 0.5, 25);
       
       if (isAcidSky) {
-        // КИСЛОТНОЕ НЕБО: Переливается неоновым фиолетово-синим поп-арт градиентом по синусоиде времени!
         double wave = (sin(acidTimer * pi * 2) + 1.0) / 2.0;
         final acidPaint = Paint()
           ..shader = LinearGradient(
@@ -1425,8 +1436,8 @@ class _EndingRoomBackgroundPainter extends CustomPainter {
           ).createShader(skyRect);
         canvas.drawRect(skyRect, acidPaint);
       } else {
-        // Обычное спокойное темно-синее небо логова
-        canvas.drawRect(skyRect, Paint()..color = const Color(0xFF0D1B2A));
+        // Если активирована вторая фаза — небо в проломе тоже становится багровым!
+        canvas.drawRect(skyRect, Paint()..color = isBloodMode ? const Color(0xFF3A0000) : const Color(0xFF0D1B2A));
       }
 
       if (showLightning) {
