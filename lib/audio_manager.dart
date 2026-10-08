@@ -185,26 +185,24 @@ static Future<void> playPaperRustle() async {
   }
 
 
-   static Future<void> startCastleDrops() async {
+   // ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД STARTCASTLEDROPS В LIB/AUDIO_MANAGER.DART:
+  static Future<void> startCastleDrops() async {
     try {
-      // Начисто тушим дождь 5 уровня и звуковые эффекты эффектов
-      await _rainPlayer.stop();
+      // Тушим старые эффекты, если они были
       await _fxPlayer.stop();
       
-      // Сбрасываем плеер фоновой музыки перед включением капель (БЕЗ .release()!)
-      await _finalMenuPlayer.stop();
-
-      // Усердная настройка под мистическую атмосферу логова Дона Моллюска
-      await _finalMenuPlayer.setVolume(1.0); 
-      await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
+      // Запускаем капли на абсолютно изолированном плеере _rainPlayer!
+      await _rainPlayer.stop();
+      await _rainPlayer.setVolume(1.0); 
+      await _rainPlayer.setReleaseMode(ReleaseMode.loop); 
+      await _rainPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.lowLatency); 
       
-      // Капли лежат там же, где и музыка — в папке music/
-      await _finalMenuPlayer.play(AssetSource('music/castle_drops.mp3')); 
-      print("Звук дождя потушен. Бронебойный эмбиент капель из папки music запущен.");
+      print("Бронебойный эмбиент капель запущен на изолированном канале плеера дождя.");
     } catch (e) {
       print("Ошибка при запуске капель замка: $e");
     }
   }
+
 
     static Future<void> startBossPhase2Music() async {
     try {
@@ -399,27 +397,31 @@ static Future<void> playPaperRustle() async {
     }
   }
 
-    // ТОЧЕЧНО ДОБАВИТЬ В КЛАСС AudioManager ПОД ГЕТТЕРОМ isRainPlaying:
+    // ТОЧЕЧНО ЗАМЕНИТЬ ГЕТТЕР ISCASTLEDROPSPLAYING В LIB/AUDIO_MANAGER.DART:
   static bool get isCastleDropsPlaying {
     try {
-      // Так как капли замка запускаются на основном фоновом плеере _finalMenuPlayer
-      return _finalMenuPlayer.state == PlayerState.playing;
+      // Теперь проверяем статус изолированного плеера капель/дождя!
+      return _rainPlayer.state == PlayerState.playing;
     } catch (_) {
-      return false; // Защита от зависания при инициализации
+      return false;
     }
   }
 
+
   
-  // ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД ОСТАНОВКИ ДОЖДЯ В LIB/AUDIO_MANAGER.DART:
+  // ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД STOPLEVEL5RAIN В LIB/AUDIO_MANAGER.DART:
   static Future<void> stopLevel5Rain() async {
     try {
       await _rainPlayer.stop();
-      await _rainPlayer.release(); // ИСПРАВЛЕНО: Полностью выжигаем кэш и освобождаем нативные ресурсы!
-      print("Звук ливня 5 уровня остановлен, нативный кэш плеера успешно зачищен.");
+      // Вместо жесткого release, который ломает нативный девайс, 
+      // мы принудительно сбрасываем источник звука в ноль, очищая ОЗУ
+      await _rainPlayer.setSource(BytesSource(Uint8List(0))); 
+      print("Звук ливня 5 уровня полностью потушен, ОЗУ очищена.");
     } catch (e) {
-      print("Ошибка при полной зачистке кэша дождя: $e");
+      print("Ошибка при мягкой зачистке кэша дождя: $e");
     }
   }
+
 
 
   // 3. Сочный раскат грома, который накладывается поверх дождя (вызывается вместе с молнией)
