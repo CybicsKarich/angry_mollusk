@@ -143,7 +143,7 @@ Container(
                               child: RawMaterialButton(
                                 shape: const CircleBorder(),
                                // ЗАМЕНИТЬ ДЕЙСТВИЕ onPressed УМНОЙ СТРЕЛКИ СПРАВА НА ЭТОТ БЛОК:
-                              onPressed: () {
+                              onPressed: () async {
                               // 1. ПЕРВЫМ ДЕЛОМ СЧИТАЕМ ЗВЁЗДЫ ЗА ТОЛЬКО ЧТО ПРОЙДЕННЫЙ БОЙ
                               int currentRoundStars = 0;
                               if (AngryMolluskGame.score >= game.targetScore3Stars) { // <-- ИСПРАВЛЕНО ТОЧЕЧНО
@@ -192,7 +192,7 @@ else if (game.currentLevel == 5) {
     MaterialPageRoute(builder: (context) => const Level6ComicScreen()), 
   );
 }                             
-else if (game.currentLevel < 4) {
+else if (game.currentLevel < 5) {
   // Теперь обычное прибавление уровня работает для 1 и 2 уровней
   game.currentLevel = game.currentLevel + 1;
 }
