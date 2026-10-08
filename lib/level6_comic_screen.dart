@@ -81,11 +81,13 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
       curve: Curves.bounceOut,
     );
 
+        // Главный движковый тикер игрового процесса с расчетом честного Delta Time
     _gameLoopTicker = createTicker((elapsed) {
       if (_isGameplayActive && mounted) {
-        // Вычисляем реальное время, прошедшее с прошлого кадра в секундах
-        double dt = (elapsed.inMicroseconds - _lastElapsed.inMicroseconds) / 10 microsecond; 
-        if (dt > 0.1) dt = 0.016; // Защита от гигантского скачка при лаге
+        // ИСПРАВЛЕНО: Чистая математика перевода микросекунд в секунды
+        double dt = (elapsed.inMicroseconds - _lastElapsed.inMicroseconds) / 1000000.0;
+        
+        if (dt > 0.1) dt = 0.016; // Защита от гигантского скачка при лаге девайса
         _lastElapsed = elapsed;
         
         _updatePhysics(dt);
