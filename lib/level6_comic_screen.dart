@@ -35,7 +35,6 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
   bool _vanyaIsJumping = false;
   int _vanyaHearts = 1; 
   Duration _lastElapsed = Duration.zero;
-  double _castleDropsCheckTimer = 0.0;
   bool _isPhase2Active = false;
   
   bool _btnLeftPressed = false;
@@ -72,6 +71,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
   @override
   void initState() {
     super.initState();
+    AudioManager.startCastleDrops();
     _debrisController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500), 
@@ -122,16 +122,6 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
         return;
       }
 
-       _castleDropsCheckTimer += dt;
-      if (_castleDropsCheckTimer >= 1.0) {
-        _castleDropsCheckTimer = 0.0; // СБРОС ТАЙМЕРА
-        
-        // Если музыка Вани-ярости сейчас НЕ играет, и при этом эмбиент капель почему-то заглох...
-        if (!_isAngryMode && !AudioManager.isCastleDropsPlaying && _bossCurrentHp > 0) {
-          print("Аварийный триггер: Капли замка затихли в бою! Воскрешаем эмбиент принудительно.");
-          AudioManager.startCastleDrops(); // Принудительный перезапуск трека castle_drops.mp3
-        }
-      }
       
       const double realGroundY = 0.88;
 
@@ -822,10 +812,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
               children: [
                 // Стрелка НАЗАД (Левее)
                 GestureDetector(
-                  onTapDown: (_) {
-                    _rescueCastleDropsOnInput(); // ИСПРАВЛЕНО: Проверяем и включаем капли принудительно!
-                    setState(() => _btnLeftPressed = true);
-                  },
+                  onTapDown: (_) => setState(() => _btnLeftPressed = true),
                   onTapUp: (_) => setState(() => _btnLeftPressed = false),
                   onTapCancel: () => setState(() => _btnLeftPressed = false),
                   child: Container(
@@ -841,10 +828,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                 const SizedBox(width: 16),
                 // Стрелка ВПЕРЁД (Правее)
                 GestureDetector(
-                  onTapDown: (_) {
-  _rescueCastleDropsOnInput(); // ИСПРАВЛЕНО: Проверяем и включаем капли принудительно!
-  setState(() => _btnRightPressed = true);
-},
+                  onTapDown: (_) => setState(() => _btnRightPressed = true),
                   onTapUp: (_) => setState(() => _btnRightPressed = false),
                   onTapCancel: () => setState(() => _btnRightPressed = false),
                   child: Container(
@@ -866,7 +850,6 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
             child: GestureDetector(
               // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО ВНУТРИ КНОПКИ ПРЫЖКА (ПРАВАЯ РУКА):
               onTapDown: (_) {
-                _rescueCastleDropsOnInput();
                 if (!_vanyaIsJumping) {
                   setState(() {
                     _btnJumpPressed = true;
