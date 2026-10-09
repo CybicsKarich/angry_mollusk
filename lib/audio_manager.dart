@@ -11,7 +11,6 @@ class AudioManager {
   static final AudioPlayer _rainPlayer = AudioPlayer();
   static DateTime? _lastMainSoundStartTime; 
   static String _currentMainSound = ""; // Теперь только 'drops', 'boss_phase2' или 'menu'
-  static DateTime? _lastCastleDropsStartTime;
   
 
   static bool _canInterruptCurrentMainSound(String newSound) {
