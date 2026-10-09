@@ -186,42 +186,31 @@ static Future<void> playPaperRustle() async {
   }
 
 
-   static Future<void> startCastleDrops() async {
-    try {
-      final now = DateTime.now();
-      // Анти-спам защита: если капли пытаются запуститься повторно быстрее чем за 1.2 секунды — жестко отклоняем вызов!
-      if (_lastCastleDropsStartTime != null && 
-          now.difference(_lastCastleDropsStartTime!).inMilliseconds < 1200 && 
-          _rainPlayer.state == PlayerState.playing) {
-        return; 
-      }
-      _lastCastleDropsStartTime = now;
+   // ПОЛНОСТЬЮ ЗАМЕНИТЬ ЭТИ ДВА МЕТОДА В КЛАССЕ AUDIO_MANAGER В LIB/AUDIO_MANAGER.DART:
 
-      await _rainPlayer.stop();
+  // Запуск капель (Фаза 1) — вызывается строго ОДИН РАЗ при загрузке 6 уровня
+  static Future<void> startCastleDrops() async {
+    try {
+      await _rainPlayer.stop(); // Намертво сбрасываем канал дождя 5 уровня
       await _rainPlayer.setVolume(1.0); 
-      await _rainPlayer.setReleaseMode(ReleaseMode.loop); 
+      await _rainPlayer.setReleaseMode(ReleaseMode.loop); // Зацикливаем константой!
       await _rainPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.lowLatency); 
-      print("Бронебойный эмбиент капель успешно перезапущен с защитой от спама.");
+      print("Фоновые капли запущены как неразрывная константа уровня.");
     } catch (e) {
-      print("Ошибка при запуске капель замка: $e");
+      print("Ошибка старта капель: $e");
     }
   }
 
-
-    static Future<void> startBossPhase2Music() async {
+  // Боевой рок (Фаза 2) — вызывается строго ОДИН РАЗ в секунду перехода на 4 HP
+  static Future<void> startBossPhase2Music() async {
     try {
-      // Останавливаем капли тронного зала
-      await _finalMenuPlayer.stop();
-
-      // Выставляем боевые параметры
-      await _finalMenuPlayer.setVolume(0.90); // Музыка босса должна качать!
-      await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
-      
-      // Название трека для второй фазы, лежит строго в music/
-      await _finalMenuPlayer.play(AssetSource('music/boss_battle.mp3'));
-      print("ВТОРАЯ ФАЗА! Запущена динамичная музыка босса из папки music.");
+      await _rainPlayer.stop(); // Бесшовно останавливаем капли, освобождая этот же канал
+      await _rainPlayer.setVolume(0.95); // Делаем музон фазы 2 громким и качающим!
+      await _rainPlayer.setReleaseMode(ReleaseMode.loop); // Жесткий бесконечный повтор!
+      await _rainPlayer.play(AssetSource('music/boss_battle.mp3'), mode: PlayerMode.lowLatency);
+      print("ВТОРАЯ ФАЗА! Боевой рок запущен намертво константой.");
     } catch (e) {
-      print("Ошибка запуска боевой музыки фазы 2: $e");
+      print("Ошибка старта рок-темы фазы 2: $e");
     }
   }
 
@@ -427,13 +416,12 @@ static Future<void> playPaperRustle() async {
   static Future<void> stopLevel5Rain() async {
     try {
       await _rainPlayer.stop();
-      // Вместо жесткого release, который ломает нативный девайс, 
-      // мы принудительно сбрасываем источник звука в ноль, очищая ОЗУ
-      print("Звук ливня 5 уровня полностью потушен, ОЗУ очищена.");
+      print("Звук ливня 5 уровня полностью заглушен.");
     } catch (e) {
-      print("Ошибка при мягкой зачистке кэша дождя: $e");
+      print("Ошибка при остановке дождя: $e");
     }
   }
+
 
 
 
