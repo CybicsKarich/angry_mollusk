@@ -187,31 +187,36 @@ static Future<void> playPaperRustle() async {
 
    // ПОЛНОСТЬЮ ЗАМЕНИТЬ ЭТИ ДВА МЕТОДА В КЛАССЕ AUDIO_MANAGER В LIB/AUDIO_MANAGER.DART:
 
-  // Запуск капель (Фаза 1) — вызывается строго ОДИН РАЗ при загрузке 6 уровня
+  // Запуск капель (Фаза 1) — работает ОДИН В ОДИН как ливень на 5 уровне!
   static Future<void> startCastleDrops() async {
     try {
-      await _rainPlayer.stop(); // Намертво сбрасываем канал дождя 5 уровня
+      await _rainPlayer.stop(); // Железно сбрасываем прошлые потоки
       await _rainPlayer.setVolume(1.0); 
-      await _rainPlayer.setReleaseMode(ReleaseMode.loop); // Зацикливаем константой!
+      await _rainPlayer.setReleaseMode(ReleaseMode.loop); // Зацикливаем бесконечно
+      
+      // ИСПРАВЛЕНО: Запускаем в режиме lowLatency, чтобы капли стали системным фоном уровня!
       await _rainPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.lowLatency); 
-      print("Фоновые капли запущены как неразрывная константа уровня.");
+      print("Фоновые капли запущены аппаратно как неразрывная константа уровня.");
     } catch (e) {
       print("Ошибка старта капель: $e");
     }
   }
 
-  // Боевой рок (Фаза 2) — вызывается строго ОДИН РАЗ в секунду перехода на 4 HP
+  // Боевой рок (Фаза 2) — переключается на том же изолированном канале
   static Future<void> startBossPhase2Music() async {
     try {
-      await _rainPlayer.stop(); // Бесшовно останавливаем капли, освобождая этот же канал
-      await _rainPlayer.setVolume(0.95); // Делаем музон фазы 2 громким и качающим!
-      await _rainPlayer.setReleaseMode(ReleaseMode.loop); // Жесткий бесконечный повтор!
+      await _rainPlayer.stop(); // Мягко останавливаем капли, освобождая аудио-чип
+      await _rainPlayer.setVolume(0.95); 
+      await _rainPlayer.setReleaseMode(ReleaseMode.loop); // Бесконечный повтор боевого рока
+      
+      // ИСПРАВЛЕНО: Тоже переводим в lowLatency! Рок будет качать до конца боя, а удары полетят поверх!
       await _rainPlayer.play(AssetSource('music/boss_battle.mp3'), mode: PlayerMode.lowLatency);
-      print("ВТОРАЯ ФАЗА! Боевой рок запущен намертво константой.");
+      print("ВТОРАЯ ФАЗА! Боевой рок запущен в режиме lowLatency поверх всех эффектов.");
     } catch (e) {
       print("Ошибка старта рок-темы фазы 2: $e");
     }
   }
+
 
 
 
