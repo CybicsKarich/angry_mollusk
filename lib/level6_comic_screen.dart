@@ -36,6 +36,8 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
   int _vanyaHearts = 1; 
   Duration _lastElapsed = Duration.zero;
   bool _isPhase2Active = false;
+  bool _isLocalBattleMusicStarted = false;
+  double _localMusicCheckTimer = 0.0;
   
   bool _btnLeftPressed = false;
   bool _btnRightPressed = false;
@@ -97,7 +99,36 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
     _gameLoopTicker.start();
   }
 
-    // ТОЧЕЧНО ДОБАВИТЬ В КЛАСС _Level6GoodRouteScreenState:
+      // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОД _manageGameplayBattleMusic В КЛАССЕ СОСТОЯНИЯ:
+  void _manageGameplayBattleMusic(double dt) {
+    // Музыка должна контролироваться только во время активного боя и пока босс жив
+    if (_isGameplayActive && _bossCurrentHp > 0) {
+      
+      // 1. ПЕРВИЧНЫЙ ХОЛОДНЫЙ СТАРТ МУЗЫКИ
+      if (!_isLocalBattleMusicStarted) {
+        _isLocalBattleMusicStarted = true;
+        AudioManager.startLevel6BattleMusic();
+        print("Локальный старт: Фоновая музыка влита в геймплей.");
+        return;
+      }
+
+      // 2. ЕЖЕСЕКУНДНЫЙ ЗАМОК НА НЕПРЕРЫВНОСТЬ МУЗЫКИ (ЗАЩИТА ОТ СБОЕВ И ЛАГОВ)
+      // Если активирована Вторая Фаза (тяжёлый рок) — проверку отключаем, так как там свой рок-канал
+      if (!_isPhase2Active) {
+        _localMusicCheckTimer += dt;
+        if (_localMusicCheckTimer >= 1.0) {
+          _localMusicCheckTimer = 0.0; // Сброс секундного таймера
+
+          // Если фоновая музыка капель на плеере босса внезапно заглохла...
+          if (!AudioManager.isBossMusicPlaying) {
+            print("Локальный триггер экрана: Обнаружено заикание или тишина! Принудительно воскрешаем фоновую музыку.");
+            AudioManager.startLevel6BattleMusic(); // Перезапускаем music/castle_drops.mp3 на плеере босса
+          }
+        }
+      }
+    }
+  }
+
 
   void _rescueCastleDropsOnInput() {
     // Если Шериф в обычном режиме (не орет под таблеткой) и босс жив
@@ -113,6 +144,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
   
   void _updatePhysics(double dt) {
     setState(() {
+       _manageGameplayBattleMusic(dt);
       
       // ТОЧЕЧНО ДОБАВИТЬ В САМОЕ НАЧАЛО МЕТОДА _updatePhysics, ПОД setState(() {:
       // Если Шериф уже погиб — полностью останавливаем симуляцию
@@ -230,7 +262,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
           _bossCurrentHp -= 1.0; 
           if (_bossCurrentHp <= 4.0 && !_isPhase2Active && _bossCurrentHp > 0) {
             _isPhase2Active = true; 
-            AudioManager.startBossPhase2Music(); 
+            AudioManager.switchToBossPhase2Music();  
             print("ДОН МОЛЛЮСК В СЕКУНДЕ ЯРОСТИ! Активирован Кровавый режим.");
           }
           
@@ -250,7 +282,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
             _bossCurrentHp -= 1.0; 
             if (_bossCurrentHp <= 4.0 && !_isPhase2Active && _bossCurrentHp > 0) {
             _isPhase2Active = true; 
-            AudioManager.startBossPhase2Music(); 
+            AudioManager.switchToBossPhase2Music(); 
             print("ДОН МОЛЛЮСК В СЕКУНДЕ ЯРОСТИ! Активирован Кровавый режим.");
           }
             
@@ -690,12 +722,15 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                                         onPressed: () {
                                           // ЗАНОВО: сбрасываем арену
                                           Navigator.pop(context);
+                                          AudioManager.startCastleDrops();
+                                          AudioManager.startLevel6BattleMusic();
                                           setState(() {
                                             _vanyaX = 0.15;
                                             _vanyaY = _groundYPercent - 0.05;
                                             _bossCurrentHp = 8.0;
                                             _isBarricadeAlive = true;
                                             _vanyaHearts = 1;
+                                            _isPhase2Active = false;
                                           });
                                         },
                                         child: const Text('ЗАНОВО', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
@@ -1004,7 +1039,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
             }
           } else {
             // Кнопка полностью РАЗБЛОКИРОВАНА и запускает живой тест геймплея арены!
-            AudioManager.startCastleDrops(); 
+            AudioManager.startLevel6BattleMusic();
             setState(() {
               _isGameplayActive = true;
             });
