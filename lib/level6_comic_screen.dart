@@ -99,7 +99,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
     _gameLoopTicker.start();
   }
 
-      // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОД _manageGameplayBattleMusic В КЛАССЕ СОСТОЯНИЯ:
+        // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОД _manageGameplayBattleMusic В ТВОИХ ФАЙЛАХ ЭКРАНОВ БОССА:
   void _manageGameplayBattleMusic(double dt) {
     // Музыка должна контролироваться только во время активного боя и пока босс жив
     if (_isGameplayActive && _bossCurrentHp > 0) {
@@ -113,13 +113,13 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
       }
 
       // 2. ЕЖЕСЕКУНДНЫЙ ЗАМОК НА НЕПРЕРЫВНОСТЬ МУЗЫКИ (ЗАЩИТА ОТ СБОЕВ И ЛАГОВ)
-      // Если активирована Вторая Фаза (тяжёлый рок) — проверку отключаем, так как там свой рок-канал
-      if (!_isPhase2Active) {
+      // Проверяем тишину только на первой фазе и ТОЛЬКО если Ваня НЕ в режиме ярости!
+      if (!_isPhase2Active && !_isAngryMode) {
         _localMusicCheckTimer += dt;
         if (_localMusicCheckTimer >= 1.0) {
           _localMusicCheckTimer = 0.0; // Сброс секундного таймера
 
-          // Если фоновая музыка капель на плеере босса внезапно заглохла...
+          // Вызываем геттер без скобок по правилам синтаксиса Dart
           if (!AudioManager.isBossMusicPlaying) {
             print("Локальный триггер экрана: Обнаружено заикание или тишина! Принудительно воскрешаем фоновую музыку.");
             AudioManager.startLevel6BattleMusic(); // Перезапускаем music/castle_drops.mp3 на плеере босса
@@ -128,6 +128,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
       }
     }
   }
+
 
 
   void _rescueCastleDropsOnInput() {
