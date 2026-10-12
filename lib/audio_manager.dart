@@ -127,7 +127,16 @@ class AudioManager {
 
 
 
-  
+  // ТОЧЕЧНО ДОБАВИТЬ В КЛАСС AudioManager В ФАЙЛЕ lib/audio_manager.dart:
+  static bool get isBossMusicPlaying {
+    try {
+      // Проверяем, играет ли нативный плеер музыки босса прямо сейчас
+      return _bossMusicPlayer.state == PlayerState.playing;
+    } catch (_) {
+      return false; // Мягкая защита от зависания при инициализации трека
+    }
+  }
+
 
 
     
