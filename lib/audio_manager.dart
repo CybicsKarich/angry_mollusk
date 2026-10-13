@@ -197,10 +197,6 @@ static Future<void> playPaperRustle() async {
   }
 
 
-
-   // 1. ДОБАВИТЬ В НАЧАЛО КЛАССА AudioManager НОВЫЙ СТАТИЧЕСКИЙ ПЛЕЕР:
-  static final AudioPlayer _level6MusicPlayer = AudioPlayer(); // ВЫДЕЛЕННЫЙ КАНАЛ ПОД МУЗЫКУ БАТТЛА
-
 // 2. ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОДЫ СТАРТА И ПЕРЕКЛЮЧЕНИЯ НА ЭТОТ АВТОНОМНЫЙ БЛОК:
 
   // Сквозные капли для комикса и концовок (оставляем на _rainPlayer)
