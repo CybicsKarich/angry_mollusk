@@ -196,56 +196,60 @@ static Future<void> playPaperRustle() async {
 
 
 
-   // 1. ТОЧЕЧНО УДАЛИТЬ ИЗ НАЧАЛА КЛАССА AudioManager СТРОКИ:
-// static DateTime? _lastMainSoundStartTime; 
-// static String _currentMainSound = ""; 
+   // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОДЫ 6 УРОВНЯ В КЛАССЕ AUDIO_MANAGER (LIB/AUDIO_MANAGER.DART):
 
-// 2. ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОДЫ 6 УРОВНЯ В КЛАССЕ AUDIO_MANAGER НА ЭТОТ МОНОЛИТ:
-
-  // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОДЫ 6 УРОВНЯ В КЛАССЕ AUDIO_MANAGER (LIB/AUDIO_MANAGER.DART):
-
-  // 1. Сквозные капли (Комиксы / Концовки) — на изолированном плеере дождя
+  // 1. Метод сквозных капель (Комиксы / Концовки)
   static Future<void> startCastleDrops() async {
     try {
       await _rainPlayer.stop();
       await _rainPlayer.setVolume(0.85);
       await _rainPlayer.setReleaseMode(ReleaseMode.loop);
-      // Для длинного фонового эмбиента используем стандартный медиа-режим
       await _rainPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.mediaPlayer);
     } catch (e) {
-      print("Ошибка запуска капель: $e");
+      print("Ошибка старта капель: $e");
     }
   }
 
-  // 2. Фоновая музыка арены (Фаза 1) — БЕЗ жесткого выжигания кэша при каждом вызове!
+  // 2. БРОНЕБОЙНЫЙ МЕТОД ДЛЯ ФОНОВОЙ МУЗЫКИ БАТТЛА (ФАЗА 1)
   static Future<void> startLevel6BattleMusic() async {
     try {
-      // Если он уже играет — просто выходим, не трогая нативный микшер!
+      // Архитектурная деталь: если плеер УЖЕ пытается играть или играет,
+      // мы жестко выходим, чтобы не сбивать нативный фокус звука в Android!
       if (_bossMusicPlayer.state == PlayerState.playing) return;
 
+      // Полностью останавливаем плеер и очищаем старый источник из ОЗУ
       await _bossMusicPlayer.stop();
+      await _bossMusicPlayer.setSource(AssetSource('')); 
+
+      // Настраиваем вечную константу звука
       await _bossMusicPlayer.setVolume(1.0);
-      await _bossMusicPlayer.setReleaseMode(ReleaseMode.loop);
-      // ИСПРАВЛЕНО: Перевели в стабильный mediaPlayer для длинных музыкальных треков!
+      await _bossMusicPlayer.setReleaseMode(ReleaseMode.loop); // Бесконечный повтор
+      
+      // Запускаем в режиме mediaPlayer — это заставляет POCO держать звук как системную музыку!
       await _bossMusicPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.mediaPlayer);
-      print("Фоновые капли боя запущены в стабильном режиме медиа-плеера.");
+      print("Нативная архитектура: Фоновая музыка баттла (Фаза 1) залочена в микшер.");
     } catch (e) {
-      print("Ошибка старта фоновой музыки: $e");
+      print("Критическая ошибка запуска фоновой музыки: $e");
     }
   }
 
-  // 3. Боевой рок (Фаза 2) — Включается строго один раз на 4 HP
+  // 3. БРОНЕБОЙНЫЙ МЕТОД ПЕРЕКЛЮЧЕНИЯ НА 2 ФАЗУ (С ПОЛНОЙ ОЧИСТКОЙ КЭША)
   static Future<void> switchToBossPhase2Music() async {
     try {
-      await _rainPlayer.setVolume(0.30); // Слегка глушим сквозной эмбиент капель
+      await _rainPlayer.setVolume(0.30); // Приглушаем тихий сквозной эмбиент
       
+      // Жестко останавливаем плеер и ПОЛНОСТЬЮ ОЧИЩАЕМ КЭШ старого трека капель перед включением рока!
       await _bossMusicPlayer.stop();
+      await _bossMusicPlayer.setSource(AssetSource('')); 
+
       await _bossMusicPlayer.setVolume(1.0);
       await _bossMusicPlayer.setReleaseMode(ReleaseMode.loop);
+      
+      // Врубаем тяжелый рок второй фазы в режиме mediaPlayer поверх всех эффектов
       await _bossMusicPlayer.play(AssetSource('music/boss_battle.mp3'), mode: PlayerMode.mediaPlayer);
-      print("ВТОРАЯ ФАЗА: Плеер босса переключен на боевой рок.");
+      print("Нативная архитектура: Кэш очищен. Боевой рок Фазы 2 запущен намертво.");
     } catch (e) {
-      print("Ошибка переключения на Фазу 2: $e");
+      print("Критическая ошибка старта Фазы 2: $e");
     }
   }
 
