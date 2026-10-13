@@ -160,26 +160,40 @@ static Future<void> playPaperRustle() async {
   // =========================================================================
     
 
-        static Future<void> stopLevelAudioAndPlayMenu() async {
-      try {
+        // ТОЧЕЧНО ДОБАВИТЬ В КЛАСС AudioManager В LIB/AUDIO_MANAGER.DART:
+
+  // Вызывается автоматически при сворачивании игры в фон
+  static void pauseAllForBackground() {
+    try {
+      _bossMusicPlayer.pause(); // Ставим музыку босса на паузу
+      _rainPlayer.pause();      // Ставим капли/ливень на паузу
+      _fxPlayer.stop();         // Глушим ор ярости
+    } catch (e) {
+      print("Ошибка аварийной паузы фона: $e");
+    }
+  }
+
+  // Обновляем метод полной очистки при выходе игрока в Главное Меню
+  static Future<void> stopLevelAudioAndPlayMenu() async {
+    try {
       _isStretching = false;
       await _stretchPlayer.stop();
       await _fxPlayer.stop();
-      _isLevel6BattleMusicActive = false; // Сбрасываем замок музыки боя
-      await _bossMusicPlayer.stop();
-      await stopLevel5Rain(); // ИСПРАВЛЕНО: Теперь при выходе в меню ливень и его кэш тоже уничтожаются!
+      await _rainPlayer.stop();      // Намертво тушим капли/дождь
+      await _bossMusicPlayer.stop(); // НАМЕРТВО ТУШИМ МУЗЫКУ БОССА! Она больше не пролезет в меню!
       await stopRage();
       
+      // Запускаем дефолтную музыку главного меню
       await _finalMenuPlayer.stop();
       await _finalMenuPlayer.setVolume(0.40);
       await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
-      await _finalMenuPlayer.play(AssetSource('music/bg_music.mp3')); 
-      
-      print("Все игровые звуки заглушены. Фоновая музыка меню запущена принудительно.");
+      await _finalMenuPlayer.play(AssetSource('music/bg_music.mp3'), mode: PlayerMode.mediaPlayer); 
+      print("Все боевые плееры зачищены. Включена музыка меню.");
     } catch (e) {
-      print("Ошибка при принудительном возврате к музыке меню: $e");
+      print("Ошибка возврата к меню: $e");
     }
   }
+
 
 
    // 1. ТОЧЕЧНО УДАЛИТЬ ИЗ НАЧАЛА КЛАССА AudioManager СТРОКИ:
