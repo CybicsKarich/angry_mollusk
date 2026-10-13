@@ -211,41 +211,39 @@ static Future<void> playPaperRustle() async {
     }
   }
 
-  // ОТДЕЛЬНЫЙ АВТОНОМНЫЙ МЕТОД ФОНОВОЙ МУЗЫКИ ДЛЯ ГЕЙМПЛЕЯ 6 УРОВНЯ
+  // ПОЛНОСТЬЮ ЗАМЕНИТЬ ЭТИ ДВА МЕТОДА В КЛАССЕ AUDIO_MANAGER (LIB/AUDIO_MANAGER.DART):
+
+  // 1. Боевые капли арены (Фаза 1)
   static Future<void> startLevel6BattleMusic() async {
     try {
-      // Если музыка уже играет на этом канале — жестко выходим, чтобы не сбивать нативный аудио-чип!
-      if (_level6MusicPlayer.state == PlayerState.playing) return;
-
-      await _level6MusicPlayer.stop();
-      await _level6MusicPlayer.setVolume(1.0);
-      await _level6MusicPlayer.setReleaseMode(ReleaseMode.loop); // Бесконечный повтор
-      
-      // ИСПРАВЛЕНО: Запускаем строго в lowLatency (КАК ДОЖДЬ НА 5 УРОВНЕ). 
-      // Теперь этот трек аппаратно залочен и ни один другой звук в игре не сможет его выключить!
-      await _level6MusicPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.lowLatency);
-      print("[ОБОРУДОВАНО]: Фоновая музыка баттла успешно влита в аппаратный микшер.");
-    } catch (e) {
-      print("Ошибка старта фоновой музыки: $e");
-    }
-  }
-
-  // Переключение на боевой рок 2 фазы (тоже на изолированном музыкальном плеере)
-  static Future<void> switchToBossPhase2Music() async {
-    try {
-      await _rainPlayer.setVolume(0.30); // Слегка приглушаем сквозные капли фона
-      
+      // Мягко останавливаем без выжигания, давая микшеру перезапустить поток
       await _level6MusicPlayer.stop();
       await _level6MusicPlayer.setVolume(1.0);
       await _level6MusicPlayer.setReleaseMode(ReleaseMode.loop);
-      
-      // Рок тоже летит в lowLatency поверх всех шлепков и взрывов блоков!
-      await _level6MusicPlayer.play(AssetSource('music/boss_battle.mp3'), mode: PlayerMode.lowLatency);
-      print("[ОБОРУДОВАНО]: ВТОРАЯ ФАЗА! Боевой рок запущен на выделенном канале.");
+      await _level6MusicPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.lowLatency);
+      print("Аппаратный перезапуск капель Фазы 1 выполнен успешно.");
     } catch (e) {
-      print("Ошибка старта рока 2 фазы: $e");
+      print("Ошибка старта боевых капель: $e");
     }
   }
+
+  // 2. Боевой рок (Фаза 2) — С ЗАЩИТОЙ ОТ ЦИКЛИЧЕСКОГО ЗАИКАНИЯ!
+  static Future<void> switchToBossPhase2Music() async {
+    try {
+      // ИСПРАВЛЕНО: Если рок уже качает — выходим сразу, не заикая дорожку каждую секунду!
+      if (_level6MusicPlayer.state == PlayerState.playing) return;
+
+      await _rainPlayer.setVolume(0.30);
+      await _level6MusicPlayer.stop();
+      await _level6MusicPlayer.setVolume(1.0);
+      await _level6MusicPlayer.setReleaseMode(ReleaseMode.loop);
+      await _level6MusicPlayer.play(AssetSource('music/boss_battle.mp3'), mode: PlayerMode.lowLatency);
+      print("ВТОРАЯ ФАЗА: Рок запущен в lowLatency.");
+    } catch (e) {
+      print("Ошибка переключения на Фазу 2: $e");
+    }
+  }
+
 
   // Новый бронебойный геттер для секундного авто-триггера экрана
   static bool get isLevel6BattleMusicPlaying {
@@ -256,8 +254,7 @@ static Future<void> playPaperRustle() async {
     }
   }
 
-  // Не забудь добавить остановку во все методы зачистки звуков (при выходе в меню или поражении):
-  // await _level6MusicPlayer.stop();
+ 
 
 
 
