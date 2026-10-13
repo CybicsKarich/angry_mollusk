@@ -99,31 +99,30 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
     _gameLoopTicker.start();
   }
 
-        // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОД _manageGameplayBattleMusic В КЛАССЕ СОСТОЯНИЯ ЭКРАНА:
+        // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОД _manageGameplayBattleMusic В КЛАССЕ СОСТОЯНИЯ ЭКРАНА БОЯ:
   void _manageGameplayBattleMusic(double dt) {
-    // Автономная проверка работает только во время живого боя и пока босс жив
+    // Внутренний контроль музыки работает БЕЗ setState, чтобы перерисовки экрана не сбивали плеер!
     if (_isGameplayActive && _bossCurrentHp > 0) {
       
-      // Отсчитываем секунду внутри игрового цикла
       _localMusicCheckTimer += dt;
       if (_localMusicCheckTimer >= 1.0) {
-        _localMusicCheckTimer = 0.0; // Сброс секундного пульса
+        _localMusicCheckTimer = 0.0; // Сброс секундного таймера
 
-        // ЕСЛИ ВАНЯ ПОД ТАБЛЕТКОЙ ОРЕТ — ПРОВЕРКУ ВРЕМЕННО ПРОПУСКАЕМ
+        // Если Ваня буйствует под таблеткой — не сбрасываем его ор ярости
         if (_isAngryMode) return;
 
-        // ПРОВЕРКА ДЛЯ ФАЗЫ 1 (Здоровье босса больше 4 HP)
+        // Контроль Фазы 1 (Капли боя)
         if (!_isPhase2Active) {
           if (!AudioManager.isBossMusicPlaying) {
-            print("Авто-триггер Фазы 1: Фоновые капли заглохли! Воскрешаем с зачисткой кэша.");
-            AudioManager.startLevel6BattleMusic(); // Включает капли с очисткой кэша плеера
+            print("[АВТО-СПАСЕНИЕ]: Обнаружена тишина на Фазе 1! Воскрешаем капли.");
+            AudioManager.startLevel6BattleMusic(); // Запустит трек только если он реально СТОИТ
           }
         } 
-        // ПРОВЕРКА ДЛЯ КРОВАВОЙ ФАЗЫ 2 (Здоровье босса 4 HP и меньше)
+        // Контроль Фазы 2 (Боевой рок)
         else {
           if (!AudioManager.isBossMusicPlaying) {
-            print("Авто-триггер Фазы 2: Тяжелый рок заглох! Воскрешаем с зачисткой кэша.");
-            AudioManager.switchToBossPhase2Music(); // Включает рок с очисткой кэша плеера
+            print("[АВТО-СПАСЕНИЕ]: Обнаружена тишина на Фазе 2! Воскрешаем боевой рок.");
+            AudioManager.switchToBossPhase2Music();
           }
         }
       }
