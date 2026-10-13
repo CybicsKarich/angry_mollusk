@@ -99,35 +99,39 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
     _gameLoopTicker.start();
   }
 
-        // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОД _manageGameplayBattleMusic В КЛАССЕ СОСТОЯНИЯ ЭКРАНА БОЯ:
+  // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОД _manageGameplayBattleMusic В КЛАССЕ СОСТОЯНИЯ ЭКРАНА БОЯ:
   void _manageGameplayBattleMusic(double dt) {
-    // Внутренний контроль музыки работает БЕЗ setState, чтобы перерисовки экрана не сбивали плеер!
+    // Автономный контроль работает строго во время живого геймплея и пока Дон Моллюск жив
     if (_isGameplayActive && _bossCurrentHp > 0) {
       
+      // Код отсчитывает ровно 1 секунду времени тикера без участия внешних кнопок!
       _localMusicCheckTimer += dt;
       if (_localMusicCheckTimer >= 1.0) {
         _localMusicCheckTimer = 0.0; // Сброс секундного таймера
 
-        // Если Ваня буйствует под таблеткой — не сбрасываем его ор ярости
+        // Если Ваня сейчас в ярости орет под таблеткой — даем ему доорать трек ярости
         if (_isAngryMode) return;
 
-        // Контроль Фазы 1 (Капли боя)
+        // ЕЖЕСЕКУНДНЫЙ КОНТРОЛЬ ДЛЯ ФАЗЫ 1 (Здоровье босса больше 4 HP)
         if (!_isPhase2Active) {
+          // Если фоновая музыка баттла капель нагло заглохла от другого звука...
           if (!AudioManager.isBossMusicPlaying) {
-            print("[АВТО-СПАСЕНИЕ]: Обнаружена тишина на Фазе 1! Воскрешаем капли.");
-            AudioManager.startLevel6BattleMusic(); // Запустит трек только если он реально СТОИТ
+            print("[ЖЕСТКИЙ АВТО-ТРИГГЕР]: Музыка баттла Фазы 1 сбита эффектом! Воскрешаем фон принудительно.");
+            AudioManager.startLevel6BattleMusic(); // Перезапустит и залочит трек обратно в микшер
           }
         } 
-        // Контроль Фазы 2 (Боевой рок)
+        // ЕЖЕСЕКУНДНЫЙ КОНТРОЛЬ ДЛЯ КРОВАВОЙ ФАЗЫ 2 (Здоровье босса 4 HP и меньше)
         else {
+          // Если боевой рок второй фазы был приглушен системой...
           if (!AudioManager.isBossMusicPlaying) {
-            print("[АВТО-СПАСЕНИЕ]: Обнаружена тишина на Фазе 2! Воскрешаем боевой рок.");
-            AudioManager.switchToBossPhase2Music();
+            print("[ЖЕСТКИЙ АВТО-ТРИГГЕР]: Боевой рок Фазы 2 сбит эффектом! Воскрешаем рок с очисткой кэша.");
+            AudioManager.switchToBossPhase2Music(); // Перезапустит рок
           }
         }
       }
     }
   }
+
 
 
 
