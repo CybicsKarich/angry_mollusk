@@ -99,35 +99,37 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
     _gameLoopTicker.start();
   }
 
-        // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОД _manageGameplayBattleMusic В ТВОИХ ФАЙЛАХ ЭКРАНОВ БОССА:
+        // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОД _manageGameplayBattleMusic В КЛАССЕ СОСТОЯНИЯ ЭКРАНА:
   void _manageGameplayBattleMusic(double dt) {
-    // Музыка должна контролироваться только во время активного боя и пока босс жив
+    // Автономная проверка работает только во время живого боя и пока босс жив
     if (_isGameplayActive && _bossCurrentHp > 0) {
       
-      // 1. ПЕРВИЧНЫЙ ХОЛОДНЫЙ СТАРТ МУЗЫКИ
-      if (!_isLocalBattleMusicStarted) {
-        _isLocalBattleMusicStarted = true;
-        AudioManager.startLevel6BattleMusic();
-        print("Локальный старт: Фоновая музыка влита в геймплей.");
-        return;
-      }
+      // Отсчитываем секунду внутри игрового цикла
+      _localMusicCheckTimer += dt;
+      if (_localMusicCheckTimer >= 1.0) {
+        _localMusicCheckTimer = 0.0; // Сброс секундного пульса
 
-      // 2. ЕЖЕСЕКУНДНЫЙ ЗАМОК НА НЕПРЕРЫВНОСТЬ МУЗЫКИ (ЗАЩИТА ОТ СБОЕВ И ЛАГОВ)
-      // Проверяем тишину только на первой фазе и ТОЛЬКО если Ваня НЕ в режиме ярости!
-      if (!_isPhase2Active && !_isAngryMode) {
-        _localMusicCheckTimer += dt;
-        if (_localMusicCheckTimer >= 1.0) {
-          _localMusicCheckTimer = 0.0; // Сброс секундного таймера
+        // ЕСЛИ ВАНЯ ПОД ТАБЛЕТКОЙ ОРЕТ — ПРОВЕРКУ ВРЕМЕННО ПРОПУСКАЕМ
+        if (_isAngryMode) return;
 
-          // Вызываем геттер без скобок по правилам синтаксиса Dart
+        // ПРОВЕРКА ДЛЯ ФАЗЫ 1 (Здоровье босса больше 4 HP)
+        if (!_isPhase2Active) {
           if (!AudioManager.isBossMusicPlaying) {
-            print("Локальный триггер экрана: Обнаружено заикание или тишина! Принудительно воскрешаем фоновую музыку.");
-            AudioManager.startLevel6BattleMusic(); // Перезапускаем music/castle_drops.mp3 на плеере босса
+            print("Авто-триггер Фазы 1: Фоновые капли заглохли! Воскрешаем с зачисткой кэша.");
+            AudioManager.startLevel6BattleMusic(); // Включает капли с очисткой кэша плеера
+          }
+        } 
+        // ПРОВЕРКА ДЛЯ КРОВАВОЙ ФАЗЫ 2 (Здоровье босса 4 HP и меньше)
+        else {
+          if (!AudioManager.isBossMusicPlaying) {
+            print("Авто-триггер Фазы 2: Тяжелый рок заглох! Воскрешаем с зачисткой кэша.");
+            AudioManager.switchToBossPhase2Music(); // Включает рок с очисткой кэша плеера
           }
         }
       }
     }
   }
+
 
 
 
