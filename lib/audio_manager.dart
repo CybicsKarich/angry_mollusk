@@ -188,51 +188,53 @@ static Future<void> playPaperRustle() async {
 
 // 2. ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОДЫ 6 УРОВНЯ В КЛАССЕ AUDIO_MANAGER НА ЭТОТ МОНОЛИТ:
 
-  // Сквозные капли комиксов/концовок
+  // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОДЫ 6 УРОВНЯ В КЛАССЕ AUDIO_MANAGER (LIB/AUDIO_MANAGER.DART):
+
+  // 1. Сквозные капли (Комиксы / Концовки) — на изолированном плеере дождя
   static Future<void> startCastleDrops() async {
     try {
       await _rainPlayer.stop();
       await _rainPlayer.setVolume(0.85);
       await _rainPlayer.setReleaseMode(ReleaseMode.loop);
-      await _rainPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.lowLatency);
+      // Для длинного фонового эмбиента используем стандартный медиа-режим
+      await _rainPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.mediaPlayer);
     } catch (e) {
       print("Ошибка запуска капель: $e");
     }
   }
 
-  // Боевые капли на арене (Фаза 1) — С полной зачисткой кэша!
+  // 2. Фоновая музыка арены (Фаза 1) — БЕЗ жесткого выжигания кэша при каждом вызове!
   static Future<void> startLevel6BattleMusic() async {
     try {
+      // Если он уже играет — просто выходим, не трогая нативный микшер!
+      if (_bossMusicPlayer.state == PlayerState.playing) return;
+
       await _bossMusicPlayer.stop();
-      // АРХИТЕКТУРНАЯ ДЕТАЛЬ: Полностью выжигаем кэш старого трека перед стартом нового!
-      await _bossMusicPlayer.setSource(AssetSource('')); 
-      
       await _bossMusicPlayer.setVolume(1.0);
       await _bossMusicPlayer.setReleaseMode(ReleaseMode.loop);
-      await _bossMusicPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.lowLatency);
-      print("Аудио-кэш очищен. Музыка капель Фазы 1 перезапущена в lowLatency.");
+      // ИСПРАВЛЕНО: Перевели в стабильный mediaPlayer для длинных музыкальных треков!
+      await _bossMusicPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.mediaPlayer);
+      print("Фоновые капли боя запущены в стабильном режиме медиа-плеера.");
     } catch (e) {
-      print("Ошибка старта боевых капель: $e");
+      print("Ошибка старта фоновой музыки: $e");
     }
   }
 
-  // Боевой рок (Фаза 2) — С полной зачисткой кэша!
+  // 3. Боевой рок (Фаза 2) — Включается строго один раз на 4 HP
   static Future<void> switchToBossPhase2Music() async {
     try {
-      await _rainPlayer.setVolume(0.40); // Слегка приглушаем сквозной эмбиент
+      await _rainPlayer.setVolume(0.30); // Слегка глушим сквозной эмбиент капель
       
       await _bossMusicPlayer.stop();
-      // АРХИТЕКТУРНАЯ ДЕТАЛЬ: Полностью выжигаем кэш Фазы 1 из памяти плеера!
-      await _bossMusicPlayer.setSource(AssetSource('')); 
-      
       await _bossMusicPlayer.setVolume(1.0);
       await _bossMusicPlayer.setReleaseMode(ReleaseMode.loop);
-      await _bossMusicPlayer.play(AssetSource('music/boss_battle.mp3'), mode: PlayerMode.lowLatency);
-      print("Аудио-кэш очищен. Боевой рок Фазы 2 запущен намертво.");
+      await _bossMusicPlayer.play(AssetSource('music/boss_battle.mp3'), mode: PlayerMode.mediaPlayer);
+      print("ВТОРАЯ ФАЗА: Плеер босса переключен на боевой рок.");
     } catch (e) {
       print("Ошибка переключения на Фазу 2: $e");
     }
   }
+
 
 
 
