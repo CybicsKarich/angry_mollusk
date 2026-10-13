@@ -11,19 +11,6 @@ class AudioManager {
   static final AudioPlayer _rainPlayer = AudioPlayer();
   static final AudioPlayer _bossMusicPlayer = AudioPlayer();
   static bool _isLevel6BattleMusicActive = false;
-  
-
-  static bool _canInterruptCurrentMainSound(String newSound) {
-    if (_lastMainSoundStartTime == null || _currentMainSound == "") return true;
-    if (_currentMainSound == newSound) return false; 
-
-    final elapsed = DateTime.now().difference(_lastMainSoundStartTime!);
-    if (elapsed.inMilliseconds < 1000) {
-      print("Защита звука: '$_currentMainSound' играет всего ${elapsed.inMilliseconds}мс. Перекрытие отклонено.");
-      return false;
-    }
-    return true;
-  }
 
 
   
