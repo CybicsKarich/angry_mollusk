@@ -39,6 +39,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
   bool _isLocalBattleMusicStarted = false;
   double _localMusicCheckTimer = 0.0;
   
+  
   bool _btnLeftPressed = false;
   bool _btnRightPressed = false;
   bool _btnJumpPressed = false;
@@ -111,8 +112,25 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
     }
   }
 
-  
+    void _secureGameplayMusicStream(double dt) {
+    // Реаниматор бдит за звуком только во время активного боя и пока босс жив
+    if (_isGameplayActive && _bossCurrentHp > 0) {
+      
+      _localMusicCheckTimer += dt;
+      if (_localMusicCheckTimer >= 0.8) { // Проверяем даже чуть чаще — каждые 800 миллисекунд!
+        _localMusicCheckTimer = 0.0;
+        
+        // Если Ваня буйствует под таблеткой — не перебиваем его ор ярости
+        if (_isAngryMode) return;
+
+        // Вызываем наш бронебойный реаниматор звука из AudioManager!
+        AudioManager.forceResumeBossMusic();
+      }
+    }
+  }
+
   void _updatePhysics(double dt) {
+    _secureGameplayMusicStream(dt);
     setState(() {
       
       // ТОЧЕЧНО ДОБАВИТЬ В САМОЕ НАЧАЛО МЕТОДА _updatePhysics, ПОД setState(() {:
