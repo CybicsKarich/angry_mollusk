@@ -112,22 +112,30 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
     }
   }
 
-    void _secureGameplayMusicStream(double dt) {
-    // Реаниматор бдит за звуком только во время активного боя и пока босс жив
+    // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОД _secureGameplayMusicStream В КЛАССЕ СОСТОЯНИЯ ЭКРАНА БОЯ:
+  void _secureGameplayMusicStream(double dt) {
+    // Жесткий принудительный перезапуск работает строго во время живого геймплея и пока босс жив
     if (_isGameplayActive && _bossCurrentHp > 0) {
       
       _localMusicCheckTimer += dt;
-      if (_localMusicCheckTimer >= 0.8) { // Проверяем даже чуть чаще — каждые 800 миллисекунд!
+      if (_localMusicCheckTimer >= 1.0) { // Строго каждую 1 секунду геймплея!
         _localMusicCheckTimer = 0.0;
         
-        // Если Ваня буйствует под таблеткой — не перебиваем его ор ярости
+        // Если Ваня орет под таблеткой — не перебиваем его спецэффект
         if (_isAngryMode) return;
 
-        // Вызываем наш бронебойный реаниматор звука из AudioManager!
-        AudioManager.forceResumeBossMusic();
+        // ПРИНУДИТЕЛЬНЫЙ ВЫЗОВ БЕЗ ПРОВЕРОК СТАТУСА:
+        if (!_isPhase2Active) {
+          // Каждую секунду жестко подтверждаем микшеру Android, что Фаза 1 обязана играть!
+          AudioManager.startLevel6BattleMusic(); 
+        } else {
+          // Каждую секунду жестко подтверждаем микшеру Android, что Фаза 2 обязана играть!
+          AudioManager.switchToBossPhase2Music(); 
+        }
       }
     }
   }
+
 
   void _updatePhysics(double dt) {
     _secureGameplayMusicStream(dt);
