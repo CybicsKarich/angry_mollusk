@@ -197,9 +197,9 @@ static Future<void> playPaperRustle() async {
   }
 
 
-// 2. ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОДЫ СТАРТА И ПЕРЕКЛЮЧЕНИЯ НА ЭТОТ АВТОНОМНЫЙ БЛОК:
+// ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОДЫ 6 УРОВНЯ В КЛАССЕ AUDIO_MANAGER (LIB/AUDIO_MANAGER.DART):
 
-  // Сквозные капли для комикса и концовок (оставляем на _rainPlayer)
+  // Сквозные капли комиксов и концовок (на плеере дождя _rainPlayer)
   static Future<void> startCastleDrops() async {
     try {
       await _rainPlayer.stop();
@@ -207,42 +207,41 @@ static Future<void> playPaperRustle() async {
       await _rainPlayer.setReleaseMode(ReleaseMode.loop);
       await _rainPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.lowLatency);
     } catch (e) {
-      print("Ошибка старта капель: $e");
+      print("Ошибка старта сквозных капель: $e");
     }
   }
 
-  // ПОЛНОСТЬЮ ЗАМЕНИТЬ ЭТИ ДВА МЕТОДА В КЛАССЕ AUDIO_MANAGER (LIB/AUDIO_MANAGER.DART):
-
-  // 1. Боевые капли арены (Фаза 1)
+  // МЕТОД ЗАПУСКА ФОНОВОЙ МУЗЫКИ АРЕНЫ (Вызывается строго ОДИН РАЗ при входе на арену)
   static Future<void> startLevel6BattleMusic() async {
     try {
-      // Мягко останавливаем без выжигания, давая микшеру перезапустить поток
       await _level6MusicPlayer.stop();
       await _level6MusicPlayer.setVolume(1.0);
-      await _level6MusicPlayer.setReleaseMode(ReleaseMode.loop);
+      await _level6MusicPlayer.setReleaseMode(ReleaseMode.loop); // Бесконечный повтор
+      
+      // Запускаем в lowLatency как дождь 5 уровня. Поверх этого трека аппаратно микшируются любые шлепки!
       await _level6MusicPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.lowLatency);
-      print("Аппаратный перезапуск капель Фазы 1 выполнен успешно.");
+      print("[КОНСТАНТА УРОВНЯ]: Фоновая музыка капель Фазы 1 успешно залочена в аппаратный микшер.");
     } catch (e) {
-      print("Ошибка старта боевых капель: $e");
+      print("Ошибка старта музыки капель: $e");
     }
   }
 
-  // 2. Боевой рок (Фаза 2) — С ЗАЩИТОЙ ОТ ЦИКЛИЧЕСКОГО ЗАИКАНИЯ!
+  // МЕТОД ПЕРЕКЛЮЧЕНИЯ НА 2 ФАЗУ (Вызывается строго ОДИН РАЗ в момент удара на 4 HP)
   static Future<void> switchToBossPhase2Music() async {
     try {
-      // ИСПРАВЛЕНО: Если рок уже качает — выходим сразу, не заикая дорожку каждую секунду!
-      if (_level6MusicPlayer.state == PlayerState.playing) return;
-
-      await _rainPlayer.setVolume(0.30);
+      await _rainPlayer.setVolume(0.30); // Слегка приглушаем сквозной эмбиент
+      
       await _level6MusicPlayer.stop();
       await _level6MusicPlayer.setVolume(1.0);
-      await _level6MusicPlayer.setReleaseMode(ReleaseMode.loop);
+      await _level6MusicPlayer.setReleaseMode(ReleaseMode.loop); // Бесконечный повтор боевого рока
+      
       await _level6MusicPlayer.play(AssetSource('music/boss_battle.mp3'), mode: PlayerMode.lowLatency);
-      print("ВТОРАЯ ФАЗА: Рок запущен в lowLatency.");
+      print("[КОНСТАНТА УРОВНЯ]: ВТОРАЯ ФАЗА! Плеер босса намертво переключен на боевой рок.");
     } catch (e) {
-      print("Ошибка переключения на Фазу 2: $e");
+      print("Ошибка переключения на рок 2 фазы: $e");
     }
   }
+
 
 
   // Новый бронебойный геттер для секундного авто-триггера экрана
