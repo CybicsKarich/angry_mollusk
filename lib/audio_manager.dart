@@ -199,7 +199,6 @@ static Future<void> playPaperRustle() async {
 
  static Future<void> startCastleDrops() async {
     try {
-      currentBossPhase = 0; // На кат-сценах боевой плеер молчит
       await _rainPlayer.stop();
       await _rainPlayer.setVolume(0.85);
       await _rainPlayer.setReleaseMode(ReleaseMode.loop);
