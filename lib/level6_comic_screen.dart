@@ -99,42 +99,6 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
     _gameLoopTicker.start();
   }
 
-  // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОД _manageGameplayBattleMusic В КЛАССЕ СОСТОЯНИЯ ЭКРАНА БОЯ:
-  void _manageGameplayBattleMusic(double dt) {
-    // Автономный контроль работает строго во время живого геймплея и пока Дон Моллюск жив
-    if (_isGameplayActive && _bossCurrentHp > 0) {
-      
-      // Код отсчитывает ровно 1 секунду времени тикера без участия внешних кнопок!
-      _localMusicCheckTimer += dt;
-      if (_localMusicCheckTimer >= 1.0) {
-        _localMusicCheckTimer = 0.0; // Сброс секундного таймера
-
-        // Если Ваня сейчас в ярости орет под таблеткой — даем ему доорать трек ярости
-        if (_isAngryMode) return;
-
-        // ЕЖЕСЕКУНДНЫЙ КОНТРОЛЬ ДЛЯ ФАЗЫ 1 (Здоровье босса больше 4 HP)
-        if (!_isPhase2Active) {
-          // Если фоновая музыка баттла капель нагло заглохла от другого звука...
-          if (!AudioManager.isBossMusicPlaying) {
-            print("[ЖЕСТКИЙ АВТО-ТРИГГЕР]: Музыка баттла Фазы 1 сбита эффектом! Воскрешаем фон принудительно.");
-            AudioManager.startLevel6BattleMusic(); // Перезапустит и залочит трек обратно в микшер
-          }
-        } 
-        // ЕЖЕСЕКУНДНЫЙ КОНТРОЛЬ ДЛЯ КРОВАВОЙ ФАЗЫ 2 (Здоровье босса 4 HP и меньше)
-        else {
-          // Если боевой рок второй фазы был приглушен системой...
-          if (!AudioManager.isBossMusicPlaying) {
-            print("[ЖЕСТКИЙ АВТО-ТРИГГЕР]: Боевой рок Фазы 2 сбит эффектом! Воскрешаем рок с очисткой кэша.");
-            AudioManager.switchToBossPhase2Music(); // Перезапустит рок
-          }
-        }
-      }
-    }
-  }
-
-
-
-
 
   void _rescueCastleDropsOnInput() {
     // Если Шериф в обычном режиме (не орет под таблеткой) и босс жив
@@ -150,7 +114,6 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
   
   void _updatePhysics(double dt) {
     setState(() {
-       _manageGameplayBattleMusic(dt);
       
       // ТОЧЕЧНО ДОБАВИТЬ В САМОЕ НАЧАЛО МЕТОДА _updatePhysics, ПОД setState(() {:
       // Если Шериф уже погиб — полностью останавливаем симуляцию
