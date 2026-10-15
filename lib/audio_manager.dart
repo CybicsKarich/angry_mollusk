@@ -12,6 +12,7 @@ class AudioManager {
   static final AudioPlayer _bossMusicPlayer = AudioPlayer();
   static bool _isLevel6BattleMusicActive = false;
   static final AudioPlayer _level6MusicPlayer = AudioPlayer();
+  static int currentBossPhase = 0;
 
 
   
@@ -197,66 +198,72 @@ static Future<void> playPaperRustle() async {
   }
 
 
-// ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОДЫ 6 УРОВНЯ В КЛАССЕ AUDIO_MANAGER (LIB/AUDIO_MANAGER.DART):
-
-  // Сквозные капли комиксов и концовок (на плеере дождя _rainPlayer)
-  static Future<void> startCastleDrops() async {
+ static Future<void> startCastleDrops() async {
     try {
+      currentBossPhase = 0; // На кат-сценах боевой плеер молчит
       await _rainPlayer.stop();
       await _rainPlayer.setVolume(0.85);
       await _rainPlayer.setReleaseMode(ReleaseMode.loop);
       await _rainPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.lowLatency);
     } catch (e) {
-      print("Ошибка старта сквозных капель: $e");
+      print("Ошибка старта капель комикса: $e");
     }
   }
 
-  // МЕТОД ЗАПУСКА ФОНОВОЙ МУЗЫКИ АРЕНЫ (Вызывается строго ОДИН РАЗ при входе на арену)
+  // ЗАПУСК МУЗЫКИ БАТТЛА (ФАЗА 1) — Вызывается на старте арены
   static Future<void> startLevel6BattleMusic() async {
     try {
-      await _level6MusicPlayer.stop();
-      await _level6MusicPlayer.setVolume(1.0);
-      await _level6MusicPlayer.setReleaseMode(ReleaseMode.loop); // Бесконечный повтор
+      currentBossPhase = 1; // Фиксируем, что ОБЯЗАНЫ играть капли боя
       
-      // Запускаем в lowLatency как дождь 5 уровня. Поверх этого трека аппаратно микшируются любые шлепки!
+      // Если нативный плеер Android уже играет — не трогаем его, чтобы не заикался
+      if (_level6MusicPlayer.state == PlayerState.playing) return;
+
+      await _level6MusicPlayer.setVolume(1.0);
+      await _level6MusicPlayer.setReleaseMode(ReleaseMode.loop);
       await _level6MusicPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.lowLatency);
-      print("[КОНСТАНТА УРОВНЯ]: Фоновая музыка капель Фазы 1 успешно залочена в аппаратный микшер.");
+      print("Микшер: Запущена музыка баттла Фазы 1.");
     } catch (e) {
-      print("Ошибка старта музыки капель: $e");
+      print("Ошибка старта музыки Фазы 1: $e");
     }
   }
 
-  // МЕТОД ПЕРЕКЛЮЧЕНИЯ НА 2 ФАЗУ (Вызывается строго ОДИН РАЗ в момент удара на 4 HP)
+  // ПЕРЕКЛЮЧЕНИЕ НА БОЕВОЙ РОК (ФАЗА 2) — Вызывается на 4 HP босса
   static Future<void> switchToBossPhase2Music() async {
     try {
-      await _rainPlayer.setVolume(0.30); // Слегка приглушаем сквозной эмбиент
+      currentBossPhase = 2; // Фиксируем, что ОБЯЗАН играть тяжелый рок
+      await _rainPlayer.setVolume(0.30); // Приглушаем сквозной фон
       
+      if (_level6MusicPlayer.state == PlayerState.playing) return;
+
       await _level6MusicPlayer.stop();
       await _level6MusicPlayer.setVolume(1.0);
-      await _level6MusicPlayer.setReleaseMode(ReleaseMode.loop); // Бесконечный повтор боевого рока
-      
+      await _level6MusicPlayer.setReleaseMode(ReleaseMode.loop);
       await _level6MusicPlayer.play(AssetSource('music/boss_battle.mp3'), mode: PlayerMode.lowLatency);
-      print("[КОНСТАНТА УРОВНЯ]: ВТОРАЯ ФАЗА! Плеер босса намертво переключен на боевой рок.");
+      print("Микшер: Плеер босса переключен на боевой рок Фазы 2.");
     } catch (e) {
-      print("Ошибка переключения на рок 2 фазы: $e");
+      print("Ошибка старта рока Фазы 2: $e");
     }
   }
 
-
-
-  // Новый бронебойный геттер для секундного авто-триггера экрана
-  static bool get isLevel6BattleMusicPlaying {
+  // АВТОРЕАНИМАТОР ЗВУКА: Принудительно возвращает музыку, если нативный микшер её заглушил!
+  static void forceResumeBossMusic() async {
     try {
-      return _level6MusicPlayer.state == PlayerState.playing;
-    } catch (_) {
-      return false;
+      // Если игра обязана крутить Фазу 1 (капли боя), но плеер заглох от удара...
+      if (currentBossPhase == 1 && _level6MusicPlayer.state != PlayerState.playing) {
+        print("[РЕАНИМАТОР]: Капли боя сбиты эффектом! Мгновенно запускаем заново.");
+        await _level6MusicPlayer.stop();
+        await _level6MusicPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.lowLatency);
+      } 
+      // Если игра обязана крутить Фазу 2 (рок), но микшер телефона его приглушил...
+      else if (currentBossPhase == 2 && _level6MusicPlayer.state != PlayerState.playing) {
+        print("[РЕАНИМАТОР]: Боевой рок сбит эффектом! Мгновенно запускаем заново.");
+        await _level6MusicPlayer.stop();
+        await _level6MusicPlayer.play(AssetSource('music/boss_battle.mp3'), mode: PlayerMode.lowLatency);
+      }
+    } catch (e) {
+      print("Ошибка реаниматора звука: $e");
     }
   }
-
- 
-
-
-
 
 
       static Future<void> pauseAll() async {
