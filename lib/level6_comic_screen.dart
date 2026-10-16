@@ -738,6 +738,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                                       child: ElevatedButton(
                                         style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                                         onPressed: () {
+                                          _isGameplayActive = false;
                                           Navigator.pop(context); // закрываем паузу
                                           AudioManager.stopLevelAudioAndPlayMenu();
                                           Navigator.pop(context); // выходим в меню уровней
