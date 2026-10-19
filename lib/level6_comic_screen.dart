@@ -271,7 +271,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
         }
       }
 
-            // =========================================================================
+                 // =========================================================================
       // 🦀 МАШИНА СОСТОЯНИЙ ДОНА МОЛЛЮСКА С СИСТЕМОЙ УСТАЛОСТИ (ПО ТЗ)
       // =========================================================================
       if (_bossCurrentHp > 0) {
@@ -280,6 +280,9 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
         // Модификаторы Второй Фазы берсерка на 4 HP и меньше
         double phase2SpeedMultiplier = _isPhase2Active ? 1.20 : 1.0; 
         double phase2CooldownReduction = _isPhase2Active ? 0.85 : 1.0; 
+
+        // ИСПРАВЛЕНО: Явно используем значение пола для корректного сброса координат Вани
+        const double localGroundY = 0.88;
 
         switch (_bossState) {
           case BossState.idle:
@@ -303,80 +306,93 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
             }
             break;
 
-           case BossState.attacking:
-          _limbRotationAngle = 0.0;
+          case BossState.attacking:
+            _limbRotationAngle = 0.0;
 
-          // Вычисляем текущую физическую позицию лапы на арене
-          double attackProgress = 0.0;
-          if (_bossStateTimer < 0.25) {
-            attackProgress = _bossStateTimer / 0.25; // Выпад вперед
-          } else {
-            attackProgress = (1.0 - _bossStateTimer) / 0.75; // Возврат назад
-          }
-          
-          // Лапа летит от босса (_bossX = 0.84) влево. Ограничиваем вылет границей экрана (0.02)
-          double currentPunchX = _bossX - (attackProgress * 0.82);
-          if (currentPunchX < 0.02) currentPunchX = 0.02;
-
-          // Проверяем нахождение Вани в радиусе поражения летящей лапы (смертельная аура)
-          double distanceToLimb = (_vanyaX - currentPunchX).abs();
-          
-          // Увеличенная площадь поражения вокруг конечности
-          if (distanceToLimb < 0.14) { 
-            bool isHit = false;
-            
-            // Если бьют щупальца (низ) — наносим урон, только если Ваня не прыгнул
-            if (_activeLimb == BossLimb.leftTentacle || _activeLimb == BossLimb.rightTentacle) {
-              if (!_vanyaIsJumping) isHit = true;
-            } 
-            // Если бьют клешни (верх) — ловим Ваню в прыжке (или если баррикада уже сломана)
-            else {
-              if (_isBarricadeAlive) {
-                _isBarricadeAlive = false;
-                AudioManager.playBlockBreak(true); // Разрушение преграды
-              } else {
-                if (_vanyaIsJumping && _vanyaVy < 0) isHit = true;
-              }
-            }
-
-            // Нанесение урона при контакте с аурой конечности
-            if (isHit && _vanyaHearts > 0) {
-              _vanyaHearts--;
-              
-              // Спавн брызг и лужи крови при потере жизни
-              _spawnBloodSplatter();
-
-              if (_vanyaHearts > 0) {
-                AudioManager.playMiss();
-                _vanyaX = 0.15; // Отброс на спавн
-                _vanyaY = realGroundY - 0.05;
-                _vanyaIsJumping = false;
-                _vanyaVy = 0.0;
-              } else {
-                AudioManager.playGameOver();
-              }
-            }
-          }
-
-          // Завершение цикла атаки босса
-          if (_bossStateTimer >= 1.0) {
-            _bossStateTimer = 0.0;
-            _bossStrikeCounter++;
-            if (_bossStrikeCounter >= 3) {
-              _bossStrikeCounter = 0;
-              _bossState = BossState.dizzy;
-              _staggerEffectTimer = 0.0;
+            // Вычисляем текущую физическую позицию лапы на арене
+            double attackProgress = 0.0;
+            if (_bossStateTimer < 0.25) {
+              attackProgress = _bossStateTimer / 0.25; // Выпад вперед
             } else {
-              _bossState = BossState.idle;
+              attackProgress = (1.0 - _bossStateTimer) / 0.75; // Возврат назад
             }
-          }
-          break;
-        }
-      }
+            
+            // Лапа летит от босса (_bossX = 0.84) влево. Ограничиваем вылет границей экрана (0.02)
+            double currentPunchX = _bossX - (attackProgress * 0.82);
+            if (currentPunchX < 0.02) currentPunchX = 0.02;
 
-            // 4. СТОЛКНОВЕНИЕ С ДОНОМ МОЛЛЮСКОМ (С УЧЁТОМ ОКНА УЯЗВИМОСТИ DIZZY)
+            // Проверяем нахождение Вани в радиусе поражения летящей лапы (смертельная аура)
+            double distanceToLimb = (_vanyaX - currentPunchX).abs();
+            
+            // Увеличенная площадь поражения вокруг конечности
+            if (distanceToLimb < 0.14) { 
+              bool isHit = false;
+              
+              // Если бьют щупальца (низ) — наносим урон, только если Ваня не прыгнул
+              if (_activeLimb == BossLimb.leftTentacle || _activeLimb == BossLimb.rightTentacle) {
+                if (!_vanyaIsJumping) isHit = true;
+              } 
+              // Если бьют клешни (верх) — ловим Ваню в прыжке (или если баррикада уже сломана)
+              else {
+                if (_isBarricadeAlive) {
+                  _isBarricadeAlive = false;
+                  AudioManager.playBlockBreak(true); // Разрушение преграды
+                } else {
+                  if (_vanyaIsJumping && _vanyaVy < 0) isHit = true;
+                }
+              }
+
+              // Нанесение урона при контакте с аурой конечности
+              if (isHit && _vanyaHearts > 0) {
+                _vanyaHearts--;
+                
+                // Спавн брызг и лужи крови при потере жизни
+                _spawnBloodSplatter();
+
+                if (_vanyaHearts > 0) {
+                  AudioManager.playMiss();
+                  _vanyaX = 0.15; // Отброс на спавн
+                  _vanyaY = localGroundY - 0.05;
+                  _vanyaIsJumping = false;
+                  _vanyaVy = 0.0;
+                } else {
+                  AudioManager.playGameOver();
+                }
+              }
+            }
+
+            // Завершение цикла атаки босса
+            if (_bossStateTimer >= 1.0) {
+              _bossStateTimer = 0.0;
+              _bossStrikeCounter++;
+              if (_bossStrikeCounter >= 3) {
+                _bossStrikeCounter = 0;
+                _bossState = BossState.dizzy;
+                _staggerEffectTimer = 0.0;
+              } else {
+                _bossState = BossState.idle;
+              }
+            }
+            break;
+
+          // ИСПРАВЛЕНО И ДОБАВЛЕНО: Блок фазы отдыха босса, которого не хватало для компиляции!
+          case BossState.dizzy:
+            _staggerEffectTimer += dt; 
+            _limbRotationAngle = 0.0; 
+            if (_bossStateTimer >= 5.0) {
+              _bossStateTimer = 0.0;
+              _staggerEffectTimer = 0.0;
+              _bossState = BossState.idle; // Проснулся через 5 секунд
+            }
+            break;
+        } // switch
+      } // if (_bossCurrentHp > 0)
+
+      // 4. СТОЛКНОВЕНИЕ С ДОНОМ МОЛЛЮСКОМ (С УЧЁТОМ ОКНА УЯЗВИМОСТИ DIZZY)
+      // ИСПРАВЛЕНО: Объявляем переменную локально, если её не было выше
+      const double localGroundY2 = 0.88;
       double dx = _vanyaX - _bossX;
-      double dy = _vanyaY - (realGroundY - 0.12);
+      double dy = _vanyaY - (localGroundY2 - 0.12);
       double distance = sqrt(dx * dx + dy * dy);
 
       if (distance < 0.12 && _bossCurrentHp > 0) {
