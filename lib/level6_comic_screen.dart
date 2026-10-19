@@ -347,24 +347,22 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
         }
       }
 
-      // 4. СТОЛКНОВЕНИЕ С ДОНОМ МОЛЛЮСКОМ (С УЧЁТОМ ОКНА УЯЗВИМОСТИ DIZZY)
+            // 4. СТОЛКНОВЕНИЕ С ДОНОМ МОЛЛЮСКОМ (С УЧЁТОМ ОКНА УЯЗВИМОСТИ DIZZY)
       double dx = _vanyaX - _bossX;
       double dy = _vanyaY - (realGroundY - 0.12);
       double distance = sqrt(dx * dx + dy * dy);
 
       if (distance < 0.12 && _bossCurrentHp > 0) {
-        // УРОН НАНОСИТСЯ СТРОГО В РЕЖИМЕ DIZZY ИЛИ ПОД ТАБЛЕТКОЙ ПО ТЗ
+        // УРОН НАНОСИТСЯ СТРОГО В РЕЖИМЕ DIZZY ИЛИ ПОД ТАБЛЕТКОЙ
         if (_bossState == BossState.dizzy || _isAngryMode) {
           _bossCurrentHp -= 1.0; 
           AudioManager.playPigHit(); 
           
-          // ЖЕСТКИЙ ПРИНУДИТЕЛЬНЫЙ ОТБРОС ШЕРИФА НАЗАД ВЛЕВО ПО ДУГЕ ПО ТЗ
           _vanyaVx = -0.48; 
           _vanyaVy = -0.58; 
           _vanyaIsJumping = true;
           _vanyaX -= 0.12;
 
-          // Успешный удар выводит босса из отключки
           if (_bossState == BossState.dizzy) {
             _bossState = BossState.idle;
             _bossStateTimer = 0.0;
@@ -381,12 +379,22 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
             print("ДОН МОЛЛЮСК В СЕКУНДЕ ЯРОСТИ! Активирован Кровавый режим.");
           }
         } else {
-          // Отскок от неуязвимого закрытого панциря без урона боссу
-          _vanyaVx = -0.25;
-          _vanyaVy = -0.35;
+          // ИСПРАВЛЕНО ТОЧЕЧНО: Таран защищенного панциря теперь забирает у Вани жизнь!
+          if (_vanyaHearts > 0) {
+            _vanyaHearts--;
+          }
+          
+          // Отбрасываем Ваню назад налево по дуге
+          _vanyaVx = -0.35;
+          _vanyaVy = -0.45;
           _vanyaIsJumping = true;
-          _vanyaX -= 0.04;
-          AudioManager.playMiss();
+          _vanyaX -= 0.06;
+
+          if (_vanyaHearts > 0) {
+            AudioManager.playMiss(); // Звук получения по лицу / промаха
+          } else {
+            AudioManager.playGameOver(); // Если это было последнее сердце
+          }
         }
       }
     });
@@ -1257,8 +1265,20 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
     );
   }
 
-    // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОД _buildDonMollusk В КЛАССЕ СОСТОЯНИЯ ЭКРАНА:
-  Widget _buildDonMollusk(double size) {
+       Widget _buildDonMollusk(double size) {
+    // Вычисляем прогресс атаки от 0.0 до 1.0 внутри секунды удара
+    double attackProgress = 0.0;
+    if (_bossState == BossState.attacking) {
+      if (_bossStateTimer < 0.25) {
+        attackProgress = _bossStateTimer / 0.25; // Выпад вперед
+      } else {
+        attackProgress = (1.0 - _bossStateTimer) / 0.75; // Возврат назад
+      }
+    }
+    
+    // Сила вылета (расстояние в пикселях)
+    double punchOffset = attackProgress * (size * 0.95);
+
     return SizedBox(
       width: size,
       height: size,
@@ -1266,118 +1286,98 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
         alignment: Alignment.center,
         clipBehavior: Clip.none,
         children: [
-          // 🐙 ЩУПАЛЬЦА С АНИМАЦИЕЙ ВРАЩЕНИЯ ПРИ ЗАМАХЕ И ПАДЕНИЯ НА ПОЛ ПРИ DIZZY
+          // 🐙 ЛЕВОЕ НИЖНЕЕ ЩУПАЛЬЦЕ (Бьет ПО ЗЕМЛЕ: летит влево и прижимается вниз)
           Positioned(
             bottom: size * 0.24, left: size * 0.04, 
-            child: Transform.rotate(
-              angle: _bossState == BossState.windingUp && _activeLimb == BossLimb.leftTentacle ? _limbRotationAngle : -0.3, 
-              child: CustomPaint(size: Size(size * 0.28, size * 0.58), painter: _DetailedTentaclePainter(isLeft: true, isFallen: _bossState == BossState.dizzy)),
+            child: Transform.translate(
+              offset: Offset(
+                _bossState == BossState.attacking && _activeLimb == BossLimb.leftTentacle ? -punchOffset : 0, 
+                _bossState == BossState.attacking && _activeLimb == BossLimb.leftTentacle ? punchOffset * 0.25 : 0 // Стелится по низу
+              ),
+              child: Transform.rotate(
+                angle: _bossState == BossState.windingUp && _activeLimb == BossLimb.leftTentacle ? _limbRotationAngle : -0.3, 
+                child: CustomPaint(size: Size(size * 0.28, size * 0.58), painter: _DetailedTentaclePainter(isLeft: true, isFallen: _bossState == BossState.dizzy)),
+              ),
             ),
           ),
-          Positioned(
-            top: size * 0.06, left: size * 0.12, 
-            child: Transform.rotate(
-              angle: -1.3, 
-              child: CustomPaint(size: Size(size * 0.25, size * 0.53), painter: _DetailedTentaclePainter(isLeft: true, isFallen: _bossState == BossState.dizzy)),
-            ),
-          ),
-          Positioned(
-            top: size * 0.06, right: size * 0.12, 
-            child: Transform.rotate(
-              angle: 1.3, 
-              child: CustomPaint(size: Size(size * 0.25, size * 0.53), painter: _DetailedTentaclePainter(isLeft: false, isFallen: _bossState == BossState.dizzy)),
-            ),
-          ),
+          
+          // Фоновые щупальца (остаются на месте для объема)
+          Positioned(top: size * 0.06, left: size * 0.12, child: Transform.rotate(angle: -1.3, child: CustomPaint(size: Size(size * 0.25, size * 0.53), painter: _DetailedTentaclePainter(isLeft: true, isFallen: _bossState == BossState.dizzy)))),
+          Positioned(top: size * 0.06, right: size * 0.12, child: Transform.rotate(angle: 1.3, child: CustomPaint(size: Size(size * 0.25, size * 0.53), painter: _DetailedTentaclePainter(isLeft: false, isFallen: _bossState == BossState.dizzy)))),
+
+          // 🐙 ПРАВОЕ НИЖНЕЕ ЩУПАЛЬЦЕ (Бьет ПО ЗЕМЛЕ: летит влево и прижимается вниз)
           Positioned(
             bottom: size * 0.24, right: size * 0.04, 
-            child: Transform.rotate(
-              angle: _bossState == BossState.windingUp && _activeLimb == BossLimb.rightTentacle ? _limbRotationAngle : 0.4, 
-              child: CustomPaint(size: Size(size * 0.28, size * 0.58), painter: _DetailedTentaclePainter(isLeft: false, isFallen: _bossState == BossState.dizzy)),
+            child: Transform.translate(
+              offset: Offset(
+                _bossState == BossState.attacking && _activeLimb == BossLimb.rightTentacle ? -punchOffset : 0, 
+                _bossState == BossState.attacking && _activeLimb == BossLimb.rightTentacle ? punchOffset * 0.25 : 0 // Стелится по низу
+              ),
+              child: Transform.rotate(
+                angle: _bossState == BossState.windingUp && _activeLimb == BossLimb.rightTentacle ? _limbRotationAngle : 0.4, 
+                child: CustomPaint(size: Size(size * 0.28, size * 0.58), painter: _DetailedTentaclePainter(isLeft: false, isFallen: _bossState == BossState.dizzy)),
+              ),
             ),
           ),
 
           // 🐷 УШКИ БОССА
-          Positioned(
-            top: size * 0.10, left: size * 0.08, 
-            child: Transform.rotate(
-              angle: -0.2,
-              child: Container(
-                width: size * 0.18, height: size * 0.26, 
-                decoration: BoxDecoration(
-                  color: const Color(0xFF689F38),
-                  borderRadius: BorderRadius.circular(size * 0.09), 
-                  border: Border.all(color: Colors.black, width: 1.8),
-                ),
-                child: Center(child: Container(width: size * 0.08, height: size * 0.14, decoration: BoxDecoration(color: const Color(0xFF558B2F), borderRadius: BorderRadius.circular(size * 0.05)))),
-              ),
-            ),
-          ),
-          Positioned(
-            top: size * 0.10, right: size * 0.08, 
-            child: Transform.rotate(
-              angle: 0.2,
-              child: Container(
-                width: size * 0.18, height: size * 0.26, 
-                decoration: BoxDecoration(
-                  color: const Color(0xFF689F38),
-                  borderRadius: BorderRadius.circular(size * 0.09),
-                  border: Border.all(color: Colors.black, width: 1.8),
-                ),
-                child: Center(child: Container(width: size * 0.08, height: size * 0.14, decoration: BoxDecoration(color: const Color(0xFF558B2F), borderRadius: BorderRadius.circular(size * 0.05)))),
-              ),
-            ),
-          ),
+          Positioned(top: size * 0.10, left: size * 0.08, child: Transform.rotate(angle: -0.2, child: Container(width: size * 0.18, height: size * 0.26, decoration: BoxDecoration(color: const Color(0xFF689F38), borderRadius: BorderRadius.circular(size * 0.09), border: Border.all(color: Colors.black, width: 1.8)), child: Center(child: Container(width: size * 0.08, height: size * 0.14, decoration: BoxDecoration(color: const Color(0xFF558B2F), borderRadius: BorderRadius.circular(size * 0.05))))))),
+          Positioned(top: size * 0.10, right: size * 0.08, child: Transform.rotate(angle: 0.2, child: Container(width: size * 0.18, height: size * 0.26, decoration: BoxDecoration(color: const Color(0xFF689F38), borderRadius: BorderRadius.circular(size * 0.09), border: Border.all(color: Colors.black, width: 1.8)), child: Center(child: Container(width: size * 0.08, height: size * 0.14, decoration: BoxDecoration(color: const Color(0xFF558B2F), borderRadius: BorderRadius.circular(size * 0.05))))))),
 
-          // Левая нижняя клешня
+          // 🦀 ЛЕВАЯ НИЖНЯЯ КЛЕШНЯ (Бьет ПО ВЕРХУ: летит влево и задирается вверх в воздух)
           Positioned(
             bottom: size * 0.16, left: -size * 0.02,
-            child: Transform.rotate(
-              angle: _bossState == BossState.windingUp && _activeLimb == BossLimb.leftClaw ? _limbRotationAngle : -0.1, 
-              // ДОБАВИЛИ ФЛАГ ОТДЫШКИ:
-              child: CustomPaint(size: Size(size * 0.34, size * 0.34), painter: _DetailedCrabClawPainter(isOpen: false, isFallen: _bossState == BossState.dizzy)),
+            child: Transform.translate(
+              offset: Offset(
+                _bossState == BossState.attacking && _activeLimb == BossLimb.leftClaw ? -punchOffset : 0, 
+                _bossState == BossState.attacking && _activeLimb == BossLimb.leftClaw ? -punchOffset * 0.45 : 0 // Резко взлетает вверх под прыжок
+              ),
+              child: Transform.rotate(
+                angle: _bossState == BossState.windingUp && _activeLimb == BossLimb.leftClaw ? _limbRotationAngle : -0.1, 
+                child: CustomPaint(size: Size(size * 0.34, size * 0.34), painter: _DetailedCrabClawPainter(isOpen: false, isFallen: _bossState == BossState.dizzy)),
+              ),
             ),
           ),
           
-          // Правая нижняя клешня
+          // 🦀 ПРАВАЯ НИЖНЯЯ КЛЕШНЯ (Бьет ПО ВЕРХУ: летит влево и задирается вверх)
           Positioned(
             bottom: size * 0.16, right: -size * 0.02,
-            child: Transform.rotate(
-              angle: _bossState == BossState.windingUp && _activeLimb == BossLimb.rightClaw ? _limbRotationAngle : 0.1, 
-              // ДОБАВИЛИ ФЛАГ ОТДЫШКИ:
-              child: CustomPaint(size: Size(size * 0.34, size * 0.34), painter: _DetailedCrabClawPainter(isOpen: false, isFallen: _bossState == BossState.dizzy)),
+            child: Transform.translate(
+              offset: Offset(
+                _bossState == BossState.attacking && _activeLimb == BossLimb.rightClaw ? -punchOffset : 0, 
+                _bossState == BossState.attacking && _activeLimb == BossLimb.rightClaw ? -punchOffset * 0.45 : 0 // Резко взлетает вверх под прыжок
+              ),
+              child: Transform.rotate(
+                angle: _bossState == BossState.windingUp && _activeLimb == BossLimb.rightClaw ? _limbRotationAngle : 0.1, 
+                child: CustomPaint(size: Size(size * 0.34, size * 0.34), painter: _DetailedCrabClawPainter(isOpen: false, isFallen: _bossState == BossState.dizzy)),
+              ),
             ),
           ),
 
-          // Верхняя клешня на макушке
+          // 🦀 ВЕРХНЯЯ КЛЕШНЯ НА МАКУШКЕ (Дополнительный сильный удар сверху по диагонали)
           Positioned(
             top: _bossState == BossState.dizzy ? 0 : -size * 0.12, 
             left: size * 0.33,
-            // ДОБАВИЛИ ФЛАГ ОТДЫШКИ (верхняя клешня бессильно съезжает вниз):
-            child: CustomPaint(size: Size(size * 0.34, size * 0.34), painter: _DetailedCrabClawPainter(isOpen: true, isFallen: _bossState == BossState.dizzy)),
+            child: Transform.translate(
+              offset: Offset(
+                _bossState == BossState.attacking && _activeLimb == BossLimb.rightClaw ? -punchOffset * 0.7 : 0, 
+                _bossState == BossState.attacking && _activeLimb == BossLimb.rightClaw ? punchOffset * 0.5 : 0
+              ),
+              child: CustomPaint(size: Size(size * 0.34, size * 0.34), painter: _DetailedCrabClawPainter(isOpen: true, isFallen: _bossState == BossState.dizzy)),
+            ),
           ),
 
           // 🟢 ЦЕНТРАЛЬНОЕ ТЕЛО БОССА
           Container(
-            width: size * 0.70,
-            height: size * 0.70,
-            decoration: BoxDecoration(
-              color: const Color(0xFF558B2F),
-              shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFF1B5E20), width: 2.2),
-              boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 4, offset: Offset(0, 2))],
-            ),
-            child: ClipOval(
-              child: Image.asset(
-                'assets/images/maksim_boss.png',
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(color: const Color(0xFF558B2F)), 
-              ),
-            ),
+            width: size * 0.70, height: size * 0.70,
+            decoration: BoxDecoration(color: const Color(0xFF558B2F), shape: BoxShape.circle, border: Border.all(color: const Color(0xFF1B5E20), width: 2.2), boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 4, offset: Offset(0, 2))]),
+            child: ClipOval(child: Image.asset('assets/images/maksim_boss.png', fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) => Container(color: const Color(0xFF558B2F)))),
           ),
         ],
       ),
     );
   }
+
   
 
   // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО В КОНЦЕ КЛАССА СОСТОЯНИЯ (МЕТОД _buildCharacter):
