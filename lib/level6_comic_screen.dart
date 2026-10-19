@@ -149,13 +149,13 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
     _secureGameplayMusicStream(dt);
     setState(() {
       
-      // ТОЧЕЧНО ДОБАВИТЬ В САМОЕ НАЧАЛО МЕТОДА _updatePhysics, ПОД setState(() {:
-      // Если Шериф уже погиб — полностью останавливаем симуляцию
       if (_vanyaHearts <= 0) {
-        _vanyaVx = 0.0;
-        _vanyaVy = 0.0;
-        return;
+      if (_gameLoopTicker.isActive) {
+        _gameLoopTicker.stop(); 
+        print("Движковый тикер успешно остановлен: Шериф повержен, экономим батарею.");
       }
+      return;
+    }
 
       
       const double realGroundY = 0.88;
@@ -396,6 +396,9 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
 
   @override
   void dispose() {
+    if (_gameLoopTicker.isActive) {
+      _gameLoopTicker.stop();
+    }
     _gameLoopTicker.dispose();
     _debrisController.dispose();
     super.dispose();
