@@ -286,12 +286,29 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
             }
             break;
 
-          case BossState.attacking:
-            _limbRotationAngle = 0.0;
-            if (_bossStateTimer < 0.25) {
-              // ЩУПАЛЬЦА бьют по земле — надо прыгать!
-              if (_activeLimb == BossLimb.leftTentacle || _activeLimb == BossLimb.rightTentacle) {
-                if (!_vanyaIsJumping && _vanyaX > 0.35) {
+                 case BossState.attacking:
+          _limbRotationAngle = 0.0;
+          if (_bossStateTimer < 0.25) {
+            // ИСПРАВЛЕНО ТОЧЕЧНО: Зона поражения щупалец расширена! Теперь бьет везде, если Ваня не прыгнул (кроме угла 0.18)
+            if (_activeLimb == BossLimb.leftTentacle || _activeLimb == BossLimb.rightTentacle) {
+              if (!_vanyaIsJumping && _vanyaX > 0.18) {
+                if (_vanyaHearts > 0) _vanyaHearts--;
+                if (_vanyaHearts > 0) {
+                  AudioManager.playMiss();
+                  _vanyaX = 0.15;
+                  _vanyaY = realGroundY - 0.05;
+                } else {
+                  AudioManager.playGameOver();
+                }
+              }
+            } 
+            // ИСПРАВЛЕНО ТОЧЕЧНО: Зона поражения клешней расширена! Ловит прыгающего Ваню по всему воздуху (кроме угла 0.18)
+            else {
+              if (_isBarricadeAlive) {
+                _isBarricadeAlive = false;
+                AudioManager.playBlockBreak(true); // Ломает преграду
+              } else {
+                if (_vanyaIsJumping && _vanyaVy < 0 && _vanyaX > 0.18) {
                   if (_vanyaHearts > 0) _vanyaHearts--;
                   if (_vanyaHearts > 0) {
                     AudioManager.playMiss();
@@ -301,26 +318,10 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                     AudioManager.playGameOver();
                   }
                 }
-              } 
-              // КЛЕШНИ бьют по верху — надо стоять на полу или прятаться
-              else {
-                if (_isBarricadeAlive) {
-                  _isBarricadeAlive = false;
-                  AudioManager.playBlockBreak(true); // Баррикада рушится со звуком камня
-                } else {
-                  if (_vanyaIsJumping && _vanyaVy < 0 && _vanyaX > 0.45) {
-                    if (_vanyaHearts > 0) _vanyaHearts--;
-                    if (_vanyaHearts > 0) {
-                      AudioManager.playMiss();
-                      _vanyaX = 0.15;
-                      _vanyaY = realGroundY - 0.05;
-                    } else {
-                      AudioManager.playGameOver();
-                    }
-                  }
-                }
               }
             }
+          }
+
 
             if (_bossStateTimer >= 1.0) {
               _bossStateTimer = 0.0;
@@ -1265,19 +1266,23 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
     );
   }
 
-       Widget _buildDonMollusk(double size) {
+        Widget _buildDonMollusk(double size) {
+    final sizeMedia = MediaQuery.of(context).size;
+    
     // Вычисляем прогресс атаки от 0.0 до 1.0 внутри секунды удара
     double attackProgress = 0.0;
     if (_bossState == BossState.attacking) {
       if (_bossStateTimer < 0.25) {
-        attackProgress = _bossStateTimer / 0.25; // Выпад вперед
+        attackProgress = _bossStateTimer / 0.25; // Молниеносный выпад вперед
       } else {
         attackProgress = (1.0 - _bossStateTimer) / 0.75; // Возврат назад
       }
     }
     
-    // Сила вылета (расстояние в пикселях)
-    double punchOffset = attackProgress * (size * 0.95);
+    // МАСШТАБ РАСТЯЖЕНИЯ: На пике удара конечность удлиняется в 4.5 раза, перекрывая весь экран!
+    double stretchFactor = 1.0 + (attackProgress * 3.5);
+    // Смещение по оси X, чтобы визуально дотягиваться до левого края
+    double punchOffset = attackProgress * (sizeMedia.width * 0.7);
 
     return SizedBox(
       width: size,
@@ -1286,36 +1291,39 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
         alignment: Alignment.center,
         clipBehavior: Clip.none,
         children: [
-          // 🐙 ЛЕВОЕ НИЖНЕЕ ЩУПАЛЬЦЕ (Бьет ПО ЗЕМЛЕ: летит влево и прижимается вниз)
+          // 🐙 ЛЕВОЕ НИЖНЕЕ ЩУПАЛЬЦЕ (Бьет ПО ЗЕМЛЕ во всю длину экрана)
           Positioned(
             bottom: size * 0.24, left: size * 0.04, 
             child: Transform.translate(
-              offset: Offset(
-                _bossState == BossState.attacking && _activeLimb == BossLimb.leftTentacle ? -punchOffset : 0, 
-                _bossState == BossState.attacking && _activeLimb == BossLimb.leftTentacle ? punchOffset * 0.25 : 0 // Стелится по низу
-              ),
-              child: Transform.rotate(
-                angle: _bossState == BossState.windingUp && _activeLimb == BossLimb.leftTentacle ? _limbRotationAngle : -0.3, 
-                child: CustomPaint(size: Size(size * 0.28, size * 0.58), painter: _DetailedTentaclePainter(isLeft: true, isFallen: _bossState == BossState.dizzy)),
+              offset: Offset(_bossState == BossState.attacking && _activeLimb == BossLimb.leftTentacle ? -punchOffset : 0, _bossState == BossState.attacking && _activeLimb == BossLimb.leftTentacle ? size * 0.2 : 0),
+              child: Transform.scale(
+                // Растягиваем щупальце в длину по горизонтали (ось X)
+                scaleX: _bossState == BossState.attacking && _activeLimb == BossLimb.leftTentacle ? stretchFactor : 1.0,
+                alignment: Alignment.centerRight, // Растяжение идет от тела босса влево!
+                child: Transform.rotate(
+                  angle: _bossState == BossState.windingUp && _activeLimb == BossLimb.leftTentacle ? _limbRotationAngle : -0.3, 
+                  child: CustomPaint(size: Size(size * 0.28, size * 0.58), painter: _DetailedTentaclePainter(isLeft: true, isFallen: _bossState == BossState.dizzy)),
+                ),
               ),
             ),
           ),
           
-          // Фоновые щупальца (остаются на месте для объема)
+          // Фоновые щупальца
           Positioned(top: size * 0.06, left: size * 0.12, child: Transform.rotate(angle: -1.3, child: CustomPaint(size: Size(size * 0.25, size * 0.53), painter: _DetailedTentaclePainter(isLeft: true, isFallen: _bossState == BossState.dizzy)))),
           Positioned(top: size * 0.06, right: size * 0.12, child: Transform.rotate(angle: 1.3, child: CustomPaint(size: Size(size * 0.25, size * 0.53), painter: _DetailedTentaclePainter(isLeft: false, isFallen: _bossState == BossState.dizzy)))),
 
-          // 🐙 ПРАВОЕ НИЖНЕЕ ЩУПАЛЬЦЕ (Бьет ПО ЗЕМЛЕ: летит влево и прижимается вниз)
+          // 🐙 ПРАВОЕ НИЖНЕЕ ЩУПАЛЬЦЕ (Бьет ПО ЗЕМЛЕ во всю длину экрана)
           Positioned(
             bottom: size * 0.24, right: size * 0.04, 
             child: Transform.translate(
-              offset: Offset(
-                _bossState == BossState.attacking && _activeLimb == BossLimb.rightTentacle ? -punchOffset : 0, 
-                _bossState == BossState.attacking && _activeLimb == BossLimb.rightTentacle ? punchOffset * 0.25 : 0 // Стелится по низу
-              ),
-              child: Transform.rotate(
-                angle: _bossState == BossState.windingUp && _activeLimb == BossLimb.rightTentacle ? _limbRotationAngle : 0.4, 
-                child: CustomPaint(size: Size(size * 0.28, size * 0.58), painter: _DetailedTentaclePainter(isLeft: false, isFallen: _bossState == BossState.dizzy)),
+              offset: Offset(_bossState == BossState.attacking && _activeLimb == BossLimb.rightTentacle ? -punchOffset : 0, _bossState == BossState.attacking && _activeLimb == BossLimb.rightTentacle ? size * 0.2 : 0),
+              child: Transform.scale(
+                scaleX: _bossState == BossState.attacking && _activeLimb == BossLimb.rightTentacle ? stretchFactor : 1.0,
+                alignment: Alignment.centerRight,
+                child: Transform.rotate(
+                  angle: _bossState == BossState.windingUp && _activeLimb == BossLimb.rightTentacle ? _limbRotationAngle : 0.4, 
+                  child: CustomPaint(size: Size(size * 0.28, size * 0.58), painter: _DetailedTentaclePainter(isLeft: false, isFallen: _bossState == BossState.dizzy)),
+                ),
               ),
             ),
           ),
@@ -1324,45 +1332,44 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
           Positioned(top: size * 0.10, left: size * 0.08, child: Transform.rotate(angle: -0.2, child: Container(width: size * 0.18, height: size * 0.26, decoration: BoxDecoration(color: const Color(0xFF689F38), borderRadius: BorderRadius.circular(size * 0.09), border: Border.all(color: Colors.black, width: 1.8)), child: Center(child: Container(width: size * 0.08, height: size * 0.14, decoration: BoxDecoration(color: const Color(0xFF558B2F), borderRadius: BorderRadius.circular(size * 0.05))))))),
           Positioned(top: size * 0.10, right: size * 0.08, child: Transform.rotate(angle: 0.2, child: Container(width: size * 0.18, height: size * 0.26, decoration: BoxDecoration(color: const Color(0xFF689F38), borderRadius: BorderRadius.circular(size * 0.09), border: Border.all(color: Colors.black, width: 1.8)), child: Center(child: Container(width: size * 0.08, height: size * 0.14, decoration: BoxDecoration(color: const Color(0xFF558B2F), borderRadius: BorderRadius.circular(size * 0.05))))))),
 
-          // 🦀 ЛЕВАЯ НИЖНЯЯ КЛЕШНЯ (Бьет ПО ВЕРХУ: летит влево и задирается вверх в воздух)
+          // 🦀 ЛЕВАЯ НИЖНЯЯ КЛЕШНЯ (Бьет ПО ВЕРХУ во всю длину экрана)
           Positioned(
             bottom: size * 0.16, left: -size * 0.02,
             child: Transform.translate(
-              offset: Offset(
-                _bossState == BossState.attacking && _activeLimb == BossLimb.leftClaw ? -punchOffset : 0, 
-                _bossState == BossState.attacking && _activeLimb == BossLimb.leftClaw ? -punchOffset * 0.45 : 0 // Резко взлетает вверх под прыжок
-              ),
-              child: Transform.rotate(
-                angle: _bossState == BossState.windingUp && _activeLimb == BossLimb.leftClaw ? _limbRotationAngle : -0.1, 
-                child: CustomPaint(size: Size(size * 0.34, size * 0.34), painter: _DetailedCrabClawPainter(isOpen: false, isFallen: _bossState == BossState.dizzy)),
+              offset: Offset(_bossState == BossState.attacking && _activeLimb == BossLimb.leftClaw ? -punchOffset : 0, _bossState == BossState.attacking && _activeLimb == BossLimb.leftClaw ? -punchOffset * 0.35 : 0),
+              child: Transform.scale(
+                scaleX: _bossState == BossState.attacking && _activeLimb == BossLimb.leftClaw ? stretchFactor : 1.0,
+                alignment: Alignment.centerRight,
+                child: Transform.rotate(
+                  angle: _bossState == BossState.windingUp && _activeLimb == BossLimb.leftClaw ? _limbRotationAngle : -0.1, 
+                  child: CustomPaint(size: Size(size * 0.34, size * 0.34), painter: _DetailedCrabClawPainter(isOpen: false, isFallen: _bossState == BossState.dizzy)),
+                ),
               ),
             ),
           ),
           
-          // 🦀 ПРАВАЯ НИЖНЯЯ КЛЕШНЯ (Бьет ПО ВЕРХУ: летит влево и задирается вверх)
+          // 🦀 ПРАВАЯ НИЖНЯЯ КЛЕШНЯ (Бьет ПО ВЕРХУ во всю длину экрана)
           Positioned(
             bottom: size * 0.16, right: -size * 0.02,
             child: Transform.translate(
-              offset: Offset(
-                _bossState == BossState.attacking && _activeLimb == BossLimb.rightClaw ? -punchOffset : 0, 
-                _bossState == BossState.attacking && _activeLimb == BossLimb.rightClaw ? -punchOffset * 0.45 : 0 // Резко взлетает вверх под прыжок
-              ),
-              child: Transform.rotate(
-                angle: _bossState == BossState.windingUp && _activeLimb == BossLimb.rightClaw ? _limbRotationAngle : 0.1, 
-                child: CustomPaint(size: Size(size * 0.34, size * 0.34), painter: _DetailedCrabClawPainter(isOpen: false, isFallen: _bossState == BossState.dizzy)),
+              offset: Offset(_bossState == BossState.attacking && _activeLimb == BossLimb.rightClaw ? -punchOffset : 0, _bossState == BossState.attacking && _activeLimb == BossLimb.rightClaw ? -punchOffset * 0.35 : 0),
+              child: Transform.scale(
+                scaleX: _bossState == BossState.attacking && _activeLimb == BossLimb.rightClaw ? stretchFactor : 1.0,
+                alignment: Alignment.centerRight,
+                child: Transform.rotate(
+                  angle: _bossState == BossState.windingUp && _activeLimb == BossLimb.rightClaw ? _limbRotationAngle : 0.1, 
+                  child: CustomPaint(size: Size(size * 0.34, size * 0.34), painter: _DetailedCrabClawPainter(isOpen: false, isFallen: _bossState == BossState.dizzy)),
+                ),
               ),
             ),
           ),
 
-          // 🦀 ВЕРХНЯЯ КЛЕШНЯ НА МАКУШКЕ (Дополнительный сильный удар сверху по диагонали)
+          // 🦀 ВЕРХНЯЯ КЛЕШНЯ НА МАКУШКЕ
           Positioned(
             top: _bossState == BossState.dizzy ? 0 : -size * 0.12, 
             left: size * 0.33,
             child: Transform.translate(
-              offset: Offset(
-                _bossState == BossState.attacking && _activeLimb == BossLimb.rightClaw ? -punchOffset * 0.7 : 0, 
-                _bossState == BossState.attacking && _activeLimb == BossLimb.rightClaw ? punchOffset * 0.5 : 0
-              ),
+              offset: Offset(_bossState == BossState.attacking && _activeLimb == BossLimb.rightClaw ? -punchOffset * 0.7 : 0, _bossState == BossState.attacking && _activeLimb == BossLimb.rightClaw ? punchOffset * 0.5 : 0),
               child: CustomPaint(size: Size(size * 0.34, size * 0.34), painter: _DetailedCrabClawPainter(isOpen: true, isFallen: _bossState == BossState.dizzy)),
             ),
           ),
@@ -1377,6 +1384,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
       ),
     );
   }
+
 
   
 
