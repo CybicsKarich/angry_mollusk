@@ -303,7 +303,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
             }
             break;
 
-                         case BossState.attacking:
+           case BossState.attacking:
           _limbRotationAngle = 0.0;
 
           // Вычисляем текущую физическую позицию лапы на арене
@@ -1321,7 +1321,9 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
       }
     }
     
-        // Смещение по оси X с жестким ограничением, чтобы лапа не вылетала за экран (0.02)
+    double stretchFactor = 1.0 + (attackProgress * 3.5);
+    
+    // Ограничиваем вылет границей экрана (0.02)
     double maxPunchDistance = sizeMedia.width * (_bossX - 0.02);
     double punchOffset = attackProgress * maxPunchDistance;
 
