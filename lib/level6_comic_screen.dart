@@ -38,7 +38,10 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
   bool _isPhase2Active = false;
   bool _isLocalBattleMusicStarted = false;
   double _localMusicCheckTimer = 0.0;
-  
+  double _bloodPoolX = -1.0;
+  double _bloodPoolTimer = 0.0;
+  bool _isBloodPoolActive = false;
+
   
   bool _btnLeftPressed = false;
   bool _btnRightPressed = false;
@@ -144,7 +147,13 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
     }
   }
 
+   void _spawnBloodSplatter() {
+    _bloodPoolX = _vanyaX;
+    _bloodPoolTimer = 5.0; // Лужа лежит ровно 5 секунд
+    _isBloodPoolActive = true;
+  }
 
+  
   void _updatePhysics(double dt) {
     _secureGameplayMusicStream(dt);
     setState(() {
@@ -157,7 +166,15 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
       return;
     }
 
-      
+          // Обновление времени жизни лужи крови Шерифа
+    if (_isBloodPoolActive) {
+      _bloodPoolTimer -= dt;
+      if (_bloodPoolTimer <= 0) {
+        _isBloodPoolActive = false;
+        _bloodPoolX = -1.0;
+      }
+    }
+
       const double realGroundY = 0.88;
 
       // Обновляем внутренние таймеры анимации ауры и эффектов подбора
@@ -286,65 +303,74 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
             }
             break;
 
-                 case BossState.attacking:
+                         case BossState.attacking:
           _limbRotationAngle = 0.0;
+
+          // Вычисляем текущую физическую позицию лапы на арене
+          double attackProgress = 0.0;
           if (_bossStateTimer < 0.25) {
-            // ИСПРАВЛЕНО ТОЧЕЧНО: Зона поражения щупалец расширена! Теперь бьет везде, если Ваня не прыгнул (кроме угла 0.18)
+            attackProgress = _bossStateTimer / 0.25; // Выпад вперед
+          } else {
+            attackProgress = (1.0 - _bossStateTimer) / 0.75; // Возврат назад
+          }
+          
+          // Лапа летит от босса (_bossX = 0.84) влево. Ограничиваем вылет границей экрана (0.02)
+          double currentPunchX = _bossX - (attackProgress * 0.82);
+          if (currentPunchX < 0.02) currentPunchX = 0.02;
+
+          // Проверяем нахождение Вани в радиусе поражения летящей лапы (смертельная аура)
+          double distanceToLimb = (_vanyaX - currentPunchX).abs();
+          
+          // Увеличенная площадь поражения вокруг конечности
+          if (distanceToLimb < 0.14) { 
+            bool isHit = false;
+            
+            // Если бьют щупальца (низ) — наносим урон, только если Ваня не прыгнул
             if (_activeLimb == BossLimb.leftTentacle || _activeLimb == BossLimb.rightTentacle) {
-              if (!_vanyaIsJumping && _vanyaX > 0.18) {
-                if (_vanyaHearts > 0) _vanyaHearts--;
-                if (_vanyaHearts > 0) {
-                  AudioManager.playMiss();
-                  _vanyaX = 0.15;
-                  _vanyaY = realGroundY - 0.05;
-                } else {
-                  AudioManager.playGameOver();
-                }
-              }
+              if (!_vanyaIsJumping) isHit = true;
             } 
-            // ИСПРАВЛЕНО ТОЧЕЧНО: Зона поражения клешней расширена! Ловит прыгающего Ваню по всему воздуху (кроме угла 0.18)
+            // Если бьют клешни (верх) — ловим Ваню в прыжке (или если баррикада уже сломана)
             else {
               if (_isBarricadeAlive) {
                 _isBarricadeAlive = false;
-                AudioManager.playBlockBreak(true); // Ломает преграду
+                AudioManager.playBlockBreak(true); // Разрушение преграды
               } else {
-                if (_vanyaIsJumping && _vanyaVy < 0 && _vanyaX > 0.18) {
-                  if (_vanyaHearts > 0) _vanyaHearts--;
-                  if (_vanyaHearts > 0) {
-                    AudioManager.playMiss();
-                    _vanyaX = 0.15;
-                    _vanyaY = realGroundY - 0.05;
-                  } else {
-                    AudioManager.playGameOver();
-                  }
-                }
+                if (_vanyaIsJumping && _vanyaVy < 0) isHit = true;
+              }
+            }
+
+            // Нанесение урона при контакте с аурой конечности
+            if (isHit && _vanyaHearts > 0) {
+              _vanyaHearts--;
+              
+              // Спавн брызг и лужи крови при потере жизни
+              _spawnBloodSplatter();
+
+              if (_vanyaHearts > 0) {
+                AudioManager.playMiss();
+                _vanyaX = 0.15; // Отброс на спавн
+                _vanyaY = realGroundY - 0.05;
+                _vanyaIsJumping = false;
+                _vanyaVy = 0.0;
+              } else {
+                AudioManager.playGameOver();
               }
             }
           }
 
-
-            if (_bossStateTimer >= 1.0) {
-              _bossStateTimer = 0.0;
-              _bossStrikeCounter++;
-              if (_bossStrikeCounter >= 3) {
-                _bossStrikeCounter = 0;
-                _bossState = BossState.dizzy; // Усталость на 5 секунд после 3 ударов
-                _staggerEffectTimer = 0.0;
-              } else {
-                _bossState = BossState.idle;
-              }
-            }
-            break;
-
-          case BossState.dizzy:
-            _staggerEffectTimer += dt; 
-            _limbRotationAngle = 0.0; 
-            if (_bossStateTimer >= 5.0) {
-              _bossStateTimer = 0.0;
+          // Завершение цикла атаки босса
+          if (_bossStateTimer >= 1.0) {
+            _bossStateTimer = 0.0;
+            _bossStrikeCounter++;
+            if (_bossStrikeCounter >= 3) {
+              _bossStrikeCounter = 0;
+              _bossState = BossState.dizzy;
               _staggerEffectTimer = 0.0;
-              _bossState = BossState.idle; // Проснулся
+            } else {
+              _bossState = BossState.idle;
             }
-            break;
+          }
+          break;
         }
       }
 
@@ -744,6 +770,21 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                       ),
                     ),
 
+                                    // 🩸 Лужа крови Шерифа при ранении или смерти (исчезает через 5 секунд)
+                  if (_isBloodPoolActive && _bloodPoolX > 0)
+                    Positioned(
+                      bottom: 22,
+                      left: size.width * _bloodPoolX - 15,
+                      child: SizedBox(
+                        width: 40,
+                        height: 12,
+                        child: CustomPaint(
+                          painter: _SheriffBloodPoolPainter(),
+                        ),
+                      ),
+                    ),
+
+                  
                   // 🔴 КРУГЛЫЙ ШЕРИФ + ИСПРАВЛЕННАЯ СИНЯЯ КРУТЯЩАЯСЯ АУРА ЯРОСТИ И ЗВЁЗДЫ
                   Positioned(
                     left: _vanyaX * size.width,
@@ -1063,6 +1104,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
                       onPressed: () {
+                        AudioManager.stopAllLevelSounds();
                         AudioManager.stopLevelAudioAndPlayMenu();
                         Navigator.pop(context);
                       },
@@ -1279,10 +1321,9 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
       }
     }
     
-    // МАСШТАБ РАСТЯЖЕНИЯ: На пике удара конечность удлиняется в 4.5 раза, перекрывая весь экран!
-    double stretchFactor = 1.0 + (attackProgress * 3.5);
-    // Смещение по оси X, чтобы визуально дотягиваться до левого края
-    double punchOffset = attackProgress * (sizeMedia.width * 0.7);
+        // Смещение по оси X с жестким ограничением, чтобы лапа не вылетала за экран (0.02)
+    double maxPunchDistance = sizeMedia.width * (_bossX - 0.02);
+    double punchOffset = attackProgress * maxPunchDistance;
 
     return SizedBox(
       width: size,
@@ -1713,4 +1754,26 @@ extension _Level6CanvasTriangleExt on Canvas {
 enum BossState { idle, windingUp, attacking, dizzy }
 enum BossLimb { leftTentacle, rightTentacle, leftClaw, rightClaw }
 
+// 🎨 Векторная лужа крови с контрастным черным контуром против сливания с полом
+class _SheriffBloodPoolPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final bloodPaint = Paint()..color = const Color(0xFFB71C1C)..style = PaintingStyle.fill;
+    final strokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.8;
+
+    final path = Path();
+    // Рисуем расплывчатый плоский эллипс лужи на плитке
+    path.moveTo(size.width * 0.1, size.height * 0.5);
+    path.cubicTo(size.width * 0.2, size.height * 0.1, size.width * 0.4, size.height * 0.2, size.width * 0.6, size.height * 0.4);
+    path.cubicTo(size.width * 0.8, size.height * 0.1, size.width * 0.95, size.height * 0.6, size.width * 0.7, size.height * 0.9);
+    path.cubicTo(size.width * 0.5, size.height * 1.1, size.width * 0.2, size.height * 0.9, size.width * 0.1, size.height * 0.5);
+    path.close();
+
+    canvas.drawPath(path, bloodPaint);
+    canvas.drawPath(path, strokePaint); // Накатываем черный контур
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
 
