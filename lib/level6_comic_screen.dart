@@ -219,7 +219,6 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
       }
     }
 
-        const double realGroundY = 0.88;
 
     // Обновление времени жизни лужи крови Шерифа
     if (_isBloodPoolActive) {
