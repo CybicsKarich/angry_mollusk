@@ -41,6 +41,11 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
   double _bloodPoolX = -1.0;
   double _bloodPoolTimer = 0.0;
   bool _isBloodPoolActive = false;
+  double _bombPigX = -1.0;         // Координата X катящейся свиньи (-1.0 — нет на экране)
+  double _bombPigTimer = 0.0;      // Таймер отсчета 6 секунд для спавна
+  bool _isBombPigActive = false;   // Активна ли свинья сейчас на арене
+  double _explosionTimer = 0.0;    // Таймер для отрисовки анимации взрыва
+  double _explosionX = -1.0; 
 
   
   bool _btnLeftPressed = false;
@@ -182,24 +187,73 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
       if (_plusOneUiTimer > 0) _plusOneUiTimer -= dt;
       if (_heartPulseTimer > 0) _heartPulseTimer -= dt;
 
-      // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО БЛОК СПАВНА ТАБЛЕТКИ:
-      // ИСПРАВЛЕНО ТОЧЕЧНО: Теперь капсула проверяется каждые 5 секунд с честным шансом 15%!
-      if (!_isPillSpawned && _bossCurrentHp > 0 && _vanyaHearts > 0) {
-        _pillSpawnTimer += dt;
-        if (_pillSpawnTimer >= 5.0) {
-          _pillSpawnTimer = 0.0; // Сбрасываем таймер
-          
-          // Проверяем шанс: генерируем число от 0 до 99. Если оно меньше 15 (это ровно 15% шанс)
-          if (_gameRand.nextInt(100) < 15) {
-            _isPillSpawned = true;
-            _pillX = 0.10 + _gameRand.nextDouble() * 0.50; 
-            _pillY = 0.40 + _gameRand.nextDouble() * (realGroundY - 0.45);
-            print("Удача! Выпал шанс 15%, синяя таблетка появилась.");
-          } else {
-            print("Шанс 15% не выпал, ждем следующие 5 секунд.");
+       if (!_isPillSpawned && _bossCurrentHp > 0 && _vanyaHearts > 0) {
+      _pillSpawnTimer += dt;
+      if (_pillSpawnTimer >= 5.0) {
+        _pillSpawnTimer = 0.0;
+        if (_gameRand.nextInt(100) < 15) {
+          _isPillSpawned = true;
+          _pillX = 0.10 + _gameRand.nextDouble() * 0.50;
+          _pillY = 0.16; // Фиксированная высота под потолком! Ване нужно прыгнуть в упор
+          print("Синяя таблетка появилась под потолком.");
+        }
+      }
+    }
+
+    // =========================================================================
+    // ИСПРАВЛЕНО ТОЧЕЧНО: МЕХАНИКА СВИHЬИ-КАМИКАДЗЕ С БОМБОЙ (КАЖДЫЕ 6 СЕК, ШАНС 80%)
+    // =========================================================================
+    if (_explosionTimer > 0) _explosionTimer -= dt; // Анимация вспышки взрыва
+
+    if (!_isBombPigActive && _bossCurrentHp > 0 && _vanyaHearts > 0) {
+      _bombPigTimer += dt;
+      if (_bombPigTimer >= 6.0) {
+        _bombPigTimer = 0.0;
+        // Проверяем честный шанс 80% (число от 0 до 99 меньше 80)
+        if (_gameRand.nextInt(100) < 80) {
+          _isBombPigActive = true;
+          _bombPigX = _bossX; // Свинья выезжает прямо из-под Дона Моллюска (0.84)
+          print("🐖 Бомба пошла! Свинья-камикадзе выкатилась на арену.");
+        }
+      }
+    }
+
+    // Физика качения свиньи по полу влево
+    if (_isBombPigActive) {
+      _bombPigX -= 0.28 * dt; // Постоянная одинаковая скорость для обоих режимов
+
+      // Условие А: Свинья докатилась до Вани Шерифа (Проверка хитбокса на полу)
+      if (!_vanyaIsJumping) {
+        double pigDist = (_vanyaX - _bombPigX).abs();
+        if (pigDist < 0.06) {
+          // МГНОВЕННЫЙ КЛАССИЧЕСКИЙ ВЗРЫВ
+          _isBombPigActive = false;
+          _explosionX = _bombPigX;
+          _explosionTimer = 0.35; // Время жизни вспышки взрыва в секундах
+          _bombPigX = -1.0;
+
+          if (_vanyaHearts > 0) {
+            _vanyaHearts--;
+            _spawnBloodSplatter(); // Из Вани сочно вылетает кровь лужей!
+
+            if (_vanyaHearts > 0) {
+              AudioManager.playMiss(); // Включаем звук получения урона
+              _vanyaX = 0.15; // Отброс Шерифа на начальный спавн
+              _vanyaY = realGroundY - 0.05;
+            } else {
+              AudioManager.playGameOver();
+            }
           }
         }
       }
+
+      // Условие Б: Ваня перепрыгнул свинью, и она благополучно уехала за левый край экрана
+      if (_bombPigX <= 0.02) {
+        _isBombPigActive = false;
+        _bombPigX = -1.0;
+        print("Свинья-камикадзе уехала за экран и удалена из памяти.");
+      }
+    }
 
       // 1. Горизонтальный бег Шерифа ногами по кнопкам
       if (_btnLeftPressed) {
@@ -725,7 +779,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                       ),
                     ),
 
-                  // 💊 СИНЯЯ КАПСУЛА ВИАГРЫ С 4 УРОВНЯ (Генерируется на карте)
+                                    // 💊 СИНЯЯ КАПСУЛА ВИАГРЫ (Отрисовка перенесена, координаты Y теперь потолочные)
                   if (_isPillSpawned)
                     Positioned(
                       left: _pillX * size.width,
@@ -733,7 +787,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                       child: Container(
                         width: 14, height: 20,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF29B6F6), // Насыщенный синий цвет
+                          color: const Color(0xFF29B6F6),
                           borderRadius: BorderRadius.circular(5),
                           border: Border.all(color: const Color(0xFF0288D1), width: 1.5),
                           boxShadow: const [BoxShadow(color: Colors.blueAccent, blurRadius: 6, spreadRadius: 1)],
@@ -743,6 +797,74 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                         ),
                       ),
                     ),
+
+                  // 🐖 ИСПРАВЛЕНО ТОЧЕЧНО: Отрисовка катящейся свиньи-камикадзе с лицом Максима и бомбой
+                  if (_isBombPigActive && _bombPigX > 0)
+                    Positioned(
+                      bottom: 22, // Стоит чётко на плитке пола арены
+                      left: size.width * _bombPigX - 18,
+                      child: SizedBox(
+                        width: 36,
+                        height: 36,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          clipBehavior: Clip.none,
+                          children: [
+                            // Черная круглая бомба, привязанная на спине у свиньи
+                            Positioned(
+                              top: -8, right: -2,
+                              child: Container(
+                                width: 14, height: 14,
+                                decoration: const BoxDecoration(color: Color(0xFF212121), shape: BoxShape.circle),
+                                child: Center(
+                                  child: Container(width: 3, height: 3, color: const Color(0xFFFF9800)), // Искрящийся фитиль
+                                ),
+                              ),
+                            ),
+                            // Тело свиньи каноничного зеленого цвета из game_screen.dart
+                            Container(
+                              width: 32, height: 32,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF4CAF50), // Тот самый цвет ушей и тела из оригинальной игры
+                                shape: BoxShape.circle,
+                                border: Border.all(color: const Color(0xFF2E7D32), width: 1.8),
+                              ),
+                              child: ClipOval(
+                                // Накладываем лицо Максима Рыбалкина, взятое из твоего гейм-экрана!
+                                child: Image.asset(
+                                  'assets/images/maksim.png', // Твой оригинальный ассет лица свиней
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => Container(color: const Color(0xFF4CAF50)),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                  // 💥 Векторная огненная вспышка подрыва бомбы камикадзе
+                  if (_explosionTimer > 0 && _explosionX > 0)
+                    Positioned(
+                      bottom: 12,
+                      left: size.width * _explosionX - 35,
+                      child: AnimatedOpacity(
+                        duration: Duration.zero,
+                        opacity: (_explosionTimer / 0.35).clamp(0.0, 1.0),
+                        child: Container(
+                          width: 70,
+                          height: 70,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: RadialGradient(
+                              colors: [Colors.white, Colors.yellow, Colors.orange, Colors.transparent],
+                              stops: [0.1, 0.4, 0.8, 1.0],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
 
                                     // 🌟 ТОЧЕЧНО ВСТАВИТЬ В STACK ПРЕД ОТРИСОВКОЙ БОССА:
                   if (_bossState == BossState.dizzy && _bossCurrentHp > 0)
