@@ -41,11 +41,13 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
   double _bloodPoolX = -1.0;
   double _bloodPoolTimer = 0.0;
   bool _isBloodPoolActive = false;
-  double _bombPigX = -1.0;         // Координата X катящейся свиньи (-1.0 — нет на экране)
+  double _bombPigX = -1.0;         // X правой свиньи
+  double _leftPigX = -1.0;         // X левой свиньи (НОВАЯ)
   double _bombPigTimer = 0.0;      // Таймер отсчета 6 секунд для спавна
-  bool _isBombPigActive = false;   // Активна ли свинья сейчас на арене
+  bool _isBombPigActive = false;   // Активна ли правая свинья
+  bool _isLeftPigActive = false;   // Активна ли левая свинья (НОВАЯ)
   double _explosionTimer = 0.0;    // Таймер для отрисовки анимации взрыва
-  double _explosionX = -1.0; 
+  double _explosionX = -1.0;       // Координата X произошедшего взрыва
 
   
   bool _btnLeftPressed = false;
@@ -154,7 +156,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
 
    void _spawnBloodSplatter() {
     _bloodPoolX = _vanyaX;
-    _bloodPoolTimer = 5.0; // Лужа лежит ровно 5 секунд
+    _bloodPoolTimer = 10.0; // Лужа лежит ровно 5 секунд
     _isBloodPoolActive = true;
   }
 
@@ -171,12 +173,29 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
       return;
     }
 
-          // Обновление времени жизни лужи крови Шерифа
     if (_isBloodPoolActive) {
       _bloodPoolTimer -= dt;
       if (_bloodPoolTimer <= 0) {
         _isBloodPoolActive = false;
         _bloodPoolX = -1.0;
+      }
+    }
+
+    // =========================================================================
+    // ИСПРАВЛЕНО ТОЧЕЧНО: МЕХАНИКА СКОЛЬЖЕНИЯ ВАНЯ-ПТИЦЫ ПО ЛУЖЕ КРОВИ
+    // =========================================================================
+    if (_isBloodPoolActive && _bloodPoolX > 0) {
+      double distToBlood = (_vanyaX - _bloodPoolX).abs();
+      // Если Ваня наступил ногами на свою лужу крови — его начинает нести по инерции!
+      if (distToBlood < 0.08 && !_vanyaIsJumping) {
+        if (_btnLeftPressed) {
+          _vanyaVx = _isAngryMode ? -0.58 : -0.42; // Скорость скольжения выше обычного бега!
+        } else if (_btnRightPressed) {
+          _vanyaVx = _isAngryMode ? 0.58 : 0.42;
+        } else {
+          // Если игрок отпустил кнопки — Ваня не останавливается мгновенно, а плавно проскальзывает вперед!
+          _vanyaVx = _vanyaVx * 0.95; 
+        }
       }
     }
 
@@ -200,45 +219,77 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
       }
     }
 
-    // =========================================================================
-    // ИСПРАВЛЕНО ТОЧЕЧНО: МЕХАНИКА СВИHЬИ-КАМИКАДЗЕ С БОМБОЙ (КАЖДЫЕ 6 СЕК, ШАНС 80%)
-    // =========================================================================
-    if (_explosionTimer > 0) _explosionTimer -= dt; // Анимация вспышки взрыва
+        const double realGroundY = 0.88;
 
-    if (!_isBombPigActive && _bossCurrentHp > 0 && _vanyaHearts > 0) {
-      _bombPigTimer += dt;
-      if (_bombPigTimer >= 6.0) {
-        _bombPigTimer = 0.0;
-        // Проверяем честный шанс 80% (число от 0 до 99 меньше 80)
-        if (_gameRand.nextInt(100) < 80) {
-          _isBombPigActive = true;
-          _bombPigX = _bossX; // Свинья выезжает прямо из-под Дона Моллюска (0.84)
-          print("🐖 Бомба пошла! Свинья-камикадзе выкатилась на арену.");
+    // Обновление времени жизни лужи крови Шерифа
+    if (_isBloodPoolActive) {
+      _bloodPoolTimer -= dt;
+      if (_bloodPoolTimer <= 0) {
+        _isBloodPoolActive = false;
+        _bloodPoolX = -1.0;
+      }
+    }
+
+    // =========================================================================
+    // ИСПРАВЛЕНО ТОЧЕЧНО: МЕХАНИКА СКОЛЬЖЕНИЯ ВАНЯ-ПТИЦЫ ПО ЛУЖЕ КРОВИ
+    // =========================================================================
+    if (_isBloodPoolActive && _bloodPoolX > 0) {
+      double distToBlood = (_vanyaX - _bloodPoolX).abs();
+      // Если Ваня наступил ногами на свою лужу крови — его начинает нести по инерции!
+      if (distToBlood < 0.08 && !_vanyaIsJumping) {
+        if (_btnLeftPressed) {
+          _vanyaVx = _isAngryMode ? -0.58 : -0.42; // Скорость скольжения выше обычного бега!
+        } else if (_btnRightPressed) {
+          _vanyaVx = _isAngryMode ? 0.58 : 0.42;
+        } else {
+          // Если игрок отпустил кнопки — Ваня не останавливается мгновенно, а плавно проскальзывает вперед!
+          _vanyaVx = _vanyaVx * 0.95; 
         }
       }
     }
 
-    // Физика качения свиньи по полу влево
-    if (_isBombPigActive) {
-      _bombPigX -= 0.28 * dt; // Постоянная одинаковая скорость для обоих режимов
+    if (_explosionTimer > 0) _explosionTimer -= dt; 
 
-      // Условие А: Свинья докатилась до Вани Шерифа (Проверка хитбокса на полу)
+    // Спавн камикадзе строго раз в 6 секунд с шансом 80%
+    if (!_isBombPigActive && !_isLeftPigActive && _bossCurrentHp > 0 && _vanyaHearts > 0) {
+      _bombPigTimer += dt;
+      if (_bombPigTimer >= 6.0) {
+        _bombPigTimer = 0.0;
+        
+        if (_gameRand.nextInt(100) < 80) {
+          _isBombPigActive = true;
+          _bombPigX = _bossX; // Правая всегда выезжает из-под Дона Моллюска (0.84)
+          
+          // НОВОЕ: Если включен кровавый режим (Фаза 2) — МГНОВЕННО спавним и левую свинью!
+          if (_isPhase2Active) {
+            _isLeftPigActive = true;
+            _leftPigX = 0.02; // Левая выезжает с самого левого края экрана
+            print("🩸 КРОВАТНЫЙ РЕЖИМ: Свиньи-камикадзе штурмуют Ваню С ДВУХ СТОРОН!");
+          } else {
+            print("🐖 Свинья-камикадзе выкатилась справа.");
+          }
+        }
+      }
+    }
+
+    // 1. ДВИЖЕНИЕ И ХИТБОКС ПРАВОЙ СВИHЬИ (ЕДЕТ ВЛЕВО)
+    if (_isBombPigActive) {
+      _bombPigX -= 0.28 * dt; 
+
       if (!_vanyaIsJumping) {
         double pigDist = (_vanyaX - _bombPigX).abs();
         if (pigDist < 0.06) {
-          // МГНОВЕННЫЙ КЛАССИЧЕСКИЙ ВЗРЫВ
           _isBombPigActive = false;
           _explosionX = _bombPigX;
-          _explosionTimer = 0.35; // Время жизни вспышки взрыва в секундах
+          _explosionTimer = 0.35;
           _bombPigX = -1.0;
 
           if (_vanyaHearts > 0) {
             _vanyaHearts--;
-            _spawnBloodSplatter(); // Из Вани сочно вылетает кровь лужей!
-
+            _spawnBloodSplatter();
             if (_vanyaHearts > 0) {
-              AudioManager.playMiss(); // Включаем звук получения урона
-              _vanyaX = 0.15; // Отброс Шерифа на начальный спавн
+              AudioManager.playMiss();
+              _vanyaX = 0.15;
               _vanyaY = realGroundY - 0.05;
             } else {
               AudioManager.playGameOver();
@@ -247,11 +298,44 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
         }
       }
 
-      // Условие Б: Ваня перепрыгнул свинью, и она благополучно уехала за левый край экрана
       if (_bombPigX <= 0.02) {
         _isBombPigActive = false;
         _bombPigX = -1.0;
-        print("Свинья-камикадзе уехала за экран и удалена из памяти.");
+      }
+    }
+
+    // 2. НОВОЕ: ДВИЖЕНИЕ И ХИТБОКС ЛЕВОЙ СВИHЬИ (ЕДЕТ ВПРАВО)
+    if (_isLeftPigActive) {
+      _leftPigX += 0.28 * dt; // Скорость точно такая же, как у правой
+
+      // Проверка взрыва с Ваней
+      if (!_vanyaIsJumping) {
+        double leftPigDist = (_vanyaX - _leftPigX).abs();
+        if (leftPigDist < 0.06) {
+          _isLeftPigActive = false;
+          _explosionX = _leftPigX;
+          _explosionTimer = 0.35;
+          _leftPigX = -1.0;
+
+          if (_vanyaHearts > 0) {
+            _vanyaHearts--;
+            _spawnBloodSplatter();
+            if (_vanyaHearts > 0) {
+              AudioManager.playMiss();
+              _vanyaX = 0.15;
+              _vanyaY = realGroundY - 0.05;
+            } else {
+              AudioManager.playGameOver();
+            }
+          }
+        }
+      }
+
+      // ИСПРАВЛЕНО ТОЧЕЧНО: Левая свинья удаляется из памяти, как только врезается в Дона Моллюска (_bossX = 0.84)
+      if (_leftPigX >= _bossX) {
+        _isLeftPigActive = false;
+        _leftPigX = -1.0;
+        print("Левая свинья врезалась в панцирь босса и удалена.");
       }
     }
 
@@ -798,6 +882,50 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                       ),
                     ),
 
+                                    // 🐖 НОВОЕ ТОЧЕЧНО: Отрисовка левой катящейся свиньи (выезжает слева в Фазе 2)
+                  if (_isLeftPigActive && _leftPigX > 0)
+                    Positioned(
+                      bottom: 22,
+                      left: size.width * _leftPigX - 18,
+                      child: SizedBox(
+                        width: 36,
+                        height: 36,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          clipBehavior: Clip.none,
+                          children: [
+                            // Черная бомба на спине левой свиньи
+                            Positioned(
+                              top: -8, left: -2, // Отражаем зеркально на левый бок
+                              child: Container(
+                                width: 14, height: 14,
+                                decoration: const BoxDecoration(color: Color(0xFF212121), shape: BoxShape.circle),
+                                child: Center(
+                                  child: Container(width: 3, height: 3, color: const Color(0xFFFF9800)),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              width: 32, height: 32,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF4CAF50),
+                                shape: BoxShape.circle,
+                                border: Border.all(color: const Color(0xFF2E7D32), width: 1.8),
+                              ),
+                              child: ClipOval(
+                                child: Image.asset(
+                                  'assets/images/maksim.png',
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => Container(color: const Color(0xFF4CAF50)),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                  
                   // 🐖 ИСПРАВЛЕНО ТОЧЕЧНО: Отрисовка катящейся свиньи-камикадзе с лицом Максима и бомбой
                   if (_isBombPigActive && _bombPigX > 0)
                     Positioned(
