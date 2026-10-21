@@ -173,31 +173,41 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
       return;
     }
 
-    if (_isBloodPoolActive) {
-      _bloodPoolTimer -= dt;
-      if (_bloodPoolTimer <= 0) {
-        _isBloodPoolActive = false;
-        _bloodPoolX = -1.0;
-      }
-    }
-
-    // =========================================================================
-    // ИСПРАВЛЕНО ТОЧЕЧНО: МЕХАНИКА СКОЛЬЖЕНИЯ ВАНЯ-ПТИЦЫ ПО ЛУЖЕ КРОВИ
-    // =========================================================================
-    if (_isBloodPoolActive && _bloodPoolX > 0) {
-      double distToBlood = (_vanyaX - _bloodPoolX).abs();
-      // Если Ваня наступил ногами на свою лужу крови — его начинает нести по инерции!
-      if (distToBlood < 0.08 && !_vanyaIsJumping) {
-        if (_btnLeftPressed) {
-          _vanyaVx = _isAngryMode ? -0.58 : -0.42; // Скорость скольжения выше обычного бега!
-        } else if (_btnRightPressed) {
-          _vanyaVx = _isAngryMode ? 0.58 : 0.42;
-        } else {
-          // Если игрок отпустил кнопки — Ваня не останавливается мгновенно, а плавно проскальзывает вперед!
-          _vanyaVx = _vanyaVx * 0.95; 
+         // =========================================================================
+      // ИСПРАВЛЕНО ТОЧЕЧНО: ЧЕСТНАЯ ОСЯЗАЕМАЯ ФИЗИКА СКОЛЬЖЕНИЯ ПО ЛУЖЕ КРОВИ
+      // =========================================================================
+      bool isOnBlood = false;
+      if (_isBloodPoolActive && _bloodPoolX > 0 && !_vanyaIsJumping) {
+        // Проверяем, наступил ли Ваня на осязаемые границы лужи (ширина хитбокса 0.08)
+        if ((_vanyaX - _bloodPoolX).abs() < 0.08) {
+          isOnBlood = true;
         }
       }
-    }
+
+      if (isOnBlood) {
+        // Физика на луже: сцепления с полом нет! Ваня скользит по инерции
+        if (_btnLeftPressed) {
+          _vanyaVx = _isAngryMode ? -0.55 : -0.38; // Скольжение влево (быстрее обычного бега)
+        } else if (_btnRightPressed) {
+          _vanyaVx = _isAngryMode ? 0.55 : 0.38;  // Скольжение вправо
+        } else {
+          // Игрок отпустил кнопки, но Ваня продолжает катиться по крови (затухание скорости всего 5% за кадр)
+          _vanyaVx = _vanyaVx * 0.95; 
+        }
+      } else {
+        // Обычная физика на сухом полу: мгновенный старт и жесткий стоп без заносов
+        if (_btnLeftPressed) {
+          _vanyaVx = _isAngryMode ? -0.42 : -0.26;
+        } else if (_btnRightPressed) {
+          _vanyaVx = _isAngryMode ? 0.42 : 0.26;
+        } else {
+          _vanyaVx = 0.0; // Жесткая остановка
+        }
+      }
+
+      // Применяем полученную скорость к координате Вани
+      _vanyaX += _vanyaVx * dt;
+ 
 
       const double realGroundY = 0.88;
 
@@ -220,33 +230,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
     }
 
 
-    // Обновление времени жизни лужи крови Шерифа
-    if (_isBloodPoolActive) {
-      _bloodPoolTimer -= dt;
-      if (_bloodPoolTimer <= 0) {
-        _isBloodPoolActive = false;
-        _bloodPoolX = -1.0;
-      }
-    }
-
-    // =========================================================================
-    // ИСПРАВЛЕНО ТОЧЕЧНО: МЕХАНИКА СКОЛЬЖЕНИЯ ВАНЯ-ПТИЦЫ ПО ЛУЖЕ КРОВИ
-    // =========================================================================
-    if (_isBloodPoolActive && _bloodPoolX > 0) {
-      double distToBlood = (_vanyaX - _bloodPoolX).abs();
-      // Если Ваня наступил ногами на свою лужу крови — его начинает нести по инерции!
-      if (distToBlood < 0.08 && !_vanyaIsJumping) {
-        if (_btnLeftPressed) {
-          _vanyaVx = _isAngryMode ? -0.58 : -0.42; // Скорость скольжения выше обычного бега!
-        } else if (_btnRightPressed) {
-          _vanyaVx = _isAngryMode ? 0.58 : 0.42;
-        } else {
-          // Если игрок отпустил кнопки — Ваня не останавливается мгновенно, а плавно проскальзывает вперед!
-          _vanyaVx = _vanyaVx * 0.95; 
-        }
-      }
-    }
-
+   
     if (_explosionTimer > 0) _explosionTimer -= dt; 
 
     // Спавн камикадзе строго раз в 6 секунд с шансом 80%
