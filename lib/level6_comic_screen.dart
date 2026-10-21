@@ -48,6 +48,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
   bool _isLeftPigActive = false;   // Активна ли левая свинья (НОВАЯ)
   double _explosionTimer = 0.0;    // Таймер для отрисовки анимации взрыва
   double _explosionX = -1.0;       // Координата X произошедшего взрыва
+  double _screenBloodTimer = 0.0;
 
   
   bool _btnLeftPressed = false;
@@ -156,7 +157,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
 
    void _spawnBloodSplatter() {
     _bloodPoolX = _vanyaX;
-    _bloodPoolTimer = 10.0; // Лужа лежит ровно 5 секунд
+    _bloodPoolTimer = 10.0; 
     _isBloodPoolActive = true;
   }
 
@@ -174,6 +175,10 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
     }
 
               
+        // Обновление времени жизни пятна крови на стекле экрана
+    if (_screenBloodTimer > 0) {
+      _screenBloodTimer -= dt;
+    }
 
 
       const double realGroundY = 0.88;
@@ -237,6 +242,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
           if (_vanyaHearts > 0) {
             _vanyaHearts--;
             _spawnBloodSplatter();
+            _screenBloodTimer = 10.0;
             if (_vanyaHearts > 0) {
               AudioManager.playMiss();
               _vanyaX = 0.15;
@@ -463,6 +469,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
               if (isHit && _vanyaHearts > 0) {
                 _vanyaHearts--;
                 _spawnBloodSplatter(); // Спавн лужи крови
+                _screenBloodTimer = 10.0; 
 
                 if (_vanyaHearts > 0) {
                   AudioManager.playMiss();
@@ -536,8 +543,15 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
             AudioManager.switchToBossPhase2Music(); 
             print("ДОН МОЛЛЮСК В СЕКУНДЕ ЯРОСТИ! Рок Фазы 2 запущен мгновенно.");
           }
-        } else {
-          if (_vanyaHearts > 0) _vanyaHearts--;
+                } else {
+          // ИСПРАВЛЕНО ТОЧЕЧНО: Таран защищенного панциря теперь забирает жизнь, льет лужу и пачкает экран!
+          if (_vanyaHearts > 0) {
+            _vanyaHearts--;
+            _spawnBloodSplatter();    // Спавним лужу на полу
+            _screenBloodTimer = 10.0; // Пачкаем стекло экрана на 10 секунд
+          }
+          
+          // Твой стандартный отскок Вани назад налево по дуге
           _vanyaVx = -0.35;
           _vanyaVy = -0.45;
           _vanyaIsJumping = true;
@@ -609,6 +623,22 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
             Padding(
               padding: const EdgeInsets.only(bottom: 4.0, top: 2.0),
               child: _buildNavigationButton(),
+            ),
+                    // 🩸 ИСПРАВЛЕНО ТОЧЕЧНО: Рваное пятно крови на стекле экрана, перекрывающее среднюю часть
+          if (_screenBloodTimer > 0)
+            IgnorePointer( // Чтобы пятно не перехватывало нажатия на кнопки управления!
+              child: Center(
+                child: Opacity(
+                  opacity: (_screenBloodTimer / 10.0).clamp(0.0, 0.85), // Плавное исчезновение
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.35, // Средний, аккуратный размер
+                    height: MediaQuery.of(context).size.height * 0.45,
+                    child: CustomPaint(
+                      painter: _ScreenBloodSplatterPainter(),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -1112,19 +1142,34 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                                       child: ElevatedButton(
                                         style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                                         onPressed: () {
-                                          // ЗАНОВО: сбрасываем арену
-                                          Navigator.pop(context);
-                                          AudioManager.startCastleDrops();
-                                          AudioManager.startLevel6BattleMusic();
-                                          setState(() {
-                                            _vanyaX = 0.15;
-                                            _vanyaY = _groundYPercent - 0.05;
-                                            _bossCurrentHp = 8.0;
-                                            _isBarricadeAlive = true;
-                                            _vanyaHearts = 1;
-                                            _isPhase2Active = false;
-                                          });
-                                        },
+                                      // ЗАНОВО: сбрасываем арену
+                                      Navigator.pop(context);
+                                      AudioManager.startLevel6BattleMusic();
+                                      setState(() {
+                                        _vanyaX = 0.15;
+                                        _vanyaY = _groundYPercent - 0.05;
+                                        _bossCurrentHp = 8.0;
+                                        _isBarricadeAlive = true;
+                                        _vanyaHearts = 1;
+                                        _isPhase2Active = false;
+
+                                        // ИСПРАВЛЕНО ТОЧЕЧНО: Полная очистка таблеток, свиней и эффектов крови при рестарте
+                                        _isPillSpawned = false;
+                                        _pillX = -1.0;
+                                        _pillY = -1.0;
+                                        _pillSpawnTimer = 0.0;
+                                        _isAngryMode = false;
+                                        _screenBloodTimer = 0.0;
+                                        _isBloodPoolActive = false;
+                                        _bloodPoolX = -1.0;
+                                        
+                                        _isBombPigActive = false;
+                                        _isLeftPigActive = false;
+                                        _bombPigX = -1.0;
+                                        _leftPigX = -1.0;
+                                        _bombPigTimer = 0.0;
+                                      });
+                                    },
                                         child: const Text('ЗАНОВО', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                                       ),
                                     ),
@@ -2026,4 +2071,40 @@ class _SheriffBloodPoolPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
+// 🎨 Векторный рисовальщик рваной кляксы крови на стекле экрана
+class _ScreenBloodSplatterPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xCC9C0000) // Глубокий бордовый цвет с полупрозрачностью
+      ..style = PaintingStyle.fill;
+    
+    final borderPaint = Paint()
+      ..color = Colors.black.withOpacity(0.5)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+
+    final path = Path();
+    final w = size.width;
+    final h = size.height;
+
+    // Рисуем рваную асимметричную форму кляксы по кривым Безье
+    path.moveTo(w * 0.2, h * 0.3);
+    path.cubicTo(w * 0.05, h * 0.1, w * 0.5, -h * 0.1, w * 0.7, h * 0.2);
+    path.cubicTo(w * 0.95, h * 0.35, w * 0.8, h * 0.7, w * 0.6, h * 0.85);
+    path.cubicTo(w * 0.4, h * 1.05, w * 0.1, h * 0.8, w * 0.2, h * 0.6);
+    path.cubicTo(-w * 0.05, h * 0.5, w * 0.05, h * 0.4, w * 0.2, h * 0.3);
+    path.close();
+
+    canvas.drawPath(path, paint);
+    canvas.drawPath(path, borderPaint); // Мягкая темная обводка для создания объема
+
+    // Парочка мелких брызг-капель отдельно от основного пятна
+    canvas.drawCircle(Offset(w * 0.15, h * 0.15), 4, paint);
+    canvas.drawCircle(Offset(w * 0.85, h * 0.65), 5, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
 
