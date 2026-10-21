@@ -173,47 +173,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
       return;
     }
 
-              // =========================================================================
-      // 💎 КАЧЕСТВЕННАЯ ИСПРАВЛЕННАЯ ФИЗИКА СКОЛЬЖЕНИЯ И СБРОСА СКОРОСТИ
-      // =========================================================================
-      bool isOnBlood = false;
-      
-      // Честная проверка: Ваня наступил на лужу, только если она активна, и он СТРОГО на полу
-      if (_isBloodPoolActive && _bloodPoolX > 0 && !_vanyaIsJumping) {
-        // Вычисляем расстояние между центрами Вани и лужи
-        double distToBlood = (_vanyaX - _bloodPoolX).abs();
-        // Лужа широкая (0.09). Если Ваня зашел в эти границы — активируем скольжение
-        if (distToBlood <= 0.09) {
-          isOnBlood = true;
-        }
-      }
-
-      if (isOnBlood) {
-        // 🩸 РЕЖИМ СКОЛЬЖЕНИЯ (Гололед из крови):
-        if (_btnLeftPressed) {
-          _vanyaVx = _isAngryMode ? -0.52 : -0.36; // Плавный разгон влево
-        } else if (_btnRightPressed) {
-          _vanyaVx = _isAngryMode ? 0.52 : 0.36;  // Плавный разгон вправо
-        } else {
-          // Игрок ОТПУСТИЛ кнопки: Ваня эффектно скользит по инерции дальше!
-          // Скорость плавно гасится на 8% за кадр, пока он не выедет с пятна
-          _vanyaVx = _vanyaVx * 0.92; 
-          if (_vanyaVx.abs() < 0.01) _vanyaVx = 0.0; // Гасим микро-тряску
-        }
-      } else {
-        // 🧭 ОБЫЧНЫЙ СУХОЙ ПОЛ (Полный контроль):
-        // Скорость жестко привязана к кнопкам. Нет кнопок — скорость МГНОВЕННО равна нулю!
-        if (_btnLeftPressed) {
-          _vanyaVx = _isAngryMode ? -0.42 : -0.26;
-        } else if (_btnRightPressed) {
-          _vanyaVx = _isAngryMode ? 0.42 : 0.26;
-        } else {
-          _vanyaVx = 0.0; // Жесткий стоп. Физика прыжка больше не ломается!
-        }
-      }
-
-      // Применяем честно посчитанную горизонтальную скорость к Ване
-      _vanyaX += _vanyaVx * dt;
+              
 
 
       const double realGroundY = 0.88;
@@ -329,16 +289,48 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
       }
     }
 
-      // 1. Горизонтальный бег Шерифа ногами по кнопкам
-      if (_btnLeftPressed) {
-        _vanyaVx = _isAngryMode ? -0.42 : -0.26; // В режиме ярости скорость бега возрастает!
-      } else if (_btnRightPressed) {
-        _vanyaVx = _isAngryMode ? 0.42 : 0.26; 
-      } else {
-        _vanyaVx = 0.0; 
+            // =========================================================================
+      // 💎 КАЧЕСТВЕННАЯ ИСПРАВЛЕННАЯ ФИЗИКА СКОЛЬЖЕНИЯ И СБРОСА СКОРОСТИ
+      // =========================================================================
+      bool isOnBlood = false;
+      
+      // Честная проверка: Ваня наступил на лужу, только если она активна, и он СТРОГО на полу
+      if (_isBloodPoolActive && _bloodPoolX > 0 && !_vanyaIsJumping) {
+        // Вычисляем расстояние между центрами Вани и лужи
+        double distToBlood = (_vanyaX - _bloodPoolX).abs();
+        // Лужа широкая (0.09). Если Ваня зашел в эти границы — активируем скольжение
+        if (distToBlood <= 0.09) {
+          isOnBlood = true;
+        }
       }
 
+      if (isOnBlood) {
+        // 🩸 РЕЖИМ СКОЛЬЖЕНИЯ (Гололед из крови):
+        if (_btnLeftPressed) {
+          _vanyaVx = _isAngryMode ? -0.52 : -0.36; // Плавный разгон влево
+        } else if (_btnRightPressed) {
+          _vanyaVx = _isAngryMode ? 0.52 : 0.36;  // Плавный разгон вправо
+        } else {
+          // Игрок ОТПУСТИЛ кнопки: Ваня эффектно скользит по инерции дальше!
+          // Скорость плавно гасится на 8% за кадр, пока он не выедет с пятна
+          _vanyaVx = _vanyaVx * 0.92; 
+          if (_vanyaVx.abs() < 0.01) _vanyaVx = 0.0; // Гасим микро-тряску
+        }
+      } else {
+        // 🧭 ОБЫЧНЫЙ СУХОЙ ПОЛ (Полный контроль):
+        // Скорость жестко привязана к кнопкам. Нет кнопок — скорость МГНОВЕННО равна нулю!
+        if (_btnLeftPressed) {
+          _vanyaVx = _isAngryMode ? -0.42 : -0.26;
+        } else if (_btnRightPressed) {
+          _vanyaVx = _isAngryMode ? 0.42 : 0.26;
+        } else {
+          _vanyaVx = 0.0; // Жесткий стоп. Физика прыжка больше не ломается!
+        }
+      }
+
+      // Применяем честно посчитанную горизонтальную скорость к Ване
       _vanyaX += _vanyaVx * dt;
+
 
       // 2. Вертикальная гравитация и прыжок
       if (_vanyaIsJumping) {
