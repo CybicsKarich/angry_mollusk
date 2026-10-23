@@ -276,6 +276,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
           if (_vanyaHearts > 0) {
             _vanyaHearts--;
             _spawnBloodSplatter();
+            _screenBloodTimer = 10.0;
             if (_vanyaHearts > 0) {
               AudioManager.playMiss();
               _vanyaX = 0.15;
@@ -623,22 +624,6 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
             Padding(
               padding: const EdgeInsets.only(bottom: 4.0, top: 2.0),
               child: _buildNavigationButton(),
-            ),
-                    // 🩸 ИСПРАВЛЕНО ТОЧЕЧНО: Рваное пятно крови на стекле экрана, перекрывающее среднюю часть
-          if (_screenBloodTimer > 0)
-            IgnorePointer( // Чтобы пятно не перехватывало нажатия на кнопки управления!
-              child: Center(
-                child: Opacity(
-                  opacity: (_screenBloodTimer / 10.0).clamp(0.0, 0.85), // Плавное исчезновение
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.35, // Средний, аккуратный размер
-                    height: MediaQuery.of(context).size.height * 0.45,
-                    child: CustomPaint(
-                      painter: _ScreenBloodSplatterPainter(),
-                    ),
-                  ),
-                ),
-              ),
             ),
           ],
         ),
@@ -1468,6 +1453,23 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                           ),
                         ),
                       ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+           if (_screenBloodTimer > 0)
+            Positioned.fill(
+              child: IgnorePointer( // Не перехватывает тапы по кнопкам
+                child: Center(
+                  child: Opacity(
+                    opacity: (_screenBloodTimer / 10.0).clamp(0.0, 0.85), // Эффект плавного исчезновения
+                    child: SizedBox(
+                      width: size.width * 0.35, // Средний аккуратный размер по ТЗ
+                      height: size.height * 0.45,
+                      child: CustomPaint(
+                        painter: _ScreenBloodSplatterPainter(),
+                      ),
                     ),
                   ),
                 ),
