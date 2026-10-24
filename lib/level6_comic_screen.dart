@@ -48,6 +48,12 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
   bool _isLeftPigActive = false;   // Активна ли левая свинья (НОВАЯ)
   double _explosionTimer = 0.0;    // Таймер для отрисовки анимации взрыва
   double _explosionX = -1.0;       // Координата X произошедшего взрыв
+  double _oilPigTimer = 0.0;       // Таймер отсчета 9 секунд между проверками плевка
+  double _oilSpitX = -1.0;         // Точка на полу, куда приземлится масло
+  double _oilActiveTimer = 0.0;    // Сколько секунд масло еще будет лежать на полу (5 сек)
+  double _oilWarmUpTimer = 0.0;    // Таймер 1-секундной анимации подготовки плевка
+  bool _isOilWarningActive = false; // Виден ли маркер прицеливания плевка
+  bool _isOilOnFloor = false;      // Лежит ли масло на полу прямо сейчас
 
   
   bool _btnLeftPressed = false;
@@ -290,50 +296,98 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
       }
     }
 
-            // =========================================================================
-      // 💎 КАЧЕСТВЕННАЯ ИСПРАВЛЕННАЯ ФИЗИКА СКОЛЬЖЕНИЯ И СБРОСА СКОРОСТИ
+                  const double realGroundY = 0.88;
+
       // =========================================================================
+      // 💎 МЕХАНИКА ТАЙМЕРОВ И СПАВНА ПЛЕВКА МАСЛОМ ДОНА МОЛЛЮСКА
+      // =========================================================================
+      if (_oilActiveTimer > 0) {
+        _oilActiveTimer -= dt;
+        if (_oilActiveTimer <= 0) {
+          _isOilOnFloor = false;
+          _oilSpitX = -1.0;
+          print("Масло испарилось, Ваня снова чист.");
+        }
+      }
+
+      // Если идет подготовка к плевку (1 секунда анимации предупреждения)
+      if (_isOilWarningActive) {
+        _oilWarmUpTimer += dt;
+        if (_oilWarmUpTimer >= 1.0) {
+          _isOilWarningActive = false;
+          _oilWarmUpTimer = 0.0;
+          _isOilOnFloor = true;
+          _oilActiveTimer = 5.0; // Масло ложится ровно на 5 секунд
+          print("💥 Дон Моллюск плюнул! Масло залило пол.");
+        }
+      }
+
+      // Цикл проверки шанса плевка раз в 9 секунд
+      if (!_isOilWarningActive && !_isOilOnFloor && _bossCurrentHp > 0 && _vanyaHearts > 0) {
+        _oilPigTimer += dt;
+        if (_oilPigTimer >= 9.0) {
+          _oilPigTimer = 0.0;
+          if (_gameRand.nextInt(100) < 55) {
+            _isOilWarningActive = true;
+            _oilWarmUpTimer = 0.0;
+            _oilSpitX = _vanyaX; // Целится туда, где Ваня стоит сейчас!
+            print("⚠️ Дон Моллюск целится маслом в координату $_oilSpitX");
+          }
+        }
+      }
+
+      // =========================================================================
+      // 💎 ОПРЕДЕЛЕНИЕ СТАТУСА: НАХОДИТСЯ ЛИ ВАНЯ В ЖЁЛТОМ МАСЛЕ ИЛИ НА КРОВИ
+      // =========================================================================
+      bool isInOil = false;
+      if (_isOilOnFloor && _oilSpitX > 0) {
+        // Масло широкое, хитбокс в 2 раза больше лужи крови (0.18)
+        if ((_vanyaX - _oilSpitX).abs() <= 0.18) {
+          isInOil = true;
+        }
+      }
+
       bool isOnBlood = false;
-      
-      // Честная проверка: Ваня наступил на лужу, только если она активна, и он СТРОГО на полу
-      if (_isBloodPoolActive && _bloodPoolX > 0 && !_vanyaIsJumping) {
-        // Вычисляем расстояние между центрами Вани и лужи
-        double distToBlood = (_vanyaX - _bloodPoolX).abs();
-        // Лужа широкая (0.09). Если Ваня зашел в эти границы — активируем скольжение
-        if (distToBlood <= 0.09) {
+      // Честная проверка крови: работает только если Ваня НЕ в масле и строго на полу!
+      if (!isInOil && _isBloodPoolActive && _bloodPoolX > 0 && !_vanyaIsJumping) {
+        if ((_vanyaX - _bloodPoolX).abs() <= 0.09) {
           isOnBlood = true;
         }
       }
 
+      // Модификатор скорости: если Ваня в масле — скорость бега режется в 2 раза (0.50)
+      double oilSpeedModifier = isInOil ? 0.50 : 1.0;
+
+      // =========================================================================
+      // 💎 ОБЪЕДИНЕННАЯ ГОРИЗОНТАЛЬНАЯ ФИЗИКА (БЕГ, СКОЛЬЖЕНИЕ ИЛИ МАСЛО)
+      // =========================================================================
       if (isOnBlood) {
-        // 🩸 РЕЖИМ СКОЛЬЖЕНИЯ (Гололед из крови):
+        // 🩸 А) РЕЖИМ СКОЛЬЖЕНИЯ ПО КРОВИ:
         if (_btnLeftPressed) {
-          _vanyaVx = _isAngryMode ? -0.52 : -0.36; // Плавный разгон влево
+          _vanyaVx = _isAngryMode ? -0.52 : -0.36;
         } else if (_btnRightPressed) {
-          _vanyaVx = _isAngryMode ? 0.52 : 0.36;  // Плавный разгон вправо
+          _vanyaVx = _isAngryMode ? 0.52 : 0.36;
         } else {
-          // Игрок ОТПУСТИЛ кнопки: Ваня эффектно скользит по инерции дальше!
-          // Скорость плавно гасится на 8% за кадр, пока он не выедет с пятна
           _vanyaVx = _vanyaVx * 0.92; 
-          if (_vanyaVx.abs() < 0.01) _vanyaVx = 0.0; // Гасим микро-тряску
+          if (_vanyaVx.abs() < 0.01) _vanyaVx = 0.0; 
         }
       } else {
-        // 🧭 ОБЫЧНЫЙ СУХОЙ ПОЛ (Полный контроль):
-        // Скорость жестко привязана к кнопкам. Нет кнопок — скорость МГНОВЕННО равна нулю!
+        // 🧭 Б) ОБЫЧНЫЙ ПОЛ ИЛИ ЗАМЕДЛЯЮЩЕЕ МАСЛО:
         if (_btnLeftPressed) {
-          _vanyaVx = _isAngryMode ? -0.42 : -0.26;
+          _vanyaVx = _isAngryMode ? (-0.42 * oilSpeedModifier) : (-0.26 * oilSpeedModifier);
         } else if (_btnRightPressed) {
-          _vanyaVx = _isAngryMode ? 0.42 : 0.26;
+          _vanyaVx = _isAngryMode ? (0.42 * oilSpeedModifier) : (0.26 * oilSpeedModifier);
         } else {
-          _vanyaVx = 0.0; // Жесткий стоп. Физика прыжка больше не ломается!
+          _vanyaVx = 0.0; // Жесткий стоп на сухом полу или в вязком масле
         }
       }
 
-      // Применяем честно посчитанную горизонтальную скорость к Ване
+      // Применяем скорость к координате
       _vanyaX += _vanyaVx * dt;
 
-
-      // 2. Вертикальная гравитация и прыжок
+      // =========================================================================
+      // 💎 ВЕРТИКАЛЬНАЯ ГРАВИТАЦИЯ И УРЕЗАННЫЙ ПРЫЖОК
+      // =========================================================================
       if (_vanyaIsJumping) {
         _vanyaVy += 1.9 * dt; 
         _vanyaY += _vanyaVy * dt;
@@ -1017,7 +1071,43 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                       ),
                     ),
 
-                                      // 🩸 Лужа крови Шерифа при ранении или смерти (УВЕЛИЧЕНА)
+                                         // ⚠️ Линия-предупреждение прицеливания плевка (мигает 1 секунду)
+                  if (_isOilWarningActive && _oilSpitX > 0)
+                    Positioned(
+                      bottom: 24,
+                      left: size.width * _oilSpitX - 10,
+                      child: Container(
+                        width: 20,
+                        height: size.height * 0.7,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
+                            colors: [
+                              Colors.yellow.withOpacity(0.4),
+                              Colors.transparent
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  // 🛢️ ОГРОМНАЯ ЖЕЛТАЯ ЛУЖА МАСЛА (В 2 раза больше лужи крови, ширина 130)
+                  if (_isOilOnFloor && _oilSpitX > 0)
+                    Positioned(
+                      bottom: 22,
+                      left: size.width * _oilSpitX - 50, // Сдвигаем шире, чтобы центр остался под Ваней
+                      child: SizedBox(
+                        width: 130, // Ровно в 2 раза шире лужи крови (было 65)
+                        height: 22,
+                        child: CustomPaint(
+                          painter: _DetailedOilPoolPainter(), // Специальный рисовальщик масла
+                        ),
+                      ),
+                    ),
+  
+                  
+                  // 🩸 Лужа крови Шерифа при ранении или смерти (УВЕЛИЧЕНА)
                   if (_isBloodPoolActive && _bloodPoolX > 0)
                     Positioned(
                       bottom: 22,
@@ -1130,6 +1220,13 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                                         _isBarricadeAlive = true;
                                         _vanyaHearts = 1;
                                         _isPhase2Active = false;
+                                        _oilPigTimer = 0.0;
+                                        _oilSpitX = -1.0;
+                                        _oilActiveTimer = 0.0;
+                                        _oilWarmUpTimer = 0.0;
+                                        _isOilWarningActive = false;
+                                        _isOilOnFloor = false;
+
 
                                         // ИСПРАВЛЕНО ТОЧЕЧНО: Полная очистка таблеток, свиней и эффектов крови при рестарте
                                         _isPillSpawned = false;
@@ -1310,21 +1407,25 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
             bottom: 16, right: 24,
             child: GestureDetector(
               // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО ВНУТРИ КНОПКИ ПРЫЖКА (ПРАВАЯ РУКА):
+                            // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО ВНУТРИ КНОПКИ ПРЫЖКА (ПРАВАЯ РУКА):
               onTapDown: (_) {
                 if (!_vanyaIsJumping) {
                   setState(() {
                     _btnJumpPressed = true;
                     _vanyaIsJumping = true;
                     
-                    // ИСПРАВЛЕНО ТОЧЕЧНО: Горизонтальный импульс урезан до 0.16 — прыжок стал намного короче в длину!
+                    // Вычисляем локальный статус масла прямо в момент нажатия
+                    bool currentlyInOil = _isOilOnFloor && _oilSpitX > 0 && (_vanyaX - _oilSpitX).abs() <= 0.18;
+                    double jumpPower = currentlyInOil ? 0.50 : 1.0;
+
                     if (_btnRightPressed) {
-                      _vanyaVy = -4.1; 
-                      _vanyaVx = 0.16; // Аккуратный укороченный полёт вперёд
+                      _vanyaVy = -4.1 * jumpPower; // Высота прыжка падает в 2 раза!
+                      _vanyaVx = 0.16; 
                     } else if (_btnLeftPressed) {
-                      _vanyaVy = -4.1;
-                      _vanyaVx = -0.16; // Аккуратный укороченный полёт назад
+                      _vanyaVy = -4.1 * jumpPower;
+                      _vanyaVx = -0.16; 
                     } else {
-                      _vanyaVy = -3.9; // Небольшой прыжок строго вверх на месте
+                      _vanyaVy = -3.9 * jumpPower; 
                     }
                   });
                 }
@@ -2042,6 +2143,34 @@ class _SheriffBloodPoolPainter extends CustomPainter {
 
     canvas.drawPath(path, bloodPaint);
     canvas.drawPath(path, strokePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// 🎨 Векторный рисовальщик густой масляной лужи желтого цвета с черным контуром
+class _DetailedOilPoolPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    // В будущем для широкой публики здесь можно просто заменить Color(0xFFFFD54F) на зеленый!
+    final oilPaint = Paint()..color = const Color(0xFFFFD54F)..style = PaintingStyle.fill; // Жирный желтый цвет масла
+    final strokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 2.0;
+
+    final path = Path();
+    final w = size.width;
+    final h = size.height;
+
+    // Рисуем растекшееся по полу скользкое масло широкими рваными волнами
+    path.moveTo(w * 0.05, h * 0.5);
+    path.cubicTo(w * 0.15, h * 0.1, w * 0.35, h * 0.2, w * 0.5, h * 0.4);
+    path.cubicTo(w * 0.65, h * 0.05, w * 0.85, h * 0.15, w * 0.95, h * 0.5);
+    path.cubicTo(w * 0.85, h * 0.9, w * 0.65, h * 0.8, w * 0.45, h * 0.95);
+    path.cubicTo(w * 0.25, h * 0.75, w * 0.12, h * 0.9, w * 0.05, h * 0.5);
+    path.close();
+
+    canvas.drawPath(path, oilPaint);
+    canvas.drawPath(path, strokePaint); // Контрастный черный контур
   }
 
   @override
