@@ -296,7 +296,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
       }
     }
 
-                  const double realGroundY = 0.88;
+
 
       // =========================================================================
       // 💎 МЕХАНИКА ТАЙМЕРОВ И СПАВНА ПЛЕВКА МАСЛОМ ДОНА МОЛЛЮСКА
