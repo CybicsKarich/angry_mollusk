@@ -47,8 +47,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
   bool _isBombPigActive = false;   // Активна ли правая свинья
   bool _isLeftPigActive = false;   // Активна ли левая свинья (НОВАЯ)
   double _explosionTimer = 0.0;    // Таймер для отрисовки анимации взрыва
-  double _explosionX = -1.0;       // Координата X произошедшего взрыва
-  double _screenBloodTimer = 0.0;
+  double _explosionX = -1.0;       // Координата X произошедшего взрыв
 
   
   bool _btnLeftPressed = false;
@@ -175,10 +174,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
     }
 
               
-        // Обновление времени жизни пятна крови на стекле экрана
-    if (_screenBloodTimer > 0) {
-      _screenBloodTimer -= dt;
-    }
+        
 
 
       const double realGroundY = 0.88;
@@ -242,7 +238,6 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
           if (_vanyaHearts > 0) {
             _vanyaHearts--;
             _spawnBloodSplatter();
-            _screenBloodTimer = 10.0;
             if (_vanyaHearts > 0) {
               AudioManager.playMiss();
               _vanyaX = 0.15;
@@ -276,7 +271,6 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
           if (_vanyaHearts > 0) {
             _vanyaHearts--;
             _spawnBloodSplatter();
-            _screenBloodTimer = 10.0;
             if (_vanyaHearts > 0) {
               AudioManager.playMiss();
               _vanyaX = 0.15;
@@ -470,7 +464,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
               if (isHit && _vanyaHearts > 0) {
                 _vanyaHearts--;
                 _spawnBloodSplatter(); // Спавн лужи крови
-                _screenBloodTimer = 10.0; 
+                
 
                 if (_vanyaHearts > 0) {
                   AudioManager.playMiss();
@@ -549,7 +543,6 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
           if (_vanyaHearts > 0) {
             _vanyaHearts--;
             _spawnBloodSplatter();    // Спавним лужу на полу
-            _screenBloodTimer = 10.0; // Пачкаем стекло экрана на 10 секунд
           }
           
           // Твой стандартный отскок Вани назад налево по дуге
@@ -1144,7 +1137,6 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                                         _pillY = -1.0;
                                         _pillSpawnTimer = 0.0;
                                         _isAngryMode = false;
-                                        _screenBloodTimer = 0.0;
                                         _isBloodPoolActive = false;
                                         _bloodPoolX = -1.0;
                                         
@@ -1453,23 +1445,6 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                           ),
                         ),
                       ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-           if (_screenBloodTimer > 0)
-            Positioned.fill(
-              child: IgnorePointer( // Не перехватывает тапы по кнопкам
-                child: Center(
-                  child: Opacity(
-                    opacity: (_screenBloodTimer / 10.0).clamp(0.0, 0.85), // Эффект плавного исчезновения
-                    child: SizedBox(
-                      width: size.width * 0.35, // Средний аккуратный размер по ТЗ
-                      height: size.height * 0.45,
-                      child: CustomPaint(
-                        painter: _ScreenBloodSplatterPainter(),
-                      ),
                     ),
                   ),
                 ),
@@ -2073,40 +2048,4 @@ class _SheriffBloodPoolPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// 🎨 Векторный рисовальщик рваной кляксы крови на стекле экрана
-class _ScreenBloodSplatterPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xCC9C0000) // Глубокий бордовый цвет с полупрозрачностью
-      ..style = PaintingStyle.fill;
-    
-    final borderPaint = Paint()
-      ..color = Colors.black.withOpacity(0.5)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-
-    final path = Path();
-    final w = size.width;
-    final h = size.height;
-
-    // Рисуем рваную асимметричную форму кляксы по кривым Безье
-    path.moveTo(w * 0.2, h * 0.3);
-    path.cubicTo(w * 0.05, h * 0.1, w * 0.5, -h * 0.1, w * 0.7, h * 0.2);
-    path.cubicTo(w * 0.95, h * 0.35, w * 0.8, h * 0.7, w * 0.6, h * 0.85);
-    path.cubicTo(w * 0.4, h * 1.05, w * 0.1, h * 0.8, w * 0.2, h * 0.6);
-    path.cubicTo(-w * 0.05, h * 0.5, w * 0.05, h * 0.4, w * 0.2, h * 0.3);
-    path.close();
-
-    canvas.drawPath(path, paint);
-    canvas.drawPath(path, borderPaint); // Мягкая темная обводка для создания объема
-
-    // Парочка мелких брызг-капель отдельно от основного пятна
-    canvas.drawCircle(Offset(w * 0.15, h * 0.15), 4, paint);
-    canvas.drawCircle(Offset(w * 0.85, h * 0.65), 5, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
 
