@@ -12,6 +12,7 @@ class AudioManager {
   static final AudioPlayer _bossMusicPlayer = AudioPlayer();
   static bool _isLevel6BattleMusicActive = false;
   static final AudioPlayer _level6MusicPlayer = AudioPlayer();
+  static bool isLevel6ArenaActive = false; 
 
 
   
@@ -221,17 +222,23 @@ static Future<void> playPaperRustle() async {
     }
   }
 
-  // Чистый запуск боевого рока (Фаза 2)
-  static void switchToBossPhase2Music() {
+    // Чистый запуск боевого рока (Фаза 2) с жесткой очисткой кэша прошлых капель
+  static void switchToBossPhase2Music() async {
     try {
-      _rainPlayer.setVolume(0.30); // Приглушаем сквозной фон
+      _isLevel6BattleMusicActive = true;
+      await _level6MusicPlayer.stop(); // Намертво выключаем капли Фазы 1
+      await _rainPlayer.stop();        // Гасим сквозные эмбиент-эффекты
+      
       _level6MusicPlayer.setVolume(1.0);
       _level6MusicPlayer.setReleaseMode(ReleaseMode.loop);
-      _level6MusicPlayer.play(AssetSource('music/boss_battle.mp3'), mode: PlayerMode.lowLatency);
+      // Запускаем рок Фазы 2 на чистом аудио-канале
+      await _level6MusicPlayer.play(AssetSource('music/boss_battle.mp3'), mode: PlayerMode.lowLatency);
+      print("Аудио-кэш зачищен. Рок Фазы 2 запущен без задержек.");
     } catch (e) {
       print("Ошибка старта рока Фазы 2: $e");
     }
   }
+
 
 
 
@@ -290,16 +297,18 @@ static Future<void> playPaperRustle() async {
 
   static void playPigHit() async {
     if (_isRageSoundPlaying) return;
-    if (!hasPigHitToken) return; 
-    hasPigHitToken = false; 
+    
+    // ИСПРАВЛЕНО ТОЧЕЧНО: На 6 уровне бьем без лимитов, на остальных — проверяем жетон!
+    if (!isLevel6ArenaActive) {
+      if (!hasPigHitToken) return; 
+      hasPigHitToken = false; 
+    }
 
     int num = _random.nextInt(3) + 1;
     try {
-      // ИСПРАВЛЕНО: Звук удара по боссу создаёт мгновенный, чистый параллельный поток низкого приоритета задержки,
-      // полностью минуя пул эффектов блоков, поэтому он железно прозвучит при каждом таране!
       final AudioPlayer hitPlayer = AudioPlayer();
       await hitPlayer.setReleaseMode(ReleaseMode.release);
-      await hitPlayer.setVolume(1.0); // Удар по боссу должен быть максимально громким!
+      await hitPlayer.setVolume(1.0); 
       await hitPlayer.play(AssetSource('audio/pig_hit$num.MP3'), mode: PlayerMode.lowLatency);
       
       hitPlayer.onPlayerComplete.listen((_) => hitPlayer.dispose());
@@ -308,16 +317,18 @@ static Future<void> playPaperRustle() async {
     }
   }
 
-  // 4. ПРОМАХ БАННИХОПА (Строго 1 раз за полет птицы)
   static void playMiss() {
     if (_isRageSoundPlaying) return;
-    if (!hasMissToken) return; // Жетон сгорел — глушим эхо
-    hasMissToken = false;
+    
+    // ИСПРАВЛЕНО ТОЧЕЧНО: На 6 уровне ранения Вани озвучиваются всегда, на остальных — по токену!
+    if (!isLevel6ArenaActive) {
+      if (!hasMissToken) return; 
+      hasMissToken = false;
+    }
 
     int num = _random.nextInt(3) + 1;
     _playSingleEffect('audio/bird_miss$num.MP3');
   }
-
   // 5. ЖИВОЕ СОПЕНИЕ (Оставляем без изменений)
   static void playPigSnort() {
     if (_isRageSoundPlaying) return;
