@@ -127,6 +127,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
       }
     });
     _gameLoopTicker.start();
+    AudioManager.isLevel6ArenaActive = true;
   }
 
 
@@ -600,8 +601,6 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
           // ИСПРАВЛЕНО: Моментальный переход на Кровавый Рок без секундных ожиданий
           if (_bossCurrentHp <= 4.0 && !_isPhase2Active && _bossCurrentHp > 0) {
             _isPhase2Active = true; 
-            // Жестко и мгновенно тушим старый плеер уровня, чтобы освободить аудио-канал под Рок!
-            AudioManager.stopLevelAudioAndPlayMenu(); 
             AudioManager.switchToBossPhase2Music(); 
             print("ДОН МОЛЛЮСК В СЕКУНДЕ ЯРОСТИ! Рок Фазы 2 запущен мгновенно.");
           }
@@ -1264,6 +1263,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                                           _isGameplayActive = false;
                                           Navigator.pop(context); // закрываем паузу
                                           AudioManager.stopLevelAudioAndPlayMenu();
+                                          AudioManager.isLevel6ArenaActive = false; 
                                           Navigator.pop(context); // выходим в меню уровней
                                         },
                                         child: const Text('В МЕНЮ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
@@ -1540,7 +1540,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                             onPressed: () {
                               // Полностью зачищаем звуки арены финала
                               AudioManager.startCastleDrops();
-                              
+                              AudioManager.isLevel6ArenaActive = false; 
                               // ПРИНУДИТЕЛЬНО И МОМЕНТАЛЬНО ПЕРЕНАПРАВЛЯЕМ ИГРОКА НА ЭКРАН ПЛОХОЙ КОНЦОВКИ!
                               Navigator.pushReplacement(
                                 context,
