@@ -212,38 +212,26 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
    
      if (_explosionTimer > 0) _explosionTimer -= dt; 
 
-    // Спавн камикадзе строго раз в 6 секунд с шансом 80%
-    if (!_isBombPigActive && !_isLeftPigActive && _bossCurrentHp > 0 && _vanyaHearts > 0) {
-      _bombPigTimer += dt;
-      
-      // В обычной фазе ждем 6 секунд. В кровавой фазе правая свинья вылетает на 0.5 сек раньше (на 5.5 сек)!
-      double requiredSpawnTime = _isPhase2Active ? 5.5 : 6.0;
-
-      if (_bombPigTimer >= requiredSpawnTime) {
-        // Если это Фаза 2 и мы на пороге 5.5 секунд — запускаем ТОЛЬКО правую свинью
-        if (_isPhase2Active && _bombPigTimer < 6.0) {
-          if (!_isBombPigActive && _gameRand.nextInt(100) < 80) {
+      if (!_isBombPigActive && !_isLeftPigActive && _bossCurrentHp > 0 && _vanyaHearts > 0) {
+        _bombPigTimer += dt;
+        if (_bombPigTimer >= 6.0) {
+          _bombPigTimer = 0.0;
+          
+          if (_gameRand.nextInt(100) < 80) {
             _isBombPigActive = true;
             _bombPigX = _bossX; 
-            print("🐖 КРОВАТНЫЙ РЕЖИМ: Правая свинья пошла на 0.5 секунды РАНЬШЕ!");
-          }
-        } 
-        // Спустя еще 0.5 секунды (таймер дошел до 6.0) — запускаем левую свинью и сбрасываем цикл
-        else {
-          _bombPigTimer = 0.0;
-          if (_isPhase2Active && !_isLeftPigActive && _gameRand.nextInt(100) < 80) {
-            _isLeftPigActive = true;
-            _leftPigX = 0.02;
-            print("🩸 КРОВАТНЫЙ РЕЖИМ: Левая свинья выкатилась следом.");
-          } else if (!_isPhase2Active && !_isBombPigActive && _gameRand.nextInt(100) < 80) {
-            // Обычная одиночная правая свинья для Фазы 1
-            _isBombPigActive = true;
-            _bombPigX = _bossX;
+            
+            // ИСПРАВЛЕНО ТOЧЕЧНО: Левая свинья выезжает одновременно с правой, как и раньше!
+            if (_isPhase2Active) {
+              _isLeftPigActive = true;
+              _leftPigX = 0.02; 
+              print("🩸 КРОВАТНЫЙ РЕЖИМ: Свиньи-камикадзе штурмуют Ваню С ДВУХ СТОРОН ОДНОВРЕМЕННО!");
+            } else {
+              print("🐖 Свинья-камикадзе выкатилась справа.");
+            }
           }
         }
       }
-    }
-
 
     // 1. ДВИЖЕНИЕ И ХИТБОКС ПРАВОЙ СВИHЬИ (ЕДЕТ ВЛЕВО)
     if (_isBombPigActive) {
@@ -369,33 +357,28 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
         }
       }
 
-      // =========================================================================
-      // 💎 ОПРЕДЕЛЕНИЕ СТАТУСА: НАХОДИТСЯ ЛИ ВАНЯ В ЖЁЛТОМ МАСЛЕ ИЛИ НА КРОВИ
-      // =========================================================================
       bool isInOil = false;
       if (_isOilOnFloor && _oilSpitX > 0) {
-        // Масло широкое, хитбокс в 2 раза больше лужи крови (0.18)
-        if ((_vanyaX - _oilSpitX).abs() <= 0.18) {
+        // ИСПРАВЛЕНО ТOЧЕЧНО: Сузили хитбокс до 0.08, чтобы он четко соответствовал краям спрайта!
+        // Теперь Ваня замедляется строго внутри лужи, а не рядом с ней
+        if ((_vanyaX - _oilSpitX).abs() <= 0.08) {
           isInOil = true;
         }
       }
 
       bool isOnBlood = false;
-      // Честная проверка крови: работает только если Ваня НЕ в масле и строго на полу!
       if (!isInOil && _isBloodPoolActive && _bloodPoolX > 0 && !_vanyaIsJumping) {
         if ((_vanyaX - _bloodPoolX).abs() <= 0.09) {
           isOnBlood = true;
         }
       }
 
-            // Модификатор скорости: если Ваня в масле — скорость бега и прыжка режется на 75% (остаётся 0.25 от базы!)
       double oilSpeedModifier = isInOil ? 0.25 : 1.0;
 
       // =========================================================================
       // 💎 ОБЪЕДИНЕННАЯ ГОРИЗОНТАЛЬНАЯ ФИЗИКА (БЕГ, СКОЛЬЖЕНИЕ ИЛИ МАСЛО)
       // =========================================================================
       if (isOnBlood) {
-        // 🩸 А) РЕЖИМ СКОЛЬЖЕНИЯ ПО КРОВИ:
         if (_btnLeftPressed) {
           _vanyaVx = _isAngryMode ? -0.52 : -0.36;
         } else if (_btnRightPressed) {
@@ -405,7 +388,6 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
           if (_vanyaVx.abs() < 0.01) _vanyaVx = 0.0; 
         }
       } else {
-        // 🧭 Б) ОБЫЧНЫЙ ПОЛ ИЛИ ЗАМЕДЛЯЮЩЕЕ МАСЛО:
         if (_btnLeftPressed) {
           _vanyaVx = _isAngryMode ? (-0.42 * oilSpeedModifier) : (-0.26 * oilSpeedModifier);
         } else if (_btnRightPressed) {
@@ -415,7 +397,6 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
         }
       }
 
-      // Применяем скорость к координате
       _vanyaX += _vanyaVx * dt;
 
 
@@ -1440,8 +1421,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                     _btnJumpPressed = true;
                     _vanyaIsJumping = true;
                     
-                   // Вычисляем локальный статус масла прямо в момент нажатия
-                    bool currentlyInOil = _isOilOnFloor && _oilSpitX > 0 && (_vanyaX - _oilSpitX).abs() <= 0.18;
+                   bool currentlyInOil = _isOilOnFloor && _oilSpitX > 0 && (_vanyaX - _oilSpitX).abs() <= 0.08;
                     // ИСПРАВЛЕНО ТОЧЕЧНО: Мощность прыжка в масле падает на 75% (остается 0.25 высоты)
                     double jumpPower = currentlyInOil ? 0.25 : 1.0; 
 
