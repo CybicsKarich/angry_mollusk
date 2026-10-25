@@ -210,29 +210,40 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
 
 
    
-    if (_explosionTimer > 0) _explosionTimer -= dt; 
+     if (_explosionTimer > 0) _explosionTimer -= dt; 
 
     // Спавн камикадзе строго раз в 6 секунд с шансом 80%
     if (!_isBombPigActive && !_isLeftPigActive && _bossCurrentHp > 0 && _vanyaHearts > 0) {
       _bombPigTimer += dt;
-      if (_bombPigTimer >= 6.0) {
-        _bombPigTimer = 0.0;
-        
-        if (_gameRand.nextInt(100) < 80) {
-          _isBombPigActive = true;
-          _bombPigX = _bossX; // Правая всегда выезжает из-под Дона Моллюска (0.84)
-          
-          // НОВОЕ: Если включен кровавый режим (Фаза 2) — МГНОВЕННО спавним и левую свинью!
-          if (_isPhase2Active) {
+      
+      // В обычной фазе ждем 6 секунд. В кровавой фазе правая свинья вылетает на 0.5 сек раньше (на 5.5 сек)!
+      double requiredSpawnTime = _isPhase2Active ? 5.5 : 6.0;
+
+      if (_bombPigTimer >= requiredSpawnTime) {
+        // Если это Фаза 2 и мы на пороге 5.5 секунд — запускаем ТОЛЬКО правую свинью
+        if (_isPhase2Active && _bombPigTimer < 6.0) {
+          if (!_isBombPigActive && _gameRand.nextInt(100) < 80) {
+            _isBombPigActive = true;
+            _bombPigX = _bossX; 
+            print("🐖 КРОВАТНЫЙ РЕЖИМ: Правая свинья пошла на 0.5 секунды РАНЬШЕ!");
+          }
+        } 
+        // Спустя еще 0.5 секунды (таймер дошел до 6.0) — запускаем левую свинью и сбрасываем цикл
+        else {
+          _bombPigTimer = 0.0;
+          if (_isPhase2Active && !_isLeftPigActive && _gameRand.nextInt(100) < 80) {
             _isLeftPigActive = true;
-            _leftPigX = 0.02; // Левая выезжает с самого левого края экрана
-            print("🩸 КРОВАТНЫЙ РЕЖИМ: Свиньи-камикадзе штурмуют Ваню С ДВУХ СТОРОН!");
-          } else {
-            print("🐖 Свинья-камикадзе выкатилась справа.");
+            _leftPigX = 0.02;
+            print("🩸 КРОВАТНЫЙ РЕЖИМ: Левая свинья выкатилась следом.");
+          } else if (!_isPhase2Active && !_isBombPigActive && _gameRand.nextInt(100) < 80) {
+            // Обычная одиночная правая свинья для Фазы 1
+            _isBombPigActive = true;
+            _bombPigX = _bossX;
           }
         }
       }
     }
+
 
     // 1. ДВИЖЕНИЕ И ХИТБОКС ПРАВОЙ СВИHЬИ (ЕДЕТ ВЛЕВО)
     if (_isBombPigActive) {
@@ -377,8 +388,8 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
         }
       }
 
-      // Модификатор скорости: если Ваня в масле — скорость бега режется в 2 раза (0.50)
-      double oilSpeedModifier = isInOil ? 0.50 : 1.0;
+            // Модификатор скорости: если Ваня в масле — скорость бега и прыжка режется на 75% (остаётся 0.25 от базы!)
+      double oilSpeedModifier = isInOil ? 0.25 : 1.0;
 
       // =========================================================================
       // 💎 ОБЪЕДИНЕННАЯ ГОРИЗОНТАЛЬНАЯ ФИЗИКА (БЕГ, СКОЛЬЖЕНИЕ ИЛИ МАСЛО)
@@ -400,12 +411,13 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
         } else if (_btnRightPressed) {
           _vanyaVx = _isAngryMode ? (0.42 * oilSpeedModifier) : (0.26 * oilSpeedModifier);
         } else {
-          _vanyaVx = 0.0; // Жесткий стоп на сухом полу или в вязком масле
+          _vanyaVx = 0.0; 
         }
       }
 
       // Применяем скорость к координате
       _vanyaX += _vanyaVx * dt;
+
 
       // =========================================================================
       // 💎 ВЕРТИКАЛЬНАЯ ГРАВИТАЦИЯ И УРЕЗАННЫЙ ПРЫЖОК
@@ -474,9 +486,11 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
       if (_bossCurrentHp > 0) {
         _bossStateTimer += dt;
 
-        // Модификаторы Второй Фазы берсерка на 4 HP и меньше
+                // Модификаторы Второй Фазы берсерка на 4 HP и меньше
         double phase2SpeedMultiplier = _isPhase2Active ? 1.20 : 1.0; 
         double phase2CooldownReduction = _isPhase2Active ? 0.85 : 1.0; 
+        // ИСПРАВЛЕНО ТОЧЕЧНО: Дополнительно срезаем время между ударами в Фазе 2 на 25% (множитель 0.75)
+        double phase2AttackGapModifier = _isPhase2Active ? 0.75 : 1.0;
 
         // ИСПРАВЛЕНО: Явно используем значение пола для корректного сброса координат Вани
         const double localGroundY = 0.88;
@@ -484,7 +498,8 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
         switch (_bossState) {
           case BossState.idle:
             _limbRotationAngle = 0.0;
-            double requiredIdleTime = 3.0 * phase2CooldownReduction;
+            // ИСПРАВЛЕНО ТОЧЕЧНО: Меньше времени между ударами на 25% во второй фазе
+            double requiredIdleTime = 3.0 * phase2CooldownReduction * phase2AttackGapModifier;
             if (_bossStateTimer >= requiredIdleTime) {
               _bossStateTimer = 0.0;
               _bossState = BossState.windingUp;
@@ -503,15 +518,14 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
             }
             break;
 
-                   case BossState.attacking:
+          case BossState.attacking:
             _limbRotationAngle = 0.0;
 
-            // Вычисляем текущую физическую позицию лапы на арене
             double attackProgress = 0.0;
             if (_bossStateTimer < 0.25) {
-              attackProgress = _bossStateTimer / 0.25; // Выпад вперед
+              attackProgress = _bossStateTimer / 0.25; 
             } else {
-              attackProgress = (1.0 - _bossStateTimer) / 0.75; // Возврат назад
+              attackProgress = (1.0 - _bossStateTimer) / 0.75; 
             }
             
             double currentPunchX = _bossX - (attackProgress * 0.82);
@@ -522,29 +536,25 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
             if (distanceToLimb < 0.14) { 
               bool isHit = false;
               
-              // 🐙 ЩУПАЛЬЦА (Низ): Сносят баррикаду ИЛИ бьют Ваню, если он не прыгнул
               if (_activeLimb == BossLimb.leftTentacle || _activeLimb == BossLimb.rightTentacle) {
                 if (_isBarricadeAlive) {
                   _isBarricadeAlive = false;
-                  AudioManager.playBlockBreak(true); // Баррикада рушится со звуком камня от щупальца!
+                  AudioManager.playBlockBreak(true); 
                 } else {
                   if (!_vanyaIsJumping) isHit = true;
                 }
               } 
-              // 🦀 КЛЕШНИ (Верх): Ловят Ваню строго в прыжке
               else {
                 if (_vanyaIsJumping && _vanyaVy < 0) isHit = true;
               }
 
-              // ИСПРАВЛЕНО: Теперь и щупальце, и клешня наносят честный урон в 1 сердце!
               if (isHit && _vanyaHearts > 0) {
                 _vanyaHearts--;
-                _spawnBloodSplatter(); // Спавн лужи крови
-                
+                _spawnBloodSplatter(); 
 
                 if (_vanyaHearts > 0) {
                   AudioManager.playMiss();
-                  _vanyaX = 0.15; // Отброс на спавн
+                  _vanyaX = 0.15; 
                   _vanyaY = localGroundY - 0.05;
                   _vanyaIsJumping = false;
                   _vanyaVy = 0.0;
@@ -567,14 +577,14 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
             }
             break;
 
-          // ИСПРАВЛЕНО И ДОБАВЛЕНО: Блок фазы отдыха босса, которого не хватало для компиляции!
           case BossState.dizzy:
             _staggerEffectTimer += dt; 
             _limbRotationAngle = 0.0; 
-            if (_bossStateTimer >= 5.0) {
+            // ИСПРАВЛЕНО ТОЧЕЧНО: Отдышка у босса идет ровно 4 секунды (на 1 секунду меньше!)
+            if (_bossStateTimer >= 4.0) { 
               _bossStateTimer = 0.0;
               _staggerEffectTimer = 0.0;
-              _bossState = BossState.idle; // Проснулся через 5 секунд
+              _bossState = BossState.idle; 
             }
             break;
         } // switch
@@ -1430,9 +1440,11 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                     _btnJumpPressed = true;
                     _vanyaIsJumping = true;
                     
-                    // Вычисляем локальный статус масла прямо в момент нажатия
+                   // Вычисляем локальный статус масла прямо в момент нажатия
                     bool currentlyInOil = _isOilOnFloor && _oilSpitX > 0 && (_vanyaX - _oilSpitX).abs() <= 0.18;
-                    double jumpPower = currentlyInOil ? 0.50 : 1.0;
+                    // ИСПРАВЛЕНО ТОЧЕЧНО: Мощность прыжка в масле падает на 75% (остается 0.25 высоты)
+                    double jumpPower = currentlyInOil ? 0.25 : 1.0; 
+
 
                     if (_btnRightPressed) {
                       _vanyaVy = -4.1 * jumpPower; // Высота прыжка падает в 2 раза!
