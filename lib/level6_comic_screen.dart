@@ -48,12 +48,17 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
   bool _isLeftPigActive = false;   // Активна ли левая свинья (НОВАЯ)
   double _explosionTimer = 0.0;    // Таймер для отрисовки анимации взрыва
   double _explosionX = -1.0;       // Координата X произошедшего взрыв
+    // Переменные для механики плевка маслом Дона Моллюска
   double _oilPigTimer = 0.0;       // Таймер отсчета 9 секунд между проверками плевка
   double _oilSpitX = -1.0;         // Точка на полу, куда приземлится масло
   double _oilActiveTimer = 0.0;    // Сколько секунд масло еще будет лежать на полу (5 сек)
-  double _oilWarmUpTimer = 0.0;    // Таймер 1-секундной анимации подготовки плевка
-  bool _isOilWarningActive = false; // Виден ли маркер прицеливания плевка
+  double _oilWarmUpTimer = 0.0;    // Таймер полета капли в воздухе (0.8 секунды)
+  bool _isOilWarningActive = false; // Летит ли капля в воздухе прямо сейчас
   bool _isOilOnFloor = false;      // Лежит ли масло на полу прямо сейчас
+  
+  // Координаты летящей капли в воздухе для анимации
+  double _oilDropX = -1.0;
+  double _oilDropY = -1.0;
 
   
   bool _btnLeftPressed = false;
@@ -298,9 +303,6 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
 
 
 
-      // =========================================================================
-      // 💎 МЕХАНИКА ТАЙМЕРОВ И СПАВНА ПЛЕВКА МАСЛОМ ДОНА МОЛЛЮСКА
-      // =========================================================================
       if (_oilActiveTimer > 0) {
         _oilActiveTimer -= dt;
         if (_oilActiveTimer <= 0) {
@@ -310,15 +312,32 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
         }
       }
 
-      // Если идет подготовка к плевку (1 секунда анимации предупреждения)
+      // Если капля летит в воздухе (Анимация полета длится строго 0.8 секунды)
       if (_isOilWarningActive) {
         _oilWarmUpTimer += dt;
-        if (_oilWarmUpTimer >= 1.0) {
+        
+        // Прогресс полета от 0.0 (рот босса) до 1.0 (земля под Ваней)
+        double progress = (_oilWarmUpTimer / 0.8).clamp(0.0, 1.0);
+        
+        // Начальная точка — рот босса
+        double startX = 0.84;
+        double startY = 0.65;
+        
+        // Линейно двигаем каплю по горизонтали X к цели
+        _oilDropX = startX + (_oilSpitX - startX) * progress;
+        
+        // Честная параболическая дуга по вертикали Y (капля эффектно взмывает и падает)
+        double arcY = sin(progress * pi) * 0.25; // Высота взлета капли в зените
+        _oilDropY = startY + (realGroundY - startY) * progress - arcY;
+
+        if (_oilWarmUpTimer >= 0.8) {
           _isOilWarningActive = false;
           _oilWarmUpTimer = 0.0;
           _isOilOnFloor = true;
-          _oilActiveTimer = 5.0; // Масло ложится ровно на 5 секунд
-          print("💥 Дон Моллюск плюнул! Масло залило пол.");
+          _oilActiveTimer = 5.0; // Масло разливается на полу на 5 секунд
+          _oilDropX = -1.0;
+          _oilDropY = -1.0;
+          print("💥 Капля масла приземлилась и растеклась по полу!");
         }
       }
 
@@ -327,11 +346,14 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
         _oilPigTimer += dt;
         if (_oilPigTimer >= 9.0) {
           _oilPigTimer = 0.0;
+          
           if (_gameRand.nextInt(100) < 55) {
             _isOilWarningActive = true;
             _oilWarmUpTimer = 0.0;
-            _oilSpitX = _vanyaX; // Целится туда, где Ваня стоит сейчас!
-            print("⚠️ Дон Моллюск целится маслом в координату $_oilSpitX");
+            _oilSpitX = _vanyaX; // Босс фиксирует точку, где Ваня стоял В СЕКУНДУ ВЫСТРЕЛА!
+            _oilDropX = 0.84;    // Стартуем из рта босса
+            _oilDropY = 0.65;
+            print("💦 Дон Моллюск плюнул маслом из рта в цель: $_oilSpitX");
           }
         }
       }
@@ -1071,23 +1093,17 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                       ),
                     ),
 
-                                         // ⚠️ Линия-предупреждение прицеливания плевка (мигает 1 секунду)
-                  if (_isOilWarningActive && _oilSpitX > 0)
+                                      // 💦 ЛЕТЯЩАЯ ИЗ РТА БОССА КАПЛЯ ГУСТОГО МАСЛА (Анимация 0.8 сек)
+                  if (_isOilWarningActive && _oilDropX > 0 && _oilDropY > 0)
                     Positioned(
-                      bottom: 24,
-                      left: size.width * _oilSpitX - 10,
-                      child: Container(
-                        width: 20,
-                        height: size.height * 0.7,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.bottomCenter,
-                            end: Alignment.topCenter,
-                            colors: [
-                              Colors.yellow.withOpacity(0.4),
-                              Colors.transparent
-                            ],
-                          ),
+                      left: size.width * _oilDropX - 12,
+                      top: size.height * _oilDropY - 16,
+                      child: SizedBox(
+                        width: 24,
+                        height: 32,
+                        child: CustomPaint(
+                          // Передаем прогресс полета, чтобы капля росла при подлете к земле
+                          painter: _FlyingOilDropPainter(progress: (_oilWarmUpTimer / 0.8).clamp(0.0, 1.0)),
                         ),
                       ),
                     ),
@@ -2177,4 +2193,41 @@ class _DetailedOilPoolPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
+// 🎨 Векторный рисовальщик летящей по дуге капли масла с динамическим масштабом
+class _FlyingOilDropPainter extends CustomPainter {
+  final double progress;
+  _FlyingOilDropPainter({required this.progress});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Капля плавно увеличивается в размерах от 0.4 до 1.2 по мере подлета к цели
+    double currentScale = 0.4 + (progress * 0.8);
+    
+    canvas.save();
+    canvas.translate(size.width / 2, size.height / 2);
+    canvas.scale(currentScale);
+
+    final oilPaint = Paint()..color = const Color(0xFFFFD54F)..style = PaintingStyle.fill;
+    final strokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.6;
+
+    final path = Path();
+    // Рисуем классическую вытянутую вверх каплевидную форму снаряда
+    path.moveTo(0, -14); // Острый носик капли направлен вверх-влево по дуге полета
+    path.cubicTo(-8, -4, -10, 6, -6, 10);
+    path.cubicTo(-2, 14, 2, 14, 6, 10);
+    path.cubicTo(10, 6, 8, -4, 0, -14);
+    path.close();
+
+    canvas.drawPath(path, oilPaint);
+    canvas.drawPath(path, strokePaint);
+    
+    // Маленький глянцевый белый блик на боку капли для эффекта объема жидкости
+    canvas.drawCircle(const Offset(-3, 2), 2, Paint()..color = Colors.white.withOpacity(0.4));
+
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant _FlyingOilDropPainter oldDelegate) => true;
+}
 
