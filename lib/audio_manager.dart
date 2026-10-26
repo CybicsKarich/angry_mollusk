@@ -289,20 +289,19 @@ static Future<void> playPaperRustle() async {
     _playSingleEffect('audio/sling_launch$num.mp3'); 
   }
 
-  static void playPigHit() async {
+   static void playPigHit() async {
     if (_isRageSoundPlaying) return;
-    if (!hasPigHitToken) return; 
-    hasPigHitToken = false; 
 
+    // ИСПРАВЛЕНО ТОЧЕЧНО: Если это НЕ 6 уровень, то проверяем и сжигаем жетон рогатки. 
+    // На 6 уровне (isLevel6ArenaActive == true) этот блок просто пропускается!
     if (!isLevel6ArenaActive) {
       if (!hasPigHitToken) return; 
       hasPigHitToken = false; 
     }
 
-   int num = _random.nextInt(3) + 1;
+    int num = _random.nextInt(3) + 1;
     try {
-      // ИСПРАВЛЕНО: Звук удара по боссу создаёт мгновенный, чистый параллельный поток низкого приоритета задержки,
-      // полностью минуя пул эффектов блоков, поэтому он железно прозвучит при каждом таране!
+      // Чистый параллельный поток низкого приоритета задержки, чтобы звук гремел при каждом таране
       final AudioPlayer hitPlayer = AudioPlayer();
       await hitPlayer.setReleaseMode(ReleaseMode.release);
       await hitPlayer.setVolume(1.0); // Удар по боссу должен быть максимально громким!
@@ -314,20 +313,19 @@ static Future<void> playPaperRustle() async {
     }
   }
 
-  // 4. ПРОМАХ БАННИХОПА (Строго 1 раз за полет птицы)
   static void playMiss() {
     if (_isRageSoundPlaying) return;
-    if (!hasMissToken) return; // Жетон сгорел — глушим эхо
-    hasMissToken = false;
 
+    // ИСПРАВЛЕНО ТОЧЕЧНО: Если это НЕ 6 уровень, то проверяем и сжигаем жетон промаха птицы.
     if (!isLevel6ArenaActive) {
       if (!hasMissToken) return; 
       hasMissToken = false;
     }
 
-   int num = _random.nextInt(3) + 1;
+    int num = _random.nextInt(3) + 1;
     _playSingleEffect('audio/bird_miss$num.MP3');
   }
+
 
   // 5. ЖИВОЕ СОПЕНИЕ (Оставляем без изменений)
   static void playPigSnort() {
