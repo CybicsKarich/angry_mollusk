@@ -197,8 +197,23 @@ static Future<void> playPaperRustle() async {
     }
   }
 
+    // ИСПРАВЛЕНО ТОЧЕЧНО: Метод тотальной мгновенной зачистки всех боевых эффектов при победе
+  static void clearAllBattleFX() async {
+    try {
+      await _fxPlayer.stop(); // Глушим основной канал (ор ярости, замахи, удары)
+      
+      // Намертво выключаем и обнуляем весь пул мелких звуков (взрывы блоков, свиней)
+      for (var player in _fxPool) {
+        await player.stop();
+      }
+      print("💥 ВСЕ звуковые эффекты арены принудительно выгружены из кэша микшера девайса.");
+    } catch (e) {
+      print("Ошибка экстренной очистки эффектов: $e");
+    }
+  }
 
- static Future<void> startCastleDrops() async {
+ 
+  static Future<void> startCastleDrops() async {
     try {
       await _rainPlayer.stop();
       await _rainPlayer.setVolume(0.85);
