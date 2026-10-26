@@ -186,7 +186,22 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
     }
 
               
+      if (_bossCurrentHp <= 0) {
+        // Первым делом мгновенно вырезаем весь накопившийся кэш непроигранных эффектов!
+        AudioManager.clearAllBattleFX(); 
+
+        _vanyaVx = 0.0;
+        _vanyaVy = 0.0;
+        _btnLeftPressed = false;
+        _btnRightPressed = false;
+        _btnJumpPressed = false;
         
+        if (_gameLoopTicker.isActive) {
+          _gameLoopTicker.stop();
+          print("🏆 ПОБЕДА! Движковый тикер намертво остановлен, арена заморожена.");
+        }
+        return; // Мгновенно прерываем метод, отключая спавн свиней, масла и урон!
+      }  
 
 
       const double realGroundY = 0.88;
