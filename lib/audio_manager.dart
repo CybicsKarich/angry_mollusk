@@ -202,48 +202,48 @@ static Future<void> playPaperRustle() async {
     }
   }
 
-    static void startLevel6BattleMusic() async {
+      // ИСПРАВЛЕНО: Возвращен жесткий принудительный запуск Low Latency, который пробивает любые звуки комикса!
+  static void startLevel6BattleMusic() async {
     try {
-      if (_rainPlayer.state == PlayerState.playing) {
-        return;
+      // Защита от ежесекундного сброса трека к началу: если капли УЖЕ играют на _level6MusicPlayer, не перебиваем их
+      if (_level6MusicPlayer.state == PlayerState.playing && !_isLevel6BattleMusicActive) {
+        return; 
       }
+      
+      _isLevel6BattleMusicActive = false; // Сбрасываем флаг под Фазу 1
 
-      // Намертво гасим рок, освобождая канал
-      await _level6MusicPlayer.stop(); 
+      _level6MusicPlayer.setVolume(1.0);
+      _level6MusicPlayer.setReleaseMode(ReleaseMode.loop);
       
-      _rainPlayer.setVolume(1.0);
-      _rainPlayer.setReleaseMode(ReleaseMode.loop);
-      
-      // ИСПРАВЛЕНО: Капли Фазы 1 теперь честно живут на плеере дождя!
-      await _rainPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.lowLatency);
-      print("Музыка Фазы 1 (Капли) запущена на плеере дождя.");
+      // ВОЗВРАЩЕНО К ОРИГИНАЛУ: Жесткий Low Latency запуск, который сочно глушит грохот камня!
+      await _level6MusicPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.lowLatency);
+      print("Музыка Фазы 1 (Капли) принудительно запущена через Low Latency.");
     } catch (e) {
       print("Ошибка старта музыки Фазы 1: $e");
     }
   }
 
-
-      // Чистый запуск боевого рока (Фаза 2) с моментальным глушением капель
+  // ИСПРАВЛЕНО: Возвращен жесткий Low Latency, который не дает другим эффектам прервать Кровавый Рок!
   static void switchToBossPhase2Music() async {
     try {
-      // ИСПРАВЛЕНО ТОЧЕЧНО: Если Рок уже играет — выходим из метода, чтобы песня НЕ сбрасывалась сначала каждую секунду!
-      if (_level6MusicPlayer.state == PlayerState.playing) {
+      // Защита от ежесекундного сброса трека к началу: если Рок УЖЕ играет на _level6MusicPlayer, просто пропускаем шаг
+      if (_level6MusicPlayer.state == PlayerState.playing && _isLevel6BattleMusicActive) {
         return; 
       }
 
-      _isLevel6BattleMusicActive = true;
+      _isLevel6BattleMusicActive = true; // Фиксируем, что включена Фаза 2
       
-      // Намертво тушим плеер капель Фазы 1, чтобы убрать задержки и освободить аудио-канал Android/iOS
+      // Мгновенно тушим сквозной фон капель на плеере дождя, если он мешает
       await _rainPlayer.stop(); 
       
       _level6MusicPlayer.setVolume(1.0);
       _level6MusicPlayer.setReleaseMode(ReleaseMode.loop);
       
-      // Запускаем рок Фазы 2 строго ОДИН раз за раунд
+      // ВОЗВРАЩЕНО К ОРИГИНАЛУ: Жесткий Low Latency запуск рока, который никакой другой звук не сможет прервать!
       await _level6MusicPlayer.play(AssetSource('music/boss_battle.mp3'), mode: PlayerMode.lowLatency);
-      print("Капли принудительно отключены. Рок Фазы 2 запущен без зависаний.");
+      print("Рок Фазы 2 принудительно запущен через Low Latency без задержек.");
     } catch (e) {
-      print("Ошибка старта рока Фазы 2: $e");
+      print("Ошибка start рока Фазы 2: $e");
     }
   }
 
@@ -439,13 +439,14 @@ static Future<void> playPaperRustle() async {
     }
   }
 
-      static bool get isCastleDropsPlaying {
+        static bool get isCastleDropsPlaying {
     try {
       return _rainPlayer.state == PlayerState.playing;
     } catch (_) {
       return false;
     }
   }
+
 
 
 static bool get isBossMusicPlaying {
