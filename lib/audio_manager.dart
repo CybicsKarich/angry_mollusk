@@ -114,15 +114,8 @@ class AudioManager {
 
 
 
-  // ТОЧЕЧНО ДОБАВИТЬ В КЛАСС AudioManager В ФАЙЛЕ lib/audio_manager.dart:
-  static bool get isBossMusicPlaying {
-    try {
-      // Проверяем, играет ли нативный плеер музыки босса прямо сейчас
-      return _bossMusicPlayer.state == PlayerState.playing;
-    } catch (_) {
-      return false; // Мягкая защита от зависания при инициализации трека
-    }
-  }
+  
+
 
 
 
@@ -209,35 +202,51 @@ static Future<void> playPaperRustle() async {
     }
   }
 
-  // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОДЫ БОССА В КЛАССЕ AUDIO_MANAGER (LIB/AUDIO_MANAGER.DART):
-
-  // Чистый запуск фоновой музыки капель арены (Фаза 1)
-  static void startLevel6BattleMusic() {
+    static void startLevel6BattleMusic() async {
     try {
-      _level6MusicPlayer.setVolume(1.0);
-      _level6MusicPlayer.setReleaseMode(ReleaseMode.loop);
-      _level6MusicPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.lowLatency);
+      if (_rainPlayer.state == PlayerState.playing) {
+        return;
+      }
+
+      // Намертво гасим рок, освобождая канал
+      await _level6MusicPlayer.stop(); 
+      
+      _rainPlayer.setVolume(1.0);
+      _rainPlayer.setReleaseMode(ReleaseMode.loop);
+      
+      // ИСПРАВЛЕНО: Капли Фазы 1 теперь честно живут на плеере дождя!
+      await _rainPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.lowLatency);
+      print("Музыка Фазы 1 (Капли) запущена на плеере дождя.");
     } catch (e) {
       print("Ошибка старта музыки Фазы 1: $e");
     }
   }
 
-    // Чистый запуск боевого рока (Фаза 2) с жесткой очисткой кэша прошлых капель
+
+      // Чистый запуск боевого рока (Фаза 2) с моментальным глушением капель
   static void switchToBossPhase2Music() async {
     try {
+      // ИСПРАВЛЕНО ТОЧЕЧНО: Если Рок уже играет — выходим из метода, чтобы песня НЕ сбрасывалась сначала каждую секунду!
+      if (_level6MusicPlayer.state == PlayerState.playing) {
+        return; 
+      }
+
       _isLevel6BattleMusicActive = true;
-      await _level6MusicPlayer.stop(); // Намертво выключаем капли Фазы 1
-      await _rainPlayer.stop();        // Гасим сквозные эмбиент-эффекты
+      
+      // Намертво тушим плеер капель Фазы 1, чтобы убрать задержки и освободить аудио-канал Android/iOS
+      await _rainPlayer.stop(); 
       
       _level6MusicPlayer.setVolume(1.0);
       _level6MusicPlayer.setReleaseMode(ReleaseMode.loop);
-      // Запускаем рок Фазы 2 на чистом аудио-канале
+      
+      // Запускаем рок Фазы 2 строго ОДИН раз за раунд
       await _level6MusicPlayer.play(AssetSource('music/boss_battle.mp3'), mode: PlayerMode.lowLatency);
-      print("Аудио-кэш зачищен. Рок Фазы 2 запущен без задержек.");
+      print("Капли принудительно отключены. Рок Фазы 2 запущен без зависаний.");
     } catch (e) {
       print("Ошибка старта рока Фазы 2: $e");
     }
   }
+
 
 
 
@@ -430,16 +439,23 @@ static Future<void> playPaperRustle() async {
     }
   }
 
-    // ТОЧЕЧНО ЗАМЕНИТЬ ГЕТТЕР ISCASTLEDROPSPLAYING В LIB/AUDIO_MANAGER.DART:
-  static bool get isCastleDropsPlaying {
+      static bool get isCastleDropsPlaying {
     try {
-      // Теперь проверяем статус изолированного плеера капель/дождя!
       return _rainPlayer.state == PlayerState.playing;
     } catch (_) {
       return false;
     }
   }
 
+
+static bool get isBossMusicPlaying {
+    try {
+      // Проверяем, играет ли нативный плеер музыки босса прямо сейчас
+      return _bossMusicPlayer.state == PlayerState.playing;
+    } catch (_) {
+      return false; // Мягкая защита от зависания при инициализации трека
+    }
+  }
 
   
   // ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД STOPLEVEL5RAIN В LIB/AUDIO_MANAGER.DART:
