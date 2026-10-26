@@ -12,7 +12,7 @@ class AudioManager {
   static final AudioPlayer _bossMusicPlayer = AudioPlayer();
   static bool _isLevel6BattleMusicActive = false;
   static final AudioPlayer _level6MusicPlayer = AudioPlayer();
-  static bool isLevel6ArenaActive = false; 
+  static bool isLevel6ArenaActive = false;
 
 
   
@@ -114,8 +114,15 @@ class AudioManager {
 
 
 
-  
-
+  // ТОЧЕЧНО ДОБАВИТЬ В КЛАСС AudioManager В ФАЙЛЕ lib/audio_manager.dart:
+  static bool get isBossMusicPlaying {
+    try {
+      // Проверяем, играет ли нативный плеер музыки босса прямо сейчас
+      return _bossMusicPlayer.state == PlayerState.playing;
+    } catch (_) {
+      return false; // Мягкая защита от зависания при инициализации трека
+    }
+  }
 
 
 
@@ -202,52 +209,30 @@ static Future<void> playPaperRustle() async {
     }
   }
 
-      // ИСПРАВЛЕНО: Возвращен жесткий принудительный запуск Low Latency, который пробивает любые звуки комикса!
-  static void startLevel6BattleMusic() async {
-    try {
-      // Защита от ежесекундного сброса трека к началу: если капли УЖЕ играют на _level6MusicPlayer, не перебиваем их
-      if (_level6MusicPlayer.state == PlayerState.playing && !_isLevel6BattleMusicActive) {
-        return; 
-      }
-      
-      _isLevel6BattleMusicActive = false; // Сбрасываем флаг под Фазу 1
+  // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОДЫ БОССА В КЛАССЕ AUDIO_MANAGER (LIB/AUDIO_MANAGER.DART):
 
+  // Чистый запуск фоновой музыки капель арены (Фаза 1)
+  static void startLevel6BattleMusic() {
+    try {
       _level6MusicPlayer.setVolume(1.0);
       _level6MusicPlayer.setReleaseMode(ReleaseMode.loop);
-      
-      // ВОЗВРАЩЕНО К ОРИГИНАЛУ: Жесткий Low Latency запуск, который сочно глушит грохот камня!
-      await _level6MusicPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.lowLatency);
-      print("Музыка Фазы 1 (Капли) принудительно запущена через Low Latency.");
+      _level6MusicPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.lowLatency);
     } catch (e) {
       print("Ошибка старта музыки Фазы 1: $e");
     }
   }
 
-  // ИСПРАВЛЕНО: Возвращен жесткий Low Latency, который не дает другим эффектам прервать Кровавый Рок!
-  static void switchToBossPhase2Music() async {
+  // Чистый запуск боевого рока (Фаза 2)
+  static void switchToBossPhase2Music() {
     try {
-      // Защита от ежесекундного сброса трека к началу: если Рок УЖЕ играет на _level6MusicPlayer, просто пропускаем шаг
-      if (_level6MusicPlayer.state == PlayerState.playing && _isLevel6BattleMusicActive) {
-        return; 
-      }
-
-      _isLevel6BattleMusicActive = true; // Фиксируем, что включена Фаза 2
-      
-      // Мгновенно тушим сквозной фон капель на плеере дождя, если он мешает
-      await _rainPlayer.stop(); 
-      
+      _rainPlayer.setVolume(0.30); // Приглушаем сквозной фон
       _level6MusicPlayer.setVolume(1.0);
       _level6MusicPlayer.setReleaseMode(ReleaseMode.loop);
-      
-      // ВОЗВРАЩЕНО К ОРИГИНАЛУ: Жесткий Low Latency запуск рока, который никакой другой звук не сможет прервать!
-      await _level6MusicPlayer.play(AssetSource('music/boss_battle.mp3'), mode: PlayerMode.lowLatency);
-      print("Рок Фазы 2 принудительно запущен через Low Latency без задержек.");
+      _level6MusicPlayer.play(AssetSource('music/boss_battle.mp3'), mode: PlayerMode.lowLatency);
     } catch (e) {
-      print("Ошибка start рока Фазы 2: $e");
+      print("Ошибка старта рока Фазы 2: $e");
     }
   }
-
-
 
 
 
@@ -306,18 +291,21 @@ static Future<void> playPaperRustle() async {
 
   static void playPigHit() async {
     if (_isRageSoundPlaying) return;
-    
-    // ИСПРАВЛЕНО ТОЧЕЧНО: На 6 уровне бьем без лимитов, на остальных — проверяем жетон!
+    if (!hasPigHitToken) return; 
+    hasPigHitToken = false; 
+
     if (!isLevel6ArenaActive) {
       if (!hasPigHitToken) return; 
       hasPigHitToken = false; 
     }
 
-    int num = _random.nextInt(3) + 1;
+   int num = _random.nextInt(3) + 1;
     try {
+      // ИСПРАВЛЕНО: Звук удара по боссу создаёт мгновенный, чистый параллельный поток низкого приоритета задержки,
+      // полностью минуя пул эффектов блоков, поэтому он железно прозвучит при каждом таране!
       final AudioPlayer hitPlayer = AudioPlayer();
       await hitPlayer.setReleaseMode(ReleaseMode.release);
-      await hitPlayer.setVolume(1.0); 
+      await hitPlayer.setVolume(1.0); // Удар по боссу должен быть максимально громким!
       await hitPlayer.play(AssetSource('audio/pig_hit$num.MP3'), mode: PlayerMode.lowLatency);
       
       hitPlayer.onPlayerComplete.listen((_) => hitPlayer.dispose());
@@ -326,18 +314,21 @@ static Future<void> playPaperRustle() async {
     }
   }
 
+  // 4. ПРОМАХ БАННИХОПА (Строго 1 раз за полет птицы)
   static void playMiss() {
     if (_isRageSoundPlaying) return;
-    
-    // ИСПРАВЛЕНО ТОЧЕЧНО: На 6 уровне ранения Вани озвучиваются всегда, на остальных — по токену!
+    if (!hasMissToken) return; // Жетон сгорел — глушим эхо
+    hasMissToken = false;
+
     if (!isLevel6ArenaActive) {
       if (!hasMissToken) return; 
       hasMissToken = false;
     }
 
-    int num = _random.nextInt(3) + 1;
+   int num = _random.nextInt(3) + 1;
     _playSingleEffect('audio/bird_miss$num.MP3');
   }
+
   // 5. ЖИВОЕ СОПЕНИЕ (Оставляем без изменений)
   static void playPigSnort() {
     if (_isRageSoundPlaying) return;
@@ -439,24 +430,16 @@ static Future<void> playPaperRustle() async {
     }
   }
 
-        static bool get isCastleDropsPlaying {
+    // ТОЧЕЧНО ЗАМЕНИТЬ ГЕТТЕР ISCASTLEDROPSPLAYING В LIB/AUDIO_MANAGER.DART:
+  static bool get isCastleDropsPlaying {
     try {
+      // Теперь проверяем статус изолированного плеера капель/дождя!
       return _rainPlayer.state == PlayerState.playing;
     } catch (_) {
       return false;
     }
   }
 
-
-
-static bool get isBossMusicPlaying {
-    try {
-      // Проверяем, играет ли нативный плеер музыки босса прямо сейчас
-      return _bossMusicPlayer.state == PlayerState.playing;
-    } catch (_) {
-      return false; // Мягкая защита от зависания при инициализации трека
-    }
-  }
 
   
   // ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД STOPLEVEL5RAIN В LIB/AUDIO_MANAGER.DART:
