@@ -1379,98 +1379,92 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
             ),
           ),
 
-          // 🕹️ В) ИНТЕРФЕЙС УПРАВЛЕНИЯ ПО НАШЕМУ УГОВОРУ
-          // Левая рука: Две полупрозрачные серые стрелки движения в нижнем левом углу
           Positioned(
-            bottom: 16, left: 20,
-            child: Row(
-              children: [
-                // Стрелка НАЗАД (Левее)
-                GestureDetector(
-                  onTapDown: (_) => setState(() => _btnLeftPressed = true),
-                  onTapUp: (_) => setState(() => _btnLeftPressed = false),
-                  onTapCancel: () => setState(() => _btnLeftPressed = false),
-                  child: Container(
-                    width: 50, height: 50,
-                    decoration: BoxDecoration(
-                      color: _btnLeftPressed ? const Color(0xAAFF1744) : Colors.white12,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white60, width: 1.5),
+              bottom: 16, left: 20,
+              child: Row(
+                children: [
+                  // Стрелка НАЗАД (УВЕЛИЧЕНА в 1.3 раза: 50 -> 65)
+                  GestureDetector(
+                    onTapDown: (_) => setState(() => _btnLeftPressed = true),
+                    onTapUp: (_) => setState(() => _btnLeftPressed = false),
+                    onTapCancel: () => setState(() => _btnLeftPressed = false),
+                    child: Container(
+                      width: 65, height: 65,
+                      decoration: BoxDecoration(
+                        color: _btnLeftPressed ? const Color(0xAAFF1744) : Colors.white12,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white60, width: 1.5),
+                      ),
+                      child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 28), // Размер иконки увеличен
                     ),
-                    child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 22),
                   ),
-                ),
-                const SizedBox(width: 16),
-                // Стрелка ВПЕРЁД (Правее)
-                GestureDetector(
-                  onTapDown: (_) => setState(() => _btnRightPressed = true),
-                  onTapUp: (_) => setState(() => _btnRightPressed = false),
-                  onTapCancel: () => setState(() => _btnRightPressed = false),
-                  child: Container(
-                    width: 50, height: 50,
-                    decoration: BoxDecoration(
-                      color: _btnRightPressed ? const Color(0xAAFF1744) : Colors.white12,
-                      shape: BoxShape.circle,
+                  const SizedBox(width: 20), // Чуть расширили зазор между кнопками для удобства больших пальцев
+                  // Стрелка ВПЕРЁД (УВЕЛИЧЕНА в 1.3 раза: 50 -> 65)
+                  GestureDetector(
+                    onTapDown: (_) => setState(() => _btnRightPressed = true),
+                    onTapUp: (_) => setState(() => _btnRightPressed = false),
+                    onTapCancel: () => setState(() => _btnRightPressed = false),
+                    child: Container(
+                      width: 65, height: 65,
+                      decoration: BoxDecoration(
+                        color: _btnRightPressed ? const Color(0xAAFF1744) : Colors.white12,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: _bossState == BossState.dizzy
+                              ? Color.lerp(Colors.white60, Colors.greenAccent, (sin(_staggerEffectTimer * 8.0) + 1.0) / 2.0)!
+                              : Colors.white60,
+                          width: _bossState == BossState.dizzy ? 2.5 : 1.5,
+                        ),
+                      ),
+                      child: const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 28),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+           Positioned(
+              bottom: 16, right: 24,
+              child: GestureDetector(
+                onTapDown: (_) {
+                  if (!_vanyaIsJumping) {
+                    setState(() {
+                      _btnJumpPressed = true;
+                      _vanyaIsJumping = true;
+                      
+                      bool currentlyInOil = _isOilOnFloor && _oilSpitX > 0 && (_vanyaX - _oilSpitX).abs() <= 0.08;
+                      double jumpPower = currentlyInOil ? 0.25 : 1.0; 
+
+                      if (_btnRightPressed) {
+                        _vanyaVy = -4.1 * jumpPower; 
+                        _vanyaX = 0.16; 
+                      } else if (_btnLeftPressed) {
+                        _vanyaVy = -4.1 * jumpPower;
+                        _vanyaX = -0.16; 
+                      } else {
+                        _vanyaVy = -3.9 * jumpPower; 
+                      }
+                    });
+                  }
+                },
+                onTapUp: (_) => setState(() => _btnJumpPressed = false),
+                onTapCancel: () => setState(() => _btnJumpPressed = false),
+                child: Container(
+                  width: 75, height: 75, // УВЕЛИЧЕНА в 1.3 раза: 58 -> 75
+                  decoration: BoxDecoration(
+                    color: _btnJumpPressed ? const Color(0xAAFF1744) : Colors.white12,
+                    shape: BoxShape.circle,
                     border: Border.all(
                       color: _bossState == BossState.dizzy
                           ? Color.lerp(Colors.white60, Colors.greenAccent, (sin(_staggerEffectTimer * 8.0) + 1.0) / 2.0)!
                           : Colors.white60,
-                      width: _bossState == BossState.dizzy ? 2.5 : 1.5,
+                      width: _bossState == BossState.dizzy ? 2.5 : 1.8,
                     ),
-                    ),
-                    child: const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 22),
                   ),
+                  child: const Icon(Icons.arrow_upward_rounded, color: Colors.white, size: 34), // Размер иконки увеличен
                 ),
-              ],
-            ),
-          ),
-
-           Positioned(
-            bottom: 16, right: 24,
-            child: GestureDetector(
-              // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО ВНУТРИ КНОПКИ ПРЫЖКА (ПРАВАЯ РУКА):
-                            // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО ВНУТРИ КНОПКИ ПРЫЖКА (ПРАВАЯ РУКА):
-              onTapDown: (_) {
-                if (!_vanyaIsJumping) {
-                  setState(() {
-                    _btnJumpPressed = true;
-                    _vanyaIsJumping = true;
-                    
-                   bool currentlyInOil = _isOilOnFloor && _oilSpitX > 0 && (_vanyaX - _oilSpitX).abs() <= 0.08;
-                    // ИСПРАВЛЕНО ТОЧЕЧНО: Мощность прыжка в масле падает на 75% (остается 0.25 высоты)
-                    double jumpPower = currentlyInOil ? 0.25 : 1.0; 
-
-
-                    if (_btnRightPressed) {
-                      _vanyaVy = -4.1 * jumpPower; // Высота прыжка падает в 2 раза!
-                      _vanyaVx = 0.16; 
-                    } else if (_btnLeftPressed) {
-                      _vanyaVy = -4.1 * jumpPower;
-                      _vanyaVx = -0.16; 
-                    } else {
-                      _vanyaVy = -3.9 * jumpPower; 
-                    }
-                  });
-                }
-              },
-              onTapUp: (_) => setState(() => _btnJumpPressed = false),
-              onTapCancel: () => setState(() => _btnJumpPressed = false),
-              child: Container(
-                width: 58, height: 58,
-                decoration: BoxDecoration(
-                  color: _btnJumpPressed ? const Color(0xAAFF1744) : Colors.white12,
-                  shape: BoxShape.circle,
-                border: Border.all(
-                  color: _bossState == BossState.dizzy
-                      ? Color.lerp(Colors.white60, Colors.greenAccent, (sin(_staggerEffectTimer * 8.0) + 1.0) / 2.0)!
-                      : Colors.white60,
-                  width: _bossState == BossState.dizzy ? 2.5 : 1.8,
-                ),
-                ),
-                child: const Icon(Icons.arrow_upward_rounded, color: Colors.white, size: 26),
               ),
             ),
-          ),
 
           // Экран триумфа, если тестовый босс полностью повержен
           if (_bossCurrentHp <= 0)
