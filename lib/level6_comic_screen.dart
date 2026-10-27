@@ -1277,6 +1277,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                                         onPressed: () {
                                           _isGameplayActive = false;
                                           Navigator.pop(context); // закрываем паузу
+                                          AudioManager.clearBossMusicAndCache();
                                           AudioManager.stopLevelAudioAndPlayMenu();
                                           AudioManager.isLevel6ArenaActive = false; 
                                           Navigator.pop(context); // выходим в меню уровней
@@ -1484,6 +1485,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
                       onPressed: () async {
+                        AudioManager.clearBossMusicAndCache();
                         // ИСПРАВЛЕНО: Сначала полностью сбрасываем и уничтожаем ВСЕ плееры уровня
                         await AudioManager.stopLevel5Rain();
                         AudioManager.stopAllLevelSounds();
@@ -1547,6 +1549,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                               elevation: 5,
                             ),
                             onPressed: () {
+                              AudioManager.clearBossMusicAndCache();
                               // Полностью зачищаем звуки арены финала
                               AudioManager.startCastleDrops();
                               AudioManager.isLevel6ArenaActive = false; 
