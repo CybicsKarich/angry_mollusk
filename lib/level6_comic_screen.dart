@@ -391,25 +391,37 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
 
       double oilSpeedModifier = isInOil ? 0.25 : 1.0;
 
-      // =========================================================================
-      // 💎 ОБЪЕДИНЕННАЯ ГОРИЗОНТАЛЬНАЯ ФИЗИКА (БЕГ, СКОЛЬЖЕНИЕ ИЛИ МАСЛО)
-      // =========================================================================
-      if (isOnBlood) {
-        if (_btnLeftPressed) {
-          _vanyaVx = _isAngryMode ? -0.52 : -0.36;
-        } else if (_btnRightPressed) {
-          _vanyaVx = _isAngryMode ? 0.52 : 0.36;
-        } else {
-          _vanyaVx = _vanyaVx * 0.92; 
-          if (_vanyaVx.abs() < 0.01) _vanyaVx = 0.0; 
-        }
+      if (_vanyaIsJumping) {
+        // Если Ваня находится в воздухе, его скорость полёта (_vanyaVx) задана 
+        // кнопкой прыжка. Мы НЕ разрешаем кнопкам бега перезаписывать её и дёргать экран!
       } else {
-        if (_btnLeftPressed) {
-          _vanyaVx = _isAngryMode ? (-0.42 * oilSpeedModifier) : (-0.26 * oilSpeedModifier);
-        } else if (_btnRightPressed) {
-          _vanyaVx = _isAngryMode ? (0.42 * oilSpeedModifier) : (0.26 * oilSpeedModifier);
+        // Логика бега и скольжения работает СТРОГО на земле:
+        bool isOnBlood = false;
+        if (_isBloodPoolActive && _bloodPoolX > 0) {
+          if ((_vanyaX - _bloodPoolX).abs() <= 0.09) {
+            isOnBlood = true;
+          }
+        }
+
+        if (isOnBlood) {
+          // 🩸 Режим скольжения по крови на земле
+          if (_btnLeftPressed) {
+            _vanyaVx = _isAngryMode ? -0.52 : -0.36;
+          } else if (_btnRightPressed) {
+            _vanyaVx = _isAngryMode ? 0.52 : 0.36;
+          } else {
+            _vanyaVx = _vanyaVx * 0.92; 
+            if (_vanyaVx.abs() < 0.01) _vanyaVx = 0.0; 
+          }
         } else {
-          _vanyaVx = 0.0; 
+          // 🧭 Обычный сухой пол на земле (Полный контроль)
+          if (_btnLeftPressed) {
+            _vanyaVx = _isAngryMode ? -0.42 : -0.26;
+          } else if (_btnRightPressed) {
+            _vanyaVx = _isAngryMode ? 0.42 : 0.26;
+          } else {
+            _vanyaVx = 0.0; // Жесткий стоп ногами на месте
+          }
         }
       }
 
