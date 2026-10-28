@@ -373,74 +373,68 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
         }
       }
 
+      double moveDirection = 0.0;
+      if (_btnRightPressed) moveDirection += 1.0;
+      if (_btnLeftPressed) moveDirection -= 1.0;
+
+      // =========================================================================
+      // 💎 2. ОПРЕДЕЛЕНИЕ СТАТУСА: НАХОДИТСЯ ЛИ ВАНЯ В ЖЁЛТОМ МАСЛЕ ИЛИ НА КРОВИ
+      // =========================================================================
       bool isInOil = false;
       if (_isOilOnFloor && _oilSpitX > 0) {
-        // ИСПРАВЛЕНО ТOЧЕЧНО: Сузили хитбокс до 0.08, чтобы он четко соответствовал краям спрайта!
-        // Теперь Ваня замедляется строго внутри лужи, а не рядом с ней
+        // Замедление работает, только если Ваня физически находится внутри лужи масла
         if ((_vanyaX - _oilSpitX).abs() <= 0.08) {
           isInOil = true;
         }
       }
 
       bool isOnBlood = false;
+      // Кровь осязаема, только если Ваня на земле и НЕ увяз в масле
       if (!isInOil && _isBloodPoolActive && _bloodPoolX > 0 && !_vanyaIsJumping) {
         if ((_vanyaX - _bloodPoolX).abs() <= 0.09) {
           isOnBlood = true;
         }
       }
 
-      double oilSpeedModifier = isInOil ? 0.25 : 1.0;
+      // Базовая скорость (выше в режиме ярости Виагры)
+      double speedBase = _isAngryMode ? 0.42 : 0.26;
 
+      // =========================================================================
+      // 💎 3. ЕДИНАЯ СИСТЕМА СКОРОСТЕЙ: ЗЕМЛЯ, ВОЗДУХ, КРОВЬ, МАСЛО
+      // =========================================================================
       if (_vanyaIsJumping) {
-        // Если Ваня находится в воздухе, его скорость полёта (_vanyaVx) задана 
-        // кнопкой прыжка. Мы НЕ разрешаем кнопкам бега перезаписывать её и дёргать экран!
-      } else {
-        // Логика бега и скольжения работает СТРОГО на земле:
-        bool isOnBlood = false;
-        if (_isBloodPoolActive && _bloodPoolX > 0) {
-          if ((_vanyaX - _bloodPoolX).abs() <= 0.09) {
-            isOnBlood = true;
-          }
-        }
-
-                if (isOnBlood) {
-          // 🩸 А) РЕЖИМ СКОЛЬЖЕНИЯ ПО КРОВИ НА ЗЕМЛЕ:
-          // Вычисляем направление: если зажаты обе увеличенные кнопки, они просто компенсируют друг друга
-          double moveDirection = 0.0;
-          if (_btnRightPressed) moveDirection += 1.0;
-          if (_btnLeftPressed) moveDirection -= 1.0;
-
-          if (moveDirection != 0.0) {
-            _vanyaVx = _isAngryMode ? (0.52 * moveDirection) : (0.36 * moveDirection);
-          } else {
-            // Игрок ОТПУСТИЛ кнопки (или зажал обе): Ваня сочно скользит дальше по инерции!
-            _vanyaVx = _vanyaVx * 0.92; 
-            if (_vanyaVx.abs() < 0.01) _vanyaVx = 0.0; 
-          }
+        // 🧭 А) ПОЛЁТ В ВОЗДУХЕ: Полное управление на 100% сохранено!
+        // В воздухе масло под ногами лететь Ване НЕ мешает, скорость честная.
+        if (moveDirection != 0.0) {
+          _vanyaVx = speedBase * moveDirection;
         } else {
-          // 🧭 Б) ОБЫЧНЫЙ СУХОЙ ПОЛ ИЛИ ПОЛЁТ В ВОЗДУХЕ (УПРАВЛЕНИЕ НА 100% СОХРАНЕНО):
-          double moveDirection = 0.0;
-          if (_btnRightPressed) moveDirection += 1.0;
-          if (_btnLeftPressed) moveDirection -= 1.0;
-
-          double speedBase = _isAngryMode ? 0.42 : 0.26;
-          // В воздухе вязкое масло на полу Ване лететь не мешает!
-          double currentOilModifier = (isInOil && !_vanyaIsJumping) ? 0.25 : 1.0; 
-
-          if (moveDirection != 0.0) {
-            // Ваня плавно управляется кнопками прямо в полете! Рывков и телепортов больше нет
-            _vanyaVx = speedBase * moveDirection * currentOilModifier;
-          } else {
-            // Если в воздухе отпустили кнопки — Ваня летит по инерции дуги прыжка, а на земле — жестко встает
-            if (!_vanyaIsJumping) {
-              _vanyaVx = 0.0; 
-            }
-          }
+          // Если в воздухе игрок отпустил кнопки, Ваня сохраняет инерцию прыжка, а не падает топором
+          _vanyaVx = _vanyaVx * 0.95; 
+          if (_vanyaVx.abs() < 0.01) _vanyaVx = 0.0;
         }
-        // Применяем честно посчитанную горизонтальную скорость к Ване
-        _vanyaX += _vanyaVx * dt;
+      } else if (isOnBlood) {
+        // 🩸 Б) РЕЖИМ СКОЛЬЖЕНИЯ ПО КРОВИ НА ЗЕМЛЕ:
+        if (moveDirection != 0.0) {
+          _vanyaVx = _isAngryMode ? (0.52 * moveDirection) : (0.36 * moveDirection);
+        } else {
+          // Ваня сочно катится по крови дальше, даже если кнопки отпущены
+          _vanyaVx = _vanyaVx * 0.92; 
+          if (_vanyaVx.abs() < 0.01) _vanyaVx = 0.0; 
+        }
+      } else {
+        // 🧭 В) ОБЫЧНЫЙ ПОЛ ИЛИ ЗАМЕДЛЯЮЩЕЕ МАСЛО НА ЗЕМЛЕ:
+        // Если Ваня наступил на масло — скорость падает на 75% (остаётся коэфф 0.25)
+        double currentOilModifier = isInOil ? 0.25 : 1.0;
+
+        if (moveDirection != 0.0) {
+          _vanyaVx = speedBase * moveDirection * currentOilModifier;
+        } else {
+          _vanyaVx = 0.0; // На сухом полу или в вязком масле — жесткий стоп
+        }
       }
 
+      // Применяем итоговую горизонтальную скорость к Ване
+      _vanyaX += _vanyaVx * dt;
 
       // =========================================================================
       // 💎 ВЕРТИКАЛЬНАЯ ГРАВИТАЦИЯ И УРЕЗАННЫЙ ПРЫЖОК
