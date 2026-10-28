@@ -403,29 +403,44 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
           }
         }
 
-        if (isOnBlood) {
-          // 🩸 Режим скольжения по крови на земле
-          if (_btnLeftPressed) {
-            _vanyaVx = _isAngryMode ? -0.52 : -0.36;
-          } else if (_btnRightPressed) {
-            _vanyaVx = _isAngryMode ? 0.52 : 0.36;
+                if (isOnBlood) {
+          // 🩸 А) РЕЖИМ СКОЛЬЖЕНИЯ ПО КРОВИ НА ЗЕМЛЕ:
+          // Вычисляем направление: если зажаты обе увеличенные кнопки, они просто компенсируют друг друга
+          double moveDirection = 0.0;
+          if (_btnRightPressed) moveDirection += 1.0;
+          if (_btnLeftPressed) moveDirection -= 1.0;
+
+          if (moveDirection != 0.0) {
+            _vanyaVx = _isAngryMode ? (0.52 * moveDirection) : (0.36 * moveDirection);
           } else {
+            // Игрок ОТПУСТИЛ кнопки (или зажал обе): Ваня сочно скользит дальше по инерции!
             _vanyaVx = _vanyaVx * 0.92; 
             if (_vanyaVx.abs() < 0.01) _vanyaVx = 0.0; 
           }
         } else {
-          // 🧭 Обычный сухой пол на земле (Полный контроль)
-          if (_btnLeftPressed) {
-            _vanyaVx = _isAngryMode ? -0.42 : -0.26;
-          } else if (_btnRightPressed) {
-            _vanyaVx = _isAngryMode ? 0.42 : 0.26;
+          // 🧭 Б) ОБЫЧНЫЙ СУХОЙ ПОЛ ИЛИ ПОЛЁТ В ВОЗДУХЕ (УПРАВЛЕНИЕ НА 100% СОХРАНЕНО):
+          double moveDirection = 0.0;
+          if (_btnRightPressed) moveDirection += 1.0;
+          if (_btnLeftPressed) moveDirection -= 1.0;
+
+          double speedBase = _isAngryMode ? 0.42 : 0.26;
+          // В воздухе вязкое масло на полу Ване лететь не мешает!
+          double currentOilModifier = (isInOil && !_vanyaIsJumping) ? 0.25 : 1.0; 
+
+          if (moveDirection != 0.0) {
+            // Ваня плавно управляется кнопками прямо в полете! Рывков и телепортов больше нет
+            _vanyaVx = speedBase * moveDirection * currentOilModifier;
           } else {
-            _vanyaVx = 0.0; // Жесткий стоп ногами на месте
+            // Если в воздухе отпустили кнопки — Ваня летит по инерции дуги прыжка, а на земле — жестко встает
+            if (!_vanyaIsJumping) {
+              _vanyaVx = 0.0; 
+            }
           }
         }
-      }
 
-      _vanyaX += _vanyaVx * dt;
+        // Применяем честно посчитанную горизонтальную скорость к Ване
+        _vanyaX += _vanyaVx * dt;
+
 
 
       // =========================================================================
