@@ -1427,7 +1427,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
            Positioned(
               bottom: 16, right: 24,
               child: GestureDetector(
-                onTapDown: (_) {
+                  onTapDown: (_) {
                   if (!_vanyaIsJumping) {
                     setState(() {
                       _btnJumpPressed = true;
@@ -1438,10 +1438,12 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
 
                       if (_btnRightPressed) {
                         _vanyaVy = -4.1 * jumpPower; 
-                        _vanyaX = 0.16; 
+                        // ИСПРАВЛЕНО ТОЧЕЧНО: МеняемVx (импульс скорости полета вперед), а не координату X!
+                        _vanyaVx = 0.16; 
                       } else if (_btnLeftPressed) {
                         _vanyaVy = -4.1 * jumpPower;
-                        _vanyaX = -0.16; 
+                        // ИСПРАВЛЕНО ТОЧЕЧНО: МеняемVx (импульс скорости полета назад), а не координату X!
+                        _vanyaVx = -0.16; 
                       } else {
                         _vanyaVy = -3.9 * jumpPower; 
                       }
