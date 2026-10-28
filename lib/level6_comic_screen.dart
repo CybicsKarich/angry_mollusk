@@ -437,10 +437,9 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
             }
           }
         }
-
         // Применяем честно посчитанную горизонтальную скорость к Ване
         _vanyaX += _vanyaVx * dt;
-
+      }
 
 
       // =========================================================================
