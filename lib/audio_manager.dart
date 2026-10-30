@@ -13,6 +13,11 @@ class AudioManager {
   static bool _isLevel6BattleMusicActive = false;
   static final AudioPlayer _level6MusicPlayer = AudioPlayer();
   static bool isLevel6ArenaActive = false;
+  static final AudioPlayer _skyFreedomPlayer = AudioPlayer();
+  static final AudioPlayer _eternalLoopPlayer = AudioPlayer();
+
+  // Флаг-замок для отмены цикла затухания, если музыку выключили принудительно
+  static bool _isFadeOutCancelled = false;
 
 
   
@@ -197,7 +202,82 @@ static Future<void> playPaperRustle() async {
     }
   }
 
-     // ИСПРАВЛЕНО ТОЧЕЧНО: Нативное освобождение RAM, выгрузка треков и тотальная зачистка кэша
+    // =========================================================================
+  // 🎵 МУЗЫКАЛЬНАЯ СИСТЕМА ДЛЯ ФИНАЛЬНОГО КОМИКСА (ЧАСТЬ 1 И ЧАСТЬ 2)
+  // =========================================================================
+
+  /// 1. Чистый запуск триумфальной музыки неба (Часть 1)
+  static Future<void> playSkyFreedom() async {
+    try {
+      _isFadeOutCancelled = false; // Сбрасываем флаг отмены затухания
+      
+      // Намертво тушим плеер петли, если он вдруг работал
+      await _eternalLoopPlayer.stop(); 
+      
+      // Запускаем победный трек на максимальную громкость в режиме бесконечного повтора
+      await _skyFreedomPlayer.setVolume(1.0);
+      await _skyFreedomPlayer.setReleaseMode(ReleaseMode.loop);
+      
+      // Пакет audioplayers сам ищет файлы в assets/, поэтому пишем путь относительно assets/
+      await _skyFreedomPlayer.play(AssetSource('music/sky_freedom.mp3'));
+      print("🚀 Финальная музыка триумфа 'sky_freedom' успешно запущена.");
+    } catch (e) {
+      print("Ошибка при запуске музыки триумфа: $e");
+    }
+  }
+
+  /// 2. Переход на истинную тему Моллюска с плавным затуханием первой части за 1.5 секунды
+  static Future<void> switchToEternalLoopWithFade() async {
+    try {
+      _isFadeOutCancelled = false;
+      double currentVolume = 1.0;
+      
+      print("⏳ Начинается плавное затухание музыки триумфа...");
+
+      // Честный асинхронный цикл затухания: 20 шагов по 75 миллисекунд = ровно 1.5 секунды!
+      for (int i = 0; i < 20; i++) {
+        // Если игрок нажал "В МЕНЮ" и звуки экстренно очистили — мгновенно выходим из цикла
+        if (_isFadeOutCancelled) return;
+
+        currentVolume -= 0.05; // Снижаем громкость на 5% за шаг
+        if (currentVolume < 0.0) currentVolume = 0.0;
+
+        await _skyFreedomPlayer.setVolume(currentVolume);
+        await Future.delayed(const Duration(milliseconds: 75));
+      }
+
+      // Как только громкость упала до нуля — намертво останавливаем плеер первой части
+      await _skyFreedomPlayer.stop();
+
+      // Моментально запускаем зловещую тему кукловода Дона Моллюска (Часть 2)
+      await _eternalLoopPlayer.setVolume(1.0);
+      await _eternalLoopPlayer.setReleaseMode(ReleaseMode.loop);
+      await _eternalLoopPlayer.play(AssetSource('music/eternal_loop.mp3'));
+      
+      print("👁️ Истинная тема Дона Моллюска 'eternal_loop' запущена после затухания.");
+    } catch (e) {
+      print("Ошибка при переключении музыки с затуханием: $e");
+    }
+  }
+
+  /// 3. Полная экстренная зачистка финальных плееров (вызывать при выходе в Главное меню)
+  static void stopFinalComicAudio() async {
+    try {
+      _isFadeOutCancelled = true; // Ломаем асинхронный цикл затухания, если он шёл прямо сейчас
+      
+      await _skyFreedomPlayer.stop();
+      await _eternalLoopPlayer.stop();
+      
+      await _skyFreedomPlayer.release();
+      await _eternalLoopPlayer.release();
+      
+      print("🧹 Аудиоканалы финального комикса успешно зачищены из RAM устройства.");
+    } catch (e) {
+      print("Ошибка при экстренной остановке финальной музыки: $e");
+    }
+  }
+
+  // ИСПРАВЛЕНО ТОЧЕЧНО: Нативное освобождение RAM, выгрузка треков и тотальная зачистка кэша
   static void clearBossMusicAndCache() async {
     try {
       // 1. .stop() останавливает воспроизведение, если оно шло
