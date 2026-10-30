@@ -1548,7 +1548,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                         ),
                         const SizedBox(height: 8),
                         const Text(
-                          "У вас закончились жизни. Замок Дона Моллюска обрушился...",
+                          "У вас закончились жизни...",
                           textAlign: TextAlign.center,
                           style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal, color: Colors.white70, decoration: TextDecoration.none),
                         ),
