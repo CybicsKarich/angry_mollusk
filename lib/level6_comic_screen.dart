@@ -5,6 +5,7 @@ import 'audio_manager.dart';
 import 'main.dart';
 import 'level6_bad_route_screen.dart';
 import 'level6_case07_screen.dart';
+import 'level6_victory_comic_screen.dart';
 
 class Level6GoodRouteScreen extends StatefulWidget {
   const Level6GoodRouteScreen({super.key});
@@ -1498,24 +1499,30 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                                     children: [
                     const Text("ТЫ УБИЛ БОССА!", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.amber)),
                     const SizedBox(height: 12),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                      onPressed: () async {
-                        AudioManager.clearBossMusicAndCache();
-                        // ИСПРАВЛЕНО: Сначала полностью сбрасываем и уничтожаем ВСЕ плееры уровня
-                        await AudioManager.stopLevel5Rain();
-                        AudioManager.stopAllLevelSounds();
-                        await AudioManager.stopLevelAudioAndPlayMenu();
-                        
-                        if (context.mounted) {
-                          setState(() {
-                            _isGameplayActive = false;
-                          });
-                          Navigator.pop(context); // Чистый выход в меню
-                        }
-                      },
-                      child: const Text("В МЕНЮ УРОВНЕЙ", style: TextStyle(color: Colors.white)),
-                    ),
+                    // =========================================================================
+// 🏆 ИСПРАВЛЕНО: КНОПКА ФИНАЛЬНОГО ТРИУМФА В ОВЕРЛЕЕ ПОБЕДЫ 6 УРОВНЯ
+// =========================================================================
+ElevatedButton(
+  style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+  onPressed: () async {
+    // 1. Полностью глушим и зачищаем все боевые плееры, RAM и кэш эффектов арены
+    AudioManager.clearBossMusicAndCache();
+    await AudioManager.stopLevel5Rain();
+    
+    if (context.mounted) {
+      setState(() {
+        _isGameplayActive = false; // Отключаем живую симуляцию арены
+      });
+
+      // 2. ИСПРАВЛЕНО: Вместо банального вылета в меню, открываем наш новый файл комикса!
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const Level6VictoryComicScreen()),
+      );
+    }
+  },
+  child: const Text("В МЕНЮ УРОВНЕЙ", style: TextStyle(color: Colors.white)),
+),
                   ],
                 ),
               ),
