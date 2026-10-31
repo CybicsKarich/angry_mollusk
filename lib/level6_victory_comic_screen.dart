@@ -288,7 +288,7 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
 // КЛАССЫ ВЕКТОРНЫХ РИСОВАЛЬЩИКОВ (PAINTERS) ДЛЯ ПЕРВОЙ ЧАСТИ КОМИКСА
 // =========================================================================
 
-Widget _buildAdvanced3DFrame({required Widget child, required bool hasHole}) {
+Widget _buildAdvanced3DFrame({required Widget child, required bool isRoom, bool hasHole = false}) {
   return Container(
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(14),
@@ -299,46 +299,67 @@ Widget _buildAdvanced3DFrame({required Widget child, required bool hasHole}) {
       borderRadius: BorderRadius.circular(11),
       child: Stack(
         children: [
-          // Гранитный фон стен тронного зала
+          // Динамический выбор фона: гранитный тронный зал или мультяшное лазурное небо
           Positioned.fill(
             child: Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Color(0xFF14141E), Color(0xFF06060A)],
+                  colors: isRoom
+                      ? [const Color(0xFF14141E), const Color(0xFF06060A)] // Тёмные стены замка
+                      : [Colors.blue.shade300, Colors.lightBlue.shade100], // Солнечное небо птиц
                 ),
               ),
             ),
           ),
           
-          // Если на 3 кадре крыша обрушилась — прорисовываем глубокий синий проём неба
-          if (hasHole)
+          // ЕСЛИ ЭТО КОМНАТА ТРОННОГО ЗАЛА (Кадр 1)
+          if (isRoom) ...[
+            if (hasHole)
+              Positioned(
+                top: 0, left: 30, right: 30, height: 18,
+                child: Container(color: const Color(0xFF0D1B2A)), 
+              ),
             Positioned(
-              top: 0, left: 30, right: 30, height: 18,
-              child: Container(color: const Color(0xFF0D1B2A)), 
+              top: 0, left: 0, right: 0, 
+              child: CustomPaint(
+                size: const Size(double.infinity, 35), 
+                painter: _CeilingPainter(drawHole: hasHole),
+              ),
             ),
-
-          Positioned(
-            top: 0, left: 0, right: 0, 
-            child: CustomPaint(
-              size: const Size(double.infinity, 35), 
-              painter: _CeilingPainter(drawHole: hasHole), // Передаём флаг дыры в рисовальщик потолка
+            Positioned(
+              bottom: 0, left: 0, right: 0, 
+              child: CustomPaint(
+                size: const Size(double.infinity, 24), 
+                painter: _FloorTilesPainter(),
+              ),
             ),
-          ),
-          Positioned(
-            bottom: 0, left: 0, right: 0, 
-            child: CustomPaint(
-              size: const Size(double.infinity, 24), 
-              painter: _FloorTilesPainter(),
+          ] 
+          // ЕСЛИ ЭТО ЛУГ ПТИЦ (Кадры 2 и 3)
+          else ...[
+            // Яркое круглое солнце в углу кадра
+            Positioned(
+              top: -15, right: -15, 
+              child: Container(width: 50, height: 50, decoration: const BoxDecoration(color: Color(0xFFFFF176), shape: BoxShape.circle)),
             ),
-          ),
-          child,
+            // Пушистые белые облака на фоне
+            Positioned(top: 15, left: 10, child: Icon(Icons.cloud_rounded, size: 24, color: Colors.white.withOpacity(0.5))),
+            Positioned(top: 30, right: 35, child: Icon(Icons.cloud_rounded, size: 20, color: Colors.white.withOpacity(0.5))),
+            // Сочный зеленый луг в основании кадра
+            Positioned(
+              bottom: 0, left: 0, right: 0, 
+              child: Container(height: 35, color: const Color(0xFF4CAF50)),
+            ),
+          ],
+          
+          child, // Накладываем персонажей, тотем и текст поверх фона
         ],
       ),
     ),
   );
 }
+
 
 Widget _buildGoldTotem(double size) {
     return SizedBox(
