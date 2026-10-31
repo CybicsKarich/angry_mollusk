@@ -8,6 +8,7 @@ import 'package:flame/events.dart';
 import 'package:angry_mollusk/audio_manager.dart'; // Подключаем наш звуковой движок
 import 'package:shared_preferences/shared_preferences.dart';
 import 'svinomatkin_comic_screen.dart';
+import 'level6_victory_comic_screen.dart';
 
 // Главный экран игры с поддержкой оверлеев: Победа, Пауза, Проигрыш
 class GameScreen extends StatelessWidget {
