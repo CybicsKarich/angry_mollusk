@@ -166,45 +166,50 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
     );
   }
 
-    // =========================================================================
-  // КАДР 3: ПОЛНОРАЗМЕРНЫЙ ПОЛЁТ ВАНЯ-ПТИЦЫ КРУГАМИ В НЕБЕСАХ (ИСПРАВЛЕННЫЙ)
+      // =========================================================================
+  // КАДР 3: ПОЛНОРАЗМЕРНЫЙ ВОЛНООБРАЗНЫЙ ПОЛЁТ ВАНЯ-ПТИЦЫ ПО ГОРИЗОНТАЛИ
   // =========================================================================
   Widget _buildFrame3() {
     return Expanded(
       child: _buildAdvanced3DFrame(
-        isRoom: false, // Включает сочный луг, солнце и облака на весь экран
+        isRoom: false, // Включает сочный луг, солнце и облака
         child: Stack(
           alignment: Alignment.center,
           children: [
             // Тотем Гнева гордо стоит на траве внизу по центру
             Positioned(bottom: 35, left: 105, child: _buildGoldTotem(36)),
 
-            // АНИМИРОВАННЫЙ ВАНЯ: Летает кругами внутри границ кадра
+            // АНИМИРОВАННЫЙ ВАНЯ: Летит по горизонтали с изгибами
             AnimatedBuilder(
               animation: _flightController,
               builder: (context, child) {
-                // Безопасный радиус вращения внутри фрейма
-                double angle = _flightController.value * pi * 2;
-                double radiusX = 50.0;
-                double radiusY = 22.0;
-                
-                // Центрируем полёт относительно пространства неба
-                double originX = 110.0;
-                double originY = 85.0;
+                // progress идет от 0.0 до 1.0 за 10 секунд
+                double progress = _flightController.value;
+
+                // Перевод горизонтальной координаты X слева направо (от 10 до 210 пикселей)
+                double posX = 10.0 + (progress * 200.0);
+
+                // Вычисляем синусоидальный изгиб по вертикали Y (делает 3 полные волны за полет)
+                double waveAngle = progress * pi * 6; 
+                double originY = 85.0; // Базовая высота полета в небе
+                double posY = originY + (sin(waveAngle) * 16.0); // Амплитуда изгиба вверх-вниз
+
+                // Вычисляем угол наклона (производная синуса — косинус), чтобы Ваня наклонялся на волнах
+                double tiltAngle = cos(waveAngle) * 0.25;
 
                 return Positioned(
-                  left: originX + cos(angle) * radiusX - 21,
-                  top: originY + sin(angle) * radiusY - 21,
+                  left: posX - 19,
+                  top: posY - 19,
                   child: _buildCharacterBaseWithRotation(
                     'assets/images/bunnyhop.png', 
                     38, 
-                    angle + pi / 2, // Наклоняем тело по вектору полёта
+                    tiltAngle, // Динамический наклон птицы при движении по волне
                   ),
                 );
               },
             ),
 
-            // Новое облачко со словами Вани (центрировано сверху)
+            // Облачко со словами Вани (центрировано сверху)
             Positioned(
               top: 20, left: 6, right: 6,
               child: CustomPaint(
@@ -277,69 +282,33 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
   // РИСОВАЛЬЩИКИ ГЕОМЕТРИИ, АССЕТОВ И ДЕКОРАЦИЙ
   // =========================================================================
 
-    // Сборщик Вани-птицы для 1 и 2 кадров (с красным телом и перьями)
+      // Сборщик Вани-птицы для 1 и 2 кадров (чистый круг с красной подложкой)
   Widget _buildCharacterBase(String assetPath, double size) {
-    return SizedBox(
-      width: size * 1.2,
-      height: size * 1.4,
-      child: Stack(
-        alignment: Alignment.bottomCenter,
-        clipBehavior: Clip.none,
-        children: [
-          // 1. Красное круглое тело птицы
-          Container(
-            width: size,
-            height: size,
-            decoration: BoxDecoration(
-              color: const Color(0xFFE53935),
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.black, width: 2.0),
-            ),
-            child: ClipOval(child: Image.asset(assetPath, fit: BoxFit.cover)),
-          ),
-          // 2. Два мультяшных красных пера на макушке (хохолок)
-          Positioned(
-            top: 0,
-            child: CustomPaint(
-              size: Size(size * 0.5, size * 0.4),
-              painter: _BirdFeatherPainter(),
-            ),
-          ),
-        ],
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: const Color(0xFFE53935), // Красная подложка-круг
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.black, width: 2.0),
       ),
+      child: ClipOval(child: Image.asset(assetPath, fit: BoxFit.cover)),
     );
   }
 
-  // Сборщик Вани-птицы с поддержкой наклона в полёте для 3 кадра
+  // Сборщик Вани-птицы с поддержкой наклона для 3 кадра (без перьев)
   Widget _buildCharacterBaseWithRotation(String assetPath, double size, double rotationAngle) {
     return Transform.rotate(
       angle: rotationAngle,
-      child: SizedBox(
-        width: size * 1.2,
-        height: size * 1.4,
-        child: Stack(
-          alignment: Alignment.bottomCenter,
-          clipBehavior: Clip.none,
-          children: [
-            Container(
-              width: size,
-              height: size,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE53935),
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.black, width: 2.0),
-              ),
-              child: ClipOval(child: Image.asset(assetPath, fit: BoxFit.cover)),
-            ),
-            Positioned(
-              top: 0,
-              child: CustomPaint(
-                size: Size(size * 0.5, size * 0.4),
-                painter: _BirdFeatherPainter(),
-              ),
-            ),
-          ],
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: const Color(0xFFE53935),
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.black, width: 2.0),
         ),
+        child: ClipOval(child: Image.asset(assetPath, fit: BoxFit.cover)),
       ),
     );
   }
@@ -791,30 +760,6 @@ extension _CanvasTriangleExt on Canvas {
   }
 }
 
-class _BirdFeatherPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final featherPaint = Paint()..color = const Color(0xFFD32F2F)..style = PaintingStyle.fill;
-    final strokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.5;
 
-    final path = Path();
-    // Левое наклонное перо хохолка
-    path.moveTo(size.width * 0.3, size.height);
-    path.lineTo(size.width * 0.1, size.height * 0.1);
-    path.lineTo(size.width * 0.5, size.height * 0.4);
-    
-    // Правое наклонное перо хохолка
-    path.moveTo(size.width * 0.5, size.height * 0.4);
-    path.lineTo(size.width * 0.8, size.height * 0.0);
-    path.lineTo(size.width * 0.7, size.height);
-    path.close();
-
-    canvas.drawPath(path, featherPaint);
-    canvas.drawPath(path, strokePaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
 
 
