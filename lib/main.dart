@@ -115,6 +115,33 @@ class MainMenuScreen extends StatefulWidget {
     await prefs.setString('ivandrop_last_daily_case_time', DateTime.now().toIso8601String());
   }
 
+  // =========================================================================
+  // 🔥 СИСТЕМНЫЙ ПРОВЕРЯЛЬЩИК ДЛЯ ИСТИННОЙ ИДЕАЛЬНОЙ КОНЦОВКИ ПО ТЗ
+  // =========================================================================
+  static Future<bool> checkTrueEndingConditions() async {
+    final prefs = await SharedPreferences.getInstance();
+    
+    // 1. Считываем статус всех 5 ачивок из SharedPreferences
+    final bool a1 = prefs.getBool('achievement_first_blood') ?? false;
+    final bool a2 = prefs.getBool('achievement_sniper') ?? false;
+    final bool a3 = prefs.getBool('achievement_triumph') ?? false;
+    final bool a4 = prefs.getBool('achievement_secret_chest') ?? false;
+    final bool a5 = prefs.getBool('achievement_new_experience') ?? false;
+    
+    // 2. Считываем количество звёзд за все 5 уровней
+    int s1 = prefs.getInt('level_1_stars') ?? 0;
+    int s2 = prefs.getInt('level_2_stars') ?? 0;
+    int s3 = prefs.getInt('level_3_stars') ?? 0;
+    int s4 = prefs.getInt('level_4_stars') ?? 0;
+    int s5 = prefs.getInt('level_5_stars') ?? 0;
+    
+    // Идеальные условия: строго все 5 медалей открыты и на всех уровнях по 3 звезды!
+    bool allAchievementsUnlocked = (a1 && a2 && a3 && a4 && a5);
+    bool allLevelsThreeStars = (s1 == 3 && s2 == 3 && s3 == 3 && s4 == 3 && s5 == 3);
+    
+    return allAchievementsUnlocked && allLevelsThreeStars;
+  }
+  
   @override
   State<MainMenuScreen> createState() => _MainMenuScreenState();
 }
@@ -885,32 +912,6 @@ class _HtmlGameScreenState extends State<HtmlGameScreen> {
       ..loadFlutterAsset('assets/web/index.html');
   }
 
-    // =========================================================================
-  // 🔥 СИСТЕМНЫЙ ПРОВЕРЯЛЬЩИК ДЛЯ ИСТИННОЙ ИДЕАЛЬНОЙ КОНЦОВКИ ПО ТЗ
-  // =========================================================================
-  static Future<bool> checkTrueEndingConditions() async {
-    final prefs = await SharedPreferences.getInstance();
-    
-    // 1. Считываем статус всех 5 ачивок из SharedPreferences
-    final bool a1 = prefs.getBool('achievement_first_blood') ?? false;
-    final bool a2 = prefs.getBool('achievement_sniper') ?? false;
-    final bool a3 = prefs.getBool('achievement_triumph') ?? false;
-    final bool a4 = prefs.getBool('achievement_secret_chest') ?? false;
-    final bool a5 = prefs.getBool('achievement_new_experience') ?? false;
-    
-    // 2. Считываем количество звёзд за все 5 уровней
-    int s1 = prefs.getInt('level_1_stars') ?? 0;
-    int s2 = prefs.getInt('level_2_stars') ?? 0;
-    int s3 = prefs.getInt('level_3_stars') ?? 0;
-    int s4 = prefs.getInt('level_4_stars') ?? 0;
-    int s5 = prefs.getInt('level_5_stars') ?? 0;
-    
-    // Идеальные условия: строго все 5 медалей открыты и на всех уровнях по 3 звезды!
-    bool allAchievementsUnlocked = (a1 && a2 && a3 && a4 && a5);
-    bool allLevelsThreeStars = (s1 == 3 && s2 == 3 && s3 == 3 && s4 == 3 && s5 == 3);
-    
-    return allAchievementsUnlocked && allLevelsThreeStars;
-  }
 
   @override
   Widget build(BuildContext context) {
