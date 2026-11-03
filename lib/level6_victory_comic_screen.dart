@@ -56,21 +56,26 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
             ),
             const SizedBox(height: 12),
 
-            // ГЛАВНАЯ СЕТКА КОМИКСА: Кадры появляются по одному в Row
+                        // ГЛАВНАЯ СЕТКА КОМИКСА: Кадры поочередно сменяют друг друга
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 14),
                 child: Row(
                   children: [
-                    if (_currentFrame >= 1) _buildFrame1(),
-                    if (_currentFrame >= 2) const SizedBox(width: 12),
-                    if (_currentFrame >= 2) _buildFrame2(),
-                    if (_currentFrame >= 3) const SizedBox(width: 12),
-                    if (_currentFrame >= 3) _buildFrame3(),
+                    // ЧАСТЬ 1: Обычный триумф (Кадры 1, 2, 3)
+                    if (_currentFrame == 1) _buildFrame1(),
+                    if (_currentFrame == 2) _buildFrame2(),
+                    if (_currentFrame == 3) _buildFrame3(),
+                    
+                    // ЧАСТЬ 2: Скрытая Истинная концовка (Кадры 4, 5, 6)
+                    if (_currentFrame == 4) _buildFrame4(),
+                    if (_currentFrame == 5) _buildFrame5(),
+                    if (_currentFrame == 6) _buildFrame6(),
                   ],
                 ),
               ),
             ),
+
 
             // НИЖНЯЯ ПАНЕЛЬ С КНОПКОЙ НАВИГАЦИИ
             Padding(
@@ -230,47 +235,226 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
     );
   }
 
+  Widget _buildFrame4() {
+    return Expanded(
+      child: _buildAdvanced3DFrame(
+        isRoom: true, // Включает деревянный кабинет
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned(bottom: 12, left: 34, child: _buildWoodenChair()),
+            Positioned(bottom: 22, left: 35, child: _buildCharacterBase('assets/images/bunnyhop.png', 55)),
+            Positioned(bottom: 2, left: 62, child: _buildWoodenTable()),
+            
+            Positioned(
+              top: 25, left: 10, right: 10,
+              child: CustomPaint(
+                painter: SpeechBubblePainter(tailXFactor: 0.45),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 12),
+                  child: Text(
+                    "Обычное мирное дежурство в округе... Кофе отличный.",
+                    style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
+  // КАДР 5 (Часть 2, Кадр 2): ВБЕГАЕТ СТИКМАН (ОДИН В ОДИН С 1 УРОВНЕМ)
+  Widget _buildFrame5() {
+    return Expanded(
+      child: _buildAdvanced3DFrame(
+        isRoom: true,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned(bottom: 12, left: 18, child: _buildWoodenChair()),
+            Positioned(bottom: 22, left: 19, child: _buildCharacterBase('assets/images/bunnyhop.png', 50)),
+            Positioned(bottom: 2, left: 44, child: _buildWoodenTable()),
+            Positioned(bottom: 4, right: 8, child: CustomPaint(size: const Size(26, 60), painter: StickmanSweatPainter())),
+            
+            Positioned(
+              top: 15, left: 4, right: 4,
+              child: CustomPaint(
+                painter: SpeechBubblePainter(tailXFactor: 0.8),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                  child: Text(
+                    "Шериф, беда! На лугах птиц завелись зелёные свиньи под предводительством Дона Молюска! Они грабят наши склады с виагрой!",
+                    style: TextStyle(fontSize: 8.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+    // =========================================================================
+  // КАДР 6: ТВ-МОНИТОР НА СТОЛЕ И ДОН МОЛЛЮСК С ЧАШКОЙ ЧАЯ (ФИНАЛ ИСТИНЫ)
   // =========================================================================
-  // УМНАЯ КНОПКА "ДАЛЬШЕ" (ПОКА ЗАБЛОКИРОВАНА НА 3 КАДРЕ ДЛЯ ЧАСТИ 2)
-  // =========================================================================
-  Widget _buildNavigationButton() {
-    bool isFinalFrame = _currentFrame == 3;
+  Widget _buildFrame6() {
+    final mediaSize = MediaQuery.of(context).size;
+
+    return Expanded(
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.black, width: 3.5),
+          boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 6, offset: Offset(0, 4))],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(11),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // 1. Глубокий мрак истинного тронного зала ложного бога
+              Positioned.fill(child: Container(color: const Color(0xFF040407))),
+              
+              // 2. Векторные рельефы готического потолка и каменного пола
+              Positioned(top: 0, left: 0, right: 0, child: CustomPaint(size: const Size(double.infinity, 35), painter: _CeilingPainter(drawHole: false))),
+              Positioned(bottom: 0, left: 0, right: 0, child: CustomPaint(size: const Size(double.infinity, 24), painter: _FloorTilesPainter())),
+
+              // 3. Божественный трон Дона Моллюска (развёрнут к столу с телевизором)
+              Positioned(
+                bottom: 12, 
+                right: mediaSize.width * 0.08, 
+                child: _buildAdvanced3DThrone(),
+              ),
+
+              // 4. Дон Моллюск в домашнем халате с чашкой чая (Новое чилл-фото)
+              Positioned(
+                bottom: 16, 
+                right: mediaSize.width * 0.04, 
+                child: _buildUltraDetailedDonMolluskChill(70),
+              ),
+
+              // 5. СТОЛ И ТЕЛЕВИЗОР (Слева перед Доном, транслирует зацикленный кабинет)
+              Positioned(
+                bottom: 2, 
+                left: mediaSize.width * 0.05,
+                child: SizedBox(
+                  width: 120,
+                  height: 80,
+                  child: Stack(
+                    alignment: Alignment.bottomCenter,
+                    clipBehavior: Clip.none,
+                    children: [
+                      // Ножки и столешница стола
+                      Positioned(bottom: 0, left: 10, right: 10, child: Container(height: 28, decoration: BoxDecoration(color: const Color(0xFF3E2723), border: Border.all(color: Colors.black, width: 1.5)))),
+                      Positioned(bottom: 26, left: 0, right: 0, child: Container(height: 5, decoration: BoxDecoration(color: const Color(0xFF4E342E), border: Border.all(color: Colors.black, width: 1.0)))),
+                      
+                      // 📺 СТАРЫЙ ТЕЛЕВИЗОР (ВНУТРИ НЕГО ИДЁТ ПЕТЛЯ ВАНЬКИ)
+                      Positioned(
+                        bottom: 31, 
+                        left: 12,
+                        child: Container(
+                          width: 85,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF212121),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: const Color(0xFF000000), width: 3.0),
+                            boxShadow: const [
+                              BoxShadow(color: Colors.cyanAccent, blurRadius: 12, spreadRadius: 1.5) // Свечение кинескопа в лицо боссу
+                            ],
+                          ),
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              // МИНИАТЮРНЫЙ КАБИНЕТ ШЕРИФА ВНУТРИ ТВ
+                              Positioned(bottom: 2, left: 6, child: Transform.scale(scale: 0.55, child: _buildWoodenChair())),
+                              Positioned(bottom: 8, left: 12, child: _buildCharacterBase('assets/images/bunnyhop.png', 24)),
+                              Positioned(bottom: 2, left: 26, child: Transform.scale(scale: 0.55, child: _buildWoodenTable())),
+                              
+                              // Голубоватый полупрозрачный свет экрана телевизора
+                              Positioned.fill(child: Container(color: Colors.cyan.withOpacity(0.08))),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  
+                  
+                  Widget _buildNavigationButton() {
+    // На 6 кадре (финал идеальной концовки) кнопка перенаправляет в титры
+    bool isTrueEndingFinal = _currentFrame == 6;
 
     return Container(
       width: double.infinity,
-      constraints: const BoxConstraints(maxWidth: 240),
+      constraints: const BoxConstraints(maxWidth: 260),
       height: 46,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          // Если это 3-й кадр — кнопка окрашивается в серый заблокированный цвет
-          backgroundColor: isFinalFrame ? Colors.grey.shade700 : const Color(0xFF37474F),
+          backgroundColor: const Color(0xFF37474F),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
-        onPressed: () {
+        onPressed: () async {
           if (_currentFrame < 3) {
+            // Обычное перелистывание кадров первой части
             setState(() => _currentFrame++);
-          } else {
-            // Мертвая блокировка кнопки на 3 кадре по твоему ТЗ!
-            print("Кнопка заблокирована. Ожидаем интеграцию проверки SharedPreferences и Части 2.");
+          } 
+          else if (_currentFrame == 3) {
+            // КЛЮЧЕВАЯ КНОПКА КУЛЬМИНАЦИИ ЧАСТИ 1: Проверяем SharedPreferences
+            bool isEligibleForTrueEnding = await MainMenuScreen.checkTrueEndingConditions();
+            
+            if (isEligibleForTrueEnding) {
+              // ПУСКАЕМ В ИДЕАЛЬНУЮ КОНЦОВКУ: Плавно тушим триумф и включаем тему петли Моллюска!
+              await AudioManager.switchToEternalLoopWithFade();
+              setState(() {
+                _currentFrame = 4; // Переключаем на Кадр 4 (Кабинет Части 2)
+              });
+            } else {
+              // ОБЫЧНЫЙ ФИНАЛ: Зачищаем музыку и вылетаем в Главное Меню Уровней
+              AudioManager.stopFinalComicAudio();
+              if (context.mounted) {
+                Navigator.pop(context);
+              }
+            }
+          } 
+          else if (_currentFrame < 6) {
+            // Перелистывание кадров Части 2
+            setState(() => _currentFrame++);
+          } 
+          else if (isTrueEndingFinal) {
+            // ИСТИННЫЙ ФИНАЛ ИДЕАЛЬНОЙ КОНЦОВКИ: Полная зачистка и выход в меню
+            AudioManager.stopFinalComicAudio();
+            if (context.mounted) {
+              Navigator.pop(context);
+            }
           }
         },
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              "ДАЛЬШЕ",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: isFinalFrame ? Colors.white54 : Colors.white,
-              ),
+              isTrueEndingFinal ? "КОНЕЦ ИГРЫ" : "ДАЛЬШЕ",
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
             ),
             const SizedBox(width: 8),
             Icon(
-              Icons.arrow_forward_ios_rounded,
+              isTrueEndingFinal ? Icons.check_circle_outline_rounded : Icons.arrow_forward_ios_rounded,
               size: 16,
-              color: isFinalFrame ? Colors.white54 : Colors.white,
+              color: Colors.white,
             ),
           ],
         ),
@@ -282,13 +466,72 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
   // РИСОВАЛЬЩИКИ ГЕОМЕТРИИ, АССЕТОВ И ДЕКОРАЦИЙ
   // =========================================================================
 
-      // Сборщик Вани-птицы для 1 и 2 кадров (чистый круг с красной подложкой)
-  Widget _buildCharacterBase(String assetPath, double size) {
-    return Container(
+   Widget _buildAdvanced3DThrone() {
+    return SizedBox(
+      width: 40, height: 58,
+      child: Stack(
+        children: [
+          Positioned(bottom: 4, left: 4, right: 4, child: Container(height: 54, decoration: BoxDecoration(color: const Color(0xFF3E2723), borderRadius: const BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)), border: Border.all(color: const Color(0xFF1A0C00), width: 1.8)))),
+          Positioned(bottom: 4, left: 0, child: Container(width: 5, height: 26, decoration: BoxDecoration(color: const Color(0xFF4E342E), border: Border.all(color: Colors.black, width: 0.8)))),
+          Positioned(bottom: 4, right: 0, child: Container(width: 5, height: 26, decoration: BoxDecoration(color: const Color(0xFF4E342E), border: Border.all(color: Colors.black, width: 0.8)))),
+          Positioned(bottom: 6, left: 3, right: 3, child: Container(height: 14, color: const Color(0xFF4E342E))),
+          Positioned(bottom: 14, left: 4, right: 4, child: Container(height: 6, decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFFD32F2F), Color(0xFFFF5252), Color(0xFFB71C1C)]), borderRadius: BorderRadius.circular(2)))),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUltraDetailedDonMolluskChill(double size) {
+    return SizedBox(
       width: size,
       height: size,
+      child: Stack(
+        alignment: Alignment.center,
+        clipBehavior: Clip.none,
+        children: [
+          // Щупальца бездействуют на полу вокруг халата ложного бога
+          Positioned(bottom: size * 0.24, left: size * 0.04, child: Transform.rotate(angle: -0.3, child: CustomPaint(size: Size(size * 0.28, size * 0.58), painter: _DetailedTentaclePainter(isLeft: true)))),
+          Positioned(top: size * 0.06, left: size * 0.12, child: Transform.rotate(angle: -1.3, child: CustomPaint(size: Size(size * 0.25, size * 0.53), painter: _DetailedTentaclePainter(isLeft: true)))),
+          Positioned(top: size * 0.06, right: size * 0.12, child: Transform.rotate(angle: 1.3, child: CustomPaint(size: Size(size * 0.25, size * 0.53), painter: _DetailedTentaclePainter(isLeft: false)))),
+          Positioned(bottom: size * 0.24, right: size * 0.04, child: Transform.rotate(angle: 0.4, child: CustomPaint(size: Size(size * 0.28, size * 0.58), painter: _DetailedTentaclePainter(isLeft: false)))),
+
+          // Мультяшные ушки Дона Моллюска
+          Positioned(top: size * 0.10, left: size * 0.08, child: Transform.rotate(angle: -0.2, child: Container(width: size * 0.18, height: size * 0.26, decoration: BoxDecoration(color: const Color(0xFF689F38), borderRadius: BorderRadius.circular(size * 0.09), border: Border.all(color: Colors.black, width: 1.8),), child: Center(child: Container(width: size * 0.08, height: size * 0.14, decoration: BoxDecoration(color: const Color(0xFF558B2F), borderRadius: BorderRadius.circular(size * 0.05))))))),
+          Positioned(top: size * 0.10, right: size * 0.08, child: Transform.rotate(angle: 0.2, child: Container(width: size * 0.18, height: size * 0.26, decoration: BoxDecoration(color: const Color(0xFF689F38), borderRadius: BorderRadius.circular(size * 0.09), border: Border.all(color: Colors.black, width: 1.8),), child: Center(child: Container(width: size * 0.08, height: size * 0.14, decoration: BoxDecoration(color: const Color(0xFF558B2F), borderRadius: BorderRadius.circular(size * 0.05))))))),
+
+          // Боковые массивные клешни
+          Positioned(bottom: size * 0.16, left: -size * 0.02, child: Transform.rotate(angle: -0.1, child: CustomPaint(size: Size(size * 0.34, size * 0.34), painter: _DetailedCrabClawPainter(isOpen: false)))),
+          Positioned(bottom: size * 0.16, right: -size * 0.02, child: Transform.rotate(angle: 0.1, child: CustomPaint(size: Size(size * 0.34, size * 0.34), painter: _DetailedCrabClawPainter(isOpen: false)))),
+          Positioned(top: -size * 0.12, left: size * 0.33, child: CustomPaint(size: Size(size * 0.34, size * 0.34), painter: _DetailedCrabClawPainter(isOpen: true))),
+
+          // 🟢 ЦЕНТРАЛЬНОЕ ТЕЛО БОССА С НОВЫМ ЧИЛЛ-ФОТО (Где он пьёт чай в халате)
+          Container(
+            width: size * 0.70,
+            height: size * 0.70,
+            decoration: BoxDecoration(
+              color: const Color(0xFF558B2F),
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFF1B5E20), width: 2.2),
+              boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 4, offset: Offset(0, 2))],
+            ),
+            child: ClipOval(
+              child: Image.asset(
+                'assets/images/maksim_boss_chill.png', // Новое фото расслабленного босса
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(color: const Color(0xFF558B2F)),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCharacterBase(String assetPath, double size) {
+    return Container(
+      width: size, height: size,
       decoration: BoxDecoration(
-        color: const Color(0xFFE53935), // Красная подложка-круг
+        color: const Color(0xFFE53935),
         shape: BoxShape.circle,
         border: Border.all(color: Colors.black, width: 2.0),
       ),
@@ -296,13 +539,11 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
     );
   }
 
-  // Сборщик Вани-птицы с поддержкой наклона для 3 кадра (без перьев)
   Widget _buildCharacterBaseWithRotation(String assetPath, double size, double rotationAngle) {
     return Transform.rotate(
       angle: rotationAngle,
       child: Container(
-        width: size,
-        height: size,
+        width: size, height: size,
         decoration: BoxDecoration(
           color: const Color(0xFFE53935),
           shape: BoxShape.circle,
@@ -312,7 +553,7 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
       ),
     );
   }
-} // <--- ВОТ ЭТА СКОБКА ТЕПЕРЬ ОФИЦИАЛЬНО ЗАКРЫВАЕТ ВЕСЬ КЛАСС СОСТОЯНИЯ ЭКРАНА!
+} 
 
 // =========================================================================
 // КЛАССЫ ВЕКТОРНЫХ РИСОВАЛЬЩИКОВ (PAINTERS) ДЛЯ ПЕРВОЙ ЧАСТИ КОМИКСА
@@ -760,6 +1001,258 @@ extension _CanvasTriangleExt on Canvas {
   }
 }
 
+Widget _buildWoodenChair() {
+    return SizedBox(
+      width: 40,
+      height: 50,
+      child: Stack(
+        children: [
+          // Задние ножки переходящие в вертикальные стойки спинки (ИСПРАВЛЕНО: Занесли цвет внутрь!)
+          Positioned(
+            bottom: 0, left: 4, 
+            child: Container(
+              width: 3, height: 48, 
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1D299),
+                border: Border.all(color: const Color(0xFFC6A065), width: 0.5),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 0, right: 16, 
+            child: Container(
+              width: 3, height: 48, 
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1D299),
+                border: Border.all(color: const Color(0xFFC6A065), width: 0.5),
+              ),
+            ),
+          ),
+          
+          // Верхняя горизонтальная планка спинки стула с фото
+          Positioned(
+            top: 2, left: 4, right: 16, 
+            child: Container(
+              height: 12, 
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8C384), 
+                borderRadius: BorderRadius.circular(1), 
+                border: Border.all(color: const Color(0xFFB58F4B), width: 0.8),
+              ),
+            ),
+          ),
+          
+          // Передние ножки стула (ИСПРАВЛЕНО: Занесли цвет внутрь!)
+          Positioned(
+            bottom: 0, left: 14, 
+            child: Container(
+              width: 3.5, height: 24, 
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1D299),
+                border: Border.all(color: const Color(0xFFC6A065), width: 0.5),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 0, right: 6, 
+            child: Container(
+              width: 3.5, height: 24, 
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1D299),
+                border: Border.all(color: const Color(0xFFC6A065), width: 0.5),
+              ),
+            ),
+          ),
+          
+          // Горизонтальное сиденье стула (ИСПРАВЛЕНО: Занесли цвет внутрь!)
+          Positioned(
+            bottom: 22, left: 2, right: 4, 
+            child: Container(
+              height: 4, 
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8C384), 
+                borderRadius: BorderRadius.circular(1), 
+                border: Border.all(color: const Color(0xFFB58F4B), width: 0.8),
+              ),
+            ),
+          ),
+          
+          // Поперечные деревянные перекладины жесткости снизу с фото (Тут был только цвет, оставляем без изменений)
+          Positioned(
+            bottom: 8, left: 4, right: 16, 
+            child: Container(height: 2.5, color: const Color(0xFFD6B274)),
+          ),
+        ],
+      ),
+    );
+  }
 
 
+    // ИСПРАВЛЕНО: МОНОЛИТНЫЙ ВЕКТОРНЫЙ СТОЛ ШЕРИФА СО ВСЕМИ БУМАГАМИ И КРУЖКОЙ ВНУТРИ!
+  Widget _buildWoodenTable() {
+    return SizedBox(
+      width: 85,
+      height: 65, // Увеличили общую высоту контейнера, чтобы кружка Sheriff помещалась во весь рост!
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // 1. ДЕРЕВЯННЫЕ НОЖКИ СТОЛА (Высота 40, стоят в основании bottom: 0)
+          // Ножка 1 
+          Positioned(bottom: 0, left: 6, child: Container(width: 5, height: 40, decoration: BoxDecoration(color: const Color(0xFFF1D299), border: Border.all(color: const Color(0xFFC6A065), width: 0.5)))),
+          // Ножка 2 (В тени)
+          Positioned(bottom: 0, left: 22, child: Container(width: 4, height: 40, decoration: BoxDecoration(color: const Color(0xFFE2C08A)))), 
+          // Ножка 3 (Дальняя правая)
+          Positioned(bottom: 0, right: 26, child: Container(width: 4, height: 40, decoration: BoxDecoration(color: const Color(0xFFE2C08A)))), 
+          // Ножка 4 
+          Positioned(bottom: 0, right: 6, child: Container(width: 5, height: 40, decoration: BoxDecoration(color: const Color(0xFFF1D299), border: Border.all(color: const Color(0xFFC6A065), width: 0.5)))),
+          
+          // 2. СТОЛЕШНИЦА И ПОДСТОЛЬЕ (Высота от пола до 44 пикселей)
+          // Массивное подстолье 
+          Positioned(bottom: 35, left: 4, right: 4, child: Container(height: 8, decoration: BoxDecoration(color: const Color(0xFFE8C384), border: Border.all(color: const Color(0xFFB58F4B), width: 0.5)))),
+          // Толстая гладкая столешница из светлой сосны по фотографии
+          Positioned(bottom: 40, left: 0, right: 0, child: Container(height: 5, decoration: BoxDecoration(color: const Color(0xFFEDCD96), borderRadius: BorderRadius.circular(1), border: Border.all(color: const Color(0xFFC6A065), width: 1.0)))),
+          
+          // =========================================================================
+          // 3. ПРЕДМЕТЫ НА СТОЛЕ: ЛЕЖАТ СТРОГО НА ПОВЕРХНОСТИ СТОЛЕШНИЦЫ (bottom: 44)
+          // =========================================================================
+          // Разбросанные бумаги рапортов
+          Positioned(bottom: 44, left: 6, child: Transform.rotate(angle: -0.2, child: Container(width: 16, height: 10, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.9), borderRadius: BorderRadius.circular(1), border: Border.all(color: Colors.black45, width: 0.5))))),
+          Positioned(bottom: 45, left: 16, child: Transform.rotate(angle: 0.1, child: Container(width: 14, height: 11, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.85), borderRadius: BorderRadius.circular(1), border: Border.all(color: Colors.black45, width: 0.5))))),
+          
+          // НАША ДЕТАЛИЗИРОВАННАЯ ЖЁЛТАЯ КРУЖКА ШЕРИФА С РУЧКОЙ ПО ФОТОГРАФИИ!
+          Positioned(
+            bottom: 44, right: 10, // Стоит чётко на крышке стола во весь свой рост!
+            child: _buildSheriffCup(),
+          ),
+        ],
+      ),
+    );
+  }
 
+  // ВЕКТОРНЫЙ РИСОВАЛЬЩИК СТИКМАНА С ТВОЕЙ КАРТИНКИ (РУКА У ГОЛОВЫ + КРУПНЫЕ КАПЛИ ПОТА!)
+class StickmanSweatPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final bodyPaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 2.2;
+    final sweatPaint = Paint()..color = const Color(0xFF00E5FF)..style = PaintingStyle.fill; // Неоново-голубой пот
+
+    // 1. Голова (Овал по твоему фото)
+    canvas.drawOval(Rect.fromLTWH(size.width * 0.1, 0, size.width * 0.8, size.height * 0.28), bodyPaint);
+    // Глаза-кружочки стикмана
+    canvas.drawCircle(Offset(size.width * 0.35, size.height * 0.1), 2.2, bodyPaint);
+    canvas.drawCircle(Offset(size.width * 0.65, size.height * 0.1), 2.2, bodyPaint);
+    // Грустный рот-дуга по фото
+    final mouthPath = Path()..addArc(Rect.fromLTWH(size.width * 0.3, size.height * 0.16, size.width * 0.4, 6), pi, pi);
+    canvas.drawPath(mouthPath, bodyPaint);
+
+    // 2. Позвоночник-линия
+    double neckY = size.height * 0.28;
+    double pelvisY = size.height * 0.65;
+    canvas.drawLine(Offset(size.width * 0.5, neckY), Offset(size.width * 0.5, pelvisY), bodyPaint);
+
+    // 3. Правая рука согнута на боку по фото
+    final rightArm = Path()
+      ..moveTo(size.width * 0.5, neckY + 4)
+      ..lineTo(0, size.height * 0.4)
+      ..lineTo(size.width * 0.35, size.height * 0.5);
+    canvas.drawPath(rightArm, bodyPaint);
+
+    // 4. Левая рука согнута у головы, вытирает пот (Точь-в-точь по твоему фото!)
+    final leftArm = Path()
+      ..moveTo(size.width * 0.5, neckY + 4)
+      ..lineTo(size.width * 0.9, size.height * 0.32)
+      ..lineTo(size.width * 0.72, size.height * 0.15);
+    canvas.drawPath(leftArm, bodyPaint);
+
+    // 5. Ноги стикмана расставлены от усталости
+    canvas.drawLine(Offset(size.width * 0.5, pelvisY), Offset(size.width * 0.2, size.height), bodyPaint); // левая
+    canvas.drawLine(Offset(size.width * 0.5, pelvisY), Offset(size.width * 0.8, size.height), bodyPaint); // правая
+    // Стопы-палочки
+    canvas.drawLine(Offset(size.width * 0.2, size.height), Offset(size.width * 0.05, size.height), bodyPaint);
+    canvas.drawLine(Offset(size.width * 0.8, size.height), Offset(size.width * 0.95, size.height), bodyPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _DetailedTentaclePainter extends CustomPainter {
+  final bool isLeft;
+  _DetailedTentaclePainter({required this.isLeft});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final tentaclePaint = Paint()..color = const Color(0xFF0288D1)..style = PaintingStyle.fill;
+    final strokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.6;
+    final suctionPaint = Paint()..color = Colors.white..style = PaintingStyle.fill;
+    final suctionHolePaint = Paint()..color = const Color(0xFF01579B)..style = PaintingStyle.fill;
+
+    final w = size.width;
+    final h = size.height;
+
+    final path = Path();
+    path.moveTo(w * 0.5, h);
+    path.cubicTo(isLeft ? -w * 0.7 : w * 1.7, h * 0.7, isLeft ? w * 0.1 : w * 0.9, h * 0.2, w * 0.5, 0);
+    path.lineTo(w * 0.7, 0);
+    path.cubicTo(isLeft ? w * 0.3 : w * 0.7, h * 0.2, isLeft ? -w * 0.4 : w * 1.4, h * 0.7, w * 0.8, h);
+    path.close();
+
+    canvas.drawPath(path, tentaclePaint);
+    canvas.drawPath(path, strokePaint);
+
+    for (int i = 1; i <= 6; i++) {
+      double factor = i * 0.14;
+      double cx = isLeft ? w * (0.32 - factor * 0.15) : w * (0.68 + factor * 0.15);
+      double cy = h * factor;
+      double radius = 2.2 - (i * 0.15);
+      if (radius > 0.6) {
+        canvas.drawCircle(Offset(cx, cy), radius, suctionPaint);
+        canvas.drawCircle(Offset(cx, cy), radius, strokePaint..strokeWidth = 0.4);
+        canvas.drawCircle(Offset(cx, cy), radius * 0.4, suctionHolePaint);
+      }
+    }
+  }
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _DetailedCrabClawPainter extends CustomPainter {
+  final bool isOpen;
+  _DetailedCrabClawPainter({required this.isOpen});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final clawPaint = Paint()..color = const Color(0xFF2E6F22)..style = PaintingStyle.fill;
+    final strokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.6;
+    final w = size.width;
+    final h = size.height;
+
+    final jointPath = Path()..moveTo(w * 0.4, h)..lineTo(w * 0.3, h * 0.6)..lineTo(w * 0.7, h * 0.6)..lineTo(w * 0.6, h)..close();
+    canvas.drawPath(jointPath, clawPaint);
+    canvas.drawPath(jointPath, strokePaint);
+
+    final mainClawPath = Path()..moveTo(w * 0.3, h * 0.6)..cubicTo(w * 0.05, h * 0.4, w * 0.1, 0, w * 0.5, 0)..lineTo(w * 0.45, h * 0.2)..cubicTo(w * 0.3, h * 0.3, w * 0.35, h * 0.5, w * 0.7, h * 0.6)..close();
+    canvas.drawPath(mainClawPath, clawPaint);
+    canvas.drawPath(mainClawPath, strokePaint);
+
+    final movingFingerPath = Path();
+    if (isOpen) {
+      movingFingerPath.moveTo(w * 0.45, h * 0.25);
+      movingFingerPath.cubicTo(w * 0.75, h * 0.1, w * 0.95, h * 0.2, w * 0.85, h * 0.5);
+      movingFingerPath.lineTo(w * 0.6, h * 0.45);
+    } else {
+      movingFingerPath.moveTo(w * 0.42, h * 0.15);
+      movingFingerPath.cubicTo(w * 0.65, h * 0.2, w * 0.75, h * 0.35, w * 0.65, h * 0.55);
+      movingFingerPath.lineTo(w * 0.52, h * 0.42);
+    }
+    movingFingerPath.close();
+    canvas.drawPath(movingFingerPath, clawPaint);
+    canvas.drawPath(movingFingerPath, strokePaint);
+
+    final toothPaint = Paint()..color = Colors.white70..style = PaintingStyle.fill;
+    canvas.drawTriangle(Offset(w * 0.38, h * 0.25), Offset(w * 0.34, h * 0.28), Offset(w * 0.42, h * 0.29), toothPaint);
+    canvas.drawTriangle(Offset(w * 0.46, h * 0.32), Offset(w * 0.42, h * 0.35), Offset(w * 0.48, h * 0.36), toothPaint);
+  }
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
