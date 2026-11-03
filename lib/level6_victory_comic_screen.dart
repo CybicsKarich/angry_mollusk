@@ -36,46 +36,69 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
     super.dispose();
   }
 
-  @override
+    @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF040407), // Темный атмосферный фон экрана
+      backgroundColor: const Color(0xFF040407), // Темный фон экрана
       body: SafeArea(
         child: Column(
           children: [
             const SizedBox(height: 12),
-            const Text(
-              "ФИНАЛ: ТРИУМФ ШЕРИФА",
-              style: TextStyle(
+            Text(
+              _currentFrame <= 3 ? "ФИНАЛ: ТРИУМФ ШЕРИФА" : "ИСТИННЫЙ ФИНАЛ: ВЕЧНОЕ ДЕЖУРСТВО",
+              style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w900,
-                color: Color(0xFFFF9800), // Золотой оттенок победы
+                color: Color(0xFFFF9800),
                 letterSpacing: 2.5,
                 shadows: [Shadow(color: Colors.black, blurRadius: 6, offset: Offset(2, 2))],
               ),
             ),
             const SizedBox(height: 12),
 
-                        // ГЛАВНАЯ СЕТКА КОМИКСА: Кадры поочередно сменяют друг друга
+            // ГЛАВНАЯ СЕТКА: Кадры накапливаются на экране по одному в ряд!
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 14),
                 child: Row(
                   children: [
-                    // ЧАСТЬ 1: Обычный триумф (Кадры 1, 2, 3)
-                    if (_currentFrame == 1) _buildFrame1(),
-                    if (_currentFrame == 2) _buildFrame2(),
-                    if (_currentFrame == 3) _buildFrame3(),
+                    // === ЧАСТЬ 1: Обычный триумф (Кадры 1, 2, 3) ===
+                    if (_currentFrame <= 3) ...[
+                      _buildFrame1(), // 1-й кадр виден всегда на первом этапе
+                      
+                      const SizedBox(width: 12),
+                      // 2-й кадр открывается только на шаге 2 и 3
+                      _currentFrame >= 2 
+                        ? _buildFrame2() 
+                        : const Expanded(child: SizedBox.shrink()), 
+                        
+                      const SizedBox(width: 12),
+                      // 3-й кадр открывается только на шаге 3
+                      _currentFrame >= 3 
+                        ? _buildFrame3() 
+                        : const Expanded(child: SizedBox.shrink()),
+                    ],
                     
-                    // ЧАСТЬ 2: Скрытая Истинная концовка (Кадры 4, 5, 6)
-                    if (_currentFrame == 4) _buildFrame4(),
-                    if (_currentFrame == 5) _buildFrame5(),
-                    if (_currentFrame == 6) _buildFrame6(),
+                    // === ЧАСТЬ 2: Идеальный финал (Кадры 4, 5, 6) ===
+                    if (_currentFrame >= 4) ...[
+                      _buildFrame4(), // 4-й кадр виден сразу при переходе на Часть 2
+                      
+                      const SizedBox(width: 12),
+                      // 5-й кадр открывается только на шаге 5 и 6
+                      _currentFrame >= 5 
+                        ? _buildFrame5() 
+                        : const Expanded(child: SizedBox.shrink()),
+                        
+                      const SizedBox(width: 12),
+                      // 6-й кадр (Огромный ТВ с Доном) открывается в самом конце
+                      _currentFrame >= 6 
+                        ? _buildFrame6() 
+                        : const Expanded(child: SizedBox.shrink()),
+                    ],
                   ],
                 ),
               ),
             ),
-
 
             // НИЖНЯЯ ПАНЕЛЬ С КНОПКОЙ НАВИГАЦИИ
             Padding(
@@ -87,6 +110,7 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
       ),
     );
   }
+
 
   // =========================================================================
   // КАДР 1: ВАНЯ С ЛЕВЫМ ТОТЕМOМ И "УМЕРШИЙ" МОЛЛЮСК С ПРАВОЙ СТОРОНЫ
@@ -235,10 +259,10 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
     );
   }
 
-  Widget _buildFrame4() {
+ Widget _buildFrame4() {
     return Expanded(
       child: _buildAdvanced3DFrame(
-        isRoom: true, // Включает деревянный кабинет
+        isRoom: true, // Включает пол и балки кабинета
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -249,14 +273,10 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
             Positioned(
               top: 25, left: 10, right: 10,
               child: CustomPaint(
-                painter: SpeechBubblePainter(tailXFactor: 0.45),
+                painter: ComicBubblePainter(tailX: 0.45),
                 child: const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 6, vertical: 12),
-                  child: Text(
-                    "Обычное мирное дежурство в округе... Кофе отличный.",
-                    style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black),
-                    textAlign: TextAlign.center,
-                  ),
+                  child: Text("Обычное мирное дежурство в округе... Кофе отличный.", style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
                 ),
               ),
             ),
@@ -266,7 +286,9 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
     );
   }
 
-  // КАДР 5 (Часть 2, Кадр 2): ВБЕГАЕТ СТИКМАН (ОДИН В ОДИН С 1 УРОВНЕМ)
+  // =========================================================================
+  // КАДР 5: ВБЕГАЕТ СТИКМАН С ПОТОМ (ОБСТАНОВКА ТОЧЬ-В-ТОЧЬ КАК НА 1 УРОВНЕ)
+  // =========================================================================
   Widget _buildFrame5() {
     return Expanded(
       child: _buildAdvanced3DFrame(
@@ -282,14 +304,10 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
             Positioned(
               top: 15, left: 4, right: 4,
               child: CustomPaint(
-                painter: SpeechBubblePainter(tailXFactor: 0.8),
+                painter: ComicBubblePainter(tailX: 0.8),
                 child: const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-                  child: Text(
-                    "Шериф, беда! На лугах птиц завелись зелёные свиньи под предводительством Дона Молюска! Они грабят наши склады с виагрой!",
-                    style: TextStyle(fontSize: 8.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
-                    textAlign: TextAlign.center,
-                  ),
+                  child: Text("Шериф, беда! На лугах птиц завелись зелёные свиньи под предводительством Дона Молюска! Они грабят наши склады с виагрой!", style: TextStyle(fontSize: 8.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15), textAlign: TextAlign.center),
                 ),
               ),
             ),
@@ -299,10 +317,7 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
     );
   }
 
-    // =========================================================================
-  // КАДР 6: ТВ-МОНИТОР НА СТОЛЕ И ДОН МОЛЛЮСК С ЧАШКОЙ ЧАЯ (ФИНАЛ ИСТИНЫ)
-  // =========================================================================
-  Widget _buildFrame6() {
+    Widget _buildFrame6() {
     final mediaSize = MediaQuery.of(context).size;
 
     return Expanded(
@@ -317,71 +332,51 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // 1. Глубокий мрак истинного тронного зала ложного бога
+              // Мрак истинного тронного зала
               Positioned.fill(child: Container(color: const Color(0xFF040407))),
               
-              // 2. Векторные рельефы готического потолка и каменного пола
               Positioned(top: 0, left: 0, right: 0, child: CustomPaint(size: const Size(double.infinity, 35), painter: _CeilingPainter(drawHole: false))),
               Positioned(bottom: 0, left: 0, right: 0, child: CustomPaint(size: const Size(double.infinity, 24), painter: _FloorTilesPainter())),
 
-              // 3. Божественный трон Дона Моллюска (развёрнут к столу с телевизором)
+              // 🪑 БОЖЕСТВЕННЫЙ СТУЛ ДОНА (Справа от ТВ)
               Positioned(
                 bottom: 12, 
-                right: mediaSize.width * 0.08, 
+                right: mediaSize.width * 0.03, 
                 child: _buildAdvanced3DThrone(),
               ),
 
-              // 4. Дон Моллюск в домашнем халате с чашкой чая (Новое чилл-фото)
+              // 🐙 ДОН МОЛЛЮСК ЧИЛЛИТ С ЧАШКОЙ ЧАЯ (Справа от ТВ)
               Positioned(
                 bottom: 16, 
-                right: mediaSize.width * 0.04, 
-                child: _buildUltraDetailedDonMolluskChill(70),
+                right: mediaSize.width * 0.01, 
+                child: _buildUltraDetailedDonMolluskChill(68),
               ),
 
-              // 5. СТОЛ И ТЕЛЕВИЗОР (Слева перед Доном, транслирует зацикленный кабинет)
+              // 📺 ОГРОМНЫЙ ТЕЛЕВИЗОР СИНУСОИДЫ СТРОГО ПО ЦЕНТРУ ЭКРАНА С ВАНЬКОЙ ВНУТРИ
               Positioned(
-                bottom: 2, 
-                left: mediaSize.width * 0.05,
-                child: SizedBox(
-                  width: 120,
-                  height: 80,
+                bottom: 12,
+                left: mediaSize.width * 0.06,
+                right: mediaSize.width * 0.16, // Сдвигаем границы, делая ТВ огромным по центру
+                child: Container(
+                  height: 105,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF15151F),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFF000000), width: 3.5),
+                    boxShadow: const [
+                      BoxShadow(color: Colors.cyanAccent, blurRadius: 14, spreadRadius: 2.0) // Свечение кинескопа
+                    ],
+                  ),
                   child: Stack(
-                    alignment: Alignment.bottomCenter,
-                    clipBehavior: Clip.none,
+                    alignment: Alignment.center,
                     children: [
-                      // Ножки и столешница стола
-                      Positioned(bottom: 0, left: 10, right: 10, child: Container(height: 28, decoration: BoxDecoration(color: const Color(0xFF3E2723), border: Border.all(color: Colors.black, width: 1.5)))),
-                      Positioned(bottom: 26, left: 0, right: 0, child: Container(height: 5, decoration: BoxDecoration(color: const Color(0xFF4E342E), border: Border.all(color: Colors.black, width: 1.0)))),
+                      // Крошечная точная симуляция кабинета Вани за стеклом телевизора
+                      Positioned(bottom: 4, left: 24, child: Transform.scale(scale: 0.7, child: _buildWoodenChair())),
+                      Positioned(bottom: 16, left: 26, child: Container(width: 32, height: 32, decoration: const BoxDecoration(color: Color(0xFFE53935), shape: BoxShape.circle), child: ClipOval(child: Image.asset('assets/images/bunnyhop.png', fit: BoxFit.cover)))),
+                      Positioned(bottom: 4, left: 54, child: Transform.scale(scale: 0.7, child: _buildWoodenTable())),
                       
-                      // 📺 СТАРЫЙ ТЕЛЕВИЗОР (ВНУТРИ НЕГО ИДЁТ ПЕТЛЯ ВАНЬКИ)
-                      Positioned(
-                        bottom: 31, 
-                        left: 12,
-                        child: Container(
-                          width: 85,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF212121),
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(color: const Color(0xFF000000), width: 3.0),
-                            boxShadow: const [
-                              BoxShadow(color: Colors.cyanAccent, blurRadius: 12, spreadRadius: 1.5) // Свечение кинескопа в лицо боссу
-                            ],
-                          ),
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              // МИНИАТЮРНЫЙ КАБИНЕТ ШЕРИФА ВНУТРИ ТВ
-                              Positioned(bottom: 2, left: 6, child: Transform.scale(scale: 0.55, child: _buildWoodenChair())),
-                              Positioned(bottom: 8, left: 12, child: _buildCharacterBase('assets/images/bunnyhop.png', 24)),
-                              Positioned(bottom: 2, left: 26, child: Transform.scale(scale: 0.55, child: _buildWoodenTable())),
-                              
-                              // Голубоватый полупрозрачный свет экрана телевизора
-                              Positioned.fill(child: Container(color: Colors.cyan.withOpacity(0.08))),
-                            ],
-                          ),
-                        ),
-                      ),
+                      // Искажение стекла ЭЛТ-экрана
+                      Positioned.fill(child: Container(color: Colors.cyan.withOpacity(0.06))),
                     ],
                   ),
                 ),
