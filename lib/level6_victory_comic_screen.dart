@@ -417,7 +417,7 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
             // КЛЮЧЕВАЯ КНОПКА КУЛЬМИНАЦИИ ЧАСТИ 1: Проверяем SharedPreferences
             bool isEligibleForTrueEnding = await MainMenuScreen.checkTrueEndingConditions();
             
-            if (isEligibleForTrueEnding) {
+            if (true) {
               // ПУСКАЕМ В ИДЕАЛЬНУЮ КОНЦОВКУ: Плавно тушим триумф и включаем тему петли Моллюска!
               await AudioManager.switchToEternalLoopWithFade();
               setState(() {
