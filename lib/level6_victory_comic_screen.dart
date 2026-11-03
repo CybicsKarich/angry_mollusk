@@ -1176,83 +1176,60 @@ class StickmanSweatPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-class _DetailedTentaclePainter extends CustomPainter {
-  final bool isLeft;
-  _DetailedTentaclePainter({required this.isLeft});
+Widget _buildSheriffCup() {
+    return SizedBox(
+      width: 22,
+      height: 18,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // 1. Большая круглая ручка кружки (ИСПРАВЛЕНО: Прижали плотно к правой границе, right: 0)
+          Positioned(
+            top: 3, right: 0,
+            child: Container(
+              width: 7, height: 11,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFEB3B), 
+                borderRadius: const BorderRadius.only(topRight: Radius.circular(5), bottomRight: Radius.circular(5)),
+                border: Border.all(color: Colors.black, width: 0.8),
+              ),
+            ),
+          ),
+          // Внутреннее отверстие ручки (ИСПРАВЛЕНО: Сдвинули влево, right: 1)
+          Positioned(
+            top: 5, right: 1,
+            child: Container(
+              width: 3, height: 7,
+              decoration: const BoxDecoration(
+                color: Color(0xFFD7CCC8), 
+                borderRadius: BorderRadius.only(topRight: Radius.circular(3), bottomRight: Radius.circular(3)),
+              ),
+            ),
+          ),
 
-  @override
-  void paint(Canvas canvas, Size size) {
-    final tentaclePaint = Paint()..color = const Color(0xFF0288D1)..style = PaintingStyle.fill;
-    final strokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.6;
-    final suctionPaint = Paint()..color = Colors.white..style = PaintingStyle.fill;
-    final suctionHolePaint = Paint()..color = const Color(0xFF01579B)..style = PaintingStyle.fill;
-
-    final w = size.width;
-    final h = size.height;
-
-    final path = Path();
-    path.moveTo(w * 0.5, h);
-    path.cubicTo(isLeft ? -w * 0.7 : w * 1.7, h * 0.7, isLeft ? w * 0.1 : w * 0.9, h * 0.2, w * 0.5, 0);
-    path.lineTo(w * 0.7, 0);
-    path.cubicTo(isLeft ? w * 0.3 : w * 0.7, h * 0.2, isLeft ? -w * 0.4 : w * 1.4, h * 0.7, w * 0.8, h);
-    path.close();
-
-    canvas.drawPath(path, tentaclePaint);
-    canvas.drawPath(path, strokePaint);
-
-    for (int i = 1; i <= 6; i++) {
-      double factor = i * 0.14;
-      double cx = isLeft ? w * (0.32 - factor * 0.15) : w * (0.68 + factor * 0.15);
-      double cy = h * factor;
-      double radius = 2.2 - (i * 0.15);
-      if (radius > 0.6) {
-        canvas.drawCircle(Offset(cx, cy), radius, suctionPaint);
-        canvas.drawCircle(Offset(cx, cy), radius, strokePaint..strokeWidth = 0.4);
-        canvas.drawCircle(Offset(cx, cy), radius * 0.4, suctionHolePaint);
-      }
-    }
+          // 2. Массивное цилиндрическое тело кружки
+          Positioned(
+            top: 0, left: 0,
+            child: Container(
+              width: 16, height: 18,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFEB3B), 
+                borderRadius: const BorderRadius.all(Radius.circular(3)),
+                border: Border.all(color: Colors.black, width: 1.0),
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  const Text(
+                    "Sheriff", 
+                    style: TextStyle(fontSize: 3.5, fontWeight: FontWeight.w900, color: Colors.black, letterSpacing: -0.1),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _DetailedCrabClawPainter extends CustomPainter {
-  final bool isOpen;
-  _DetailedCrabClawPainter({required this.isOpen});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final clawPaint = Paint()..color = const Color(0xFF2E6F22)..style = PaintingStyle.fill;
-    final strokePaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 1.6;
-    final w = size.width;
-    final h = size.height;
-
-    final jointPath = Path()..moveTo(w * 0.4, h)..lineTo(w * 0.3, h * 0.6)..lineTo(w * 0.7, h * 0.6)..lineTo(w * 0.6, h)..close();
-    canvas.drawPath(jointPath, clawPaint);
-    canvas.drawPath(jointPath, strokePaint);
-
-    final mainClawPath = Path()..moveTo(w * 0.3, h * 0.6)..cubicTo(w * 0.05, h * 0.4, w * 0.1, 0, w * 0.5, 0)..lineTo(w * 0.45, h * 0.2)..cubicTo(w * 0.3, h * 0.3, w * 0.35, h * 0.5, w * 0.7, h * 0.6)..close();
-    canvas.drawPath(mainClawPath, clawPaint);
-    canvas.drawPath(mainClawPath, strokePaint);
-
-    final movingFingerPath = Path();
-    if (isOpen) {
-      movingFingerPath.moveTo(w * 0.45, h * 0.25);
-      movingFingerPath.cubicTo(w * 0.75, h * 0.1, w * 0.95, h * 0.2, w * 0.85, h * 0.5);
-      movingFingerPath.lineTo(w * 0.6, h * 0.45);
-    } else {
-      movingFingerPath.moveTo(w * 0.42, h * 0.15);
-      movingFingerPath.cubicTo(w * 0.65, h * 0.2, w * 0.75, h * 0.35, w * 0.65, h * 0.55);
-      movingFingerPath.lineTo(w * 0.52, h * 0.42);
-    }
-    movingFingerPath.close();
-    canvas.drawPath(movingFingerPath, clawPaint);
-    canvas.drawPath(movingFingerPath, strokePaint);
-
-    final toothPaint = Paint()..color = Colors.white70..style = PaintingStyle.fill;
-    canvas.drawTriangle(Offset(w * 0.38, h * 0.25), Offset(w * 0.34, h * 0.28), Offset(w * 0.42, h * 0.29), toothPaint);
-    canvas.drawTriangle(Offset(w * 0.46, h * 0.32), Offset(w * 0.42, h * 0.35), Offset(w * 0.48, h * 0.36), toothPaint);
-  }
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
