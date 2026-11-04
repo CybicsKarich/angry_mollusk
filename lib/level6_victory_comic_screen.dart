@@ -164,7 +164,7 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
   Widget _buildFrame2() {
     return Expanded(
       child: _buildAdvanced3DFrame(
-        isRoom: false, // Включает сочный мультяшный луг, солнце и облака
+        environmentFlag: 'birds_meadow',
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -201,7 +201,7 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
   Widget _buildFrame3() {
     return Expanded(
       child: _buildAdvanced3DFrame(
-        isRoom: false, // Включает сочный луг, солнце и облака
+        environmentFlag: 'birds_meadow',
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -565,24 +565,26 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
   }
 } 
 
-// =========================================================================
-// КЛАССЫ ВЕКТОРНЫХ РИСОВАЛЬЩИКОВ (PAINTERS) ДЛЯ ПЕРВОЙ ЧАСТИ КОМИКСА
-// =========================================================================
-
 Widget _buildAdvanced3DFrame({required Widget child, String environmentFlag = 'throne_room'}) {
-  // 1. ОПРЕДЕЛЯЕМ ЦВЕТА СТЕН НА ОСНОВЕ ТЕКСТОВЫХ ФЛАГОВ ОКРУЖЕНИЯ ПO ТЗ
+  // 1. ЯВНО ПРOПИСЫВАЕМ ЦВЕТА СТЕН ДЛЯ КАЖДОГО ФЛАГА ОКРУЖЕНИЯ
   List<Color> gradientColors;
   if (environmentFlag == 'sheriff_cabinet') {
-    gradientColors = [const Color(0xFFD7CCC8), const Color(0xFFBCAAA4)]; // Бежевые деревянные обои кабинета Вани
+    gradientColors = [const Color(0xFFD7CCC8), const Color(0xFFBCAAA4)]; // Бежевые обои кабинета Вани
   } else if (environmentFlag == 'mollusk_office') {
-    gradientColors = [const Color(0xFF08080C), const Color(0xFF020204)]; // Угольно-чёрная секретная комната ложного бога
+    gradientColors = [const Color(0xFF08080C), const Color(0xFF020204)]; // Чёрная комната Моллюска
   } else if (environmentFlag == 'throne_room') {
-    gradientColors = [const Color(0xFF14141E), const Color(0xFF06060A)]; // Серый гранит замка Дона
-  } else {
+    gradientColors = [const Color(0xFF14141E), const Color(0xFF06060A)]; // Серый гранит замка
+  } else if (environmentFlag == 'birds_meadow') {
     gradientColors = [Colors.blue.shade300, Colors.lightBlue.shade100]; // Лазурное небо луга птиц
+  } else {
+    // Резервный дефолтный вариант на всякий случай
+    gradientColors = [Colors.blue.shade300, Colors.lightBlue.shade100];
   }
 
-  bool isRoomBackground = environmentFlag == 'throne_room' || environmentFlag == 'sheriff_cabinet' || environmentFlag == 'mollusk_office';
+  // Явное разделение: только три этих флага являются закрытыми помещениями
+  bool isRoomBackground = environmentFlag == 'throne_room' || 
+                         environmentFlag == 'sheriff_cabinet' || 
+                         environmentFlag == 'mollusk_office';
 
   return Container(
     decoration: BoxDecoration(
@@ -594,7 +596,7 @@ Widget _buildAdvanced3DFrame({required Widget child, String environmentFlag = 't
       borderRadius: BorderRadius.circular(11),
       child: Stack(
         children: [
-          // Заливаем нужный градиент стен
+          // Заливаем градиент заднего плана
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
@@ -607,25 +609,22 @@ Widget _buildAdvanced3DFrame({required Widget child, String environmentFlag = 't
             ),
           ),
           
+          // ЕСЛИ ЭТО ИНТЕРЬЕР ПОМЕЩЕНИЙ
           if (isRoomBackground) ...[
-            // Если это тронный зал — прорисовываем глубокий синий проём неба над балками
             if (environmentFlag == 'throne_room')
               Positioned(
                 top: 0, left: 30, right: 30, height: 18,
                 child: Container(color: const Color(0xFF0D1B2A)), 
               ),
 
-            // Потолочные балки прорисовываем только в тронном зале и кабинете Шерифа
             if (environmentFlag != 'mollusk_office')
               Positioned(
                 top: 0, left: 0, right: 0, 
                 child: CustomPaint(
                   size: const Size(double.infinity, 35), 
-                  // Передаем true только для тронного зала, в кабинете Вани дыры не будет
                   painter: _CeilingPainter(drawHole: environmentFlag == 'throne_room'), 
                 ),
               ),
-            // Отрисовка пола
             Positioned(
               bottom: 0, left: 0, right: 0, 
               child: CustomPaint(
@@ -634,8 +633,8 @@ Widget _buildAdvanced3DFrame({required Widget child, String environmentFlag = 't
               ),
             ),
           ] 
-          // ЕСЛИ ЭТО ОТКРЫТЫЙ МУЛЬТЯШНЫЙ ЛУГ (Кадры 2 и 3)
-          else ...[
+          // ЕСЛИ ЭТО ОТКРЫТЫЙ МУЛЬТЯШНЫЙ ЛУГ (Флаг 'birds_meadow')
+          else if (environmentFlag == 'birds_meadow') ...[
             Positioned(
               top: -15, right: -15, 
               child: Container(width: 50, height: 50, decoration: const BoxDecoration(color: Color(0xFFFFF176), shape: BoxShape.circle)),
@@ -644,16 +643,17 @@ Widget _buildAdvanced3DFrame({required Widget child, String environmentFlag = 't
             Positioned(top: 30, right: 35, child: Icon(Icons.cloud_rounded, size: 20, color: Colors.white.withOpacity(0.5))),
             Positioned(
               bottom: 0, left: 0, right: 0, 
-              child: Container(height: 35, color: const Color(0xFF4CAF50)),
+              child: Container(height: 35, color: const Color(0xFF4CAF50)), // Сочная мультяшная трава луга
             ),
           ],
           
-          child, // Накладываем внутренний стек кадра поверх фона
+          child, 
         ],
       ),
     ),
   );
 }
+
 
 
 
