@@ -118,7 +118,7 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
   Widget _buildFrame1() {
     return Expanded(
       child: _buildAdvanced3DFrame(
-        isRoom: true, // Включает потолок и пол тронного зала
+        environmentFlag: 'throne_room',
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -259,10 +259,13 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
     );
   }
 
- Widget _buildFrame4() {
+   // =========================================================================
+  // КАДР 4: КАБИНЕТ ШЕРИФА (ОБСТАНОВКА 1 УРОВНЯ С КОРРЕКТНЫМ ОКРУЖЕНИЕМ)
+  // =========================================================================
+  Widget _buildFrame4() {
     return Expanded(
       child: _buildAdvanced3DFrame(
-        isRoom: true, // Включает пол и балки кабинета
+        environmentFlag: 'sheriff_cabinet', // Включает бежевые обои кабинета Вани
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -287,12 +290,12 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
   }
 
   // =========================================================================
-  // КАДР 5: ВБЕГАЕТ СТИКМАН С ПОТОМ (ОБСТАНОВКА ТОЧЬ-В-ТОЧЬ КАК НА 1 УРОВНЕ)
+  // КАДР 5: ВБЕГАЕТ СТИКМАН (ОБСТАНОВКА 1 УРОВНЯ С КОРРЕКТНЫМ ОКРУЖЕНИЕМ)
   // =========================================================================
   Widget _buildFrame5() {
     return Expanded(
       child: _buildAdvanced3DFrame(
-        isRoom: true,
+        environmentFlag: 'sheriff_cabinet',
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -304,7 +307,7 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
             Positioned(
               top: 15, left: 4, right: 4,
               child: CustomPaint(
-                painter: ComicBubblePainter(tailX: 0.8),
+                painter: SpeechBubblePainter(tailXFactor: 0.8),
                 child: const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
                   child: Text("Шериф, беда! На лугах птиц завелись зелёные свиньи под предводительством Дона Молюска! Они грабят наши склады с виагрой!", style: TextStyle(fontSize: 8.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15), textAlign: TextAlign.center),
@@ -317,76 +320,88 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
     );
   }
 
-    Widget _buildFrame6() {
-    final mediaSize = MediaQuery.of(context).size;
-
+  // =========================================================================
+  // КАДР 6: ГИГАНТСКИЙ ЦЕНТРАЛЬНЫЙ ТВ НА ВЕСЬ ЭКРАН И ДОН МОЛЛЮСК СБОКУ
+  // =========================================================================
+  Widget _buildFrame6() {
     return Expanded(
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.black, width: 3.5),
-          boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 6, offset: Offset(0, 4))],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(11),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // Мрак истинного тронного зала
-              Positioned.fill(child: Container(color: const Color(0xFF040407))),
-              
-              Positioned(top: 0, left: 0, right: 0, child: CustomPaint(size: const Size(double.infinity, 35), painter: _CeilingPainter(drawHole: false))),
-              Positioned(bottom: 0, left: 0, right: 0, child: CustomPaint(size: const Size(double.infinity, 24), painter: _FloorTilesPainter())),
-
-              // 🪑 БОЖЕСТВЕННЫЙ СТУЛ ДОНА (Справа от ТВ)
-              Positioned(
-                bottom: 12, 
-                right: mediaSize.width * 0.03, 
-                child: _buildAdvanced3DThrone(),
-              ),
-
-              // 🐙 ДОН МОЛЛЮСК ЧИЛЛИТ С ЧАШКОЙ ЧАЯ (Справа от ТВ)
-              Positioned(
-                bottom: 16, 
-                right: mediaSize.width * 0.01, 
-                child: _buildUltraDetailedDonMolluskChill(68),
-              ),
-
-              // 📺 ОГРОМНЫЙ ТЕЛЕВИЗОР СИНУСОИДЫ СТРОГО ПО ЦЕНТРУ ЭКРАНА С ВАНЬКОЙ ВНУТРИ
-              Positioned(
-                bottom: 12,
-                left: mediaSize.width * 0.06,
-                right: mediaSize.width * 0.16, // Сдвигаем границы, делая ТВ огромным по центру
-                child: Container(
-                  height: 105,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF15151F),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFF000000), width: 3.5),
-                    boxShadow: const [
-                      BoxShadow(color: Colors.cyanAccent, blurRadius: 14, spreadRadius: 2.0) // Свечение кинескопа
-                    ],
-                  ),
+      child: _buildAdvanced3DFrame(
+        environmentFlag: 'mollusk_office', // Включает угольно-чёрную хакерскую секретку Дона
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // 📺 ОГРОМНЫЙ ТЕЛЕВИЗОР НА ПОЧТИ ВЕСЬ КАДР КОМИКСА (По центру)
+            Positioned(
+              top: 10,
+              bottom: 12,
+              left: 20,
+              right: 95, // Оставляем аккуратный зазор справа под стул босса
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF101015),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFF000000), width: 4.5),
+                  boxShadow: const [
+                    BoxShadow(color: Colors.cyanAccent, blurRadius: 18, spreadRadius: 3.0) // Сочное неоновое свечение кинескопа
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      // Крошечная точная симуляция кабинета Вани за стеклом телевизора
-                      Positioned(bottom: 4, left: 24, child: Transform.scale(scale: 0.7, child: _buildWoodenChair())),
-                      Positioned(bottom: 16, left: 26, child: Container(width: 32, height: 32, decoration: const BoxDecoration(color: Color(0xFFE53935), shape: BoxShape.circle), child: ClipOval(child: Image.asset('assets/images/bunnyhop.png', fit: BoxFit.cover)))),
-                      Positioned(bottom: 4, left: 54, child: Transform.scale(scale: 0.7, child: _buildWoodenTable())),
-                      
-                      // Искажение стекла ЭЛТ-экрана
-                      Positioned.fill(child: Container(color: Colors.cyan.withOpacity(0.06))),
+                      // Задний бежевый фон кабинета Ваньки внутри кинескопа телевизора
+                      Positioned.fill(child: Container(color: const Color(0xFFD7CCC8))),
+                      Positioned(bottom: 0, left: 0, right: 0, child: Container(height: 14, color: const Color(0xFF8D6E63))), // пол внутри ТВ
+
+                      // Кабинет Вани в телевизоре (Масштаб увеличен под гигантский ТВ!)
+                      Positioned(bottom: 12, left: 35, child: Transform.scale(scale: 0.9, child: _buildWoodenChair())),
+                      Positioned(bottom: 20, left: 38, child: _buildCharacterBase('assets/images/bunnyhop.png', 48)),
+                      Positioned(bottom: 2, left: 75, child: Transform.scale(scale: 0.9, child: _buildWoodenTable())),
+
+                      // СЛОВА ВАНКНИ ТЕПЕРЬ СТРОГО ВНУТРИ ТЕЛЕВИЗОРА НАД ЕГО ГОЛОВОЙ!
+                      Positioned(
+                        top: 12, left: 8, right: 8,
+                        child: CustomPaint(
+                          painter: ComicBubblePainter(tailX: 0.35),
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                            child: Text(
+                              "Пора расхлебать это дерьмо и... что-то мне это напоминает",
+                              style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w900, color: Colors.red, height: 1.2),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Стеклянные ЭЛТ-блики растра монитора
+                      Positioned.fill(child: Container(color: Colors.cyan.withOpacity(0.04))),
                     ],
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+
+            // 🪑 БОЖЕСТВЕННЫЙ СТУЛ ДОНА МОЛЛЮСКА (Справа, слегка сбоку, впритирку к ТВ)
+            Positioned(
+              bottom: 12, 
+              right: 28, 
+              child: Transform.scale(scale: 1.05, child: _buildAdvanced3DThrone()),
+            ),
+
+            // 🐙 ДОН МОЛЛЮСК ЧИЛЛИТ И СМОТРИТ В СВОЙ КИНЕСКОП (Справа, на капли сбоку от ТВ)
+            Positioned(
+              bottom: 16, 
+              right: 4, 
+              child: _buildUltraDetailedDonMolluskChill(72),
+            ),
+          ],
         ),
       ),
     );
   }
+
 
   
                   
@@ -554,7 +569,21 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
 // КЛАССЫ ВЕКТОРНЫХ РИСОВАЛЬЩИКОВ (PAINTERS) ДЛЯ ПЕРВОЙ ЧАСТИ КОМИКСА
 // =========================================================================
 
-Widget _buildAdvanced3DFrame({required Widget child, required bool isRoom, bool hasHole = false}) {
+Widget _buildAdvanced3DFrame({required Widget child, String environmentFlag = 'throne_room'}) {
+  // 1. ОПРЕДЕЛЯЕМ ЦВЕТА СТЕН НА ОСНОВЕ ТЕКСТОВЫХ ФЛАГОВ ОКРУЖЕНИЯ ПO ТЗ
+  List<Color> gradientColors;
+  if (environmentFlag == 'sheriff_cabinet') {
+    gradientColors = [const Color(0xFFD7CCC8), const Color(0xFFBCAAA4)]; // Бежевые деревянные обои кабинета Вани
+  } else if (environmentFlag == 'mollusk_office') {
+    gradientColors = [const Color(0xFF08080C), const Color(0xFF020204)]; // Угольно-чёрная секретная комната ложного бога
+  } else if (environmentFlag == 'throne_room') {
+    gradientColors = [const Color(0xFF14141E), const Color(0xFF06060A)]; // Серый гранит замка Дона
+  } else {
+    gradientColors = [Colors.blue.shade300, Colors.lightBlue.shade100]; // Лазурное небо луга птиц
+  }
+
+  bool isRoomBackground = environmentFlag == 'throne_room' || environmentFlag == 'sheriff_cabinet' || environmentFlag == 'mollusk_office';
+
   return Container(
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(14),
@@ -565,66 +594,67 @@ Widget _buildAdvanced3DFrame({required Widget child, required bool isRoom, bool 
       borderRadius: BorderRadius.circular(11),
       child: Stack(
         children: [
-          // Динамический выбор фона: гранитный тронный зал или мультяшное лазурное небо
+          // Заливаем нужный градиент стен
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: isRoom
-                      ? [const Color(0xFF14141E), const Color(0xFF06060A)] // Тёмные стены замка
-                      : [Colors.blue.shade300, Colors.lightBlue.shade100], // Солнечное небо птиц
+                  colors: gradientColors,
                 ),
               ),
             ),
           ),
           
-          // ЕСЛИ ЭТО КОМНАТА ТРОННОГО ЗАЛА (Кадр 1)
-          if (isRoom) ...[
-            if (hasHole)
+          if (isRoomBackground) ...[
+            // Если это тронный зал — прорисовываем глубокий синий проём неба над балками
+            if (environmentFlag == 'throne_room')
               Positioned(
                 top: 0, left: 30, right: 30, height: 18,
                 child: Container(color: const Color(0xFF0D1B2A)), 
               ),
-            Positioned(
-              top: 0, left: 0, right: 0, 
-              child: CustomPaint(
-                size: const Size(double.infinity, 35), 
-                painter: _CeilingPainter(drawHole: hasHole),
+
+            // Потолочные балки прорисовываем только в тронном зале и кабинете Шерифа
+            if (environmentFlag != 'mollusk_office')
+              Positioned(
+                top: 0, left: 0, right: 0, 
+                child: CustomPaint(
+                  size: const Size(double.infinity, 35), 
+                  // Передаем true только для тронного зала, в кабинете Вани дыры не будет
+                  painter: _CeilingPainter(drawHole: environmentFlag == 'throne_room'), 
+                ),
               ),
-            ),
+            // Отрисовка пола
             Positioned(
               bottom: 0, left: 0, right: 0, 
               child: CustomPaint(
                 size: const Size(double.infinity, 24), 
-                painter: _FloorTilesPainter(),
+                painter: _FloorTilesPainter(isWoodFloor: environmentFlag == 'sheriff_cabinet'),
               ),
             ),
           ] 
-          // ЕСЛИ ЭТО ЛУГ ПТИЦ (Кадры 2 и 3)
+          // ЕСЛИ ЭТО ОТКРЫТЫЙ МУЛЬТЯШНЫЙ ЛУГ (Кадры 2 и 3)
           else ...[
-            // Яркое круглое солнце в углу кадра
             Positioned(
               top: -15, right: -15, 
               child: Container(width: 50, height: 50, decoration: const BoxDecoration(color: Color(0xFFFFF176), shape: BoxShape.circle)),
             ),
-            // Пушистые белые облака на фоне
             Positioned(top: 15, left: 10, child: Icon(Icons.cloud_rounded, size: 24, color: Colors.white.withOpacity(0.5))),
             Positioned(top: 30, right: 35, child: Icon(Icons.cloud_rounded, size: 20, color: Colors.white.withOpacity(0.5))),
-            // Сочный зеленый луг в основании кадра
             Positioned(
               bottom: 0, left: 0, right: 0, 
               child: Container(height: 35, color: const Color(0xFF4CAF50)),
             ),
           ],
           
-          child, // Накладываем персонажей, тотем и текст поверх фона
+          child, // Накладываем внутренний стек кадра поверх фона
         ],
       ),
     ),
   );
 }
+
 
 
 Widget _buildGoldTotem(double size) {
@@ -657,14 +687,13 @@ class _CeilingPainter extends CustomPainter {
     final beamPaint = Paint()..color = const Color(0xFF09090D)..style = PaintingStyle.stroke..strokeWidth = 2.2;
     
     if (!drawHole) {
-      // Сплошной потолок: линии сходятся НА ПЕРЕДНЕМ плане и расширяются ВДАЛЬ
+      // Сплошной потолок для кабинета Вани
       canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), ceilPaint);
       for (int i = 0; i <= 6; i++) {
-        // ОБРАТНАЯ ПЕРСПЕКТИВА: Старт из сжатого центра на переднем плане, уход в широкие края вдаль
         canvas.drawLine(Offset(size.width * 0.5, 0), Offset(size.width * (i / 6), size.height), beamPaint);
       }
     } else {
-      // КРЫША ОБВАЛИЛАСЬ: Пролом расширяется вглубь, левый и правый уцелевшие куски сужаются к переду
+      // КРЫША ОБВАЛИЛАСЬ: Отрисовка левого и правого уцелевших кусков для 1 кадра
       final leftPath = Path()
         ..moveTo(0, 0)..lineTo(size.width * 0.42, 0)
         ..lineTo(size.width * 0.35, size.height)..lineTo(0, size.height)..close();
@@ -680,32 +709,37 @@ class _CeilingPainter extends CustomPainter {
     canvas.drawLine(Offset(0, size.height), Offset(size.width, size.height), beamPaint);
   }
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant _CeilingPainter oldDelegate) => true;
 }
 
 
 
-// ЗАМЕНИТЬ ТОЧЕЧНО В LIB/LEVEL6_COMIC_SCREEN.DART:
+
 class _FloorTilesPainter extends CustomPainter {
+  final bool isWoodFloor;
+  _FloorTilesPainter({this.isWoodFloor = false});
+
   @override
   void paint(Canvas canvas, Size size) {
-    final tilePaint = Paint()..color = const Color(0xFF1E1E24)..style = PaintingStyle.fill;
-    final linePaint = Paint()..color = const Color(0xFF111114)..style = PaintingStyle.stroke..strokeWidth = 1.6;
+    // Если флаг дерева активен — красим пол в цвет сосновых досок 1 уровня, иначе в тёмный гранит замка
+    final tilePaint = Paint()..color = isWoodFloor ? const Color(0xFF8D6E63) : const Color(0xFF1E1E24)..style = PaintingStyle.fill;
+    final linePaint = Paint()..color = isWoodFloor ? const Color(0xFF5D4037) : const Color(0xFF111114)..style = PaintingStyle.stroke..strokeWidth = 1.6;
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), tilePaint);
     
-    // Горизонтальные плиты: сужаются (уплотняются) к нижнему краю экрана
+    // Горизонтальные стыки
     for (int i = 0; i < 5; i++) {
       double hY = size.height * (0.8 - (i * i * 0.8 / 16));
       canvas.drawLine(Offset(0, hY), Offset(size.width, hY), linePaint);
     }
-    // Вертикальные швы: ОБРАТНЫЙ ВЕЕР (расширяются от низа к верху)
+    // Вертикальные швы в обратной перспективе
     for (int i = 0; i <= 12; i++) {
       canvas.drawLine(Offset(size.width * (i / 12), 0), Offset(size.width * (0.3 + (i * 0.4 / 12)), size.height), linePaint);
     }
   }
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
+
 
 
 class _WingsPainter extends CustomPainter {
