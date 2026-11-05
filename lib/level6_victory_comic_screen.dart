@@ -270,7 +270,19 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
           alignment: Alignment.center,
           children: [
             Positioned(bottom: 12, left: 34, child: _buildWoodenChair()),
-            Positioned(bottom: 22, left: 35, child: _buildCharacterBase('assets/images/bunnyhop.png', 55)),
+            Positioned(
+              bottom: 22, left: 35,
+              child: SizedBox(
+                width: 56, height: 70, // Высота увеличена под шляпу
+                child: Stack(
+                  alignment: Alignment.bottomCenter,
+                  children: [
+                    _buildCharacterBase('assets/images/bunnyhop.png', 55),
+                    Positioned(top: 0, child: _buildSheriffHat()), // Шляпа Шерифа на месте!
+                  ],
+                ),
+              ),
+            ),
             Positioned(bottom: 2, left: 62, child: _buildWoodenTable()),
             
             Positioned(
@@ -300,7 +312,19 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
           alignment: Alignment.center,
           children: [
             Positioned(bottom: 12, left: 18, child: _buildWoodenChair()),
-            Positioned(bottom: 22, left: 19, child: _buildCharacterBase('assets/images/bunnyhop.png', 50)),
+            Positioned(
+              bottom: 22, left: 19,
+              child: SizedBox(
+                width: 52, height: 65,
+                child: Stack(
+                  alignment: Alignment.bottomCenter,
+                  children: [
+                    _buildCharacterBase('assets/images/bunnyhop.png', 50),
+                    Positioned(top: 0, child: ScaleTransition(scale: const AlwaysStoppedAnimation(0.9), child: _buildSheriffHat())),
+                  ],
+                ),
+              ),
+            ),
             Positioned(bottom: 2, left: 44, child: _buildWoodenTable()),
             Positioned(bottom: 4, right: 8, child: CustomPaint(size: const Size(26, 60), painter: StickmanSweatPainter())),
             
@@ -406,7 +430,19 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
                                     Positioned(bottom: 0, left: 0, right: 0, child: Container(height: 12, color: const Color(0xFF8D6E63))),
 
                                     Positioned(bottom: 10, left: 16, child: Transform.scale(scale: 0.8, child: _buildWoodenChair())),
-                                    Positioned(bottom: 16, left: 20, child: _buildCharacterBase('assets/images/bunnyhop.png', 38)),
+                                     Positioned(
+                                      bottom: 16, left: 20,
+                                      child: SizedBox(
+                                        width: 40, height: 50,
+                                        child: Stack(
+                                          alignment: Alignment.bottomCenter,
+                                          children: [
+                                            _buildCharacterBase('assets/images/bunnyhop.png', 38),
+                                            Positioned(top: 0, child: Transform.scale(scale: 0.72, child: _buildSheriffHat())),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
                                     Positioned(bottom: 2, left: 48, child: Transform.scale(scale: 0.8, child: _buildWoodenTable())),
 
                                     // ТЕКСТ ВАНЬКИ СТРОГО ВНУТРИ ЭКРАНА ТЕЛЕВИЗОРА
@@ -639,6 +675,67 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
       ),
     );
   }
+
+  // =========================================================================
+  // 🪓 ТОЧЕЧНЫЙ ХЕЛПЕР: ВЕКТОРНАЯ КОВБОЙСКАЯ ШЛЯПА ШЕРИФА ИЗ ТВOЕГО КОДА
+  // =========================================================================
+  Widget _buildSheriffHat() {
+    return SizedBox(
+      width: 55,
+      height: 25,
+      child: Stack(
+        alignment: Alignment.topCenter,
+        children: [
+          Container(
+            width: 32,
+            height: 14,
+            decoration: const BoxDecoration(
+              color: Color(0xFF795548),
+              borderRadius: BorderRadius.only(topLeft: Radius.circular(8), topRight: Radius.circular(8)),
+            ),
+          ),
+          Positioned(
+            bottom: 3,
+            child: Container(
+              width: 52,
+              height: 5,
+              decoration: BoxDecoration(
+                color: const Color(0xFF6D4C41),
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: const Color(0xFF4E342E), width: 0.8),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 7,
+            child: Container(
+              width: 31,
+              height: 2,
+              decoration: BoxDecoration(
+                color: const Color(0xFF212121),
+                borderRadius: BorderRadius.circular(1),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 2,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Icon(Icons.star_rounded, color: Colors.blueGrey.shade100, size: 14),
+                Container(
+                  width: 4,
+                  height: 4,
+                  decoration: const BoxDecoration(color: Color(0xFFFFFFFF), shape: BoxShape.circle),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 } 
 
 Widget _buildAdvanced3DFrame({required Widget child, String environmentFlag = 'throne_room'}) {
