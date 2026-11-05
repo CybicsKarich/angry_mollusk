@@ -115,32 +115,31 @@ class MainMenuScreen extends StatefulWidget {
     await prefs.setString('ivandrop_last_daily_case_time', DateTime.now().toIso8601String());
   }
 
-  // =========================================================================
-  // 🔥 СИСТЕМНЫЙ ПРОВЕРЯЛЬЩИК ДЛЯ ИСТИННОЙ ИДЕАЛЬНОЙ КОНЦОВКИ ПО ТЗ
+    // =========================================================================
+  // 🔥 ИСПРАВЛЕННЫЙ ЖЕЛЕЗОБЕТОННЫЙ ВАЛИДАТОР ИДЕАЛЬНОЙ КОНЦОВКИ
   // =========================================================================
   static Future<bool> checkTrueEndingConditions() async {
     final prefs = await SharedPreferences.getInstance();
     
-    // 1. Считываем статус всех 5 ачивок из SharedPreferences
+    // 1. Напрямую считываем статус всех 5 официальных медалей игры
     final bool a1 = prefs.getBool('achievement_first_blood') ?? false;
     final bool a2 = prefs.getBool('achievement_sniper') ?? false;
-    final bool a3 = prefs.getBool('achievement_triumph') ?? false;
-    final bool a4 = prefs.getBool('achievement_secret_chest') ?? false;
-    final bool a5 = prefs.getBool('achievement_new_experience') ?? false;
+    final bool a3 = prefs.getBool('achievement_triumph') ?? false; // 3 звезды за 1-4 уровни
+    final bool a4 = prefs.getBool('achievement_secret_chest') ?? false; // Секретный сундук краба
+    final bool a5 = prefs.getBool('achievement_new_experience') ?? false; // Игра IvanDrop в Дополнительно
     
-    // 2. Считываем количество звёзд за все 5 уровней
-    int s1 = prefs.getInt('level_1_stars') ?? 0;
-    int s2 = prefs.getInt('level_2_stars') ?? 0;
-    int s3 = prefs.getInt('level_3_stars') ?? 0;
-    int s4 = prefs.getInt('level_4_stars') ?? 0;
+    // 2. Считываем оценку за финальный штурм Цитадели (5 уровень)
     int s5 = prefs.getInt('level_5_stars') ?? 0;
     
-    // Идеальные условия: строго все 5 медалей открыты и на всех уровнях по 3 звезды!
+    // 3. Честная проверка: открыты все 5 медалей И за 5-й уровень получены максимальные 3 звезды!
     bool allAchievementsUnlocked = (a1 && a2 && a3 && a4 && a5);
-    bool allLevelsThreeStars = (s1 == 3 && s2 == 3 && s3 == 3 && s4 == 3 && s5 == 3);
+    bool finalLevelMaxed = (s5 == 3);
     
-    return allAchievementsUnlocked && allLevelsThreeStars;
+    print("📊 [LOG] Проверка финала: Медали = $allAchievementsUnlocked (1:$a1, 2:$a2, 3:$a3, 4:$a4, 5:$a5), 5-й уровень = $s5/3");
+    
+    return allAchievementsUnlocked && finalLevelMaxed;
   }
+
   
   @override
   State<MainMenuScreen> createState() => _MainMenuScreenState();
