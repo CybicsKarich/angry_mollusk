@@ -115,24 +115,34 @@ class MainMenuScreen extends StatefulWidget {
     await prefs.setString('ivandrop_last_daily_case_time', DateTime.now().toIso8601String());
   }
 
-    // =========================================================================
+   // =========================================================================
   // 🔥 ЭТАЛОННЫЙ ЧЕСТНЫЙ ВАЛИДАТОР ИДЕАЛЬНОЙ КОНЦОВКИ ДЛЯ РЕЛИЗА
   // =========================================================================
   static Future<bool> checkTrueEndingConditions() async {
     final prefs = await SharedPreferences.getInstance();
     
-    // Считываем статус всех 5 официальных медалей игры
+    // 1. Считываем статус медалей, которые физически пишутся на диск
     final bool a1 = prefs.getBool('achievement_first_blood') ?? false; // Первая кровь
     final bool a2 = prefs.getBool('achievement_sniper') ?? false;      // Снайпер
-    final bool a3 = prefs.getBool('achievement_triumph') ?? false;     // ТРИУМФ (Все 5 уровней на 3 звезды!)
     final bool a4 = prefs.getBool('achievement_secret_chest') ?? false; // Секретный сундук краба
     final bool a5 = prefs.getBool('achievement_new_experience') ?? false; // Игра IvanDrop в Дополнительно
     
-    print("📊 [LOG] Проверка условий: Медали (1:$a1, 2:$a2, 3:$a3, 4:$a4, 5:$a5)");
+    // 2. Честно и математически считаем звёзды за ВСЕ 5 уровней, как на экране медалей!
+    int s1 = prefs.getInt('level_1_stars') ?? 0;
+    int s2 = prefs.getInt('level_2_stars') ?? 0;
+    int s3 = prefs.getInt('level_3_stars') ?? 0;
+    int s4 = prefs.getInt('level_4_stars') ?? 0;
+    int s5 = prefs.getInt('level_5_stars') ?? 0; // Включая финальную цитадель!
     
-    // Истинный финал откроется только если в SharedPreferences горят все 5 флагов true!
-    return a1 && a2 && a3 && a4 && a5;
+    // Медаль Триумфа активна, только если абсолютно все 5 уровней пройдены на 3 звезды
+    bool isTriumphActive = (s1 == 3 && s2 == 3 && s3 == 3 && s4 == 3 && s5 == 3);
+    bool otherAchievementsUnlocked = (a1 && a2 && a4 && a5);
+    
+    print("📊 [LOG] Валидация финала: Медали=(1:$a1, 2:$a2, 4:$a4, 5:$a5), Звёзды=(1:$s1, 2:$s2, 3:$s3, 4:$s4, 5:$s5) -> Триумф:$isTriumphActive");
+    
+    return otherAchievementsUnlocked && isTriumphActive;
   }
+
 
 
   
