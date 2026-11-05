@@ -485,11 +485,7 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
     );
   }
 
-
-
-  
-                  
-                  Widget _buildNavigationButton() {
+    Widget _buildNavigationButton() {
     // На 6 кадре (финал идеальной концовки) кнопка перенаправляет в титры
     bool isTrueEndingFinal = _currentFrame == 6;
 
@@ -504,21 +500,22 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
         ),
         onPressed: () async {
           if (_currentFrame < 3) {
-            // Обычное перелистывание кадров первой части
+            // Обычное перелистывание кадров первой части триумфа
             setState(() => _currentFrame++);
           } 
           else if (_currentFrame == 3) {
-            // КЛЮЧЕВАЯ КНОПКА КУЛЬМИНАЦИИ ЧАСТИ 1: Проверяем SharedPreferences
+            // 🔥 КЛЮЧЕВАЯ РАЗВИТКА: Проверяем SharedPreferences на 100% прохождение!
             bool isEligibleForTrueEnding = await MainMenuScreen.checkTrueEndingConditions();
             
-            if (true) {
-              // ПУСКАЕМ В ИДЕАЛЬНУЮ КОНЦОВКУ: Плавно тушим триумф и включаем тему петли Моллюска!
+            if (isEligibleForTrueEnding) {
+              // ИГРОК КРАСАВЧИК — ПУСКАЕМ В ИДЕАЛЬНУЮ КОНЦОВКУ!
+              // Плавно тушим мажорный рок и включаем зацикленную тему кукловода
               await AudioManager.switchToEternalLoopWithFade();
               setState(() {
                 _currentFrame = 4; // Переключаем на Кадр 4 (Кабинет Части 2)
               });
             } else {
-              // ОБЫЧНЫЙ ФИНАЛ: Зачищаем музыку и вылетаем в Главное Меню Уровней
+              // ОБЫЧНЫЙ ФИНАЛ: Условия не выполнены, гасим трек неба и плавно выходим в меню уровней
               AudioManager.stopFinalComicAudio();
               if (context.mounted) {
                 Navigator.pop(context);
@@ -526,11 +523,11 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
             }
           } 
           else if (_currentFrame < 6) {
-            // Перелистывание кадров Части 2
+            // Перелистывание кадров Части 2 (Кабинет Вани и Стикман)
             setState(() => _currentFrame++);
           } 
           else if (isTrueEndingFinal) {
-            // ИСТИННЫЙ ФИНАЛ ИДЕАЛЬНОЙ КОНЦОВКИ: Полная зачистка и выход в меню
+            // ИСТИННЫЙ ФИНАЛ: Полная зачистка плееров вечной петли Моллюска и выход в меню
             AudioManager.stopFinalComicAudio();
             if (context.mounted) {
               Navigator.pop(context);
@@ -544,17 +541,12 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
               isTrueEndingFinal ? "КОНЕЦ ИГРЫ" : "ДАЛЬШЕ",
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
             ),
-            const SizedBox(width: 8),
-            Icon(
-              isTrueEndingFinal ? Icons.check_circle_outline_rounded : Icons.arrow_forward_ios_rounded,
-              size: 16,
-              color: Colors.white,
-            ),
           ],
         ),
       ),
     );
   }
+
 
   // =========================================================================
   // РИСОВАЛЬЩИКИ ГЕОМЕТРИИ, АССЕТОВ И ДЕКОРАЦИЙ
