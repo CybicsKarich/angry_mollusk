@@ -116,29 +116,24 @@ class MainMenuScreen extends StatefulWidget {
   }
 
     // =========================================================================
-  // 🔥 ИСПРАВЛЕННЫЙ ЖЕЛЕЗОБЕТОННЫЙ ВАЛИДАТОР ИДЕАЛЬНОЙ КОНЦОВКИ
+  // 🔥 ЭТАЛОННЫЙ ЧЕСТНЫЙ ВАЛИДАТОР ИДЕАЛЬНОЙ КОНЦОВКИ ДЛЯ РЕЛИЗА
   // =========================================================================
   static Future<bool> checkTrueEndingConditions() async {
     final prefs = await SharedPreferences.getInstance();
     
-    // 1. Напрямую считываем статус всех 5 официальных медалей игры
-    final bool a1 = prefs.getBool('achievement_first_blood') ?? false;
-    final bool a2 = prefs.getBool('achievement_sniper') ?? false;
-    final bool a3 = prefs.getBool('achievement_triumph') ?? false; // 3 звезды за 1-4 уровни
+    // Считываем статус всех 5 официальных медалей игры
+    final bool a1 = prefs.getBool('achievement_first_blood') ?? false; // Первая кровь
+    final bool a2 = prefs.getBool('achievement_sniper') ?? false;      // Снайпер
+    final bool a3 = prefs.getBool('achievement_triumph') ?? false;     // ТРИУМФ (Все 5 уровней на 3 звезды!)
     final bool a4 = prefs.getBool('achievement_secret_chest') ?? false; // Секретный сундук краба
     final bool a5 = prefs.getBool('achievement_new_experience') ?? false; // Игра IvanDrop в Дополнительно
     
-    // 2. Считываем оценку за финальный штурм Цитадели (5 уровень)
-    int s5 = prefs.getInt('level_5_stars') ?? 0;
+    print("📊 [LOG] Проверка условий: Медали (1:$a1, 2:$a2, 3:$a3, 4:$a4, 5:$a5)");
     
-    // 3. Честная проверка: открыты все 5 медалей И за 5-й уровень получены максимальные 3 звезды!
-    bool allAchievementsUnlocked = (a1 && a2 && a3 && a4 && a5);
-    bool finalLevelMaxed = (s5 == 3);
-    
-    print("📊 [LOG] Проверка финала: Медали = $allAchievementsUnlocked (1:$a1, 2:$a2, 3:$a3, 4:$a4, 5:$a5), 5-й уровень = $s5/3");
-    
-    return allAchievementsUnlocked && finalLevelMaxed;
+    // Истинный финал откроется только если в SharedPreferences горят все 5 флагов true!
+    return a1 && a2 && a3 && a4 && a5;
   }
+
 
   
   @override
