@@ -622,4 +622,14 @@ static Future<void> playPaperRustle() async {
       print("КРИТИЧЕСКАЯ ОШИБКА ФАНФАР МЕДАЛИ: $e");
     }
   }
+
+  static void incrementStat(String key) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      int currentVal = prefs.getInt(key) ?? 0;
+      await prefs.setInt(key, currentVal + 1);
+    } catch (e) {
+      print("Ошибка записи статистики $key: $e");
+    }
+  }
 } // <--- ВОТ ЭТА ОДНА СКОБКА ТЕПЕРЬ САМАЯ ПОСЛЕДНЯЯ В ФАЙЛЕ! Она закрывает весь класс AudioManager.
