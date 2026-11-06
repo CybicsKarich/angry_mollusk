@@ -2,6 +2,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'audio_manager.dart';
 import 'main.dart'; // Для доступа к HomeScreen / Трамплину титров, если понадобится
+import 'good_ending_screen.dart';
+import 'true_ending_screen.dart';
+
 
 class Level6VictoryComicScreen extends StatefulWidget {
   const Level6VictoryComicScreen({super.key});
@@ -521,8 +524,7 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
     );
   }
 
-    Widget _buildNavigationButton() {
-    // На 6 кадре (финал идеальной концовки) кнопка перенаправляет в титры
+      Widget _buildNavigationButton() {
     bool isTrueEndingFinal = _currentFrame == 6;
 
     return Container(
@@ -536,37 +538,45 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
         ),
         onPressed: () async {
           if (_currentFrame < 3) {
-            // Обычное перелистывание кадров первой части триумфа
+            // Обычное последовательное открытие кадров Части 1
             setState(() => _currentFrame++);
           } 
           else if (_currentFrame == 3) {
-            // 🔥 КЛЮЧЕВАЯ РАЗВИТКА: Проверяем SharedPreferences на 100% прохождение!
+            // 🔥 КЛЮЧЕВАЯ СЮЖЕТНАЯ РАЗВИТКА ХАРДКОРА KARRICK STUDIO
             bool isEligibleForTrueEnding = await MainMenuScreen.checkTrueEndingConditions();
             
             if (isEligibleForTrueEnding) {
-              // ИГРОК КРАСАВЧИК — ПУСКАЕМ В ИДЕАЛЬНУЮ КОНЦОВКУ!
-              // Плавно тушим мажорный рок и включаем зацикленную тему кукловода
+              // 🌌 УСЛОВИЯ ВЫПОЛНЕНЫ: Включаем затухание мажора и пускаем в Часть 2 (Кабинет Вани)
               await AudioManager.switchToEternalLoopWithFade();
               setState(() {
-                _currentFrame = 4; // Переключаем на Кадр 4 (Кабинет Части 2)
+                _currentFrame = 4; 
               });
             } else {
-              // ОБЫЧНЫЙ ФИНАЛ: Условия не выполнены, гасим трек неба и плавно выходим в меню уровней
+              // 🟢 ОБЫЧНЫЙ ПОЛЬЗОВАТЕЛЬ: Медалей не хватает. Тушим музыку неба и везём в Хорошие Титры!
               AudioManager.stopFinalComicAudio();
               if (context.mounted) {
-                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const GoodEndingScreen()),
+                );
               }
             }
           } 
           else if (_currentFrame < 6) {
-            // Перелистывание кадров Части 2 (Кабинет Вани и Стикман)
+            // Последовательное накопление кадров Части 2 (Кабинет и Стикман)
             setState(() => _currentFrame++);
           } 
           else if (isTrueEndingFinal) {
-            // ИСТИННЫЙ ФИНАЛ: Полная зачистка плееров вечной петли Моллюска и выход в меню
+            // 🔥 КАТАРСИС ИДЕАЛЬНОГО ФИНАЛА (Конец Кадра 6 с чаем)
+            // Имитируем щелчок выключения телевизора, полностью гася аудио петли Дона
             AudioManager.stopFinalComicAudio();
+            
             if (context.mounted) {
-              Navigator.pop(context);
+              // Намертво перенаправляем хардкорщика на экран ЭЛТ-кинескопа
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const TrueEndingScreen()),
+              );
             }
           }
         },
@@ -582,6 +592,7 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
       ),
     );
   }
+
 
 
   // =========================================================================
