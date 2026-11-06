@@ -1816,7 +1816,7 @@ if (hasWantedPoster && !showWantedBig) {
 
   }
   
-  @override
+   @override
   void onDragEnd(DragEndEvent event) {
     super.onDragEnd(event);
     
@@ -1825,11 +1825,14 @@ if (hasWantedPoster && !showWantedBig) {
       AudioManager.stopStretch(); 
       AudioManager.playLaunch();  
       currentBird!.launch(0.15, groundY - 0.07);
+
+      // 🔥 ТОЧЕЧНО ДОПИСАТЬ: Фиксируем выпуск птицы в общую статистику игры
+      AudioManager.incrementStat('stats_birds_launched');
     }
     
-    // В конце любого перетаскивания сбрасываем флаг прицеливания
     isAiming = false;
   }
+
 
     void _renderIsland(Canvas canvas, Size size, double startPct, double endPct) {
     final startX = size.width * startPct;
@@ -2125,7 +2128,7 @@ class Bunnyhop {
         
 
 
-        // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО В МЕТОДЕ update КЛАССА Bunnyhop:
+    // ЗАМЕНИТЬ СТРОГО ТОЧЕЧНО В МЕТОДЕ update КЛАССА Bunnyhop:
 for (var pig in pigs) {
   double dx = position.dx - pig.x;
   double dy = position.dy - pig.y;
@@ -2133,10 +2136,12 @@ for (var pig in pigs) {
     pig.hit(velocity);
     pig.shouldRemove = true; // Ваня мгновенно уничтожает свинью при таране!
     
-    // ИСПРАВЛЕНО: Свинья теперь тоже забирает импульс Вани! Скорость гасится на 30%
-    velocity = Offset(velocity.dx * 0.70, velocity.dy * 0.70);
+    // 🔥 ТОЧЕЧНО ДОПИСАТЬ: Свинья погибла от прямого удара
+    // Используем ключ 'stats_pigs_defeated'
+    AudioManager.incrementStat('stats_pigs_defeated');
     
-    AngryMolluskGame.score += 50; // Начисляем пацанские очки
+    velocity = Offset(velocity.dx * 0.70, velocity.dy * 0.70);
+    AngryMolluskGame.score += 50; 
   }
 }
   }
@@ -2215,12 +2220,13 @@ class MolluskMaksim {
 
           double blockSpeed = sqrt(block.vx * block.vx + block.vy * block.vy);
           
-          // ТАКТИКА 1: ИСПРАВЛЕНО! Порог скорости летящего блока увеличен с 0.20 до 0.55!
-          // От слабо катящихся или слегка упавших балок свинья теперь НЕ умирает, а выживает!
-          if (blockSpeed > 0.55) {
+                    if (blockSpeed > 0.55) {
             AudioManager.playPigHit(); 
             AngryMolluskGame.score += 50;
             shouldRemove = true;
+
+            // 🔥 ТОЧЕЧНО ДОПИСАТЬ: Свинью придавило лавиной блоков
+            AudioManager.incrementStat('stats_pigs_defeated');
             return; 
           }
         }
@@ -2231,6 +2237,7 @@ class MolluskMaksim {
       AudioManager.playPigHit(); 
       AngryMolluskGame.score += 50;
       shouldRemove = true;
+      AudioManager.incrementStat('stats_pigs_defeated');
       return;
     }
 
@@ -2248,6 +2255,7 @@ class MolluskMaksim {
         if (vy.abs() > 1.35) {
           AngryMolluskGame.score += 50;
           shouldRemove = true;
+         AudioManager.incrementStat('stats_pigs_defeated');
         } else {
           vx = 0;
           vy = 0;
@@ -2459,15 +2467,19 @@ class GameBlock {
     }
 
 
-        if (isBroken) {
+            if (isBroken) {
       fragmentOffset += 0.15 * dt; 
       fragmentAlpha -= 1.8 * dt;  
       if (fragmentAlpha <= 0) {
         AngryMolluskGame.score += isStone ? 30 : 20;
         shouldRemove = true;
+
+        // 🔥 ТОЧЕЧНО ДОПИСАТЬ: Фиксируем уничтожение укрепления свиней
+        AudioManager.incrementStat('stats_blocks_destroyed');
         return;
       }
-    } // ЗАКРЫВАЕТ if (fragmentAlpha <= 0)
+    }
+
   
 
 
