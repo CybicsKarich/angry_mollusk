@@ -261,7 +261,8 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
           _explosionX = _bombPigX;
           _explosionTimer = 0.35;
           _bombPigX = -1.0;
-
+          AudioManager.incrementStat('stats_pigs_defeated');
+          
           if (_vanyaHearts > 0) {
             _vanyaHearts--;
             _spawnBloodSplatter();
@@ -294,7 +295,8 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
           _explosionX = _leftPigX;
           _explosionTimer = 0.35;
           _leftPigX = -1.0;
-
+          AudioManager.incrementStat('stats_pigs_defeated');
+         
           if (_vanyaHearts > 0) {
             _vanyaHearts--;
             _spawnBloodSplatter();
