@@ -848,6 +848,7 @@ if (hasWantedPoster && wantedAttachedBlockIndex != -1 && !showWantedBig) {
           // Сама игра уменьшает статическую пачку таблеток ровно в момент проката
           if (currentBird!.loopAngle >= 0.85 * pi && currentBird!.loopAngle <= 1.05 * pi && AngryMolluskGame.pillsRemaining > 0) {
             AngryMolluskGame.pillsRemaining--; 
+            AudioManager.incrementStat('stats_pills_consumed', amount: 3);
           }
         }
 
@@ -2473,9 +2474,6 @@ class GameBlock {
       if (fragmentAlpha <= 0) {
         AngryMolluskGame.score += isStone ? 30 : 20;
         shouldRemove = true;
-
-        // 🔥 ТОЧЕЧНО ДОПИСАТЬ: Фиксируем уничтожение укрепления свиней
-        AudioManager.incrementStat('stats_blocks_destroyed');
         return;
       }
     }
