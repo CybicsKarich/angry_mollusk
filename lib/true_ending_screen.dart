@@ -222,7 +222,7 @@ class _TrueEndingScreenState extends State<TrueEndingScreen> with TickerProvider
                                   Navigator.of(context).popUntil((route) => route.isFirst); 
                                 },
                                 child: const Text(
-                                  "ПЕРЕЗАГРУЗКА МАТРИЦЫ",
+                                  "В главное меню",
                                   style: TextStyle(
                                     fontFamily: 'Courier New',
                                     fontSize: 11,
