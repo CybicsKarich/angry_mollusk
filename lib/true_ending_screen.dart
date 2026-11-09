@@ -74,7 +74,7 @@ class _TrueEndingScreenState extends State<TrueEndingScreen> with TickerProvider
     final prefs = await SharedPreferences.getInstance();
     return {
       'birds': prefs.getInt('stats_birds_launched') ?? 0,
-      'blocks': prefs.getInt('stats_blocks_destroyed') ?? 0,
+      'pills': prefs.getInt('stats_pills_consumed') ?? 0,
       'pigs': prefs.getInt('stats_pigs_defeated') ?? 0,
     };
   }
