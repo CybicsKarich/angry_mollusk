@@ -51,7 +51,7 @@ class _GoodEndingScreenState extends State<GoodEndingScreen> with SingleTickerPr
 
     return Scaffold(
       backgroundColor: const Color(0xFF1A0A05), // Мрачно-багровая подложка
-      body: SafeArea(
+      body: Stack(
         child: FutureBuilder<Map<String, int>>(
           future: _loadGameStats(),
           builder: (context, snapshot) {
@@ -109,7 +109,7 @@ class _GoodEndingScreenState extends State<GoodEndingScreen> with SingleTickerPr
                           child: ClipOval(child: Image.asset('assets/images/bunnyhop.png', fit: BoxFit.cover)),
                         ),
                         // Ковбойская ковбойская шляпа из твоего кода на макушке Шерифа
-                        Positioned(top: 0, child: _buildSheriffHat()),
+                        Positioned(top: 12, child: _buildSheriffHat()),
                       ],
                     ),
                   ),
@@ -183,7 +183,7 @@ class _GoodEndingScreenState extends State<GoodEndingScreen> with SingleTickerPr
 
                           // КНОПКА ВОЗВРАЩЕНИЯ В ГЛАВНОЕ МЕНЮ
                           SizedBox(
-                            width: 160, height: 40,
+                            width: 200, height: 40,
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF5D4037),
@@ -311,7 +311,7 @@ class _GoodEndingScreenState extends State<GoodEndingScreen> with SingleTickerPr
           Positioned(bottom: 44, left: 6, child: Transform.rotate(angle: -0.2, child: Container(width: 16, height: 10, decoration: BoxDecoration(color: Colors.white.withOpacity(0.9), borderRadius: BorderRadius.circular(1), border: Border.all(color: Colors.black45, width: 0.5))))),
           Positioned(bottom: 45, left: 18, child: Transform.rotate(angle: 0.1, child: Container(width: 14, height: 11, decoration: BoxDecoration(color: Colors.white.withOpacity(0.85), borderRadius: BorderRadius.circular(1), border: Border.all(color: Colors.black45, width: 0.5))))),
 
-          // Наша жёлтая кружка с надписью Sheriff
+                    // Наша жёлтая кружка с надписью Sheriff
           Positioned(
             bottom: 44, right: 8,
             child: SizedBox(
@@ -321,7 +321,19 @@ class _GoodEndingScreenState extends State<GoodEndingScreen> with SingleTickerPr
                 children: [
                   Positioned(top: 3, right: 0, child: Container(width: 7, height: 11, decoration: BoxDecoration(color: const Color(0xFFFFEB3B), borderRadius: const BorderRadius.only(topRight: Radius.circular(5), bottomRight: Radius.circular(5)), border: Border.all(color: Colors.black, width: 0.8)))),
                   Positioned(top: 5, right: 1, child: Container(width: 3, height: 7, decoration: const BoxDecoration(color: Color(0xFFD7CCC8), borderRadius: BorderRadius.only(topRight: Radius.circular(3), bottomRight: Radius.circular(3))))),
-                  Positioned(top: 0, left: 0, child: Container(width: 16, height: 18, decoration: BoxDecoration(color: const Color(0xFFFFEB3B), borderRadius: BorderRadius.circular(3), border: Border.all(color: Colors.black, width: 1.0)))),
+                  Positioned(
+                    top: 0, left: 0,
+                    child: Container(
+                      width: 16, height: 18,
+                      decoration: BoxDecoration(color: const Color(0xFFFFEB3B), borderRadius: BorderRadius.circular(3), border: Border.all(color: Colors.black, width: 1.0)),
+                      child: const Center(
+                        child: Text(
+                          "Sheriff", // ИСПРАВЛЕНО: Добавлен каноничный микро-текст на кружку
+                          style: TextStyle(fontSize: 3.2, fontWeight: FontWeight.w900, color: Colors.black),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
