@@ -211,6 +211,8 @@ class _GoodEndingScreenState extends State<GoodEndingScreen> with SingleTickerPr
                       ),
                     ),
                   ),
+                  ),
+                    ),
                 ),
               ],
             );
