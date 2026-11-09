@@ -150,7 +150,7 @@ class _GoodEndingScreenState extends State<GoodEndingScreen> with SingleTickerPr
                               fontFamily: 'Georgia',
                               fontSize: 14,
                               fontStyle: FontStyle.italic,
-                              color: Colors.white90,
+                              Colors.white.withOpacity(0.9)
                               height: 1.3,
                             ),
                           ),
