@@ -468,6 +468,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
           _vanyaHearts += 1; // Дает +1 жизнь в верхний интерфейс
           _plusOneUiTimer = 0.6; // Запускаем вспышку синего крестика «+1»
           _heartPulseTimer = 0.8; // Запускаем плавную пульсацию сердечка
+          AudioManager.incrementStat('stats_pills_consumed');
           
           _isAngryMode = true; // Активируем бессмертие и кислотное небо
           AudioManager.playRage(); // Громко включаем твой андеграундный трек ярости вторым потоком!
