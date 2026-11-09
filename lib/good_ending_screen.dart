@@ -45,7 +45,7 @@ class _GoodEndingScreenState extends State<GoodEndingScreen> with SingleTickerPr
     };
   }
 
-  @override
+    @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context).size;
 
@@ -122,10 +122,6 @@ class _GoodEndingScreenState extends State<GoodEndingScreen> with SingleTickerPr
                 Center(
                   child: FadeTransition(
                     opacity: _textOpacity,
-                                    // 3. ПЕРЕДНИЙ ПЛАН: АККУРАТНЫЙ SERIF-ТЕКСТ РАПОРТА СТАТИСТИКИ КАРРИК
-                Center(
-                  child: FadeTransition(
-                    opacity: _textOpacity,
                     child: Container(
                       width: media.width * 0.50,
                       padding: const EdgeInsets.all(20),
@@ -157,7 +153,7 @@ class _GoodEndingScreenState extends State<GoodEndingScreen> with SingleTickerPr
                               color: Colors.white70, // Исправленный константный цвет
                               height: 1.3,
                             ),
-                          ), // <--- ЗАПЯТАЯ ТУТ БЫЛА ПОТЕРЯНА! ТЕПЕРЬ ВСЁ НА МЕСТЕ
+                          ),
                           const SizedBox(height: 20),
                           Container(width: 80, height: 1.5, color: const Color(0xFFFFCC80).withOpacity(0.4)),
                           const SizedBox(height: 16),
@@ -211,8 +207,6 @@ class _GoodEndingScreenState extends State<GoodEndingScreen> with SingleTickerPr
                       ),
                     ),
                   ),
-                  ),
-                    ),
                 ),
               ],
             );
@@ -221,6 +215,7 @@ class _GoodEndingScreenState extends State<GoodEndingScreen> with SingleTickerPr
       ),
     );
   }
+
 
   // Строка вывода конкретного параметра статистики
   Widget _buildStatRow(String label, int value) {
