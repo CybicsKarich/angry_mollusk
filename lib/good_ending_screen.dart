@@ -143,17 +143,17 @@ class _GoodEndingScreenState extends State<GoodEndingScreen> with SingleTickerPr
                             ),
                           ),
                           const SizedBox(height: 10),
-                          const Text(
+                           const Text(
                             "Спасибо за прохождение игры!\nНадеюсь, увидимся снова!",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontFamily: 'Georgia',
                               fontSize: 14,
                               fontStyle: FontStyle.italic,
-                              Colors.white.withOpacity(0.9)
+                              color: Colors.white70, // ИСПРАВЛЕНО: Константный цвет, не ломает const-виджет
                               height: 1.3,
                             ),
-                          ),
+                          )
                           const SizedBox(height: 20),
                           Container(width: 80, height: 1.5, color: const Color(0xFFFFCC80).withOpacity(0.4)),
                           const SizedBox(height: 16),
