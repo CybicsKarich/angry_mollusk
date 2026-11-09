@@ -625,11 +625,14 @@ static Future<void> playPaperRustle() async {
     }
   }
 
-  static void incrementStat(String key) async {
+    // =========================================================================
+  // 📊 ИСПРАВЛЕННЫЙ СЧЁТЧИК СТАТИСТИКИ ДЛЯ KARRICK STUDIO (ПРИНИМАЕТ ОБЪЁМ)
+  // =========================================================================
+  static void incrementStat(String key, {int amount = 1}) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       int currentVal = prefs.getInt(key) ?? 0;
-      await prefs.setInt(key, currentVal + 1);
+      await prefs.setInt(key, currentVal + amount); // Прибавляем переданный объём!
     } catch (e) {
       print("Ошибка записи статистики $key: $e");
     }
