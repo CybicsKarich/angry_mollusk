@@ -191,18 +191,19 @@ class _TrueEndingScreenState extends State<TrueEndingScreen> with TickerProvider
 
                             const SizedBox(height: 32),
 
-                            // 🔴 БЕЗКОМПРОМИССНАЯ КРОВ АВО-КРАСНАЯ ТОЧКА ФИНАЛА СИМУЛЯЦИИ ПО ТЗ
+                            
                             const Text(
                               "КОНЕЦ.",
                               style: TextStyle(
                                 fontFamily: 'Courier New',
                                 fontSize: 34,
-                                fontWeight: FontWeight.black,
+                                fontWeight: FontWeight.w900, // ИСПРАВЛЕНО: w900 вместо несуществующего black
                                 color: Color(0xFFFF1744), // Кроваво-красный неон смерти цикла
                                 letterSpacing: 5.0,
                                 shadows: [Shadow(color: Color(0xFFD50000), blurRadius: 10)],
                               ),
                             ),
+
                             const SizedBox(height: 24),
 
                             // КНОПКА СБРОСА И ПЕРЕЗАГРУЗКИ МАТРИЦЫ КИНЕСКОПА
