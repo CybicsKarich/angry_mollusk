@@ -122,11 +122,15 @@ class _GoodEndingScreenState extends State<GoodEndingScreen> with SingleTickerPr
                 Center(
                   child: FadeTransition(
                     opacity: _textOpacity,
+                                    // 3. ПЕРЕДНИЙ ПЛАН: АККУРАТНЫЙ SERIF-ТЕКСТ РАПОРТА СТАТИСТИКИ КАРРИК
+                Center(
+                  child: FadeTransition(
+                    opacity: _textOpacity,
                     child: Container(
                       width: media.width * 0.50,
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFFDE7).withOpacity(0.06), // Едва заметное благородное свечение по центру
+                        color: const Color(0xFFFFFDE7).withOpacity(0.06), // Едва заметное свечение по центру
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Column(
@@ -143,17 +147,17 @@ class _GoodEndingScreenState extends State<GoodEndingScreen> with SingleTickerPr
                             ),
                           ),
                           const SizedBox(height: 10),
-                           const Text(
+                          const Text(
                             "Спасибо за прохождение игры!\nНадеюсь, увидимся снова!",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontFamily: 'Georgia',
                               fontSize: 14,
                               fontStyle: FontStyle.italic,
-                              color: Colors.white70, // ИСПРАВЛЕНО: Константный цвет, не ломает const-виджет
+                              color: Colors.white70, // Исправленный константный цвет
                               height: 1.3,
                             ),
-                          )
+                          ), // <--- ЗАПЯТАЯ ТУТ БЫЛА ПОТЕРЯНА! ТЕПЕРЬ ВСЁ НА МЕСТЕ
                           const SizedBox(height: 20),
                           Container(width: 80, height: 1.5, color: const Color(0xFFFFCC80).withOpacity(0.4)),
                           const SizedBox(height: 16),
@@ -167,7 +171,7 @@ class _GoodEndingScreenState extends State<GoodEndingScreen> with SingleTickerPr
                           
                           const SizedBox(height: 28),
                           
-                          // СOМНЕВАЮЩИЙСЯ ЖЁЛТЫЙ ЗHАК ФИНАЛА ПО ТЗ
+                          // СОМНЕВАЮЩИЙСЯ ЖЁЛТЫЙ ЗНАК ФИНАЛА ПО ТЗ
                           const Text(
                             "КОНЕЦ?",
                             style: TextStyle(
@@ -187,14 +191,20 @@ class _GoodEndingScreenState extends State<GoodEndingScreen> with SingleTickerPr
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF5D4037),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10), side: const BorderSide(color: Colors.black, width: 1.5)),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10), 
+                                  side: const BorderSide(color: Colors.black, width: 1.5),
+                                ),
                                 elevation: 4,
                               ),
                               onPressed: () {
                                 AudioManager.stopFinalComicAudio();
                                 Navigator.of(context).popUntil((route) => route.isFirst); // Мгновенный сброс стейтов и вылет на Главный Экран
                               },
-                              child: const Text("В ГЛАВНОЕ МЕНЮ", style: TextStyle(fontFamily: 'Georgia', fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white)),
+                              child: const Text(
+                                "В ГЛАВНОЕ МЕНЮ", 
+                                style: TextStyle(fontFamily: 'Georgia', fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                              ),
                             ),
                           ),
                         ],
