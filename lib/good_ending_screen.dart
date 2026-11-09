@@ -45,176 +45,176 @@ class _GoodEndingScreenState extends State<GoodEndingScreen> with SingleTickerPr
     };
   }
 
-    @override
+       @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context).size;
 
     return Scaffold(
       backgroundColor: const Color(0xFF1A0A05), // Мрачно-багровая подложка
-      body: Stack(
-        child: FutureBuilder<Map<String, int>>(
-          future: _loadGameStats(),
-          builder: (context, snapshot) {
-            final stats = snapshot.data ?? {'birds': 0, 'blocks': 0, 'pigs': 0};
+      body: FutureBuilder<Map<String, int>>(
+        future: _loadGameStats(),
+        builder: (context, snapshot) {
+          final stats = snapshot.data ?? {'birds': 0, 'pills': 0, 'pigs': 0};
 
-            return Stack(
-              children: [
-                // 1. ЗАДНИЙ ПЛАН: УЮТНЫЙ ДЕРЕВЯННЫЙ КАБИНЕТ В ЛУЧАХ БАГРЯНОГО ЗАКАТА
-                Positioned.fill(
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Color(0xFF8B4F30), // Верх стен озарён заходящим солнцем
-                          Color(0xFF3E1F15), // Тёмные углы внизу
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Ровный плоский пол кабинета Шерифа Вани без искажений
-                Positioned(
-                  bottom: 0, left: 0, right: 0, height: 32,
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF5D4037), // Массивные доски паркета
-                      border: Border(top: BorderSide(color: Color(0xFF3E2723), width: 2.5)),
-                    ),
-                  ),
-                ),
-
-                // 2. ДЕКОРАЦИИ КАБИНЕТА: СТОЛ, СТУЛ, РАПОРТЫ И КРУЖКА ШЕРИФА С КОФЕ
-                // Деревянный рабочий стул
-                Positioned(bottom: 22, left: media.width * 0.14, child: _buildWoodenChair()),
-                
-                // 🤠 ВАНЯ БАННИХОП СИДИТ ЗА СТОЛОМ В ШЛЯПЕ (БЕЗ СЛОВ, НА СВОЁМ ДЕЖУРСТВЕ)
-                Positioned(
-                  bottom: 34, left: media.width * 0.14 + 10,
-                  child: SizedBox(
-                    width: 60, height: 75,
-                    child: Stack(
-                      alignment: Alignment.bottomCenter,
-                      children: [
-                        // Круглое красное тело птицы
-                        Container(
-                          width: 52, height: 52,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFE53935),
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.black, width: 2.2),
-                          ),
-                          child: ClipOval(child: Image.asset('assets/images/bunnyhop.png', fit: BoxFit.cover)),
-                        ),
-                        // Ковбойская ковбойская шляпа из твоего кода на макушке Шерифа
-                        Positioned(top: 12, child: _buildSheriffHat()),
+          return Stack(
+            children: [
+              // 1. ЗАДНИЙ ПЛАН: УЮТНЫЙ ДЕРЕВЯННЫЙ КАБИНЕТ В ЛУЧАХ БАГРЯНОГО ЗАКАТА
+              Positioned.fill(
+                child: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Color(0xFF8B4F30), // Верх стен озарён заходящим солнцем
+                        Color(0xFF3E1F15), // Тёмные углы внизу
                       ],
                     ),
                   ),
                 ),
+              ),
 
-                // Массивный рабочий стол с бумагами
-                Positioned(bottom: 4, left: media.width * 0.22, child: _buildWoodenTableWithReports()),
+              // Ровный плоский пол кабинета Шерифа Вани без искажений
+              Positioned(
+                bottom: 0, left: 0, right: 0, height: 32,
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF5D4037), // Массивные доски паркета
+                    border: Border(top: BorderSide(color: Color(0xFF3E2723), width: 2.5)),
+                  ),
+                ),
+              ),
 
-                // 3. ПЕРЕДНИЙ ПЛАН: АККУРАТНЫЙ SERIF-ТЕКСТ РАПОРТА СТАТИСТИКИ КАРРИК
-                Center(
-                  child: FadeTransition(
-                    opacity: _textOpacity,
-                    child: Container(
-                      width: media.width * 0.50,
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFFFDE7).withOpacity(0.06), // Едва заметное свечение по центру
-                        borderRadius: BorderRadius.circular(16),
+              // 2. ДЕКОРАЦИИ КАБИНЕТА: СТОЛ, СТУЛ, РАПОРТЫ И КРУЖКА ШЕРИФА С КОФЕ
+              // Деревянный рабочий стул
+              Positioned(bottom: 22, left: media.width * 0.14, child: _buildWoodenChair()),
+              
+              // 🤠 ВАНЯ БАННИХОП СИДИТ ЗА СТОЛОМ В ШЛЯПЕ (БЕЗ СЛОВ, НА СВОЁМ ДЕЖУРСТВЕ)
+              Positioned(
+                bottom: 34, left: media.width * 0.14 + 10,
+                child: SizedBox(
+                  width: 60, height: 75,
+                  child: Stack(
+                    alignment: Alignment.bottomCenter,
+                    children: [
+                      // Круглое красное тело птицы
+                      Container(
+                        width: 52, height: 52,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE53935),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.black, width: 2.2),
+                        ),
+                        child: ClipOval(child: Image.asset('assets/images/bunnyhop.png', fit: BoxFit.cover)),
                       ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text(
-                            "KARRICK STUDIO",
-                            style: TextStyle(
-                              fontFamily: 'Georgia', // Serif-шрифт с засечками
-                              fontSize: 26,
-                              fontWeight: FontWeight.w900,
-                              color: Color(0xFFFFCC80), // Золотисто-закатный оттенок бренда
-                              letterSpacing: 2.0,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          const Text(
-                            "Спасибо за прохождение игры!\nНадеюсь, увидимся снова!",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontFamily: 'Georgia',
-                              fontSize: 14,
-                              fontStyle: FontStyle.italic,
-                              color: Colors.white70, // Исправленный константный цвет
-                              height: 1.3,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          Container(width: 80, height: 1.5, color: const Color(0xFFFFCC80).withOpacity(0.4)),
-                          const SizedBox(height: 16),
-                          
-                          // БЛОК ИНФОГРАФИКИ НАКОПЛЕННЫХ ДАННЫХ
-                          _buildStatRow("Запущено птиц из рогатки:", stats['birds']!),
-                          const SizedBox(height: 8),
-                          _buildStatRow("Уничтожено укреплений свиней:", stats['blocks']!),
-                          const SizedBox(height: 8),
-                          _buildStatRow("Убито зелёных свиней:", stats['pigs']!),
-                          
-                          const SizedBox(height: 28),
-                          
-                          // СОМНЕВАЮЩИЙСЯ ЖЁЛТЫЙ ЗНАК ФИНАЛА ПО ТЗ
-                          const Text(
-                            "КОНЕЦ?",
-                            style: TextStyle(
-                              fontFamily: 'Georgia',
-                              fontSize: 32,
-                              fontWeight: FontWeight.w900,
-                              color: Color(0xFFFFD54F), // Сочно-жёлтый цвет интриги
-                              letterSpacing: 4.0,
-                              shadows: [Shadow(color: Colors.black87, blurRadius: 4, offset: Offset(2, 2))],
-                            ),
-                          ),
-                          const SizedBox(height: 20),
+                      // Ковбойская ковбойская шляпа из твоего кода на макушке Шерифа
+                      Positioned(top: 12, child: _buildSheriffHat()), // Опущена строго на голову птицы
+                    ],
+                  ),
+                ),
+              ),
 
-                          // КНОПКА ВОЗВРАЩЕНИЯ В ГЛАВНОЕ МЕНЮ
-                          SizedBox(
-                            width: 200, height: 40,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF5D4037),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10), 
-                                  side: const BorderSide(color: Colors.black, width: 1.5),
-                                ),
-                                elevation: 4,
+              // Массивный рабочий стол с бумагами
+              Positioned(bottom: 4, left: media.width * 0.22, child: _buildWoodenTableWithReports()),
+
+              // 3. ПЕРЕДНИЙ ПЛАН: АККУРАТНЫЙ SERIF-ТЕКСТ РАПОРТА СТАТИСТИКИ КАРРИК
+              Center(
+                child: FadeTransition(
+                  opacity: _textOpacity,
+                  child: Container(
+                    width: media.width * 0.50,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFFDE7).withOpacity(0.06), // Едва заметное свечение по центру
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          "KARRICK STUDIO",
+                          style: TextStyle(
+                            fontFamily: 'Georgia', // Serif-шрифт с засечками
+                            fontSize: 26,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFFFFCC80), // Золотисто-закатный оттенок бренда
+                            letterSpacing: 2.0,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          "Спасибо за прохождение игры!\nНадеюсь, увидимся снова!",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: 'Georgia',
+                            fontSize: 14,
+                            fontStyle: FontStyle.italic,
+                            color: Colors.white70, // Исправленный константный цвет
+                            height: 1.3,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Container(width: 80, height: 1.5, color: const Color(0xFFFFCC80).withOpacity(0.4)),
+                        const SizedBox(height: 16),
+                        
+                        // БЛОК ИНФОГРАФИКИ НАКОПЛЕННЫХ ДАННЫХ
+                        _buildStatRow("Запущено птиц из рогатки:", stats['birds']!),
+                        const SizedBox(height: 8),
+                        // Считываем правильный синхронизированный ключ таблеток
+                        _buildStatRow("Потрачено капсул Виагры:", stats['pills']!),
+                        const SizedBox(height: 8),
+                        _buildStatRow("Убито зелёных свиней:", stats['pigs']!),
+                        
+                        const SizedBox(height: 28),
+                        
+                        // СОМНЕВАЮЩИЙСЯ ЖЁЛТЫЙ ЗНАК ФИНАЛА ПО ТЗ
+                        const Text(
+                          "КОНЕЦ?",
+                          style: TextStyle(
+                            fontFamily: 'Georgia',
+                            fontSize: 32,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFFFFD54F), // Сочно-жёлтый цвет интриги
+                            letterSpacing: 4.0,
+                            shadows: [Shadow(color: Colors.black87, blurRadius: 4, offset: Offset(2, 2))],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        // КНОПКА ВОЗВРАЩЕНИЯ В ГЛАВНОЕ МЕНЮ (СТРОГО В ОДИН РЯД)
+                        SizedBox(
+                          width: 200, height: 40,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF5D4037),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10), 
+                                side: const BorderSide(color: Colors.black, width: 1.5),
                               ),
-                              onPressed: () {
-                                AudioManager.stopFinalComicAudio();
-                                Navigator.of(context).popUntil((route) => route.isFirst); // Мгновенный сброс стейтов и вылет на Главный Экран
-                              },
-                              child: const Text(
-                                "В ГЛАВНОЕ МЕНЮ", 
-                                style: TextStyle(fontFamily: 'Georgia', fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
-                              ),
+                              elevation: 4,
+                            ),
+                            onPressed: () {
+                              AudioManager.stopFinalComicAudio();
+                              Navigator.of(context).popUntil((route) => route.isFirst); // Мгновенный сброс стейтов и вылет на Главный Экран
+                            },
+                            child: const Text(
+                              "В ГЛАВНОЕ МЕНЮ", 
+                              style: TextStyle(fontFamily: 'Georgia', fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              ],
-            );
-          },
-        ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
+
 
 
   // Строка вывода конкретного параметра статистики
