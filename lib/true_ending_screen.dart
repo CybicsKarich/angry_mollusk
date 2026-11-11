@@ -35,14 +35,22 @@ class _TrueEndingScreenState extends State<TrueEndingScreen> with TickerProvider
         _tvWidth = 1.0;
       });
       
+          Future.delayed(const Duration(milliseconds: 100), () {
+      if (!mounted) return;
+      setState(() {
+        _tvLineHeight = 4.0;
+        _tvWidth = 1.0;
+      });
+      
       Future.delayed(const Duration(milliseconds: 250), () {
+        if (!mounted) return;
         setState(() {
-          _isTvPowerOnSequence = false; // Взрыв растра на весь холст!
+          _isTvPowerOnSequence = false;
         });
-        // Музыка капель дождя замка castle_drops плавно подчёркивает тишину симуляции
         AudioManager.startCastleDrops(); 
       });
     });
+
 
     // 2. Бешеный цикличный таймер для глитчей и горизонтальных помех кинескопа
     _glitchController = AnimationController(
@@ -105,11 +113,11 @@ class _TrueEndingScreenState extends State<TrueEndingScreen> with TickerProvider
 
     return Scaffold(
       backgroundColor: const Color(0xFF040407), // Кромешная тьма комнаты Дона
-      body: SafeArea(
-        child: FutureBuilder<Map<String, int>>(
+      body: FutureBuilder<Map<String, int>>(
           future: _loadTrueStats(),
           builder: (context, snapshot) {
-            final stats = snapshot.data ?? {'birds': 0, 'blocks': 0, 'pigs': 0};
+            final stats = snapshot.data ?? {'birds': 0, 'pills': 0, 'pigs': 0};
+
 
             return Stack(
               children: [
@@ -185,7 +193,7 @@ class _TrueEndingScreenState extends State<TrueEndingScreen> with TickerProvider
                             // СТАТИСТИКА ИГРЫ СТРОГО ПО ТВОЕМУ ТОЧНОМУ ШАБЛОНУ
                             _buildCRTStatLine("• Запущено птиц из рогатки:", stats['birds']!),
                             const SizedBox(height: 8),
-                            _buildCRTStatLine("• Уничтожено укреплений свиней:", stats['blocks']!),
+                            _buildCRTStatLine("• Потрачено капсул Виагры:", stats['pills']!),
                             const SizedBox(height: 8),
                             _buildCRTStatLine("• Убито зелёных свиней:", stats['pigs']!),
 
@@ -243,7 +251,6 @@ class _TrueEndingScreenState extends State<TrueEndingScreen> with TickerProvider
             );
           },
         ),
-      ),
     );
   }
 
