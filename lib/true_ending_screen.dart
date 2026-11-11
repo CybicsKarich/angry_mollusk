@@ -24,18 +24,12 @@ class _TrueEndingScreenState extends State<TrueEndingScreen> with TickerProvider
   double _glitchOffset = 0.0;
   bool _showCRTNoise = true;
 
-  @override
+    @override
   void initState() {
     super.initState();
     
     // 1. Анимация включения старого ЭЛТ-телевизора Дона Моллюска
     Future.delayed(const Duration(milliseconds: 100), () {
-      setState(() {
-        _tvLineHeight = 4.0; // Сначала экран — тонкая неоновая нить
-        _tvWidth = 1.0;
-      });
-      
-          Future.delayed(const Duration(milliseconds: 100), () {
       if (!mounted) return;
       setState(() {
         _tvLineHeight = 4.0;
@@ -50,7 +44,6 @@ class _TrueEndingScreenState extends State<TrueEndingScreen> with TickerProvider
         AudioManager.startCastleDrops(); 
       });
     });
-
 
     // 2. Бешеный цикличный таймер для глитчей и горизонтальных помех кинескопа
     _glitchController = AnimationController(
@@ -69,6 +62,7 @@ class _TrueEndingScreenState extends State<TrueEndingScreen> with TickerProvider
       duration: const Duration(milliseconds: 3000),
     )..forward();
   }
+
 
   @override
   void dispose() {
