@@ -551,7 +551,7 @@ static Future<void> playPaperRustle() async {
     static Future<void> startLevel5Rain() async {
     try {
       await _finalMenuPlayer.stop(); // Гарантированно убираем музыку меню во время ливня
-      await _rainPlayer.setVolume(0.45); 
+      await _rainPlayer.setVolume(0.45 * masterVolume); 
       await _rainPlayer.setReleaseMode(ReleaseMode.loop); 
       await _rainPlayer.play(AssetSource('music/rain_ambient.mp3'), mode: PlayerMode.lowLatency);
     } catch (e) {print("Ошибка запуска звука капель кочка: $e");}
