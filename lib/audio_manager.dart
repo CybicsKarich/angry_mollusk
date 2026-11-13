@@ -20,6 +20,34 @@ class AudioManager {
 
   // Флаг-замок для отмены цикла затухания, если музыку выключили принудительно
   static bool _isFadeOutCancelled = false;
+    static double masterVolume = 0.5; // Глобальный множитель громкости (от 0.0 до 1.0)
+
+  // Геттер для получения текущего состояния фонового плеера
+  static AudioPlayer get menuPlayer => _finalMenuPlayer;
+
+  // Устанавливает громкость для ВСЕХ активных плееров и сохраняет её на диск
+  static Future<void> setMasterVolume(double volume) async {
+    masterVolume = volume.clamp(0.0, 1.0);
+    
+    // Сохраняем выбранную громкость в память устройства
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble('game_master_volume', masterVolume);
+
+    // Моментально обновляем громкость у всех постоянных плееров
+    await _finalMenuPlayer.setVolume(masterVolume);
+    await _stretchPlayer.setVolume(masterVolume);
+    await _fxPlayer.setVolume(masterVolume);
+    await _rainPlayer.setVolume(0.45 * masterVolume);
+    await _bossMusicPlayer.setVolume(masterVolume);
+    await _level6MusicPlayer.setVolume(masterVolume);
+    await _skyFreedomPlayer.setVolume(masterVolume);
+    await _eternalLoopPlayer.setVolume(masterVolume);
+    
+    for (var player in _fxPool) {
+      await player.setVolume(masterVolume);
+    }
+  }
+
 
 
   
@@ -41,11 +69,15 @@ class AudioManager {
   static bool hasPigHitToken = true;
   static bool hasMissToken = true;
 
-  static Future<void> init() async {
+    static Future<void> init() async {
+    final prefs = await SharedPreferences.getInstance();
+    masterVolume = prefs.getDouble('game_master_volume') ?? 0.5;
+    
     _stretchPlayer.setReleaseMode(ReleaseMode.loop);
     _finalMenuPlayer.setReleaseMode(ReleaseMode.release);
-    resetTokensForNextBird(); // Заряжаем жетоны при старте
+    resetTokensForNextBird();
   }
+
 
     // === ВСTАВЛЯЙ НОВЫЙ МЕТОД СТРОГО СЮДА ===
   static Future<void> playBackgroundMusic() async {
@@ -73,7 +105,7 @@ class AudioManager {
   static Future<void> playRage() async {
     try {
       await _fxPlayer.stop();
-      await _fxPlayer.setVolume(0.85); // Делаем ор ярости громким и сочным
+      await _fxPlayer.setVolume(0.85 * masterVolume);
       
       // ИСПРАВЛЕНО: Твой оригинальный файл ярости из папки audio/
       await _fxPlayer.play(AssetSource('audio/bunnyhop_rage.mp3'));
@@ -99,7 +131,7 @@ class AudioManager {
   static Future<void> playBossWhip() async {
     try {
       await _fxPlayer.stop(); // Глушим прошлый эффект, чтобы не было каши
-      await _fxPlayer.setVolume(0.75); // Настраиваем сочную громкость замаха
+      await _fxPlayer.setVolume(0.75 * masterVolume);
       await _fxPlayer.play(AssetSource('audio/boss_whip.mp3'));
       print("Эффект замаха босса запущен успешно.");
     } catch (e) {
@@ -111,7 +143,7 @@ class AudioManager {
   static Future<void> playBossStrike() async {
     try {
       await _fxPlayer.stop(); // Мгновенно сбрасываем канал под удар
-      await _fxPlayer.setVolume(1.0); // Удар Дона должен греметь на максимум!
+      await _fxPlayer.setVolume(1.0 * masterVolume);
       await _fxPlayer.play(AssetSource('audio/boss_strike.mp3'));
       print("Эффект удара босса запущен успешно.");
     } catch (e) {
@@ -146,7 +178,7 @@ class AudioManager {
   static Future<void> playHatSplat() async {
     try {
       await _fxPlayer.stop(); // Глушим прошлый звук, если он наложился
-      await _fxPlayer.setVolume(1.0); // Выкручиваем громкость на 100%
+      await _fxPlayer.setVolume(1.0 * masterVolume);
       await _fxPlayer.play(AssetSource('audio/hat_splat.mp3')); 
     } catch (e) {
       print("Ошибка воспроизведения звука шлепка шляпы: $e");
@@ -157,7 +189,7 @@ class AudioManager {
 static Future<void> playPaperRustle() async {
   try {
     await _fxPlayer.stop(); // Глушим прошлый звук эффектов, чтобы не накладывался
-    await _fxPlayer.setVolume(1.0); // Включаем на полную громкость
+    await _fxPlayer.setVolume(1.0 * masterVolume);
     await _fxPlayer.play(AssetSource('audio/paper_rustle.mp3')); // Чистый путь относительно папки assets/
   } catch (e) {
     print("Ошибка воспроизведения звука шелеста бумаги: $e");
@@ -195,7 +227,7 @@ static Future<void> playPaperRustle() async {
       
       // Запускаем дефолтную музыку главного меню
       await _finalMenuPlayer.stop();
-      await _finalMenuPlayer.setVolume(0.40);
+      await _finalMenuPlayer.setVolume(0.40 * masterVolume);
       await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
       await _finalMenuPlayer.play(AssetSource('music/bg_music.mp3'), mode: PlayerMode.mediaPlayer); 
       print("Все боевые плееры зачищены. Включена музыка меню.");
@@ -208,19 +240,15 @@ static Future<void> playPaperRustle() async {
   // 🎵 МУЗЫКАЛЬНАЯ СИСТЕМА ДЛЯ ФИНАЛЬНОГО КОМИКСА (ЧАСТЬ 1 И ЧАСТЬ 2)
   // =========================================================================
 
-  /// 1. Чистый запуск триумфальной музыки неба (Часть 1)
+    /// 1. Чистый запуск триумфальной музыки неба (Часть 1)
   static Future<void> playSkyFreedom() async {
     try {
-      _isFadeOutCancelled = false; // Сбрасываем флаг отмены затухания
-      
-      // Намертво тушим плеер петли, если он вдруг работал
+      _isFadeOutCancelled = false;
       await _eternalLoopPlayer.stop(); 
       
-      // Запускаем победный трек на максимальную громкость в режиме бесконечного повтора
-      await _skyFreedomPlayer.setVolume(1.0);
+      // Запускаем победный трек на текущей общей громкости
+      await _skyFreedomPlayer.setVolume(masterVolume);
       await _skyFreedomPlayer.setReleaseMode(ReleaseMode.loop);
-      
-      // Пакет audioplayers сам ищет файлы в assets/, поэтому пишем путь относительно assets/
       await _skyFreedomPlayer.play(AssetSource('music/sky_freedom.mp3'));
       print("🚀 Финальная музыка триумфа 'sky_freedom' успешно запущена.");
     } catch (e) {
@@ -232,27 +260,25 @@ static Future<void> playPaperRustle() async {
   static Future<void> switchToEternalLoopWithFade() async {
     try {
       _isFadeOutCancelled = false;
-      double currentVolume = 1.0;
+      double currentVolume = masterVolume; // Стартуем с текущей громкости из настроек
+      double step = masterVolume / 20;     // Вычисляем шаг снижения за 20 тактов
       
       print("⏳ Начинается плавное затухание музыки триумфа...");
 
-      // Честный асинхронный цикл затухания: 20 шагов по 75 миллисекунд = ровно 1.5 секунды!
       for (int i = 0; i < 20; i++) {
-        // Если игрок нажал "В МЕНЮ" и звуки экстренно очистили — мгновенно выходим из цикла
         if (_isFadeOutCancelled) return;
 
-        currentVolume -= 0.05; // Снижаем громкость на 5% за шаг
+        currentVolume -= step;
         if (currentVolume < 0.0) currentVolume = 0.0;
 
         await _skyFreedomPlayer.setVolume(currentVolume);
         await Future.delayed(const Duration(milliseconds: 75));
       }
 
-      // Как только громкость упала до нуля — намертво останавливаем плеер первой части
       await _skyFreedomPlayer.stop();
 
-      // Моментально запускаем зловещую тему кукловода Дона Моллюска (Часть 2)
-      await _eternalLoopPlayer.setVolume(1.0);
+      // Запускаем тему кукловода строго на уровне общей громкости
+      await _eternalLoopPlayer.setVolume(masterVolume);
       await _eternalLoopPlayer.setReleaseMode(ReleaseMode.loop);
       await _eternalLoopPlayer.play(AssetSource('music/eternal_loop.mp3'));
       
@@ -261,6 +287,7 @@ static Future<void> playPaperRustle() async {
       print("Ошибка при переключении музыки с затуханием: $e");
     }
   }
+
 
   /// 3. Полная экстренная зачистка финальных плееров (вызывать при выходе в Главное меню)
   static void stopFinalComicAudio() async {
@@ -315,7 +342,7 @@ static Future<void> playPaperRustle() async {
   static Future<void> startCastleDrops() async {
     try {
       await _rainPlayer.stop();
-      await _rainPlayer.setVolume(0.85);
+      await _rainPlayer.setVolume(0.85 * masterVolume);
       await _rainPlayer.setReleaseMode(ReleaseMode.loop);
       await _rainPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.lowLatency);
     } catch (e) {
@@ -325,10 +352,10 @@ static Future<void> playPaperRustle() async {
 
   // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОДЫ БОССА В КЛАССЕ AUDIO_MANAGER (LIB/AUDIO_MANAGER.DART):
 
-  // Чистый запуск фоновой музыки капель арены (Фаза 1)
+    // Чистый запуск фоновой музыки капель арены (Фаза 1)
   static void startLevel6BattleMusic() {
     try {
-      _level6MusicPlayer.setVolume(1.0);
+      _level6MusicPlayer.setVolume(masterVolume);
       _level6MusicPlayer.setReleaseMode(ReleaseMode.loop);
       _level6MusicPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.lowLatency);
     } catch (e) {
@@ -339,14 +366,15 @@ static Future<void> playPaperRustle() async {
   // Чистый запуск боевого рока (Фаза 2)
   static void switchToBossPhase2Music() {
     try {
-      _rainPlayer.setVolume(0.30); // Приглушаем сквозной фон
-      _level6MusicPlayer.setVolume(1.0);
+      _rainPlayer.setVolume(0.30 * masterVolume); // Приглушаем сквозной фон пропорционально общей громкости
+      _level6MusicPlayer.setVolume(masterVolume);
       _level6MusicPlayer.setReleaseMode(ReleaseMode.loop);
       _level6MusicPlayer.play(AssetSource('music/boss_battle.mp3'), mode: PlayerMode.lowLatency);
     } catch (e) {
       print("Ошибка старта рока Фазы 2: $e");
     }
   }
+
 
 
 
@@ -381,6 +409,7 @@ static Future<void> playPaperRustle() async {
     _isStretching = true;
     try {
       await _stretchPlayer.stop();
+      await _stretchPlayer.setVolume(masterVolume);
       await _stretchPlayer.play(AssetSource('audio/sling_stretch.MP3'));
     } catch (e) {
       print("Ошибка stretch: $e");
@@ -418,7 +447,7 @@ static Future<void> playPaperRustle() async {
       // Чистый параллельный поток низкого приоритета задержки, чтобы звук гремел при каждом таране
       final AudioPlayer hitPlayer = AudioPlayer();
       await hitPlayer.setReleaseMode(ReleaseMode.release);
-      await hitPlayer.setVolume(1.0); // Удар по боссу должен быть максимально громким!
+      await hitPlayer.setVolume(1.0 * masterVolume);
       await hitPlayer.play(AssetSource('audio/pig_hit$num.MP3'), mode: PlayerMode.lowLatency);
       
       hitPlayer.onPlayerComplete.listen((_) => hitPlayer.dispose());
@@ -471,7 +500,7 @@ static Future<void> playPaperRustle() async {
       
       // Отключаем бесконечный повтор для эффекта победы
       await _fxPlayer.setReleaseMode(ReleaseMode.release);
-      
+      await _fxPlayer.setVolume(masterVolume);
       // 2. ИСПРАВЛЕНО: Перенесли трек на _fxPlayer, чтобы он больше не затирал _finalMenuPlayer!
       await _fxPlayer.play(AssetSource('audio/victory_screamer.MP3'));
       print("Звук победы успешно запущен на канале эффектов в один поток.");
@@ -484,7 +513,7 @@ static Future<void> playPaperRustle() async {
   static Future<void> playCastleCollapse() async {
     try {
       await _fxPlayer.stop();
-      await _fxPlayer.setVolume(1.0);
+      await _fxPlayer.setVolume(1.0 * masterVolume);
       await _fxPlayer.play(AssetSource('audio/stone_break.mp3'));
     } catch (e) {
       print("Ошибка звука обрушения потолка: $e");
@@ -496,6 +525,7 @@ static Future<void> playPaperRustle() async {
     try {
       await _fxPlayer.stop();
       await _fxPlayer.setReleaseMode(ReleaseMode.release);
+      await _fxPlayer.setVolume(masterVolume);
       await _fxPlayer.play(AssetSource('audio/game_over_fail.MP3'));
     } catch (e) {
       print("Ошибка звука поражения: $e");
@@ -511,6 +541,7 @@ static Future<void> playPaperRustle() async {
 
       await player.stop();
       await player.setReleaseMode(ReleaseMode.release);
+      await player.setVolume(masterVolume);
       await player.play(AssetSource(assetPath), mode: PlayerMode.lowLatency);
     } catch (e) {
       print("Ошибка пула мелких эффектов: $e");
@@ -573,7 +604,7 @@ static Future<void> playPaperRustle() async {
       // Создаем отдельный временный плеер, чтобы звук грома накладывался на дождь
       final AudioPlayer thunderPlayer = AudioPlayer();
       await thunderPlayer.setReleaseMode(ReleaseMode.release);
-      await thunderPlayer.setVolume(0.85); // Делаем гром достаточно мощным
+      await thunderPlayer.setVolume(0.85 * masterVolume);
       await thunderPlayer.play(AssetSource('audio/thunder_strike.mp3'), mode: PlayerMode.lowLatency);
       
       // Сами чистим память после окончания раската
@@ -618,7 +649,7 @@ static Future<void> playPaperRustle() async {
   static Future<void> playAchievement() async {
     try {
       await _fxPlayer.stop();
-      await _fxPlayer.setVolume(1.0);
+      await _fxPlayer.setVolume(1.0 * masterVolume);
       await _fxPlayer.play(AssetSource('audio/achievement_unlocked.mp3'));
     } catch (e) {
       print("КРИТИЧЕСКАЯ ОШИБКА ФАНФАР МЕДАЛИ: $e");
