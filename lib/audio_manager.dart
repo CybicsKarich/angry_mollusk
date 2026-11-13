@@ -49,11 +49,6 @@ class AudioManager {
   }
 
 
-
-  
-    // Геттер для получения текущего состояния фонового плеера (нужен для main.dart)
-  static AudioPlayer get menuPlayer => _finalMenuPlayer;
-
   // Метод для изменения громкости музыки на лету из экрана настроек
   static Future<void> setMenuVolume(double volume) async {
     await _finalMenuPlayer.setVolume(volume);
