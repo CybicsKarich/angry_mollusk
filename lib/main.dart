@@ -161,18 +161,20 @@ class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObse
     @override
   void initState() {
     super.initState();
-    // Включаем слежку за тем, свернули ли игру
     WidgetsBinding.instance.addObserver(this);
-    
-    // Принудительно выжигаем все игровые шумы
     AudioManager.stopAllLevelSounds();
     
-    // Инициализируем менеджер и запускаем фон на настроенной громкости
     AudioManager.init().then((_) {
-      AudioManager.setMenuVolume(_currentVolume);
+      if (mounted) {
+        setState(() {
+          _currentVolume = AudioManager.masterVolume; // Берём сохранённую громкость
+        });
+      }
+      AudioManager.setMasterVolume(_currentVolume);
       AudioManager.playBackgroundMusic();
     });
   }
+
 
 
     @override
@@ -223,13 +225,13 @@ class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObse
 
 
 
-    void _openSettings() async {
+      void _openSettings() async {
     final updatedVolume = await Navigator.push<double>(
       context,
       MaterialPageRoute(
         builder: (context) => SettingsScreen(
-          initialVolume: _currentVolume,
-          audioPlayer: AudioManager.menuPlayer, // Передаем глобальный статический плеер
+          initialVolume: AudioManager.masterVolume,
+          audioPlayer: AudioManager.menuPlayer,
         ),
       ),
     );
@@ -237,9 +239,10 @@ class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObse
       setState(() {
         _currentVolume = updatedVolume;
       });
-      AudioManager.setMenuVolume(_currentVolume); // Меняем звук глобально
+      await AudioManager.setMasterVolume(_currentVolume);
     }
   }
+
 
 
 
@@ -435,14 +438,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blueGrey),
                   ),
                   const SizedBox(height: 10),
-                  Slider(
+                                    Slider(
                     value: _volume,
                     min: 0.0,
                     max: 1.0,
                     activeColor: Colors.orange,
                     onChanged: (newValue) {
                       setState(() => _volume = newValue);
-                      widget.audioPlayer.setVolume(_volume); // Меняем звук на лету
+                      AudioManager.setMasterVolume(_volume); // Меняем громкость ВСЕХ плееров сразу
                     },
                   ),
                   Text('${(_volume * 100).toStringAsFixed(0)}%', style: const TextStyle(fontWeight: FontWeight.bold)),
