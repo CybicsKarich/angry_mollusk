@@ -11,6 +11,8 @@ import 'svinomatkin_comic_screen.dart';
 import 'level6_comic_screen.dart';
 import 'level6_bad_route_screen.dart';
 import 'splash_screen.dart';
+import 'controls_editor_screen.dart';
+
 
 
 
