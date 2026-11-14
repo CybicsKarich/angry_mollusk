@@ -449,9 +449,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     },
                   ),
                   Text('${(_volume * 100).toStringAsFixed(0)}%', style: const TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
+                  
+                  // НОВАЯ КНОПКА НАСТРОЙКИ УПРАВЛЕНИЯ 6 УРОВНЯ
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const ControlsEditorScreen()),
+                        );
+                      },
+                      icon: const Icon(Icons.gamepad_rounded, color: Colors.white),
+                      label: const Text('УПРАВЛЕНИЕ (6 УРОВЕНЬ)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0288D1),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () => Navigator.pop(context, _volume), // Кнопка назад
+                    onPressed: () => Navigator.pop(context, _volume),
                     style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
                     child: const Text('НАЗАД', style: TextStyle(color: Colors.white)),
                   ),
