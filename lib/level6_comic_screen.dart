@@ -6,6 +6,8 @@ import 'main.dart';
 import 'level6_bad_route_screen.dart';
 import 'level6_case07_screen.dart';
 import 'level6_victory_comic_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class Level6GoodRouteScreen extends StatefulWidget {
   const Level6GoodRouteScreen({super.key});
@@ -65,6 +67,13 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
   bool _btnLeftPressed = false;
   bool _btnRightPressed = false;
   bool _btnJumpPressed = false;
+  double _btnLeftX = 0.05;
+  double _btnLeftY = 0.78;
+  double _btnRightX = 0.17;
+  double _btnRightY = 0.78;
+  double _btnJumpX = 0.85;
+  double _btnJumpY = 0.78;
+  double _btnScale = 1.0; 
 
   // ИСПРАВЛЕНО: Каменная баррикада смещена намного левее (на 0.45)
   bool _isBarricadeAlive = true; 
@@ -129,9 +138,24 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
     });
     _gameLoopTicker.start();
     AudioManager.isLevel6ArenaActive = true;
+    _loadCustomControls();
   }
 
 
+  Future<void> _loadCustomControls() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() {
+      _btnLeftX = prefs.getDouble('ctrl_left_x') ?? 0.05;
+      _btnLeftY = prefs.getDouble('ctrl_left_y') ?? 0.78;
+      _btnRightX = prefs.getDouble('ctrl_right_x') ?? 0.17;
+      _btnRightY = prefs.getDouble('ctrl_right_y') ?? 0.78;
+      _btnJumpX = prefs.getDouble('ctrl_jump_x') ?? 0.85;
+      _btnJumpY = prefs.getDouble('ctrl_jump_y') ?? 0.78;
+      _btnScale = prefs.getDouble('ctrl_scale') ?? 1.0;
+    });
+  }
+  
   void _rescueCastleDropsOnInput() {
     // Если Шериф в обычном режиме (не орет под таблеткой) и босс жив
     if (!_isAngryMode && _bossCurrentHp > 0) {
@@ -1398,49 +1422,99 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
             ),
           ),
 
+                    // Кнопка ВЛЕВО (позиция и размер из настроек)
           Positioned(
-              bottom: 16, left: 20,
-              child: Row(
-                children: [
-                  // Стрелка НАЗАД (УВЕЛИЧЕНА в 1.3 раза: 50 -> 65)
-                  GestureDetector(
-                    onTapDown: (_) => setState(() => _btnLeftPressed = true),
-                    onTapUp: (_) => setState(() => _btnLeftPressed = false),
-                    onTapCancel: () => setState(() => _btnLeftPressed = false),
-                    child: Container(
-                      width: 65, height: 65,
-                      decoration: BoxDecoration(
-                        color: _btnLeftPressed ? const Color(0xAAFF1744) : Colors.white12,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white60, width: 1.5),
-                      ),
-                      child: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 28), // Размер иконки увеличен
-                    ),
-                  ),
-                  const SizedBox(width: 20), // Чуть расширили зазор между кнопками для удобства больших пальцев
-                  // Стрелка ВПЕРЁД (УВЕЛИЧЕНА в 1.3 раза: 50 -> 65)
-                  GestureDetector(
-                    onTapDown: (_) => setState(() => _btnRightPressed = true),
-                    onTapUp: (_) => setState(() => _btnRightPressed = false),
-                    onTapCancel: () => setState(() => _btnRightPressed = false),
-                    child: Container(
-                      width: 65, height: 65,
-                      decoration: BoxDecoration(
-                        color: _btnRightPressed ? const Color(0xAAFF1744) : Colors.white12,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: _bossState == BossState.dizzy
-                              ? Color.lerp(Colors.white60, Colors.greenAccent, (sin(_staggerEffectTimer * 8.0) + 1.0) / 2.0)!
-                              : Colors.white60,
-                          width: _bossState == BossState.dizzy ? 2.5 : 1.5,
-                        ),
-                      ),
-                      child: const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 28),
-                    ),
-                  ),
-                ],
+            left: _btnLeftX * size.width,
+            top: _btnLeftY * size.height,
+            child: GestureDetector(
+              onTapDown: (_) => setState(() => _btnLeftPressed = true),
+              onTapUp: (_) => setState(() => _btnLeftPressed = false),
+              onTapCancel: () => setState(() => _btnLeftPressed = false),
+              child: Container(
+                width: 65 * _btnScale,
+                height: 65 * _btnScale,
+                decoration: BoxDecoration(
+                  color: _btnLeftPressed ? const Color(0xAAFF1744) : Colors.white12,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white60, width: 1.5),
+                ),
+                child: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 28 * _btnScale),
               ),
             ),
+          ),
+
+          // Кнопка ВПРАВО (позиция и размер из настроек)
+          Positioned(
+            left: _btnRightX * size.width,
+            top: _btnRightY * size.height,
+            child: GestureDetector(
+              onTapDown: (_) => setState(() => _btnRightPressed = true),
+              onTapUp: (_) => setState(() => _btnRightPressed = false),
+              onTapCancel: () => setState(() => _btnRightPressed = false),
+              child: Container(
+                width: 65 * _btnScale,
+                height: 65 * _btnScale,
+                decoration: BoxDecoration(
+                  color: _btnRightPressed ? const Color(0xAAFF1744) : Colors.white12,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: _bossState == BossState.dizzy
+                        ? Color.lerp(Colors.white60, Colors.greenAccent, (sin(_staggerEffectTimer * 8.0) + 1.0) / 2.0)!
+                        : Colors.white60,
+                    width: _bossState == BossState.dizzy ? 2.5 : 1.5,
+                  ),
+                ),
+                child: Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 28 * _btnScale),
+              ),
+            ),
+          ),
+
+          // Кнопка ПРЫЖОК (позиция и размер из настроек)
+          Positioned(
+            left: _btnJumpX * size.width,
+            top: _btnJumpY * size.height,
+            child: GestureDetector(
+              onTapDown: (_) {
+                if (!_vanyaIsJumping) {
+                  setState(() {
+                    _btnJumpPressed = true;
+                    _vanyaIsJumping = true;
+                    
+                    bool currentlyInOil = _isOilOnFloor && _oilSpitX > 0 && (_vanyaX - _oilSpitX).abs() <= 0.08;
+                    double jumpPower = currentlyInOil ? 0.25 : 1.0; 
+
+                    if (_btnRightPressed) {
+                      _vanyaVy = -4.1 * jumpPower; 
+                      _vanyaVx = 0.16; 
+                    } else if (_btnLeftPressed) {
+                      _vanyaVy = -4.1 * jumpPower;
+                      _vanyaVx = -0.16; 
+                    } else {
+                      _vanyaVy = -3.9 * jumpPower; 
+                    }
+                  });
+                }
+              },
+              onTapUp: (_) => setState(() => _btnJumpPressed = false),
+              onTapCancel: () => setState(() => _btnJumpPressed = false),
+              child: Container(
+                width: 75 * _btnScale,
+                height: 75 * _btnScale,
+                decoration: BoxDecoration(
+                  color: _btnJumpPressed ? const Color(0xAAFF1744) : Colors.white12,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: _bossState == BossState.dizzy
+                        ? Color.lerp(Colors.white60, Colors.greenAccent, (sin(_staggerEffectTimer * 8.0) + 1.0) / 2.0)!
+                        : Colors.white60,
+                    width: _bossState == BossState.dizzy ? 2.5 : 1.8,
+                  ),
+                ),
+                child: Icon(Icons.arrow_upward_rounded, color: Colors.white, size: 34 * _btnScale),
+              ),
+            ),
+          ),
+
 
            Positioned(
               bottom: 16, right: 24,
