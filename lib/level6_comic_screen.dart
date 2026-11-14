@@ -1516,50 +1516,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
           ),
 
 
-           Positioned(
-              bottom: 16, right: 24,
-              child: GestureDetector(
-                  onTapDown: (_) {
-                  if (!_vanyaIsJumping) {
-                    setState(() {
-                      _btnJumpPressed = true;
-                      _vanyaIsJumping = true;
-                      
-                      bool currentlyInOil = _isOilOnFloor && _oilSpitX > 0 && (_vanyaX - _oilSpitX).abs() <= 0.08;
-                      double jumpPower = currentlyInOil ? 0.25 : 1.0; 
-
-                      if (_btnRightPressed) {
-                        _vanyaVy = -4.1 * jumpPower; 
-                        // ИСПРАВЛЕНО ТОЧЕЧНО: МеняемVx (импульс скорости полета вперед), а не координату X!
-                        _vanyaVx = 0.16; 
-                      } else if (_btnLeftPressed) {
-                        _vanyaVy = -4.1 * jumpPower;
-                        // ИСПРАВЛЕНО ТОЧЕЧНО: МеняемVx (импульс скорости полета назад), а не координату X!
-                        _vanyaVx = -0.16; 
-                      } else {
-                        _vanyaVy = -3.9 * jumpPower; 
-                      }
-                    });
-                  }
-                },
-                onTapUp: (_) => setState(() => _btnJumpPressed = false),
-                onTapCancel: () => setState(() => _btnJumpPressed = false),
-                child: Container(
-                  width: 75, height: 75, // УВЕЛИЧЕНА в 1.3 раза: 58 -> 75
-                  decoration: BoxDecoration(
-                    color: _btnJumpPressed ? const Color(0xAAFF1744) : Colors.white12,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: _bossState == BossState.dizzy
-                          ? Color.lerp(Colors.white60, Colors.greenAccent, (sin(_staggerEffectTimer * 8.0) + 1.0) / 2.0)!
-                          : Colors.white60,
-                      width: _bossState == BossState.dizzy ? 2.5 : 1.8,
-                    ),
-                  ),
-                  child: const Icon(Icons.arrow_upward_rounded, color: Colors.white, size: 34), // Размер иконки увеличен
-                ),
-              ),
-            ),
+           
 
           // Экран триумфа, если тестовый босс полностью повержен
           if (_bossCurrentHp <= 0)
