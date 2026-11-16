@@ -34,10 +34,10 @@ class AudioManager {
     await prefs.setDouble('game_master_volume', masterVolume);
 
     // Моментально обновляем громкость у всех постоянных плееров
-    await _finalMenuPlayer.setVolume(masterVolume);
+    await _finalMenuPlayer.setVolume(0.5 * masterVolume);
     await _stretchPlayer.setVolume(masterVolume);
     await _fxPlayer.setVolume(masterVolume);
-    await _rainPlayer.setVolume(0.45 * masterVolume);
+    await _rainPlayer.setVolume(0.5 * masterVolume);
     await _bossMusicPlayer.setVolume(masterVolume);
     await _level6MusicPlayer.setVolume(masterVolume);
     await _skyFreedomPlayer.setVolume(masterVolume);
@@ -79,6 +79,7 @@ class AudioManager {
     try {
       if (_finalMenuPlayer.state != PlayerState.playing) {
         await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
+        await _finalMenuPlayer.setVolume(0.5 * masterVolume);
         await _finalMenuPlayer.play(AssetSource('music/bg_music.mp3'));
       }
     } catch (e) {
@@ -224,7 +225,7 @@ static Future<void> playPaperRustle() async {
       
       // Запускаем дефолтную музыку главного меню
       await _finalMenuPlayer.stop();
-      await _finalMenuPlayer.setVolume(0.40 * masterVolume);
+      await _finalMenuPlayer.setVolume(0.50 * masterVolume);
       await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
       await _finalMenuPlayer.play(AssetSource('music/bg_music.mp3'), mode: PlayerMode.mediaPlayer); 
       print("Все боевые плееры зачищены. Включена музыка меню.");
@@ -553,7 +554,7 @@ static Future<void> playPaperRustle() async {
     static Future<void> startLevel5Rain() async {
     try {
       await _finalMenuPlayer.stop(); // Гарантированно убираем музыку меню во время ливня
-      await _rainPlayer.setVolume(0.45 * masterVolume); 
+      await _rainPlayer.setVolume(0.5 * masterVolume); 
       await _rainPlayer.setReleaseMode(ReleaseMode.loop); 
       await _rainPlayer.play(AssetSource('music/rain_ambient.mp3'), mode: PlayerMode.lowLatency);
     } catch (e) {print("Ошибка запуска звука капель кочка: $e");}
@@ -630,7 +631,7 @@ static Future<void> playPaperRustle() async {
       await _finalMenuPlayer.stop();
       await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
       
-      // Запускаем фоновую музыку обратно на чистом канале
+      await _finalMenuPlayer.setVolume(0.5 * masterVolume);
       await _finalMenuPlayer.play(AssetSource('music/bg_music.mp3'));
       print("Полная зачистка всех аудиопотоков (включая _fxPlayer) завершена.");
     } catch (e) {
