@@ -222,6 +222,7 @@ class _TrueEndingScreenState extends State<TrueEndingScreen> with TickerProvider
                                   AudioManager.isLevel6ArenaActive = false;
                                   AudioManager.resetTokensForNextBird();
                                   AudioManager.stopFinalComicAudio();
+                                  AudioManager.stopLevelAudioAndPlayMenu();
                                   Navigator.of(context).popUntil((route) => route.isFirst); 
                                 },
                                 child: const Text(
