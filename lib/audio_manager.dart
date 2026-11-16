@@ -337,41 +337,39 @@ static Future<void> playPaperRustle() async {
   }
 
  
-  static Future<void> startCastleDrops() async {
+    static Future<void> startCastleDrops() async {
     try {
       await _rainPlayer.stop();
       await _rainPlayer.setVolume(0.85 * masterVolume);
       await _rainPlayer.setReleaseMode(ReleaseMode.loop);
-      await _rainPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.lowLatency);
+      await _rainPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.mediaPlayer);
     } catch (e) {
       print("Ошибка старта капель комикса: $e");
     }
   }
 
-  // ПОЛНОСТЬЮ ЗАМЕНИТЬ МЕТОДЫ БОССА В КЛАССЕ AUDIO_MANAGER (LIB/AUDIO_MANAGER.DART):
 
-    // Чистый запуск фоновой музыки капель арены (Фаза 1)
-  static void startLevel6BattleMusic() {
+    static void startLevel6BattleMusic() {
     try {
       _level6MusicPlayer.setVolume(masterVolume);
       _level6MusicPlayer.setReleaseMode(ReleaseMode.loop);
-      _level6MusicPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.lowLatency);
+      _level6MusicPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.mediaPlayer);
     } catch (e) {
       print("Ошибка старта музыки Фазы 1: $e");
     }
   }
 
-  // Чистый запуск боевого рока (Фаза 2)
   static void switchToBossPhase2Music() {
     try {
-      _rainPlayer.setVolume(0.30 * masterVolume); // Приглушаем сквозной фон пропорционально общей громкости
+      _rainPlayer.setVolume(0.50 * masterVolume);
       _level6MusicPlayer.setVolume(masterVolume);
       _level6MusicPlayer.setReleaseMode(ReleaseMode.loop);
-      _level6MusicPlayer.play(AssetSource('music/boss_battle.mp3'), mode: PlayerMode.lowLatency);
+      _level6MusicPlayer.play(AssetSource('music/boss_battle.mp3'), mode: PlayerMode.mediaPlayer);
     } catch (e) {
       print("Ошибка старта рока Фазы 2: $e");
     }
   }
+
 
 
 
@@ -551,14 +549,17 @@ static Future<void> playPaperRustle() async {
   // БЛОК ГРОЗЫ И ЛИВНЯ ДЛЯ ЭПИЧНОГО 5 УРОВНЯ
   // =========================================================================
 
-    static Future<void> startLevel5Rain() async {
+      static Future<void> startLevel5Rain() async {
     try {
-      await _finalMenuPlayer.stop(); // Гарантированно убираем музыку меню во время ливня
-      await _rainPlayer.setVolume(0.5 * masterVolume); 
+      await _finalMenuPlayer.stop();
+      await _rainPlayer.setVolume(0.50 * masterVolume); 
       await _rainPlayer.setReleaseMode(ReleaseMode.loop); 
-      await _rainPlayer.play(AssetSource('music/rain_ambient.mp3'), mode: PlayerMode.lowLatency);
-    } catch (e) {print("Ошибка запуска звука капель кочка: $e");}
+      await _rainPlayer.play(AssetSource('music/rain_ambient.mp3'), mode: PlayerMode.mediaPlayer);
+    } catch (e) {
+      print("Ошибка запуска звука дождя: $e");
+    }
   }
+
 
 
 
