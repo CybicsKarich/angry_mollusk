@@ -47,17 +47,20 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
         child: Column(
           children: [
             const SizedBox(height: 12),
-            Text(
-              _currentFrame <= 3 ? "ФИНАЛ: ТРИУМФ ШЕРИФА" : "ИСТИННЫЙ ФИНАЛ: ВЕЧНОЕ ДЕЖУРСТВО",
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w900,
-                color: Color(0xFFFF9800),
-                letterSpacing: 2.5,
-                shadows: [Shadow(color: Colors.black, blurRadius: 6, offset: Offset(2, 2))],
+            // Показываем заголовок ТОЛЬКО в 1-й части комикса (кадры 1-3)
+            if (_currentFrame <= 3) ...[
+              const Text(
+                "ФИНАЛ: ТРИУМФ ШЕРИФА",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFFFF9800),
+                  letterSpacing: 2.5,
+                  shadows: [Shadow(color: Colors.black, blurRadius: 6, offset: Offset(2, 2))],
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
+              const SizedBox(height: 12),
+            ],
 
             // ГЛАВНАЯ СЕТКА: Кадры накапливаются на экране по одному в ряд!
             Expanded(
