@@ -197,6 +197,7 @@ class _GoodEndingScreenState extends State<GoodEndingScreen> with SingleTickerPr
                               AudioManager.isLevel6ArenaActive = false;
                               AudioManager.resetTokensForNextBird();
                               AudioManager.stopFinalComicAudio();
+                              AudioManager.stopLevelAudioAndPlayMenu();
                               Navigator.of(context).popUntil((route) => route.isFirst); // Мгновенный сброс стейтов и вылет на Главный Экран
                             },
                             child: const Text(
