@@ -219,7 +219,8 @@ class _TrueEndingScreenState extends State<TrueEndingScreen> with TickerProvider
                                   backgroundColor: const Color(0xFF00FF66).withOpacity(0.04),
                                 ),
                                 onPressed: () {
-                                  // Полностью зачищаем вечные капли Моллюска и вылетаем в корень на Трамплин
+                                  AudioManager.isLevel6ArenaActive = false;
+                                  AudioManager.resetTokensForNextBird();
                                   AudioManager.stopFinalComicAudio();
                                   Navigator.of(context).popUntil((route) => route.isFirst); 
                                 },
