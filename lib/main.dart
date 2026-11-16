@@ -706,8 +706,7 @@ SizedBox(
     );
   }
 
-  // ПОЛНОСТЬЮ ЗАМЕНИ СТАРЫЙ МЕТОД _buildLevelCard НА ЭТОТ ЦЕЛЬНЫЙ ВАРИАНТ:
-Widget _buildLevelCard(String levelNumber, bool isActive) {
+  Widget _buildLevelCard(String levelNumber, bool isActive) {
   return Column(
     mainAxisSize: MainAxisSize.min,
     children: [
@@ -737,13 +736,10 @@ Widget _buildLevelCard(String levelNumber, bool isActive) {
               Navigator.push(context, MaterialPageRoute(builder: (context) => const ComicIntroScreen()));
               return;
             }
-             
-            // ДОБАВИТЬ СРАЗУ ПОСЛЕ ПРОВЕРКИ НА levelNumber == '4':
             if (levelNumber == '5') {
-              Navigator.push(context, MaterialPageRoute(builder: (context) =>  SvinomatkinComicScreen()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => SvinomatkinComicScreen()));
               return;
             }
-
             if (levelNumber == '6') {
               Navigator.push(context, MaterialPageRoute(builder: (context) => const Level6ComicScreen()));
               return;
@@ -776,22 +772,26 @@ Widget _buildLevelCard(String levelNumber, bool isActive) {
       ),
       const SizedBox(height: 8),
              
-      FutureBuilder<int>(
-        future: SharedPreferences.getInstance().then((prefs) => prefs.getInt('level_${levelNumber}_stars') ?? 0),
-        builder: (context, snapshot) {
-          final int savedStars = snapshot.data ?? 0;
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.star_rounded, size: 22, color: savedStars >= 1 ? const Color(0xFFFFD54F) : Colors.grey),
-              const SizedBox(width: 2),
-              Icon(Icons.star_rounded, size: 26, color: savedStars >= 2 ? const Color(0xFFFFD54F) : Colors.grey), 
-              const SizedBox(width: 2),
-              Icon(Icons.star_rounded, size: 22, color: savedStars >= 3 ? const Color(0xFFFFD54F) : Colors.grey),
-            ],
-          );
-        },
-      ),
+      // ИСПРАВЛЕНО: Убираем звёздочки для 6 уровня, оставляя пустой отступ для выравнивания ряда
+      if (levelNumber != '6')
+        FutureBuilder<int>(
+          future: SharedPreferences.getInstance().then((prefs) => prefs.getInt('level_${levelNumber}_stars') ?? 0),
+          builder: (context, snapshot) {
+            final int savedStars = snapshot.data ?? 0;
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.star_rounded, size: 22, color: savedStars >= 1 ? const Color(0xFFFFD54F) : Colors.grey),
+                const SizedBox(width: 2),
+                Icon(Icons.star_rounded, size: 26, color: savedStars >= 2 ? const Color(0xFFFFD54F) : Colors.grey), 
+                const SizedBox(width: 2),
+                Icon(Icons.star_rounded, size: 22, color: savedStars >= 3 ? const Color(0xFFFFD54F) : Colors.grey),
+              ],
+            );
+          },
+        )
+      else
+        const SizedBox(height: 26),
     ],
   );
 }
