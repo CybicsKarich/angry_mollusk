@@ -614,30 +614,38 @@ static Future<void> playPaperRustle() async {
     }
   }
 
-    static void stopAllLevelSounds() async {
+      static void stopAllLevelSounds() async {
     _isStretching = false;
-    await stopLevel5Rain(); // ГАРАНТИРОВАННО тушим дождь и капли 6 уровня!
+    isLevel6ArenaActive = false;
+    resetTokensForNextBird();
+    await stopLevel5Rain(); // Тушим дождь и капли замка
     
     try {
-      // Начисто тушим натяжение рогатки Вани
       await _stretchPlayer.stop();
+      await _fxPlayer.stop(); // Глушим замахи, удары босса (boss_whip, boss_strike) и ярость
       
-      // ИСПРАВЛЕНО: Намертво выключаем плеер эффектов, чтобы звук победы не циклился в меню!
-      await _fxPlayer.stop();
-       _isLevel6BattleMusicActive = false; // Сбрасываем замок музыки боя
-       await _bossMusicPlayer.stop();
+      // Глушим весь пул мелких звуковых эффектов
+      for (var player in _fxPool) {
+        await player.stop();
+      }
       
-      // Сбрасываем старый системный плеер меню
+      // Намертво останавливаем и выгружаем музыку 1-й и 2-й фазы 6-го уровня
+      _isLevel6BattleMusicActive = false;
+      await _bossMusicPlayer.stop();
+      await _level6MusicPlayer.stop();
+      await _level6MusicPlayer.release();
+      
+      // Перезапускаем фоновую музыку меню на ровной громкости 0.5
       await _finalMenuPlayer.stop();
-      await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
-      
       await _finalMenuPlayer.setVolume(0.5 * masterVolume);
-      await _finalMenuPlayer.play(AssetSource('music/bg_music.mp3'));
-      print("Полная зачистка всех аудиопотоков (включая _fxPlayer) завершена.");
+      await _finalMenuPlayer.setReleaseMode(ReleaseMode.loop);
+      await _finalMenuPlayer.play(AssetSource('music/bg_music.mp3'), mode: PlayerMode.mediaPlayer);
+      print("Полная зачистка всех аудиопотоков (включая 6 уровень) завершена.");
     } catch (e) {
       print("Ошибка при полной остановке звуков: $e");
     }
   }
+
 
 
 
