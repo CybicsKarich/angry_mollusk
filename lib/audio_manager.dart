@@ -68,10 +68,27 @@ class AudioManager {
     final prefs = await SharedPreferences.getInstance();
     masterVolume = prefs.getDouble('game_master_volume') ?? 0.5;
     
+    // Отключаем перехват аудиофокуса ТОЛЬКО для плеера музыки 6 уровня
+    await _level6MusicPlayer.setAudioContext(
+      AudioContext(
+        android: const AudioContextAndroid(
+          isSpeakerphoneOn: true,
+          stayAwake: true,
+          contentType: AndroidContentType.music,
+          usageType: AndroidUsageType.game,
+          audioFocus: AndroidAudioFocus.none, // Мелкие звуки не прерывают музыку босса
+        ),
+        iOS: AudioContextIOS(
+          category: AVAudioSessionCategory.ambient,
+        ),
+      ),
+    );
+
     _stretchPlayer.setReleaseMode(ReleaseMode.loop);
     _finalMenuPlayer.setReleaseMode(ReleaseMode.release);
     resetTokensForNextBird();
   }
+
 
 
     // === ВСTАВЛЯЙ НОВЫЙ МЕТОД СТРОГО СЮДА ===
@@ -339,32 +356,35 @@ static Future<void> playPaperRustle() async {
  
     static Future<void> startCastleDrops() async {
     try {
-      await _rainPlayer.stop();
+      if (_rainPlayer.state == PlayerState.playing) return;
       await _rainPlayer.setVolume(0.85 * masterVolume);
       await _rainPlayer.setReleaseMode(ReleaseMode.loop);
-      await _rainPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.mediaPlayer);
+      await _rainPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.lowLatency);
     } catch (e) {
       print("Ошибка старта капель комикса: $e");
     }
   }
 
 
-    static void startLevel6BattleMusic() {
+    static Future<void> startLevel6BattleMusic() async {
     try {
-      _level6MusicPlayer.setVolume(masterVolume);
-      _level6MusicPlayer.setReleaseMode(ReleaseMode.loop);
-      _level6MusicPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.mediaPlayer);
+      if (_level6MusicPlayer.state == PlayerState.playing) return;
+      await _level6MusicPlayer.setVolume(masterVolume);
+      await _level6MusicPlayer.setReleaseMode(ReleaseMode.loop);
+      await _level6MusicPlayer.play(AssetSource('music/castle_drops.mp3'), mode: PlayerMode.mediaPlayer);
     } catch (e) {
       print("Ошибка старта музыки Фазы 1: $e");
     }
   }
 
-  static void switchToBossPhase2Music() {
+  // Переключение на боевой рок Фазы 2 (однократный чистый переход)
+  static Future<void> switchToBossPhase2Music() async {
     try {
-      _rainPlayer.setVolume(0.50 * masterVolume);
-      _level6MusicPlayer.setVolume(masterVolume);
-      _level6MusicPlayer.setReleaseMode(ReleaseMode.loop);
-      _level6MusicPlayer.play(AssetSource('music/boss_battle.mp3'), mode: PlayerMode.mediaPlayer);
+      await _rainPlayer.setVolume(0.30 * masterVolume);
+      await _level6MusicPlayer.stop();
+      await _level6MusicPlayer.setVolume(masterVolume);
+      await _level6MusicPlayer.setReleaseMode(ReleaseMode.loop);
+      await _level6MusicPlayer.play(AssetSource('music/boss_battle.mp3'), mode: PlayerMode.mediaPlayer);
     } catch (e) {
       print("Ошибка старта рока Фазы 2: $e");
     }
@@ -549,12 +569,13 @@ static Future<void> playPaperRustle() async {
   // БЛОК ГРОЗЫ И ЛИВНЯ ДЛЯ ЭПИЧНОГО 5 УРОВНЯ
   // =========================================================================
 
-      static Future<void> startLevel5Rain() async {
+  static Future<void> startLevel5Rain() async {
     try {
       await _finalMenuPlayer.stop();
+      if (_rainPlayer.state == PlayerState.playing) return;
       await _rainPlayer.setVolume(0.50 * masterVolume); 
       await _rainPlayer.setReleaseMode(ReleaseMode.loop); 
-      await _rainPlayer.play(AssetSource('music/rain_ambient.mp3'), mode: PlayerMode.mediaPlayer);
+      await _rainPlayer.play(AssetSource('music/rain_ambient.mp3'), mode: PlayerMode.lowLatency);
     } catch (e) {
       print("Ошибка запуска звука дождя: $e");
     }
