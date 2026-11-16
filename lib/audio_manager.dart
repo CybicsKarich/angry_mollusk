@@ -212,6 +212,8 @@ static Future<void> playPaperRustle() async {
   // Обновляем метод полной очистки при выходе игрока в Главное Меню
   static Future<void> stopLevelAudioAndPlayMenu() async {
     try {
+      isLevel6ArenaActive = false;
+      resetTokensForNextBird();
       _isStretching = false;
       await _stretchPlayer.stop();
       await _fxPlayer.stop();
