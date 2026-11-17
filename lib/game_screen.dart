@@ -1163,65 +1163,208 @@ if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictor
     }
 
 
-    // Солнце (рисуется на фоне)
-    canvas.save();
-    final sunCenter = Offset(size.width * 0.15, size.height * 0.2);
-    final sunRadius = size.height * 0.08;
-    canvas.translate(sunCenter.dx, sunCenter.dy);
-    canvas.rotate(sunRotation);
-    canvas.drawCircle(Offset.zero, sunRadius, Paint()..color = const Color(0xFFFFF176));
-    final rayPaint = Paint()..color = const Color(0xFFFFF59D)..style = PaintingStyle.stroke..strokeWidth = 3;
-    for (int i = 0; i < 8; i++) {
-      canvas.rotate(pi / 4);
-      canvas.drawLine(Offset(sunRadius + 5, 0), Offset(sunRadius + 20, 0), rayPaint);
-    }
-    canvas.restore();
-      
-        if (currentLevel == 5) {
-      // РИСУЕМ ТЁМНЫЕ ТУЧИ ИЗ КОМИКСА ГЕНЕРАЛА
-      final stormCloudPaint = Paint()..color = const Color(0xFF37474F).withOpacity(0.9);
-      double stormX = (size.width * 0.1 + cloudOffset1 * size.width) % (size.width * worldWidthFactor + 200) - 100;
-      canvas.drawCircle(Offset(stormX, size.height * 0.12), 40, stormCloudPaint);
-      canvas.drawCircle(Offset(stormX + 45, size.height * 0.09), 55, stormCloudPaint);
-      canvas.drawCircle(Offset(stormX + 95, size.height * 0.12), 42, stormCloudPaint);
+       // =========================================================================
+    // 🎨 ОБНОВЛЁННЫЙ МНОГОСЛОЙНЫЙ ПАРАЛЛАКС-ФОН ДЛЯ УРОВНЕЙ 1–5
+    // =========================================================================
 
-            // НЕПРЕРЫВНЫЙ ЛИВЕНЬ: Рисуем косые нити дождя, бегущие по экрану
-      final rainPaint = Paint()
-        ..color = Colors.blue.shade100.withOpacity(0.25)
-        ..strokeWidth = 1.2;
-            
-      // ИСПРАВЛЕНО ТОЧЕЧНО: Возвращён твой оригинальный локальный Random(13)
-      final randRain = Random(13);
-      for (int i = 0; i < 60; i++) {
-        double rx = randRain.nextDouble() * size.width * worldWidthFactor;
-        double ry = randRain.nextDouble() * size.height * 0.83;
-        canvas.drawLine(Offset(rx, ry), Offset(rx + 8, ry + 25), rainPaint); // Косые капли ливня
+    // 1. СОЛНЦЕ С МЯГКИМ СВЕЧЕНИЕМ (ТОЛЬКО ДЛЯ 1–4 УРОВНЕЙ, НА 5 УРОВНЕ УБРАНО!)
+    if (currentLevel != 5) {
+      canvas.save();
+      // Лёгкий параллакс для солнца, чтобы оно величественно плыло на фоне
+      final sunCenter = Offset(size.width * 0.15 - (size.width * worldScrollX * 0.7), size.height * 0.20);
+      final sunRadius = size.height * 0.08;
+      canvas.translate(sunCenter.dx, sunCenter.dy);
+
+      // Мягкое полупрозрачное гало вокруг солнца
+      canvas.drawCircle(Offset.zero, sunRadius * 1.65, Paint()..color = const Color(0xFFFFF59D).withOpacity(0.25));
+      canvas.drawCircle(Offset.zero, sunRadius * 1.25, Paint()..color = const Color(0xFFFFF59D).withOpacity(0.45));
+
+      canvas.rotate(sunRotation);
+      canvas.drawCircle(Offset.zero, sunRadius, Paint()..color = const Color(0xFFFFF176));
+      final rayPaint = Paint()
+        ..color = const Color(0xFFFFF59D).withOpacity(0.8)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3;
+      for (int i = 0; i < 8; i++) {
+        canvas.rotate(pi / 4);
+        canvas.drawLine(Offset(sunRadius + 6, 0), Offset(sunRadius + 22, 0), rayPaint);
+      }
+      canvas.restore();
+    }
+
+    // 2. ОБЪЁМНЫЕ ОБЛАКА ИЛИ ГРОЗОВЫЕ ТУЧИ С ТЕНЯМИ
+    if (currentLevel == 5) {
+      // Объёмные грозовые тучи (многослойные, с фиолетово-графитовой тенью снизу)
+      for (int idx = 0; idx < 3; idx++) {
+        double baseShift = idx * size.width * 0.65;
+        double stormX = (size.width * 0.08 + baseShift + cloudOffset1 * size.width * 1.2) % (size.width * worldWidthFactor + 260) - 130;
+        double stormY = size.height * (0.11 + (idx % 2) * 0.05);
+
+        final darkBottom = Paint()..color = const Color(0xFF1C252C).withOpacity(0.95);
+        final midCloud = Paint()..color = const Color(0xFF37474F).withOpacity(0.92);
+        final topHighlight = Paint()..color = const Color(0xFF546E7A).withOpacity(0.55);
+
+        // Нижняя тяжёлая тень тучи
+        canvas.drawCircle(Offset(stormX + 10, stormY + 12), 42, darkBottom);
+        canvas.drawCircle(Offset(stormX + 55, stormY + 14), 52, darkBottom);
+        canvas.drawCircle(Offset(stormX + 105, stormY + 12), 40, darkBottom);
+
+        // Основное тело тучи
+        canvas.drawCircle(Offset(stormX, stormY), 40, midCloud);
+        canvas.drawCircle(Offset(stormX + 48, stormY - 12), 56, midCloud);
+        canvas.drawCircle(Offset(stormX + 100, stormY), 42, midCloud);
+
+        // Верхний отсвет
+        canvas.drawCircle(Offset(stormX + 45, stormY - 22), 34, topHighlight);
       }
     } else {
-      // Обычные мультяшные облака для 1-4 уровней
-      final cloudPaint = Paint()..color = Colors.white.withOpacity(0.85);
-      double c1X = (size.width * 0.3 + cloudOffset1 * size.width) % (size.width * worldWidthFactor + 200) - 100;
-      canvas.drawCircle(Offset(c1X, size.height * 0.15), 30, cloudPaint);
-      canvas.drawCircle(Offset(c1X + 35, size.height * 0.12), 42, cloudPaint);
-      canvas.drawCircle(Offset(c1X + 75, size.height * 0.15), 32, cloudPaint);
+      // Объёмные мультяшные облака для 1–4 уровней (с мягкой серо-голубой тенью)
+      for (int idx = 0; idx < 3; idx++) {
+        double baseShift = idx * size.width * 0.62;
+        double cX = (size.width * 0.25 + baseShift + cloudOffset1 * size.width) % (size.width * worldWidthFactor + 240) - 120;
+        double cY = size.height * (0.14 + (idx % 2) * 0.06);
+
+        final shadowCloud = Paint()..color = const Color(0xFFB3E5FC).withOpacity(0.75);
+        final mainCloud = Paint()..color = Colors.white.withOpacity(0.92);
+
+        // Нижняя тень облака
+        canvas.drawCircle(Offset(cX + 5, cY + 8), 28, shadowCloud);
+        canvas.drawCircle(Offset(cX + 38, cY + 10), 38, shadowCloud);
+        canvas.drawCircle(Offset(cX + 75, cY + 8), 30, shadowCloud);
+
+        // Пушистый белый верх
+        canvas.drawCircle(Offset(cX, cY), 30, mainCloud);
+        canvas.drawCircle(Offset(cX + 36, cY - 8), 42, mainCloud);
+        canvas.drawCircle(Offset(cX + 76, cY), 32, mainCloud);
+      }
     }
 
+    // 3. ДАЛЬНИЙ ПАРАЛЛАКС-ПЛАН: ГОРЫ И ХОЛМЫ НА ГОРИЗОНТЕ (БЕЗ ЗАМКА!)
+    canvas.save();
+    // Сдвигаем дальний фон медленнее камеры для эффекта глубины
+    canvas.translate(-size.width * worldScrollX * 0.55, 0);
+    final double horizonY = size.height * 0.83;
 
-    // Вода и океан тянутся до самого края фона уровня
-    canvas.drawRect(Rect.fromLTWH(0, size.height * 0.83, size.width * worldWidthFactor, size.height * 0.02), Paint()..color = const Color(0xFF29B6F6));
-    canvas.drawRect(Rect.fromLTWH(0, size.height * 0.85, size.width * worldWidthFactor, size.height * 0.15), Paint()..color = const Color(0xFF0288D1));
+    if (currentLevel == 5) {
+      // Мрачные скалистые пики на горизонте 5 уровня
+      final farPeakPaint = Paint()..color = const Color(0xFF161329);
+      final nearRidgePaint = Paint()..color = const Color(0xFF211C3A);
 
-    // Острова суши встают на свои места
+      final farPeaks = Path()
+        ..moveTo(-50, horizonY)
+        ..lineTo(size.width * 0.15, horizonY - size.height * 0.32)
+        ..lineTo(size.width * 0.35, horizonY - size.height * 0.14)
+        ..lineTo(size.width * 0.58, horizonY - size.height * 0.38)
+        ..lineTo(size.width * 0.82, horizonY - size.height * 0.16)
+        ..lineTo(size.width * 1.10, horizonY - size.height * 0.34)
+        ..lineTo(size.width * 1.45, horizonY)
+        ..close();
+      canvas.drawPath(farPeaks, farPeakPaint);
+
+      final nearRidge = Path()
+        ..moveTo(-50, horizonY)
+        ..lineTo(size.width * 0.08, horizonY - size.height * 0.18)
+        ..lineTo(size.width * 0.28, horizonY - size.height * 0.08)
+        ..lineTo(size.width * 0.48, horizonY - size.height * 0.22)
+        ..lineTo(size.width * 0.72, horizonY - size.height * 0.10)
+        ..lineTo(size.width * 0.96, horizonY - size.height * 0.20)
+        ..lineTo(size.width * 1.35, horizonY)
+        ..close();
+      canvas.drawPath(nearRidge, nearRidgePaint);
+    } else {
+      // Дальние голубоватые горы для 1–4 уровней
+      final mountainPaint = Paint()..color = const Color(0xFF90CAF9).withOpacity(0.55);
+      final snowCapPaint = Paint()..color = Colors.white.withOpacity(0.45);
+
+      final mountains = Path()
+        ..moveTo(-50, horizonY)
+        ..lineTo(size.width * 0.18, horizonY - size.height * 0.30)
+        ..lineTo(size.width * 0.38, horizonY - size.height * 0.12)
+        ..lineTo(size.width * 0.62, horizonY - size.height * 0.35)
+        ..lineTo(size.width * 0.88, horizonY - size.height * 0.14)
+        ..lineTo(size.width * 1.15, horizonY - size.height * 0.28)
+        ..lineTo(size.width * 1.45, horizonY)
+        ..close();
+      canvas.drawPath(mountains, mountainPaint);
+
+      // Лёгкие снежные шапки на пиках
+      final cap1 = Path()
+        ..moveTo(size.width * 0.18, horizonY - size.height * 0.30)
+        ..lineTo(size.width * 0.13, horizonY - size.height * 0.22)
+        ..lineTo(size.width * 0.18, horizonY - size.height * 0.24)
+        ..lineTo(size.width * 0.23, horizonY - size.height * 0.22)
+        ..close();
+      canvas.drawPath(cap1, snowCapPaint);
+
+      final cap2 = Path()
+        ..moveTo(size.width * 0.62, horizonY - size.height * 0.35)
+        ..lineTo(size.width * 0.56, horizonY - size.height * 0.26)
+        ..lineTo(size.width * 0.62, horizonY - size.height * 0.28)
+        ..lineTo(size.width * 0.68, horizonY - size.height * 0.26)
+        ..close();
+      canvas.drawPath(cap2, snowCapPaint);
+
+      // Мягкие зелёные холмы среднего плана
+      final farHillsPaint = Paint()..color = const Color(0xFF81C784).withOpacity(0.75);
+      final nearHillsPaint = Paint()..color = const Color(0xFF66BB6A).withOpacity(0.85);
+
+      final farHills = Path()
+        ..moveTo(-50, horizonY)
+        ..quadraticBezierTo(size.width * 0.15, horizonY - size.height * 0.16, size.width * 0.35, horizonY - size.height * 0.05)
+        ..quadraticBezierTo(size.width * 0.55, horizonY - size.height * 0.18, size.width * 0.78, horizonY - size.height * 0.04)
+        ..quadraticBezierTo(size.width * 1.05, horizonY - size.height * 0.15, size.width * 1.40, horizonY)
+        ..close();
+      canvas.drawPath(farHills, farHillsPaint);
+
+      final nearHills = Path()
+        ..moveTo(-50, horizonY)
+        ..quadraticBezierTo(size.width * 0.25, horizonY - size.height * 0.10, size.width * 0.50, horizonY - size.height * 0.02)
+        ..quadraticBezierTo(size.width * 0.80, horizonY - size.height * 0.12, size.width * 1.35, horizonY)
+        ..close();
+      canvas.drawPath(nearHills, nearHillsPaint);
+    }
+    canvas.restore();
+
+    // 4. ЖИВОЙ ОКЕАН С ГРАДИЕНТОМ И БЛИКАМИ ВОЛН
+    final waterRect = Rect.fromLTWH(0, size.height * 0.83, size.width * worldWidthFactor, size.height * 0.17);
+    final waterPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: currentLevel == 5
+            ? [const Color(0xFF0D47A1), const Color(0xFF051E42)] // Тёмное штормовое море на 5 уровне
+            : [const Color(0xFF29B6F6), const Color(0xFF0277BD)], // Яркий тропический океан на 1–4
+      ).createShader(waterRect);
+    canvas.drawRect(waterRect, waterPaint);
+
+    // Светлая кромка прибоя у горизонта
+    canvas.drawRect(
+      Rect.fromLTWH(0, size.height * 0.83, size.width * worldWidthFactor, 3),
+      Paint()..color = (currentLevel == 5 ? Colors.lightBlueAccent : Colors.white).withOpacity(0.35),
+    );
+
+    // Плавные анимированные блики волн на воде
+    final wavePaint = Paint()
+      ..color = Colors.white.withOpacity(currentLevel == 5 ? 0.12 : 0.28)
+      ..strokeWidth = 2.0
+      ..strokeCap = StrokeCap.round;
+
+    for (int i = 0; i < 14; i++) {
+      double waveX = ((i * size.width * 0.16) + sin(sunRotation * 2 + i) * 18) % (size.width * worldWidthFactor);
+      double waveY = size.height * (0.86 + (i % 3) * 0.04);
+      canvas.drawLine(Offset(waveX, waveY), Offset(waveX + 24, waveY), wavePaint);
+    }
+
+    // 5. ОСТРОВА СУШИ ВСТАЮТ НА СВОИ МЕСТА
     _renderIsland(canvas, size, 0.0, 0.25); // Островок рогатки
     
-        if (currentLevel == 1) {
+    if (currentLevel == 1) {
       _renderIsland(canvas, size, 0.55, 1.0); 
     } else if (currentLevel == 2) {
       _renderIsland(canvas, size, 1.28, 1.75); 
     } else if (currentLevel == 3 || currentLevel == 4) {
       _renderIsland(canvas, size, 1.15, 1.95); 
     } else if (currentLevel == 5) {
-      // На 5 уровне правый остров увеличен (до 2.2), чтобы замок-монолит крепко стоял на земле
       _renderIsland(canvas, size, 1.15, 2.20); 
     }
 
@@ -1835,56 +1978,91 @@ if (hasWantedPoster && !showWantedBig) {
   }
 
 
-    void _renderIsland(Canvas canvas, Size size, double startPct, double endPct) {
+      void _renderIsland(Canvas canvas, Size size, double startPct, double endPct) {
     final startX = size.width * startPct;
     final endX = size.width * endPct;
     final topY = size.height * groundY;
     final bottomY = size.height * 0.83;
 
-    // Коричневая скала
-    canvas.drawRect(Rect.fromLTRB(startX, topY, endX, bottomY), Paint()..color = const Color(0xFF6D4C41));
+    // 1. Основная земляная скала с мягким градиентом глубины
+    final rockRect = Rect.fromLTRB(startX, topY, endX, bottomY);
+    final rockPaint = Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color(0xFF795548), Color(0xFF4E342E)],
+      ).createShader(rockRect);
+    canvas.drawRect(rockRect, rockPaint);
 
-    // Прослойки темной земли для детализации
-    final layerPaint = Paint()..color = const Color(0xFF4E342E)..strokeWidth = 3;
-    canvas.drawLine(Offset(startX, topY + 25), Offset(endX, topY + 28), layerPaint);
-    canvas.drawLine(Offset(startX, topY + 65), Offset(endX, topY + 62), layerPaint);
+    // 2. Тёмные прослойки грунта и камушки внутри скалы
+    final layerPaint = Paint()
+      ..color = const Color(0xFF3E2723).withOpacity(0.6)
+      ..strokeWidth = 3;
+    canvas.drawLine(Offset(startX + 4, topY + 26), Offset(endX - 4, topY + 29), layerPaint);
+    canvas.drawLine(Offset(startX + 6, topY + 58), Offset(endX - 6, topY + 55), layerPaint);
 
-    // Мультяшная зеленая трава с зубчиками
-    final grassPaint = Paint()..color = const Color(0xFF4CAF50);
+    final pebblePaint = Paint()..color = const Color(0xFF8D6E63).withOpacity(0.55);
+    for (double px = startX + 18; px < endX - 18; px += 48) {
+      canvas.drawOval(Rect.fromCenter(center: Offset(px, topY + 42), width: 12, height: 7), pebblePaint);
+      canvas.drawOval(Rect.fromCenter(center: Offset(px + 22, topY + 70), width: 9, height: 6), pebblePaint);
+    }
+
+    // 3. Пышные мультяшные кустики на траве (на 1–4 уровнях)
+    if (currentLevel != 5) {
+      final bushDark = Paint()..color = const Color(0xFF2E7D32);
+      final bushLight = Paint()..color = const Color(0xFF43A047);
+      for (double bx = startX + 25; bx < endX - 25; bx += 110) {
+        // Не ставим куст прямо под рогаткой
+        if ((bx - size.width * 0.15).abs() < 35) continue;
+        canvas.drawCircle(Offset(bx, topY - 2), 11, bushDark);
+        canvas.drawCircle(Offset(bx + 12, topY - 4), 14, bushDark);
+        canvas.drawCircle(Offset(bx + 24, topY - 2), 10, bushDark);
+        canvas.drawCircle(Offset(bx + 11, topY - 6), 10, bushLight);
+      }
+    }
+
+    // 4. Сочный дёрн и трава с тенью
+    final grassShadowPaint = Paint()..color = const Color(0xFF2E7D32);
+    canvas.drawRect(Rect.fromLTWH(startX, topY + 10, endX - startX, 5), grassShadowPaint);
+
+    final grassPaint = Paint()..color = currentLevel == 5 ? const Color(0xFF388E3C) : const Color(0xFF4CAF50);
     canvas.drawRect(Rect.fromLTWH(startX, topY, endX - startX, 12), grassPaint);
+
+    // Зубчики травы по краю обрыва
     final grassPath = Path();
-    for (double x = startX; x < endX; x += 10) {
+    for (double x = startX; x < endX - 5; x += 10) {
       grassPath.moveTo(x, topY + 11);
       grassPath.lineTo(x + 5, topY + 19);
       grassPath.lineTo(x + 10, topY + 11);
     }
     canvas.drawPath(grassPath, grassPaint);
-  }
-    // ИСПРАВЛЕННЫЙ МЕТОД ДЛЯ АНИМАЦИИ НАСТОЯЩЕГО ДИНАМИЧЕСКОГО ЛИВНЯ
-  void _renderLiveFallingRain(Canvas canvas, Size size, double worldWidthFactor) {
-    final stormCloudPaint = Paint()..color = const Color(0xFF37474F).withOpacity(0.9);
-    double stormX = (size.width * 0.1 + cloudOffset1 * size.width) % (size.width * worldWidthFactor + 200) - 100;
-    canvas.drawCircle(Offset(stormX, size.height * 0.12), 40, stormCloudPaint);
-    canvas.drawCircle(Offset(stormX + 45, size.height * 0.09), 55, stormCloudPaint);
-    canvas.drawCircle(Offset(stormX + 95, size.height * 0.12), 42, stormCloudPaint);
 
-     final rainPaint = Paint()
+    // 5. Белая пена прибоя у основания острова в воде
+    final foamPaint = Paint()
+      ..color = Colors.white.withOpacity(0.45)
+      ..strokeWidth = 2.5
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(Offset(startX - 4, bottomY), Offset(endX + 4, bottomY), foamPaint);
+  }
+
+  // ИСПРАВЛЕННЫЙ МЕТОД ДЛЯ АНИМАЦИИ ДИНАМИЧЕСКОГО ЛИВНЯ (ТУЧИ УБРАНЫ, КАПЛИ ОСТАЛИСЬ ПРЕЖНИМИ)
+  void _renderLiveFallingRain(Canvas canvas, Size size, double worldWidthFactor) {
+    final rainPaint = Paint()
       ..color = Colors.blue.shade100.withOpacity(0.35)
       ..strokeWidth = 1.4;
         
-    // ИСПРАВЛЕНО ТОЧЕЧНО: Возвращён твой оригинальный локальный Random(99)
     final randRain = Random(99);
     for (int i = 0; i < 65; i++) {
       double baseX = randRain.nextDouble() * size.width * worldWidthFactor;
       double baseY = randRain.nextDouble() * size.height * 0.83;
       
-      // ИСПРАВЛЕНО: Движение завязано на _rainAnimationTimer, ливень оживёт и полетит!
       double liveX = (baseX + _rainAnimationTimer * 400) % (size.width * worldWidthFactor);
       double liveY = (baseY + _rainAnimationTimer * 1600) % (size.height * 0.83);
       
       canvas.drawLine(Offset(liveX, liveY), Offset(liveX + 6, liveY + 18), rainPaint);
     }
   }
+
   // ТОЧЕЧНО ЗАМЕНИТЬ В САМОМ КОНЦЕ КЛАССА AngryMolluskGame:
   void _drawDivineLightningClaw(Canvas canvas, Size size) {
     // Угольно-чёрный, плотный и сильно видимый цвет тени ложного бога
