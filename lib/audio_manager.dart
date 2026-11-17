@@ -207,25 +207,9 @@ static Future<void> playPaperRustle() async {
   } catch (e) {
     print("Ошибка воспроизведения звука шелеста бумаги: $e");
   }
-}
+}  
 
-  // =========================================================================
-  // ЖУТКИЙ ЗВУК КАПЕЛЬ ДЛЯ 6 УРОВНЯ (ГЛУШИТ СТАРЫЕ, НО УСТУПАЕТ НОВЫМ)
-  // =========================================================================
-    
-
-        // ТОЧЕЧНО ДОБАВИТЬ В КЛАСС AudioManager В LIB/AUDIO_MANAGER.DART:
-
-  // Вызывается автоматически при сворачивании игры в фон
-  static void pauseAllForBackground() {
-    try {
-      _bossMusicPlayer.pause(); // Ставим музыку босса на паузу
-      _rainPlayer.pause();      // Ставим капли/ливень на паузу
-      _fxPlayer.stop();         // Глушим ор ярости
-    } catch (e) {
-      print("Ошибка аварийной паузы фона: $e");
-    }
-  }
+        
 
   // Обновляем метод полной очистки при выходе игрока в Главное Меню
   static Future<void> stopLevelAudioAndPlayMenu() async {
@@ -394,27 +378,47 @@ static Future<void> playPaperRustle() async {
 
 
 
-      static Future<void> pauseAll() async {
+        static Future<void> pauseAll() async {
     try {
-      await _finalMenuPlayer.pause();
-      await _rainPlayer.pause(); 
-      await _stretchPlayer.pause(); // Добавлена пауза натяжения рогатки
-      print("Все звуковые потоки поставлены на паузу при выходе из приложения.");
-    } catch (e) {print("Ошибка запуска звука капель кочка: $e");}
+      await _finalMenuPlayer.pause();    // Музыка главного меню
+      await _rainPlayer.pause();         // Ливень 5 уровня и капли замка
+      await _stretchPlayer.pause();      // Натяжение рогатки
+      await _bossMusicPlayer.pause();    // Резервный плеер босса
+      await _level6MusicPlayer.pause();  // Капли Фазы 1 и рок Фазы 2 (6 уровень)
+      await _skyFreedomPlayer.pause();   // Музыка 1-й части финала (хорошая концовка)
+      await _eternalLoopPlayer.pause();  // Музыка 2-й части финала (идеальная концовка)
+      print("Все звуковые потоки поставлены на паузу при сворачивании приложения.");
+    } catch (e) {
+      print("Ошибка при паузе звуков: $e");
+    }
   }
 
   static Future<void> resumeAll() async {
     try {
-      // Музыка возобновляется строго из состояния паузы, без перезапусков
       if (_finalMenuPlayer.state == PlayerState.paused) {
         await _finalMenuPlayer.resume();
       }
       if (_rainPlayer.state == PlayerState.paused) {
         await _rainPlayer.resume();
       }
-      print("Звуковые потоки возобновлены.");
-    } catch (e) {print("Ошибка запуска звука капель кочка: $e");}
+      if (_bossMusicPlayer.state == PlayerState.paused) {
+        await _bossMusicPlayer.resume();
+      }
+      if (_level6MusicPlayer.state == PlayerState.paused) {
+        await _level6MusicPlayer.resume();
+      }
+      if (_skyFreedomPlayer.state == PlayerState.paused) {
+        await _skyFreedomPlayer.resume();
+      }
+      if (_eternalLoopPlayer.state == PlayerState.paused) {
+        await _eternalLoopPlayer.resume();
+      }
+      print("Все поставленные на паузу звуковые потоки возобновлены.");
+    } catch (e) {
+      print("Ошибка при возобновлении звуков: $e");
+    }
   }
+
 
 
 
