@@ -196,8 +196,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObse
     if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
       // Ставим на паузу стандартную музыку меню
       AudioManager.pauseAll(); 
-      // ИСПРАВЛЕНО: Намертво глушим фоновые плееры босса 6 уровня при сворачивании!
-      AudioManager.pauseAllForBackground(); 
     } 
     else if (state == AppLifecycleState.resumed) {
       // Восстанавливаем музыку меню
@@ -207,21 +205,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObse
   }
 
 
-
-    // СТРОГО ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД didChangeDependencies В LIB/MAIN.DART:
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    
-    // ИСПРАВЛЕНО: При любом изменении экранов (выход в меню/концовку) 
-    // намертво очищаем все боевые плееры и музыку босса 6 уровня!
-    AudioManager.stopLevelAudioAndPlayMenu(); 
-    
-    // Безопасно запускаем музыку меню через твой AudioManager
-    if (AudioManager.menuPlayer.state != PlayerState.playing) {
-      AudioManager.playBackgroundMusic();
-    }
-  }
 
 
 
