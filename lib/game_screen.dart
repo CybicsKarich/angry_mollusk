@@ -788,9 +788,10 @@ if (currentLevel == 2 || currentLevel == 3) {
     if (currentLevel == 5) {
       _lightningTimer += dt;
       
-      if (!AudioManager.isRainPlaying && !levelCleared && !levelFailed && !isPaused && !isVictorySequenceStarted) {
+     if (!AudioManager.isRainPlaying && !levelCleared && !levelFailed && !isPaused && !isVictorySequenceStarted) {
         AudioManager.startLevel5Rain();
       }
+      
         // Каждые 5 секунд бьет ослепляющая молния
       if (_lightningTimer >= 5.0) {
         _lightningTimer = 0.0;
