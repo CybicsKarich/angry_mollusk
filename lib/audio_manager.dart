@@ -65,25 +65,25 @@ class AudioManager {
   static bool hasPigHitToken = true;
   static bool hasMissToken = true;
 
-      static Future<void> init() async {
+        static Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
     masterVolume = prefs.getDouble('game_master_volume') ?? 0.5;
     
-    final gameAudioContext = AudioContext(
-      android: AudioContextAndroid(
-        isSpeakerphoneOn: true,
-        stayAwake: true,
-        contentType: AndroidContentType.music,
-        usageType: AndroidUsageType.game,
-        audioFocus: AndroidAudioFocus.none, // Звуки не глушат друг друга
-      ),
-      iOS: AudioContextIOS(
-        category: AVAudioSessionCategory.ambient,
+    // Отключаем перехват аудиофокуса ТОЛЬКО для музыки боссфайта 6 уровня
+    await _level6MusicPlayer.setAudioContext(
+      AudioContext(
+        android: const AudioContextAndroid(
+          isSpeakerphoneOn: true,
+          stayAwake: true,
+          contentType: AndroidContentType.music,
+          usageType: AndroidUsageType.game,
+          audioFocus: AndroidAudioFocus.none,
+        ),
+        iOS: AudioContextIOS(
+          category: AVAudioSessionCategory.ambient,
+        ),
       ),
     );
-
-    await _level6MusicPlayer.setAudioContext(gameAudioContext);
-    await _rainPlayer.setAudioContext(gameAudioContext); // Отключаем фокус для дождя и капель
 
     _stretchPlayer.setReleaseMode(ReleaseMode.loop);
     _finalMenuPlayer.setReleaseMode(ReleaseMode.release);
@@ -571,9 +571,7 @@ static Future<void> playPaperRustle() async {
   }
 
 
-    static Future<void> startLevel5Rain() async {
-    if (_isStartingRain || _rainPlayer.state == PlayerState.playing) return;
-    _isStartingRain = true;
+      static Future<void> startLevel5Rain() async {
     try {
       await _finalMenuPlayer.stop();
       await _rainPlayer.setVolume(0.45 * masterVolume); 
@@ -581,10 +579,9 @@ static Future<void> playPaperRustle() async {
       await _rainPlayer.play(AssetSource('music/rain_ambient.mp3'), mode: PlayerMode.lowLatency);
     } catch (e) {
       print("Ошибка запуска звука дождя: $e");
-    } finally {
-      _isStartingRain = false;
     }
   }
+
 
 
   // 2. БЕЗОПАСНЫЙ ГЕТТЕР СТУСА ДЛЯ ИГРОВОГО ЦИКЛА (Защита от зависаний)
@@ -608,11 +605,11 @@ static Future<void> playPaperRustle() async {
 
 
   
-  // ТОЧЕЧНО ЗАМЕНИТЬ МЕТОД STOPLEVEL5RAIN В LIB/AUDIO_MANAGER.DART:
-  static Future<void> stopLevel5Rain() async {
+    static Future<void> stopLevel5Rain() async {
     try {
       await _rainPlayer.stop();
-      print("Звук ливня 5 уровня полностью заглушен.");
+      await _rainPlayer.release();
+      print("Звук ливня и капель полностью заглушен.");
     } catch (e) {
       print("Ошибка при остановке дождя: $e");
     }
