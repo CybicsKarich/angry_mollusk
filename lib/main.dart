@@ -274,17 +274,6 @@ class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObse
                           ],
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'Баннихоп против Максима Рыбалкина',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blueGrey,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -780,7 +769,6 @@ SizedBox(
 }
 }
 
-// 1. ОБНОВЛЕННЫЙ ЭКРАН "ДОПОЛНИТЕЛЬНО" С ФИРМЕННОЙ ПОДПИСЬЮ ivandrop
 class AdditionalScreen extends StatelessWidget {
   const AdditionalScreen({super.key});
 
@@ -801,63 +789,46 @@ class AdditionalScreen extends StatelessWidget {
           ),
           child: Column(
             children: [
-              const Text(
-                "ДИСКЛЕЙМЕР",
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Color(0xFFD84315), letterSpacing: 1.5),
-              ),
-              const Divider(color: Color(0xFFFBC02D), thickness: 2, indent: 40, endIndent: 40),
-              
               Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Column(
-                    children: [
-                      const Text(
-                        "Парни, этот проект — чисто наш локальный прикол и дружеский угар! Я делал эту игру исключительно для того, чтобы мы вместе поржали с озвучки и разнесли пару замков, а не чтобы кого-то задеть или обидеть. Свиные ушки у Максимов — мультяшные, blocks камня и дерева — виртуальные, а наше уважение друг к другу и дружба — настоящие. Ребята, вы лучшие! Не обижайтесь на приколы, это всё любя и ради фана.",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF3E2723), height: 1.4),
-                      ),
-                      const SizedBox(height: 24),
-                      const Divider(color: Color(0xFFFBC02D), thickness: 1.5),
-                      const SizedBox(height: 8),
-                      const Text(
-                        "ПОПРОБУЙТЕ НАШИ ДРУГИЕ ИГРЫ:",
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF5D4037), letterSpacing: 1.1),
-                      ),
-                      const SizedBox(height: 12),
-                      
-                      // Кнопка запускает локальный HTML-файл из памяти APK!
-                      ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFF9800),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                child: Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Кнопка запускает локальный HTML-файл из памяти APK!
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFF9800),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          ),
+                          onPressed: () {
+                            SharedPreferences.getInstance().then((prefs) async {
+                              await prefs.setBool('achievement_new_experience', true);
+                            });
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const HtmlGameScreen()),
+                            );
+                          },
+                          icon: const Icon(Icons.html_rounded, color: Colors.white, size: 24),
+                          label: const Text("ИГРАТЬ В ОФФЛАЙНЕ", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                         ),
-                        onPressed: () {
-                          // Переходим на внутренний экран с браузером
-                          SharedPreferences.getInstance().then((prefs) async {
-                            await prefs.setBool('achievement_new_experience', true);
-                          });
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const HtmlGameScreen()),
-                          );
-                        },
-                        icon: const Icon(Icons.html_rounded, color: Colors.white, size: 24),
-                        label: const Text("ИГРАТЬ В ОФФЛАЙНЕ", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        "IVANDROP",
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, fontStyle: FontStyle.italic, color: Colors.brown),
-                      ),
-                    ],
+                        const SizedBox(height: 16),
+                        const Text(
+                          "IVANDROP",
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, fontStyle: FontStyle.italic, color: Colors.brown),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
               const SizedBox(height: 10),
               Container(
-                width: 50, height: 50,
+                width: 50,
+                height: 50,
                 decoration: const BoxDecoration(color: Color(0xFF4CAF50), shape: BoxShape.circle),
                 child: RawMaterialButton(
                   shape: const CircleBorder(),
@@ -872,6 +843,7 @@ class AdditionalScreen extends StatelessWidget {
     );
   }
 }
+
 
 // 2. НОВЫЙ ЭКРАН-ПЛЕЕР ДЛЯ ВСТРОЕННОЙ HTML ИГРЫ
 class HtmlGameScreen extends StatefulWidget {
