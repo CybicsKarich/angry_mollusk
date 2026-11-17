@@ -69,7 +69,7 @@ class AudioManager {
     final prefs = await SharedPreferences.getInstance();
     masterVolume = prefs.getDouble('game_master_volume') ?? 0.5;
     
-    const gameAudioContext = AudioContext(
+    final gameAudioContext = AudioContext(
       android: AudioContextAndroid(
         isSpeakerphoneOn: true,
         stayAwake: true,
