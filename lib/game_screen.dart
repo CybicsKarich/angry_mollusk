@@ -1398,7 +1398,37 @@ if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictor
       final loopCenter = Offset(0.78 * size.width, 0.25 * size.height);
       final loopRadius = size.height * 0.15; 
       
-      final loopPaint = Paint()
+      // НОВОЕ: Полупрозрачная фоновая балка от воды до верхней точки петли
+      final double postWidth = 16.0;
+      final double postTopY = loopCenter.dy - loopRadius; // Верхняя точка кольца
+      final double postBottomY = size.height * 0.85;      // Уходит прямо в воду
+      final postRect = Rect.fromLTWH(
+        loopCenter.dx - postWidth / 2,
+        postTopY,
+        postWidth,
+        postBottomY - postTopY,
+      );
+
+      // Основное тело балки (полупрозрачное дерево)
+      canvas.drawRect(
+        postRect,
+        Paint()..color = const Color(0xFF6D4C41).withOpacity(0.38),
+      );
+      // Тёмная боковая грань для объёма
+      canvas.drawRect(
+        Rect.fromLTWH(postRect.right - 4, postTopY, 4, postBottomY - postTopY),
+        Paint()..color = const Color(0xFF3E2723).withOpacity(0.38),
+      );
+      // Лёгкий контур балки
+      canvas.drawRect(
+        postRect,
+        Paint()
+          ..color = const Color(0xFF3E2723).withOpacity(0.45)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.5,
+      );
+        
+        final loopPaint = Paint()
         ..color = const Color(0xFF795548) // Деревянный каркас
         ..style = PaintingStyle.stroke
         ..strokeWidth = 12.0
@@ -1978,13 +2008,13 @@ if (hasWantedPoster && !showWantedBig) {
   }
 
 
-      void _renderIsland(Canvas canvas, Size size, double startPct, double endPct) {
+        void _renderIsland(Canvas canvas, Size size, double startPct, double endPct) {
     final startX = size.width * startPct;
     final endX = size.width * endPct;
     final topY = size.height * groundY;
     final bottomY = size.height * 0.83;
 
-    // 1. Основная земляная скала с мягким градиентом глубины
+    // 1. Чистая земляная скала с плавным градиентом
     final rockRect = Rect.fromLTRB(startX, topY, endX, bottomY);
     final rockPaint = Paint()
       ..shader = const LinearGradient(
@@ -1994,20 +2024,7 @@ if (hasWantedPoster && !showWantedBig) {
       ).createShader(rockRect);
     canvas.drawRect(rockRect, rockPaint);
 
-    // 2. Тёмные прослойки грунта и камушки внутри скалы
-    final layerPaint = Paint()
-      ..color = const Color(0xFF3E2723).withOpacity(0.6)
-      ..strokeWidth = 3;
-    canvas.drawLine(Offset(startX + 4, topY + 26), Offset(endX - 4, topY + 29), layerPaint);
-    canvas.drawLine(Offset(startX + 6, topY + 58), Offset(endX - 6, topY + 55), layerPaint);
-
-    final pebblePaint = Paint()..color = const Color(0xFF8D6E63).withOpacity(0.55);
-    for (double px = startX + 18; px < endX - 18; px += 48) {
-      canvas.drawOval(Rect.fromCenter(center: Offset(px, topY + 42), width: 12, height: 7), pebblePaint);
-      canvas.drawOval(Rect.fromCenter(center: Offset(px + 22, topY + 70), width: 9, height: 6), pebblePaint);
-    }
-
-    // 3. Пышные мультяшные кустики на траве (на 1–4 уровнях)
+    // 2. Пышные мультяшные кустики на траве (на 1–4 уровнях)
     if (currentLevel != 5) {
       final bushDark = Paint()..color = const Color(0xFF2E7D32);
       final bushLight = Paint()..color = const Color(0xFF43A047);
@@ -2021,7 +2038,7 @@ if (hasWantedPoster && !showWantedBig) {
       }
     }
 
-    // 4. Сочный дёрн и трава с тенью
+    // 3. Сочный дёрн и трава с тенью
     final grassShadowPaint = Paint()..color = const Color(0xFF2E7D32);
     canvas.drawRect(Rect.fromLTWH(startX, topY + 10, endX - startX, 5), grassShadowPaint);
 
@@ -2036,14 +2053,8 @@ if (hasWantedPoster && !showWantedBig) {
       grassPath.lineTo(x + 10, topY + 11);
     }
     canvas.drawPath(grassPath, grassPaint);
-
-    // 5. Белая пена прибоя у основания острова в воде
-    final foamPaint = Paint()
-      ..color = Colors.white.withOpacity(0.45)
-      ..strokeWidth = 2.5
-      ..strokeCap = StrokeCap.round;
-    canvas.drawLine(Offset(startX - 4, bottomY), Offset(endX + 4, bottomY), foamPaint);
   }
+
 
   // ИСПРАВЛЕННЫЙ МЕТОД ДЛЯ АНИМАЦИИ ДИНАМИЧЕСКОГО ЛИВНЯ (ТУЧИ УБРАНЫ, КАПЛИ ОСТАЛИСЬ ПРЕЖНИМИ)
   void _renderLiveFallingRain(Canvas canvas, Size size, double worldWidthFactor) {
