@@ -1399,35 +1399,7 @@ if (spawnCompleted && pigs.isEmpty && !levelCleared && !levelFailed && !isVictor
       final loopCenter = Offset(0.78 * size.width, 0.25 * size.height);
       final loopRadius = size.height * 0.15; 
       
-      // НОВОЕ: Полупрозрачная фоновая балка от воды до верхней точки петли
-      final double postWidth = 16.0;
-      final double postTopY = loopCenter.dy - loopRadius; // Верхняя точка кольца
-      final double postBottomY = size.height * 0.85;      // Уходит прямо в воду
-      final postRect = Rect.fromLTWH(
-        loopCenter.dx - postWidth / 2,
-        postTopY,
-        postWidth,
-        postBottomY - postTopY,
-      );
-
-      // Основное тело балки (полупрозрачное дерево)
-      canvas.drawRect(
-        postRect,
-        Paint()..color = const Color(0xFF6D4C41).withOpacity(0.38),
-      );
-      // Тёмная боковая грань для объёма
-      canvas.drawRect(
-        Rect.fromLTWH(postRect.right - 4, postTopY, 4, postBottomY - postTopY),
-        Paint()..color = const Color(0xFF3E2723).withOpacity(0.38),
-      );
-      // Лёгкий контур балки
-      canvas.drawRect(
-        postRect,
-        Paint()
-          ..color = const Color(0xFF3E2723).withOpacity(0.45)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.5,
-      );
+      
         
         final loopPaint = Paint()
         ..color = const Color(0xFF795548) // Деревянный каркас
