@@ -19,6 +19,7 @@ class Level6GoodRouteScreen extends StatefulWidget {
 class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with TickerProviderStateMixin {
   int _currentFrame = 1; // Текущий видимый кадр (1, 2 или 3)
   bool _isGameplayActive = false; // Переключатель: комикс -> живая арена боссфайта
+  bool _isPaused = false;
   late AnimationController _debrisController;
   late Animation<double> _fallAnimation;
   
@@ -124,13 +125,14 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
       curve: Curves.bounceOut,
     );
 
-        // Главный движковый тикер игрового процесса с расчетом честного Delta Time
-    _gameLoopTicker = createTicker((elapsed) {
-      if (_isGameplayActive && mounted) {
-        // ИСПРАВЛЕНО: Чистая математика перевода микросекунд в секунды
+            _gameLoopTicker = createTicker((elapsed) {
+      if (_isGameplayActive && !_isPaused && mounted) {
+        if (_lastElapsed == Duration.zero) {
+          _lastElapsed = elapsed;
+          return;
+        }
         double dt = (elapsed.inMicroseconds - _lastElapsed.inMicroseconds) / 1000000.0;
-        
-        if (dt > 0.1) dt = 0.016; // Защита от гигантского скачка при лаге девайса
+        if (dt > 0.1) dt = 0.016;
         _lastElapsed = elapsed;
         
         _updatePhysics(dt);
@@ -191,6 +193,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
 
   
   void _updatePhysics(double dt) {
+    if (_isPaused) return;
     _secureGameplayMusicStream(dt);
     setState(() {
       
@@ -1221,111 +1224,140 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                   children: [
                     Row(
                       children: [
-                        IconButton(
+                         IconButton(
                           style: IconButton.styleFrom(backgroundColor: Colors.black45, padding: const EdgeInsets.all(6)),
                           icon: const Icon(Icons.pause_rounded, color: Colors.white, size: 22),
                           onPressed: () {
-                        // ИСПРАВЛЕНО: Вместо вылета открываем оригинальное PauseMenu из game_screen.dart!
-                        // Создаём временный контекст-заглушку, чтобы вызвать твоё оригинальное меню оверлеев
-                        showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (BuildContext context) {
-                            // Вызываем точно такое же по дизайну меню паузы, как в game_screen.dart!
-                            return Center(
-                              child: Container(
-                                width: 280,
-                                padding: const EdgeInsets.all(24),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.9),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(color: Colors.orange, width: 4),
-                                ),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Text(
-                                      'ПАУЗА',
-                                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2, decoration: TextDecoration.none),
+                            // 1. ОСТАНАВЛИВАЕМ ДВИЖЕНИЕ И СБРАСЫВАЕМ НАЖАТЫЕ КНОПКИ
+                            setState(() {
+                              _isPaused = true;
+                              _btnLeftPressed = false;
+                              _btnRightPressed = false;
+                              _btnJumpPressed = false;
+                            });
+                            if (_gameLoopTicker.isActive) {
+                              _gameLoopTicker.stop();
+                            }
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (BuildContext context) {
+                                return Center(
+                                  child: Container(
+                                    width: 280,
+                                    padding: const EdgeInsets.all(24),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.9),
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(color: Colors.orange, width: 4),
                                     ),
-                                    const SizedBox(height: 20),
-                                    SizedBox(
-                                      width: double.infinity,
-                                      height: 44,
-                                      child: ElevatedButton(
-                                        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                                        onPressed: () => Navigator.pop(context), // ПРОДОЛЖИТЬ
-                                        child: const Text('ПРОДОЛЖИТЬ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    SizedBox(
-                                      width: double.infinity,
-                                      height: 44,
-                                      child: ElevatedButton(
-                                        style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                                        onPressed: () {
-                                      // ЗАНОВО: сбрасываем арену
-                                      Navigator.pop(context);
-                                      AudioManager.startLevel6BattleMusic();
-                                      setState(() {
-                                        _vanyaX = 0.15;
-                                        _vanyaY = _groundYPercent - 0.05;
-                                        _bossCurrentHp = 8.0;
-                                        _isBarricadeAlive = true;
-                                        _vanyaHearts = 1;
-                                        _isPhase2Active = false;
-                                        _oilPigTimer = 0.0;
-                                        _oilSpitX = -1.0;
-                                        _oilActiveTimer = 0.0;
-                                        _oilWarmUpTimer = 0.0;
-                                        _isOilWarningActive = false;
-                                        _isOilOnFloor = false;
-
-
-                                        // ИСПРАВЛЕНО ТОЧЕЧНО: Полная очистка таблеток, свиней и эффектов крови при рестарте
-                                        _isPillSpawned = false;
-                                        _pillX = -1.0;
-                                        _pillY = -1.0;
-                                        _pillSpawnTimer = 0.0;
-                                        _isAngryMode = false;
-                                        _isBloodPoolActive = false;
-                                        _bloodPoolX = -1.0;
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Text(
+                                          'ПАУЗА',
+                                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2, decoration: TextDecoration.none),
+                                        ),
+                                        const SizedBox(height: 20),
                                         
-                                        _isBombPigActive = false;
-                                        _isLeftPigActive = false;
-                                        _bombPigX = -1.0;
-                                        _leftPigX = -1.0;
-                                        _bombPigTimer = 0.0;
-                                      });
-                                    },
-                                        child: const Text('ЗАНОВО', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
-                                      ),
+                                        // 2. КНОПКА «ПРОДОЛЖИТЬ» — СНИМАЕМ С ПАУЗЫ И ЗАПУСКАЕМ ТИКЕР
+                                        SizedBox(
+                                          width: double.infinity,
+                                          height: 44,
+                                          child: ElevatedButton(
+                                            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                              setState(() {
+                                                _isPaused = false;
+                                                _lastElapsed = Duration.zero;
+                                              });
+                                              if (!_gameLoopTicker.isActive) {
+                                                _gameLoopTicker.start();
+                                              }
+                                            },
+                                            child: const Text('ПРОДОЛЖИТЬ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        
+                                        // 3. КНОПКА «ЗАНОВО» — СБРАСЫВАЕМ АРЕНУ И СНИМАЕМ С ПАУЗЫ
+                                        SizedBox(
+                                          width: double.infinity,
+                                          height: 44,
+                                          child: ElevatedButton(
+                                            style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                              AudioManager.startLevel6BattleMusic();
+                                              setState(() {
+                                                _isPaused = false;
+                                                _lastElapsed = Duration.zero;
+                                                _vanyaX = 0.15;
+                                                _vanyaY = _groundYPercent - 0.05;
+                                                _bossCurrentHp = 8.0;
+                                                _isBarricadeAlive = true;
+                                                _vanyaHearts = 1;
+                                                _isPhase2Active = false;
+                                                _oilPigTimer = 0.0;
+                                                _oilSpitX = -1.0;
+                                                _oilActiveTimer = 0.0;
+                                                _oilWarmUpTimer = 0.0;
+                                                _isOilWarningActive = false;
+                                                _isOilOnFloor = false;
+
+                                                // Полная очистка таблеток, свиней и эффектов крови при рестарте
+                                                _isPillSpawned = false;
+                                                _pillX = -1.0;
+                                                _pillY = -1.0;
+                                                _pillSpawnTimer = 0.0;
+                                                _isAngryMode = false;
+                                                _isBloodPoolActive = false;
+                                                _bloodPoolX = -1.0;
+                                                
+                                                _isBombPigActive = false;
+                                                _isLeftPigActive = false;
+                                                _bombPigX = -1.0;
+                                                _leftPigX = -1.0;
+                                                _bombPigTimer = 0.0;
+                                              });
+                                              if (!_gameLoopTicker.isActive) {
+                                                _gameLoopTicker.start();
+                                              }
+                                            },
+                                            child: const Text('ЗАНОВО', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        
+                                        // 4. КНОПКА «В МЕНЮ» — СБРАСЫВАЕМ ФЛАГИ И ВЫХОДИМ
+                                        SizedBox(
+                                          width: double.infinity,
+                                          height: 44,
+                                          child: ElevatedButton(
+                                            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                                            onPressed: () {
+                                              _isPaused = false;
+                                              _isGameplayActive = false;
+                                              if (_gameLoopTicker.isActive) {
+                                                _gameLoopTicker.stop();
+                                              }
+                                              Navigator.pop(context); // закрываем паузу
+                                              AudioManager.clearBossMusicAndCache();
+                                              AudioManager.stopLevelAudioAndPlayMenu();
+                                              AudioManager.isLevel6ArenaActive = false; 
+                                              Navigator.pop(context); // выходим в меню уровней
+                                            },
+                                            child: const Text('В МЕНЮ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(height: 12),
-                                    SizedBox(
-                                      width: double.infinity,
-                                      height: 44,
-                                      child: ElevatedButton(
-                                        style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                                        onPressed: () {
-                                          _isGameplayActive = false;
-                                          Navigator.pop(context); // закрываем паузу
-                                          AudioManager.clearBossMusicAndCache();
-                                          AudioManager.stopLevelAudioAndPlayMenu();
-                                          AudioManager.isLevel6ArenaActive = false; 
-                                          Navigator.pop(context); // выходим в меню уровней
-                                        },
-                                        child: const Text('В МЕНЮ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                                  ),
+                                );
+                              },
                             );
                           },
-                        );
-                      },
                         ),
                         // ВСПЫШКА КРЕСТИКА «+1» НА ДОЛЮ СЕКУНДЫ НАД СЕРДЦАМИ ПО ТЗ!
                         if (_plusOneUiTimer > 0)
