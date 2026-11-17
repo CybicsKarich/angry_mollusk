@@ -11,6 +11,7 @@ class AudioManager {
   static final List<AudioPlayer> _fxPool = List.generate(4, (_) => AudioPlayer());
   static int _fxPoolIndex = 0;
   static final AudioPlayer _rainPlayer = AudioPlayer();
+  static bool _isStartingRain = false;
   static final AudioPlayer _bossMusicPlayer = AudioPlayer();
   static bool _isLevel6BattleMusicActive = false;
   static final AudioPlayer _level6MusicPlayer = AudioPlayer();
@@ -64,30 +65,31 @@ class AudioManager {
   static bool hasPigHitToken = true;
   static bool hasMissToken = true;
 
-    static Future<void> init() async {
+      static Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
     masterVolume = prefs.getDouble('game_master_volume') ?? 0.5;
     
-    // Отключаем перехват аудиофокуса ТОЛЬКО для плеера музыки 6 уровня
-    await _level6MusicPlayer.setAudioContext(
-      AudioContext(
-        android: const AudioContextAndroid(
-          isSpeakerphoneOn: true,
-          stayAwake: true,
-          contentType: AndroidContentType.music,
-          usageType: AndroidUsageType.game,
-          audioFocus: AndroidAudioFocus.none, // Мелкие звуки не прерывают музыку босса
-        ),
-        iOS: AudioContextIOS(
-          category: AVAudioSessionCategory.ambient,
-        ),
+    const gameAudioContext = AudioContext(
+      android: AudioContextAndroid(
+        isSpeakerphoneOn: true,
+        stayAwake: true,
+        contentType: AndroidContentType.music,
+        usageType: AndroidUsageType.game,
+        audioFocus: AndroidAudioFocus.none, // Звуки не глушат друг друга
+      ),
+      iOS: AudioContextIOS(
+        category: AVAudioSessionCategory.ambient,
       ),
     );
+
+    await _level6MusicPlayer.setAudioContext(gameAudioContext);
+    await _rainPlayer.setAudioContext(gameAudioContext); // Отключаем фокус для дождя и капель
 
     _stretchPlayer.setReleaseMode(ReleaseMode.loop);
     _finalMenuPlayer.setReleaseMode(ReleaseMode.release);
     resetTokensForNextBird();
   }
+
 
 
 
@@ -569,23 +571,20 @@ static Future<void> playPaperRustle() async {
   }
 
 
-    // =========================================================================
-  // БЛОК ГРОЗЫ И ЛИВНЯ ДЛЯ ЭПИЧНОГО 5 УРОВНЯ
-  // =========================================================================
-
-  static Future<void> startLevel5Rain() async {
+    static Future<void> startLevel5Rain() async {
+    if (_isStartingRain || _rainPlayer.state == PlayerState.playing) return;
+    _isStartingRain = true;
     try {
       await _finalMenuPlayer.stop();
-      if (_rainPlayer.state == PlayerState.playing) return;
-      await _rainPlayer.setVolume(0.50 * masterVolume); 
+      await _rainPlayer.setVolume(0.45 * masterVolume); 
       await _rainPlayer.setReleaseMode(ReleaseMode.loop); 
       await _rainPlayer.play(AssetSource('music/rain_ambient.mp3'), mode: PlayerMode.lowLatency);
     } catch (e) {
       print("Ошибка запуска звука дождя: $e");
+    } finally {
+      _isStartingRain = false;
     }
   }
-
-
 
 
   // 2. БЕЗОПАСНЫЙ ГЕТТЕР СТУСА ДЛЯ ИГРОВОГО ЦИКЛА (Защита от зависаний)
