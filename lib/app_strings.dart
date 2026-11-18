@@ -121,5 +121,53 @@ class AppStrings {
       'ru': 'Во вкладке дополнительно\nоткройте игру ivandrop',
       'en': 'Open the ivandrop game\nin the Extras tab',
     },
+  'victory_title': {
+      'ru': 'Ты победил, красавчик!',
+      'en': 'You won, handsome!',
+    },
+    'final_score': {
+      'ru': 'ИТОГОВЫЙ СЧЁТ',
+      'en': 'FINAL SCORE',
+    },
+    'ach_unlocked_title': {
+      'ru': 'ДОСТИЖЕНИЕ РАЗБЛОКИРОВАНО!',
+      'en': 'ACHIEVEMENT UNLOCKED!',
+    },
+    'ach_unlocked_desc': {
+      'ru': 'Загляни в меню достижений на главном экране!',
+      'en': 'Check the achievements menu on the main screen!',
+    },
+    'pause_title': {
+      'ru': 'ПАУЗА',
+      'en': 'PAUSED',
+    },
+    'btn_resume': {
+      'ru': 'ПРОДОЛЖИТЬ',
+      'en': 'RESUME',
+    },
+    'btn_restart': {
+      'ru': 'ЗАНОВО',
+      'en': 'RESTART',
+    },
+    'btn_to_menu': {
+      'ru': 'В МЕНЮ',
+      'en': 'MAIN MENU',
+    },
+    'game_over_text': {
+      'ru': 'ПТИЦЫ КОНЧИЛИСЬ!\nМАКСИМ ПОБЕДИЛ!',
+      'en': 'OUT OF BIRDS!\nMAKSIM WINS!',
+    },
+    'poster_wanted': {
+      'ru': 'РАЗЫСКИВАЕТСЯ',
+      'en': 'WANTED',
+    },
+    'poster_name': {
+      'ru': 'ДОН МОЛЛЮСК',
+      'en': 'DON MOLLUSK',
+    },
+    'poster_reward': {
+      'ru': 'НАГРАДА',
+      'en': 'REWARD',
+    },
   };
 }
