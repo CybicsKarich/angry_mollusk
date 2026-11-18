@@ -330,5 +330,40 @@ class AppStrings {
       'ru': 'Дело №07: Шериф объявлен пропавшим без вести на лугу свиней. Расследование прекращено.',
       'en': 'Case #07: The Sheriff has been declared missing in the pigs\' meadow. Investigation closed.',
     },
+        // =========================================================================
+    // ХОРОШАЯ ЛИНИЯ И ГЕЙМПЛЕЙ 6 УРОВНЯ (LEVEL 6 GOOD ROUTE SCREEN)
+    // =========================================================================
+    'c6_good_f1_vanya': {
+      'ru': 'Твоя власть на лугу птиц окончена, Моллюск. Отдай тотем гнева, освободи луг и мы закончим это.',
+      'en': 'Your reign over the bird meadow is over, Mollusk. Hand over the Totem of Wrath, free the meadow, and let\'s end this.',
+    },
+    'c6_good_f1_don': {
+      'ru': 'Ты слишком самоуверен для того, кто ползает по земле! Жалкая птица. Я следил за тобой с самого первого дня твоего путешествия, видел все твои битвы, я думал ты прибежишь сюда в ярости!',
+      'en': 'You\'re far too cocky for someone crawling in the dirt! Pathetic bird. I\'ve watched you since day one of your journey, seen all your battles—I thought you\'d charge in here blind with rage!',
+    },
+    'c6_good_f2_vanya': {
+      'ru': 'Я видел все твои знаки и тени. Но они меня не напугали, а лишь привели к твоей двери. Твой план провалился.',
+      'en': 'I saw all your signs and shadows. They didn\'t scare me—they just led me straight to your door. Your plan has failed.',
+    },
+    'c6_good_f2_don': {
+      'ru': 'Ах ты наглая птица! Ты думаешь, раз выжил и разрушил все постройки, то сможешь одолеть меня?! Хрю-выкуси!',
+      'en': 'Why, you insolent bird! You think just because you survived and smashed a few forts, you can defeat me?! Oink—in your dreams!',
+    },
+    'c6_good_f3_vanya': {
+      'ru': 'Похоже твой замок разваливается сам, Моллюск! Ничего, сейчас я его доломаю и убью тебя!',
+      'en': 'Looks like your castle is crumbling on its own, Mollusk! No worries, I\'ll finish tearing it down along with you!',
+    },
+    'lvl6_boss_defeated': {
+      'ru': 'ТЫ УБИЛ БОССА!',
+      'en': 'YOU DEFEATED THE BOSS!',
+    },
+    'lvl6_sheriff_defeated': {
+      'ru': 'ШЕРИФ ПОВЕРЖЕН',
+      'en': 'SHERIFF DEFEATED',
+    },
+    'lvl6_no_lives': {
+      'ru': 'У вас закончились жизни...',
+      'en': 'You ran out of lives...',
+    },
   };
 }
