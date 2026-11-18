@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'audio_manager.dart';
+import 'app_strings.dart';
 
 class Level6Case07Screen extends StatefulWidget {
   const Level6Case07Screen({super.key});
@@ -120,24 +121,24 @@ class _Level6Case07ScreenState extends State<Level6Case07Screen> with SingleTick
             ),
           ),
 
-          // 📜 5. ИСПРАВЛЕНО: ДВЕ НАДПИСИ «КОНЕЦ» И «ДЕЛО №07» НАВЕРХУ ПОД ПОТОЛКОМ
+          // 📜 5. ДВЕ НАДПИСИ «КОНЕЦ» И «ДЕЛО №07» НАВЕРХУ ПОД ПОТОЛКОМ
           Positioned(
             left: 24, right: 24, top: 42, 
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  "КОНЕЦ",
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Color(0xFFB71C1C), letterSpacing: 3.5, decoration: TextDecoration.none),
+                Text(
+                  AppStrings.get('btn_end'),
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Color(0xFFB71C1C), letterSpacing: 3.5, decoration: TextDecoration.none),
                 ),
                 const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.white10, width: 0.8)),
-                  child: const Text(
-                    "Дело №07: Шериф объявлен пропавшим без вести на лугу свиней. Расследование прекращено.",
+                  child: Text(
+                    AppStrings.get('bad_end_case_07'),
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontFamily: 'serif', fontSize: 11.0, fontWeight: FontWeight.bold, color: Colors.white70, height: 1.35, decoration: TextDecoration.none),
+                    style: const TextStyle(fontFamily: 'serif', fontSize: 11.0, fontWeight: FontWeight.bold, color: Colors.white70, height: 1.35, decoration: TextDecoration.none),
                   ),
                 ),
               ],
@@ -161,7 +162,7 @@ class _Level6Case07ScreenState extends State<Level6Case07Screen> with SingleTick
                   Navigator.pop(context); 
                 },
                 icon: const Icon(Icons.home_rounded, color: Colors.white, size: 16),
-                label: const Text("В МЕНЮ УРОВНЕЙ", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
+                label: Text(AppStrings.get('btn_levels_menu'), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
               ),
             ),
           ),
