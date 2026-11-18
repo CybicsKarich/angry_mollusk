@@ -326,5 +326,9 @@ class AppStrings {
       'ru': 'В МЕНЮ УРОВНЕЙ',
       'en': 'LEVEL SELECT',
     },
+    'bad_end_case_07': {
+      'ru': 'Дело №07: Шериф объявлен пропавшим без вести на лугу свиней. Расследование прекращено.',
+      'en': 'Case #07: The Sheriff has been declared missing in the pigs\' meadow. Investigation closed.',
+    },
   };
 }
