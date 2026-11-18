@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'game_screen.dart';
 import 'main.dart';
+import 'app_strings.dart';
 
 
 class SheriffComicScreen extends StatefulWidget {
@@ -23,7 +24,7 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
           children: [
             const SizedBox(height: 16),
             Text(
-              _currentComicPage == 0 ? "ИСТОРИЯ ШЕРИФА БАННИХОПА" : "ИСТОРИЯ ШЕРИФА: НА ЛУГУ",
+              _currentComicPage == 0 ? AppStrings.get('c1_title_p1') : AppStrings.get('c1_title_p2'),
               style: const TextStyle(
                 fontSize: 22, 
                 fontWeight: FontWeight.w900, 
@@ -56,7 +57,7 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
                       elevation: 5,
                     ),
                     onPressed: () => setState(() => _currentComicPage = 1),
-                    icon: const Text("ВПЕРЁД", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                    icon: Text(AppStrings.get('btn_forward'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
                     label: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 24),
                   )
                 : ElevatedButton(
@@ -73,7 +74,7 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
                       gameScreenInstance.gameInstance.worldScrollX = 0.0;
                       Navigator.push(context, MaterialPageRoute(builder: (context) => gameScreenInstance));
                     },
-                    child: const Text("ПОГНАЛИ!", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                    child: Text(AppStrings.get('btn_lets_go'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
                   ),
             ),
           ],
@@ -102,7 +103,7 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
                 painter: ComicBubblePainter(tailX: 0.45),
                 child: const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 6, vertical: 12),
-                  child: Text("Обычное мирное дежурство в округе... Кофе отличный.", style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
+                  child: Text(AppStrings.get('c1_p1_f1'), style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
                 ),
               ),
             ),
@@ -130,7 +131,7 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
                 painter: ComicBubblePainter(tailX: 0.8),
                 child: const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-                  child: Text("Шериф, беда! На лугах птиц завелись зелёные свиньи под предводительством Дона Молюска! Они грабят наши склады с виагрой!", style: TextStyle(fontSize: 8.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15), textAlign: TextAlign.center),
+                  child: Text(AppStrings.get('c1_p1_f2'), style: TextStyle(fontSize: 8.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15), textAlign: TextAlign.center),
                 ),
               ),
             ),
@@ -208,7 +209,7 @@ Positioned(
                 painter: ComicBubblePainter(tailX: 0.35),
                 child: const Padding(
                   padding: EdgeInsets.all(8.0),
-                  child: Text("Пора расхлебать это дерьмо и проучить этих свиней!", style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
+                  child: Text(AppStrings.get('c1_p1_f3'), style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
                 ),
               ),
             ),
@@ -261,7 +262,7 @@ Positioned(
                 painter: ComicBubblePainter(tailX: 0.35),
                 child: const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-                  child: Text("Так... Следы ведут сюда. Ошмётки упаковок повсюду. Свиньи где-то рядом...", style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15), textAlign: TextAlign.center),
+                  child: Text(AppStrings.get('c1_p2_f1'), style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15), textAlign: TextAlign.center),
                 ),
               ),
             ),
@@ -336,7 +337,7 @@ Positioned(
               top: 15, left: 6, width: 95,
               child: CustomPaint(
                 painter: ComicBubblePainter(tailX: 0.25),
-                child: const Padding(padding: EdgeInsets.all(5.0), child: Text("Я нашёл вас!", style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center)),
+                child: const Padding(padding: EdgeInsets.all(5.0), child: Text(AppStrings.get('c1_p2_f2_vanya1'), style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center)),
               ),
             ),
             Positioned(
@@ -345,7 +346,7 @@ Positioned(
                 painter: ComicBubblePainter(tailX: 0.8),
                 child: const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 5, vertical: 6),
-                  child: Text("О, Шериф припёрся! Ну что, таблеточки-то тю-тю! Наш босс станет бессмертным, и ты нас ни за что не достанешь - мы построили неприступную крепость!", style: TextStyle(fontSize: 7.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.1), textAlign: TextAlign.center),
+                  child: Text(AppStrings.get('c1_p2_f2_pigs'), style: TextStyle(fontSize: 7.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.1), textAlign: TextAlign.center),
                 ),
               ),
             ),
@@ -353,7 +354,7 @@ Positioned(
               bottom: 60, left: 10, right: 10,
               child: CustomPaint(
                 painter: ComicBubblePainter(tailX: 0.2),
-                child: const Padding(padding: EdgeInsets.all(5.0), child: Text("Вы совершили главную ошибку в жизни, зайдя на луг птиц и начав воровать мои таблетки!", style: TextStyle(fontSize: 7.6, fontWeight: FontWeight.bold, color: Colors.red), textAlign: TextAlign.center)),
+                child: const Padding(padding: EdgeInsets.all(5.0), child: Text(AppStrings.get('c1_p2_f2_vanya2'), style: TextStyle(fontSize: 7.6, fontWeight: FontWeight.bold, color: Colors.red), textAlign: TextAlign.center)),
               ),
             ),
           ],
@@ -425,8 +426,7 @@ Positioned(
     painter: ComicBubblePainter(tailX: 0.25), // Хвостик указывает левее, прямо на оттянутого Ваню!
     child: const Padding(
       padding: EdgeInsets.all(8.0),
-      child: Text(
-        "Посмотрим, какую крепость вы построили!", 
+      child: Text(AppStrings.get('c1_p2_f3'), 
         style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black), 
         textAlign: TextAlign.center,
       ),
