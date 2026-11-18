@@ -12,7 +12,7 @@ import 'level6_comic_screen.dart';
 import 'level6_bad_route_screen.dart';
 import 'splash_screen.dart';
 import 'controls_editor_screen.dart';
-
+import 'app_strings.dart';
 
 
 
@@ -30,7 +30,7 @@ void main() async {
   // Они откроются, только если пользователь проведет пальцем от края экрана, и закроются сами.
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
-
+  await AppStrings.init();
   runApp(const MyApp());
 }
 
