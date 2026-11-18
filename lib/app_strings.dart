@@ -169,5 +169,68 @@ class AppStrings {
       'ru': 'НАГРАДА',
       'en': 'REWARD',
     },
+        // =========================================================================
+    // ПРЕДЫСТОРИЯ 4 УРОВНЯ (COMIC INTRO SCREEN)
+    // =========================================================================
+    'c4_title': {
+      'ru': 'ПРЕДЫСТОРИЯ УРОВНЯ 4',
+      'en': 'LEVEL 4 BACKSTORY',
+    },
+    'c4_f1_pigs': {
+      'ru': 'Баннихоп уже близко к замку нашего босса. Надо что-то придумать! Сделаем крепость из бронированного стекла. Тогда он точно не сможет её сломать!',
+      'en': 'Bunnyhop is getting close to our boss\'s castle. We need a plan! Let\'s build a fortress out of armored glass. He\'ll never break through it!',
+    },
+    'c4_f2_vanya': {
+      'ru': 'Ах вот вы что задумали!',
+      'en': 'Aha, so that\'s your plan!',
+    },
+    'c4_f3_vanya': {
+      'ru': 'А у меня вот это есть',
+      'en': 'Well, I\'ve got this!',
+    },
+    'c4_pill_label': {
+      'ru': 'ВИАГРА',
+      'en': 'VIAGRA',
+    },
+
+    // =========================================================================
+    // КОМИКС 6 УРОВНЯ: ЛОГОВО ДОНА МОЛЛЮСКА (LEVEL 6 COMIC SCREEN)
+    // =========================================================================
+    'c6_title': {
+      'ru': 'ГЛАВА VI: ЛОГОВО ДОНА МОЛЛЮСКА',
+      'en': 'CHAPTER VI: DON MOLLUSK\'S LAIR',
+    },
+    'c6_f1_vanya': {
+      'ru': 'Дон Молюск! Все твои свиньи убиты! Где же ты спрятался, выйди ко мне.',
+      'en': 'Don Mollusk! All your pigs are defeated! Where are you hiding, come out and face me.',
+    },
+    'c6_f2_steps': {
+      'ru': 'ШАГИ ИЗ ТЕМНОТЫ...',
+      'en': 'FOOTSTEPS FROM THE DARKNESS...',
+    },
+    'c6_choice_1': {
+      'ru': 'Вот ты где! Сдавайся чудовище! Твоё время пришло!',
+      'en': 'There you are! Surrender, monster! Your time has come!',
+    },
+    'c6_choice_2': {
+      'ru': 'Давай по-хорошему. отдай Древний Тотем Гнева, оставь склады с таблетками в покое и уйди слуга птиц навсегда.',
+      'en': 'Let\'s do this the easy way. Hand over the Ancient Totem of Wrath, leave the pill warehouses alone, and leave the birds\' lands forever.',
+    },
+    'c6_don_reply_1': {
+      'ru': 'Хрю-ха-ха! Сдаться тебе? Жалкая птица! Не на того напал!',
+      'en': 'Oink-ha-ha! Surrender to you? Pathetic bird! You picked the wrong foe!',
+    },
+    'c6_don_reply_2': {
+      'ru': 'По-хорошему? Ты слишком вежлив для птицы, потерявшей способность летать. Этим предметом мы лишили ваш род неба! И ты думаешь, я отдам его просто так?',
+      'en': 'The easy way? You\'re too polite for a flightless bird. With this artifact we robbed your kind of the skies! And you think I\'ll just hand it over?',
+    },
+    'c6_select_prompt': {
+      'ru': 'ВЫБЕРИТЕ ОТВЕТ ШЕРИФА ДЛЯ ПРОДОЛЖЕНИЯ СЮЖЕТА',
+      'en': 'CHOOSE THE SHERIFF\'S REPLY TO CONTINUE',
+    },
+    'btn_next': {
+      'ru': 'ДАЛЬШЕ',
+      'en': 'NEXT',
+    },
   };
 }
