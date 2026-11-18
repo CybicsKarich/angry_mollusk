@@ -210,7 +210,7 @@ class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObse
 
 
 
-      void _openSettings() async {
+    void _openSettings() async {
     final updatedVolume = await Navigator.push<double>(
       context,
       MaterialPageRoute(
@@ -225,8 +225,11 @@ class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObse
         _currentVolume = updatedVolume;
       });
       await AudioManager.setMasterVolume(_currentVolume);
+    } else {
+      setState(() {}); // Перерисовываем меню на случай смены языка
     }
   }
+
 
 
 
@@ -287,28 +290,28 @@ class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObse
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                       // Кнопка УРОВНИ теперь открывает новый экран уровней
-                       _buildMenuButton('УРОВНИ', Icons.play_arrow_rounded, Colors.orange, () {
+                       _buildMenuButton(AppStrings.get('menu_levels'), Icons.play_arrow_rounded, Colors.orange, () {
                         Navigator.push(
                          context,
                         MaterialPageRoute(builder: (context) => const LevelsScreen()),
                             );
                           }),
                       const SizedBox(height: 16), // Вернули пробел 16
-                      _buildMenuButton('ДОСТИЖЕНИЯ', Icons.emoji_events_rounded, Colors.amber, () {
+                      _buildMenuButton(AppStrings.get('menu_achievements'), Icons.emoji_events_rounded, Colors.amber, () {
                       Navigator.push(
                        context,
                         MaterialPageRoute(builder: (context) => const AchievementsScreen()),
                        );
                       }),
                         const SizedBox(height: 16), // Вернули пробел 16
-                      _buildMenuButton('ДОПОЛНИТЕЛЬНО', Icons.extension_rounded, Colors.purple, () {
+                      _buildMenuButton(AppStrings.get('menu_extra'), Icons.extension_rounded, Colors.purple, () {
                       Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const AdditionalScreen()),
                       );
                       }),
                       const SizedBox(height: 16), // Вернули пробел 16
-                      _buildMenuButton('НАСТРОЙКИ', Icons.settings_rounded, Colors.grey, _openSettings),
+                      _buildMenuButton(AppStrings.get('menu_settings'), Icons.settings_rounded, Colors.grey, _openSettings),
                       ],
                      )
                     ),
@@ -397,61 +400,86 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         child: SafeArea(
           child: Center(
-            child: Container(
-              padding: const EdgeInsets.all(24),
-              constraints: const BoxConstraints(maxWidth: 400),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'ГРОМКОСТЬ ЗВУКА',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blueGrey),
-                  ),
-                  const SizedBox(height: 10),
-                                    Slider(
-                    value: _volume,
-                    min: 0.0,
-                    max: 1.0,
-                    activeColor: Colors.orange,
-                    onChanged: (newValue) {
-                      setState(() => _volume = newValue);
-                      AudioManager.setMasterVolume(_volume); // Меняем громкость ВСЕХ плееров сразу
-                    },
-                  ),
-                  Text('${(_volume * 100).toStringAsFixed(0)}%', style: const TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 16),
-                  
-                  // НОВАЯ КНОПКА НАСТРОЙКИ УПРАВЛЕНИЯ 6 УРОВНЯ
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const ControlsEditorScreen()),
-                        );
+            child: SingleChildScrollView(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+                constraints: const BoxConstraints(maxWidth: 420),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.92),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      AppStrings.get('settings_volume'),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blueGrey),
+                    ),
+                    Slider(
+                      value: _volume,
+                      min: 0.0,
+                      max: 1.0,
+                      activeColor: Colors.orange,
+                      onChanged: (newValue) {
+                        setState(() => _volume = newValue);
+                        AudioManager.setMasterVolume(_volume);
                       },
-                      icon: const Icon(Icons.gamepad_rounded, color: Colors.white),
-                      label: const Text('УПРАВЛЕНИЕ (6 УРОВЕНЬ)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0288D1),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    Text('${(_volume * 100).toStringAsFixed(0)}%', style: const TextStyle(fontWeight: FontWeight.bold)),
+                    
+                    const SizedBox(height: 12),
+                    Text(
+                      AppStrings.get('settings_language'),
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.blueGrey),
+                    ),
+                    const SizedBox(height: 8),
+
+                    // ПЕРЕКЛЮЧАТЕЛЬ ЯЗЫКА С ФЛАГАМИ РФ И UK
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _buildLanguageOption(
+                          langCode: 'ru',
+                          label: 'РУССКИЙ',
+                          flagWidget: CustomPaint(size: const Size(48, 30), painter: _RussiaFlagPainter()),
+                        ),
+                        const SizedBox(width: 24),
+                        _buildLanguageOption(
+                          langCode: 'en',
+                          label: 'ENGLISH',
+                          flagWidget: CustomPaint(size: const Size(48, 30), painter: _UkFlagPainter()),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 14),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const ControlsEditorScreen()),
+                          );
+                        },
+                        icon: const Icon(Icons.gamepad_rounded, color: Colors.white),
+                        label: Text(AppStrings.get('settings_controls'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF0288D1),
+                          padding: const EdgeInsets.symmetric(vertical: 11),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
                       ),
                     ),
-                  ),
 
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => Navigator.pop(context, _volume),
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
-                    child: const Text('НАЗАД', style: TextStyle(color: Colors.white)),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context, _volume),
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
+                      child: Text(AppStrings.get('btn_back'), style: const TextStyle(color: Colors.white)),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -459,7 +487,92 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
+
+  Widget _buildLanguageOption({
+    required String langCode,
+    required String label,
+    required Widget flagWidget,
+  }) {
+    final bool isSelected = AppStrings.currentLang == langCode;
+    return GestureDetector(
+      onTap: () async {
+        await AppStrings.setLanguage(langCode);
+        setState(() {});
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.orange.withValues(alpha: 0.15) : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? Colors.orange : Colors.grey.shade400,
+            width: isSelected ? 2.5 : 1.2,
+          ),
+        ),
+        child: Column(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: Container(
+                decoration: BoxDecoration(border: Border.all(color: Colors.black26, width: 0.8)),
+                child: flagWidget,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w900,
+                color: isSelected ? const Color(0xFFE65100) : Colors.blueGrey,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
+
+class _RussiaFlagPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final h = size.height / 3;
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, h), Paint()..color = Colors.white);
+    canvas.drawRect(Rect.fromLTWH(0, h, size.width, h), Paint()..color = const Color(0xFF0039A6));
+    canvas.drawRect(Rect.fromLTWH(0, h * 2, size.width, h), Paint()..color = const Color(0xFFD52B1E));
+  }
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _UkFlagPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.save();
+    canvas.clipRect(Rect.fromLTWH(0, 0, size.width, size.height));
+    // Синий фон
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), Paint()..color = const Color(0xFF012169));
+    // Белые диагонали
+    final whiteDiag = Paint()..color = Colors.white..strokeWidth = 7.0;
+    canvas.drawLine(Offset.zero, Offset(size.width, size.height), whiteDiag);
+    canvas.drawLine(Offset(size.width, 0), Offset(0, size.height), whiteDiag);
+    // Красные диагонали
+    final redDiag = Paint()..color = const Color(0xFFC8102E)..strokeWidth = 3.0;
+    canvas.drawLine(Offset.zero, Offset(size.width, size.height), redDiag);
+    canvas.drawLine(Offset(size.width, 0), Offset(0, size.height), redDiag);
+    // Белый прямой крест
+    canvas.drawRect(Rect.fromLTWH(size.width / 2 - 4.5, 0, 9, size.height), Paint()..color = Colors.white);
+    canvas.drawRect(Rect.fromLTWH(0, size.height / 2 - 4.5, size.width, 9), Paint()..color = Colors.white);
+    // Красный прямой крест
+    canvas.drawRect(Rect.fromLTWH(size.width / 2 - 2.5, 0, 5, size.height), Paint()..color = const Color(0xFFC8102E));
+    canvas.drawRect(Rect.fromLTWH(0, size.height / 2 - 2.5, size.width, 5), Paint()..color = const Color(0xFFC8102E));
+    canvas.restore();
+  }
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
 
 // =========================================================================
 // ПОЛНОСТЬЮ ОБНОВЛЕННЫЙ ЭКРАН УРОВНЕЙ 1-5 С КНОПКАМИ-СТРЕЛКАМИ И ЗВЕЗДАМИ
@@ -559,8 +672,7 @@ class _LevelsScreenState extends State<LevelsScreen> {
                 children: [
                   const SizedBox(height: 15),
                   
-                  const Text(
-                    'УРОВНИ',
+                  Text(AppStrings.get('levels_title'),
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.w900,
@@ -813,7 +925,7 @@ class AdditionalScreen extends StatelessWidget {
                             );
                           },
                           icon: const Icon(Icons.html_rounded, color: Colors.white, size: 24),
-                          label: const Text("ИГРАТЬ В ОФФЛАЙНЕ", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          label: Text(AppStrings.get('btn_play_offline'), style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                         ),
                         const SizedBox(height: 16),
                         const Text(
@@ -1014,8 +1126,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const SizedBox(height: 40),
-                    const Text(
-                      "МЕНЮ ДОСТИЖЕНИЙ",
+                    Text(AppStrings.get('ach_title'),
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.w900,
@@ -1032,8 +1143,8 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildAchievementCircle(
-                          title: "Первая Кровь",
-                          desc: "Убей самую первую\nсвинью на 1 уровне",
+                          title: AppStrings.get('ach_1_title'),
+                          desc: AppStrings.get('ach_1_desc'),
                           isUnlocked: isFirstBloodUnlocked,
                           child: AnimatedBuilder(
                             animation: _animController,
@@ -1053,8 +1164,8 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                         ),
                         const SizedBox(width: 35),
                         _buildAchievementCircle(
-                          title: "Снайпер",
-                          desc: "Пройди любой уровень,\nпотратив всего 1 птицу",
+                          title: AppStrings.get('ach_2_title'),
+                          desc: AppStrings.get('ach_2_desc'),
                           isUnlocked: isSniperUnlocked,
                           child: AnimatedBuilder(
                             animation: _animController,
@@ -1108,8 +1219,8 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                         ),
                         const SizedBox(width: 35),
                         _buildAchievementCircle(
-                          title: "Триумф",
-                          desc: "Пройди все 5 уровней\nна максимальные 3 звезды",
+                          title: AppStrings.get('ach_3_title'),
+                          desc: AppStrings.get('ach_3_desc'),
                           isUnlocked: isTriumphUnlocked,
                           child: AnimatedBuilder(
                             animation: _animController,
@@ -1149,8 +1260,8 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
                       children: [
                                                 // 4 КРУГ: КРОВОЖАДНАЯ МЕСТЬ (Эпичный Ardor-стиль, квадратные зубы с кариесом!)
                         _buildAchievementCircle(
-                          title: isSecretChestUnlocked ? "Кровожадная месть" : "SECRET",
-                          desc: isSecretChestUnlocked ? "Ты раскрыл тайну\nскрытого сундука!" : "???",
+                          title: isSecretChestUnlocked ? AppStrings.get('ach_4_title') : "SECRET",
+                          desc: isSecretChestUnlocked ? AppStrings.get('ach_4_desc') : "???",
                           isUnlocked: isSecretChestUnlocked,
                           child: AnimatedBuilder(
                             animation: _animController,
@@ -1224,8 +1335,8 @@ class _AchievementsScreenState extends State<AchievementsScreen> with SingleTick
 
                         // 5 КРУГ: НОВЫЙ ОПЫТ (Клик по IvanDrop во вкладке Дополнительно)
                         _buildAchievementCircle(
-                          title: "Новый опыт",
-                          desc: "Во вкладке дополнительно\nоткройте игру ivandrop",
+                          title: AppStrings.get('ach_5_title'),
+                          desc: AppStrings.get('ach_5_desc'),
                           isUnlocked: isNewExperienceUnlocked,
                           child: AnimatedBuilder(
                             animation: _animController,
