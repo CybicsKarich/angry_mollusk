@@ -101,7 +101,7 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
               top: 25, left: 10, right: 10,
               child: CustomPaint(
                 painter: ComicBubblePainter(tailX: 0.45),
-                child: const Padding(
+                child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 6, vertical: 12),
                   child: Text(AppStrings.get('c1_p1_f1'), style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
                 ),
@@ -129,7 +129,7 @@ class _SheriffComicScreenState extends State<SheriffComicScreen> {
               top: 15, left: 4, right: 4,
               child: CustomPaint(
                 painter: ComicBubblePainter(tailX: 0.8),
-                child: const Padding(
+                child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
                   child: Text(AppStrings.get('c1_p1_f2'), style: TextStyle(fontSize: 8.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15), textAlign: TextAlign.center),
                 ),
@@ -207,7 +207,7 @@ Positioned(
               top: 25, left: 10, right: 10,
               child: CustomPaint(
                 painter: ComicBubblePainter(tailX: 0.35),
-                child: const Padding(
+                child: Padding(
                   padding: EdgeInsets.all(8.0),
                   child: Text(AppStrings.get('c1_p1_f3'), style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
                 ),
@@ -260,7 +260,7 @@ Positioned(
               top: 25, left: 8, right: 8,
               child: CustomPaint(
                 painter: ComicBubblePainter(tailX: 0.35),
-                child: const Padding(
+                child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
                   child: Text(AppStrings.get('c1_p2_f1'), style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15), textAlign: TextAlign.center),
                 ),
@@ -337,14 +337,14 @@ Positioned(
               top: 15, left: 6, width: 95,
               child: CustomPaint(
                 painter: ComicBubblePainter(tailX: 0.25),
-                child: const Padding(padding: EdgeInsets.all(5.0), child: Text(AppStrings.get('c1_p2_f2_vanya1'), style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center)),
+                child: Padding(padding: EdgeInsets.all(5.0), child: Text(AppStrings.get('c1_p2_f2_vanya1'), style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center)),
               ),
             ),
             Positioned(
               top: 35, right: 6, width: 135,
               child: CustomPaint(
                 painter: ComicBubblePainter(tailX: 0.8),
-                child: const Padding(
+                child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 5, vertical: 6),
                   child: Text(AppStrings.get('c1_p2_f2_pigs'), style: TextStyle(fontSize: 7.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.1), textAlign: TextAlign.center),
                 ),
@@ -354,7 +354,7 @@ Positioned(
               bottom: 60, left: 10, right: 10,
               child: CustomPaint(
                 painter: ComicBubblePainter(tailX: 0.2),
-                child: const Padding(padding: EdgeInsets.all(5.0), child: Text(AppStrings.get('c1_p2_f2_vanya2'), style: TextStyle(fontSize: 7.6, fontWeight: FontWeight.bold, color: Colors.red), textAlign: TextAlign.center)),
+                child: Padding(padding: EdgeInsets.all(5.0), child: Text(AppStrings.get('c1_p2_f2_vanya2'), style: TextStyle(fontSize: 7.6, fontWeight: FontWeight.bold, color: Colors.red), textAlign: TextAlign.center)),
               ),
             ),
           ],
@@ -424,7 +424,7 @@ Positioned(
   right: 10,
   child: CustomPaint(
     painter: ComicBubblePainter(tailX: 0.25), // Хвостик указывает левее, прямо на оттянутого Ваню!
-    child: const Padding(
+    child: Padding(
       padding: EdgeInsets.all(8.0),
       child: Text(AppStrings.get('c1_p2_f3'), 
         style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black), 
