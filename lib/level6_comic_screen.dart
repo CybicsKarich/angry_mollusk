@@ -1626,7 +1626,7 @@ ElevatedButton(
                                 MaterialPageRoute(builder: (context) => const Level6Case07Screen()), // Твой класс из level6_bad_route_screen.dart
                               );
                             },
-                            Text(AppStrings.get('btn_end'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.2)),
+                           child: Text(AppStrings.get('btn_end'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.2)),
                           ),
                         ),
                       ],
