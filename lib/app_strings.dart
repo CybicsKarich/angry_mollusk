@@ -232,5 +232,60 @@ class AppStrings {
       'ru': 'ДАЛЬШЕ',
       'en': 'NEXT',
     },
+        // =========================================================================
+    // КОМИКС 5 УРОВНЯ: ГЕНЕРАЛ СВИНОМАТКИН (SVINOMATKIN COMIC SCREEN)
+    // =========================================================================
+    'c5_title_p1': {
+      'ru': 'ГЛАВА V: ПОДСТУПЫ К ЦИТАДЕЛИ',
+      'en': 'CHAPTER V: APPROACH TO THE CITADEL',
+    },
+    'c5_title_p2': {
+      'ru': 'ГЛАВА V: ПОСЛЕДНИЙ РУБЕЖ',
+      'en': 'CHAPTER V: THE LAST STAND',
+    },
+    'btn_to_battle': {
+      'ru': 'В БОЙ!',
+      'en': 'TO BATTLE!',
+    },
+    'c5_p1_f1': {
+      'ru': 'Вот я и дошёл до замка Дона Молюска!',
+      'en': 'I\'ve finally reached Don Mollusk\'s castle!',
+    },
+    'c5_p1_f2_vanya': {
+      'ru': 'Все твои братья разбиты! Ты остался один! Уйди с дороги, я иду к твоему боссу!',
+      'en': 'All your brothers are defeated! You\'re the last one left! Step aside, I\'m coming for your boss!',
+    },
+    'c5_p1_f2_gen': {
+      'ru': 'Хрю-ха-ха! Шериф-младший, ты слишком далеко зашёл, но здесь твой путь закончится! Дон Молюск доверил мне охранять подступы к его замку, и я не сделаю ни шагу назад!',
+      'en': 'Oink-ha-ha! Sheriff Junior, you\'ve come too far, and your journey ends right here! Don Mollusk entrusted me to guard his castle gates, and I won\'t take a single step back!',
+    },
+    'c5_p1_f3_vanya': {
+      'ru': 'Стоп, шериф-младший? Погоди-ка, кого-то ты мне напоминаешь... Ах, это ты Генерал Свиноматкин! Это ты, сорок лет назад обманул моего деда - великого шерифа-старшего! Ты ослепил его дымовой завесой и выкрал Древний Тотем Гнева, как же я мог забыть про это, ну ничего я сегодня заберу тотем у свиней и освобожу луг птиц!',
+      'en': 'Wait, Sheriff Junior? Hold on, you look familiar... Ah, it\'s you, General Svinomatkin! Forty years ago you tricked my grandfather, the great Sheriff Senior! You blinded him with a smokescreen and stole the Ancient Totem of Wrath! Today I\'ll take it back and free the bird meadow!',
+    },
+    'c5_p1_f3_gen': {
+      'ru': 'О да, я помню твоего деда! Он был силён, но слишком доверчив! Без Тотема Гнева ваш род навсегда потерял способность парить в небесах. Вы упали на землю и стали бессильными! А наш босс забрал тотем себе!',
+      'en': 'Oh yes, I remember your grandfather! He was strong, yet far too trusting! Without the Totem of Wrath, your kind lost the skies forever. You fell to the earth, powerless! And our boss claimed the totem for himself!',
+    },
+    'c5_p2_f1_vanya': {
+      'ru': 'Сегодня тотем вернётся обратно к птицам, и все свиньи в страхе сбегут с луга птиц!',
+      'en': 'Today the totem returns to the birds, and all pigs will flee the meadow in terror!',
+    },
+    'c5_p2_f1_gen': {
+      'ru': 'Вот это у тебя фантазии, постоянно повторяешь про луг и тотем! Что осталась детская травма? Хрю-ха-ха!',
+      'en': 'What a wild imagination, always babbling about the meadow and the totem! Still got childhood trauma? Oink-ha-ha!',
+    },
+    'c5_p2_f2_vanya': {
+      'ru': 'Свиноматкин, ты уже прожил своё, я сейчас разнесу твою крепость в щепки, и про травмы ты будешь говорить служа птицам!',
+      'en': 'Svinomatkin, your time is up! I\'ll smash your fortress to splinters, and you\'ll be whining about trauma while serving the birds!',
+    },
+    'c5_p2_f2_gen': {
+      'ru': 'Я построил крепость из двойного камня, ты ни за что её не сломаешь!',
+      'en': 'I built this fortress out of double stone—you\'ll never break through it!',
+    },
+    'c5_p2_f3': {
+      'ru': 'Настало время последнего боя!',
+      'en': 'It\'s time for the final battle!',
+    },
   };
 }
