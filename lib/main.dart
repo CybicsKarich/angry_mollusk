@@ -2207,7 +2207,7 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
                 top: 14, left: 4, right: 4,
                 child: CustomPaint(
                   painter: SpeechBubblePainter(tailXFactor: 0.8, tailGoesUp: false),
-                  child: const Padding(
+                  child: Padding(
                     padding: EdgeInsets.all(7.0),
                     child: Text(AppStrings.get('c6_don_reply_2'),
                       style: TextStyle(fontSize: 8.0, fontWeight: FontWeight.bold, color: Colors.black, height: 1.12),
@@ -2407,7 +2407,7 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
     }
   }
 },
-      child: const Row(
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.center, 
         children: [
           Text(AppStrings.get('btn_next'), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)), 
