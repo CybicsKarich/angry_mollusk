@@ -662,7 +662,7 @@ Widget _buildAdvanced3DFrame({required Widget child, required bool hasHole}) {
                   Navigator.pop(context); 
                 },
                 icon: const Icon(Icons.home_rounded, color: Colors.white, size: 16),
-                label: label: Text(AppStrings.get('btn_levels_menu'), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
+                label: Text(AppStrings.get('btn_levels_menu'), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
               ),
             ),
           ),
