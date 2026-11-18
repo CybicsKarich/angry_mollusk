@@ -9,6 +9,7 @@ import 'package:angry_mollusk/audio_manager.dart'; // Подключаем на�
 import 'package:shared_preferences/shared_preferences.dart';
 import 'svinomatkin_comic_screen.dart';
 import 'level6_victory_comic_screen.dart';
+import 'app_strings.dart';
 
 // Главный экран игры с поддержкой оверлеев: Победа, Пауза, Проигрыш
 class GameScreen extends StatelessWidget {
@@ -65,10 +66,10 @@ class GameScreen extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        const Text(
-                          "Ты победил, красавчик!",
+                           Text(
+                          AppStrings.get('victory_title'),
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 26,
                             fontWeight: FontWeight.w900,
                             color: Color(0xFFD84315), 
@@ -87,15 +88,15 @@ class GameScreen extends StatelessWidget {
                             );
                           }),
                         ),
-                        // ТОЧЕЧНО ЗАМЕНИТЬ В СТРОКЕ ИТОГОВОГО СЧЕТА:
-                        Text(
-                          "ИТОГОВЫЙ СЧЁТ: ${AngryMolluskGame.score}", // <-- ДОПИСАЛИ ИМЯ КЛАССА
+                      Text(
+                          "${AppStrings.get('final_score')}: ${AngryMolluskGame.score}",
                           style: const TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
                             color: Color(0xFF3E2723), 
                           ),
                         ),
+
                                                Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -234,22 +235,22 @@ else if (game.currentLevel < 5) {
                       border: Border.all(color: const Color(0xFF64B5F6), width: 3),
                       boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 10, offset: Offset(0, 4))],
                     ),
-                    child: const Row(
+                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.emoji_events_rounded, color: Color(0xFFFFD54F), size: 28),
-                        SizedBox(width: 12),
+                        const Icon(Icons.emoji_events_rounded, color: Color(0xFFFFD54F), size: 28),
+                        const SizedBox(width: 12),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              "ДОСТИЖЕНИЕ РАЗБЛОКИРОВАНО!",
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.1),
+                              AppStrings.get('ach_unlocked_title'),
+                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.1),
                             ),
                             Text(
-                              "Загляни в меню достижений на главном экране!",
-                              style: TextStyle(fontSize: 11, color: Color(0xFFE3F2FD)),
+                              AppStrings.get('ach_unlocked_desc'),
+                              style: const TextStyle(fontSize: 11, color: Color(0xFFE3F2FD)),
                             ),
                           ],
                         ),
@@ -274,10 +275,7 @@ else if (game.currentLevel < 5) {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text(
-                          'ПАУЗА',
-                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2),
-                        ),
+                        Text(AppStrings.get('pause_title'), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2)),
                         const SizedBox(height: 20),
                         SizedBox(
                           width: double.infinity,
@@ -289,7 +287,7 @@ else if (game.currentLevel < 5) {
                                 game.overlays.remove('PauseMenu');
                               game.resumeEngine();
                             },
-                            child: const Text('ПРОДОЛЖИТЬ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                            child: Text(AppStrings.get('btn_resume'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -306,7 +304,7 @@ else if (game.currentLevel < 5) {
                               game.levelCleared = false;
                               game.buildLevelStructures();
                             },
-                            child: const Text('ЗАНОВО', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                            child: Text(AppStrings.get('btn_restart'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -325,7 +323,7 @@ else if (game.currentLevel < 5) {
   
   Navigator.pop(context); 
 },
-                            child: const Text('В МЕНЮ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                            child: Text(AppStrings.get('btn_to_menu'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                           ),
                         ),
                       ],
@@ -349,10 +347,10 @@ else if (game.currentLevel < 5) {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text(
-                          'ПТИЦЫ КОНЧИЛИСЬ!\nМАКСИМ ПОБЕДИЛ!',
+                         Text(
+                          AppStrings.get('game_over_text'),
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.1),
+                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.1),
                         ),
                         const SizedBox(height: 24),
                         Row(
@@ -2993,7 +2991,7 @@ class WantedPosterPainter {
   textPainter.dispose(); // Освобождаем нативную память
 }
 
-    drawCleanText('РАЗЫСКИВАЕТСЯ', 22, -h / 2 + 25, isTitle: true);
+    drawCleanText(AppStrings.get('poster_wanted'), 22, -h / 2 + 25, isTitle: true);
 
     // =========================================================================
     // 5. ОГРОМНЫЙ ПРЯМОУГОЛЬНЫЙ ВЫРЕЗ ПОД ФОТО (С ЭФФЕКТОМ ГЛУБИНЫ)
@@ -3092,9 +3090,10 @@ class WantedPosterPainter {
     // =========================================================================
     // 7. НИЖНИЙ ТЕКСТ И НАГРАДА
     // =========================================================================
-    drawCleanText('ДОН МОЛЛЮСК', 16, photoRect.bottom + 14);
-    drawCleanText('НАГРАДА', 13, photoRect.bottom + 42);
+    drawCleanText(AppStrings.get('poster_name'), 16, photoRect.bottom + 14);
+    drawCleanText(AppStrings.get('poster_reward'), 13, photoRect.bottom + 42);
     drawCleanText('1, 000, 000\$', 22, photoRect.bottom + 62);
+
 
     // =========================================================================
     // 8. ПУЛИ ИЗ ПЕРВОЙ ВЕРСИИ (РЕАЛИСТИЧНЫЕ ДЫРКИ С НАГАРОМ И ТРЕЩИНАМИ)
