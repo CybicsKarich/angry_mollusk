@@ -2366,7 +2366,7 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
 
   Widget _buildNavigationButton() {
   if (_currentFrame == 3 && _selectedChoice == 0) {
-    return const SizedBox(
+    return SizedBox(
       height: 46, 
       child: Center(
         child: Text(AppStrings.get('c6_select_prompt'), 
