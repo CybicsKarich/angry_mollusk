@@ -7,6 +7,7 @@ import 'level6_bad_route_screen.dart';
 import 'level6_case07_screen.dart';
 import 'level6_victory_comic_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'app_strings.dart';
 
 
 class Level6GoodRouteScreen extends StatefulWidget {
@@ -706,9 +707,9 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
         child: Column(
           children: [
             const SizedBox(height: 4), 
-            const Text(
-              "ГЛАВА VI: ЛОГОВО ДОНА МОЛЛЮСКА",
-              style: TextStyle(
+               Text(
+              AppStrings.get('c6_title'),
+              style: const TextStyle(
                 fontSize: 18, 
                 fontWeight: FontWeight.w900,
                 color: Color(0xFF455A64),
@@ -762,10 +763,9 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
               top: 20, left: 6, width: 105,
               child: CustomPaint(
                 painter: SpeechBubblePainter(tailXFactor: 0.25),
-                child: const Padding(
+                child: Padding(
                   padding: EdgeInsets.all(6.0),
-                  child: Text(
-                    "Творя власть на лугу птиц окончена, Моллюск. Отдай тотем гнева, освободи луг и мы закончим это.",
+                  child: Text(AppStrings.get('c6_good_f1_vanya'),
                     style: TextStyle(fontSize: 7.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
                     textAlign: TextAlign.center,
                   ),
@@ -778,10 +778,9 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
               top: 75, right: 6, width: 110,
               child: CustomPaint(
                 painter: SpeechBubblePainter(tailXFactor: 0.8),
-                child: const Padding(
+                child: Padding(
                   padding: EdgeInsets.all(6.0),
-                  child: Text(
-                    "Ты слишком самоуверен для того, кто ползает по земле! Жалкая птица. Я следил за тобой с самого первого дня твоего путешествия, видел все твои битвы, я думал ты прибежишь сюда в ярости!",
+                  child: Text(AppStrings.get('c6_good_f1_don'),
                     style: TextStyle(fontSize: 6.8, fontWeight: FontWeight.bold, color: Colors.black, height: 1.1),
                     textAlign: TextAlign.center,
                   ),
@@ -812,10 +811,9 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
               top: 20, left: 4, width: 110,
               child: CustomPaint(
                 painter: SpeechBubblePainter(tailXFactor: 0.25),
-                child: const Padding(
+                child: Padding(
                   padding: EdgeInsets.all(6.0),
-                  child: Text(
-                    "Я видел все твои знаки и тени. Но они меня не напугали, а лишь привели к твоей двери. Твой план провалился.",
+                  child: Text(AppStrings.get('c6_good_f2_vanya'),
                     style: TextStyle(fontSize: 7.5, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
                     textAlign: TextAlign.center,
                   ),
@@ -828,10 +826,9 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
               top: 72, right: 4, width: 110,
               child: CustomPaint(
                 painter: SpeechBubblePainter(tailXFactor: 0.75),
-                child: const Padding(
+                child: Padding(
                   padding: EdgeInsets.all(6.0),
-                  child: Text(
-                    "Ах ты наглая птица! Ты думаешь, раз выжил и разрушил все постройки, то сможешь одолеть меня?! Хрю-выкуси!",
+                  child: Text(AppStrings.get('c6_good_f2_don'),
                     style: TextStyle(fontSize: 7.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.1),
                     textAlign: TextAlign.center,
                   ),
@@ -909,10 +906,9 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
               top: 25, left: 6, right: 6,
               child: CustomPaint(
                 painter: SpeechBubblePainter(tailXFactor: 0.25),
-                child: const Padding(
+                child: Padding(
                   padding: EdgeInsets.all(8.0),
-                  child: Text(
-                    "Похоже твой замок разваливается сам, Моллюск! Ничего, сейчас я его доломаю и убью тебя!",
+                  child: Text(AppStrings.get('c6_good_f3_vanya'),
                     style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
                     textAlign: TextAlign.center,
                   ),
@@ -1254,10 +1250,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        const Text(
-                                          'ПАУЗА',
-                                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2, decoration: TextDecoration.none),
-                                        ),
+                                        Text(AppStrings.get('pause_title'), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2, decoration: TextDecoration.none)),
                                         const SizedBox(height: 20),
                                         
                                         // 2. КНОПКА «ПРОДОЛЖИТЬ» — СНИМАЕМ С ПАУЗЫ И ЗАПУСКАЕМ ТИКЕР
@@ -1276,7 +1269,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                                                 _gameLoopTicker.start();
                                               }
                                             },
-                                            child: const Text('ПРОДОЛЖИТЬ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                                            child: Text(AppStrings.get('btn_resume'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                                           ),
                                         ),
                                         const SizedBox(height: 12),
@@ -1325,7 +1318,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                                                 _gameLoopTicker.start();
                                               }
                                             },
-                                            child: const Text('ЗАНОВО', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                                            child: Text(AppStrings.get('btn_restart'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                                           ),
                                         ),
                                         const SizedBox(height: 12),
@@ -1348,7 +1341,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                                               AudioManager.isLevel6ArenaActive = false; 
                                               Navigator.pop(context); // выходим в меню уровней
                                             },
-                                            child: const Text('В МЕНЮ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                                            child: Text(AppStrings.get('btn_to_menu'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                                           ),
                                         ),
                                       ],
@@ -1546,7 +1539,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
           if (_bossCurrentHp <= 0)
             Center(
               child: Container(
-                padding: const EdgeInsets.all(20),
+                padding: EdgeInsets.all(20),
                 decoration: BoxDecoration(
             color: Colors.black.withOpacity(0.9), 
             borderRadius: BorderRadius.circular(16), 
@@ -1555,7 +1548,7 @@ class _Level6GoodRouteScreenState extends State<Level6GoodRouteScreen> with Tick
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                                     children: [
-                    const Text("ТЫ УБИЛ БОССА!", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.amber)),
+                    Text(AppStrings.get('lvl6_boss_defeated'), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.amber)),
                     const SizedBox(height: 12),
                     // =========================================================================
 // 🏆 ИСПРАВЛЕНО: КНОПКА ФИНАЛЬНОГО ТРИУМФА В ОВЕРЛЕЕ ПОБЕДЫ 6 УРОВНЯ
@@ -1579,7 +1572,7 @@ ElevatedButton(
       );
     }
   },
-  child: const Text("В МЕНЮ УРОВНЕЙ", style: TextStyle(color: Colors.white)),
+    child: Text(AppStrings.get('btn_end'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
 ),
                   ],
                 ),
@@ -1607,16 +1600,9 @@ ElevatedButton(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text(
-                          "ШЕРИФ ПОВЕРЖЕН",
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFFB71C1C), letterSpacing: 1.5, decoration: TextDecoration.none),
-                        ),
+                        Text(AppStrings.get('lvl6_sheriff_defeated'), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFFB71C1C), letterSpacing: 1.5, decoration: TextDecoration.none)),
                         const SizedBox(height: 8),
-                        const Text(
-                          "У вас закончились жизни...",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.normal, color: Colors.white70, decoration: TextDecoration.none),
-                        ),
+                        Text(AppStrings.get('lvl6_no_lives'), textAlign: TextAlign.center, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.normal, color: Colors.white70, decoration: TextDecoration.none)),
                         const SizedBox(height: 20),
                         
                         // РОДНАЯ И ЕДИНСТВЕННАЯ КНОПКА «КОНЕЦ» ДЛЯ ВЫЛЕТА В ПЛОХУЮ КОНЦОВКУ
@@ -1640,10 +1626,7 @@ ElevatedButton(
                                 MaterialPageRoute(builder: (context) => const Level6Case07Screen()), // Твой класс из level6_bad_route_screen.dart
                               );
                             },
-                            child: const Text(
-                              "КОНЕЦ", 
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.2),
-                            ),
+                            Text(AppStrings.get('btn_end'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.2)),
                           ),
                         ),
                       ],
@@ -1694,10 +1677,10 @@ ElevatedButton(
               child: FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Text(
-                  _currentFrame == 3 ? "КОНЕЦ" : "ДАЛЬШЕ", 
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
-                  textAlign: TextAlign.center,
-                ),
+  _currentFrame == 3 ? AppStrings.get('btn_end') : AppStrings.get('btn_next'), 
+  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+  textAlign: TextAlign.center,
+),
               ),
             ), 
             const SizedBox(width: 6), 
