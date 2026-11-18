@@ -86,5 +86,40 @@ class AppStrings {
       'ru': 'Посмотрим, какую крепость вы построили!',
       'en': 'Let\'s see what kind of fortress you built!',
     },
+        // =========================================================================
+    // ЭКРАН УРОВНЕЙ И ДОПОЛНИТЕЛЬНО
+    // =========================================================================
+    'levels_title': {'ru': 'УРОВНИ', 'en': 'LEVELS'},
+    'btn_play_offline': {'ru': 'ИГРАТЬ В ОФФЛАЙНЕ', 'en': 'PLAY OFFLINE'},
+
+    // =========================================================================
+    // ЭКРАН ДОСТИЖЕНИЙ (ACHIEVEMENTS)
+    // =========================================================================
+    'ach_title': {'ru': 'МЕНЮ ДОСТИЖЕНИЙ', 'en': 'ACHIEVEMENTS'},
+    'ach_1_title': {'ru': 'Первая Кровь', 'en': 'First Blood'},
+    'ach_1_desc': {
+      'ru': 'Убей самую первую\nсвинью на 1 уровне',
+      'en': 'Defeat the very first\npig on Level 1',
+    },
+    'ach_2_title': {'ru': 'Снайпер', 'en': 'Sniper'},
+    'ach_2_desc': {
+      'ru': 'Пройди любой уровень,\nпотратив всего 1 птицу',
+      'en': 'Beat any level\nusing only 1 bird',
+    },
+    'ach_3_title': {'ru': 'Триумф', 'en': 'Triumph'},
+    'ach_3_desc': {
+      'ru': 'Пройди все 5 уровней\nна максимальные 3 звезды',
+      'en': 'Complete all 5 levels\nwith 3 stars',
+    },
+    'ach_4_title': {'ru': 'Кровожадная месть', 'en': 'Bloodthirsty Revenge'},
+    'ach_4_desc': {
+      'ru': 'Ты раскрыл тайну\nскрытого сундука!',
+      'en': 'You uncovered the secret\nof the hidden chest!',
+    },
+    'ach_5_title': {'ru': 'Новый опыт', 'en': 'New Experience'},
+    'ach_5_desc': {
+      'ru': 'Во вкладке дополнительно\nоткройте игру ivandrop',
+      'en': 'Open the ivandrop game\nin the Extras tab',
+    },
   };
 }
