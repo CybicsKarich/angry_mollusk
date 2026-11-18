@@ -1564,8 +1564,7 @@ class ComicIntroScreen extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 16),
-            const Text(
-              "ПРЕДЫСТОРИЯ УРОВНЯ 4",
+            Text(AppStrings.get('c4_title'),
               style: TextStyle(
                 fontSize: 24, 
                 fontWeight: FontWeight.w900, 
@@ -1609,10 +1608,9 @@ Expanded(
           top: 28, left: 6, right: 6,
           child: CustomPaint(
             painter: SpeechBubblePainter(tailXFactor: 0.5, tailGoesUp: false),
-            child: const Padding(
+            child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-              child: Text(
-                "Баннихоп уже близко к замку нашего босса. Надо что-то придумать! Сделаем крепость из бронированного стекла. Тогда он точно не сможет её сломать!",
+              child: Text(AppStrings.get('c4_f1_pigs'),
                 style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
                 textAlign: TextAlign.center,
               ),
@@ -1682,9 +1680,9 @@ const SizedBox(width: 12),
                               top: 35, left: 10, width: 110,
                               child: CustomPaint(
                                 painter: SpeechBubblePainter(tailXFactor: 0.25, tailGoesUp: false),
-                                child: const Padding(
+                                  child:  Padding(
                                   padding: EdgeInsets.all(8.0),
-                                  child: Text("Ах вот вы что задумали!", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
+                                  child: Text(AppStrings.get('c4_f2_vanya'), style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
                                 ),
                               ),
                             ),
@@ -1841,8 +1839,7 @@ const SizedBox(width: 12),
                                         borderRadius: BorderRadius.circular(2),
                                         border: Border.all(color: const Color(0xFF01579B), width: 0.5),
                                       ),
-                                      child: const Text(
-                                        "ВИАГРА",
+                                      child: Text(AppStrings.get('c4_pill_label'),
                                         style: TextStyle(fontSize: 5.5, fontWeight: FontWeight.w900, color: Color(0xFF01579B), letterSpacing: 0.2),
                                         textAlign: TextAlign.center,
                                       ),
@@ -1859,9 +1856,9 @@ const SizedBox(width: 12),
                               top: 35, left: 15, width: 115,
                               child: CustomPaint(
                                 painter: SpeechBubblePainter(tailXFactor: 0.25, tailGoesUp: false),
-                                child: const Padding(
+                                  child:  Padding(
                                   padding: EdgeInsets.all(8.0),
-                                  child: Text("А у меня вот это есть", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
+                                  child: Text(AppStrings.get('c4_f3_vanya'), style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
                                 ),
                               ),
                             ),
@@ -1897,7 +1894,7 @@ const SizedBox(width: 12),
                   MaterialPageRoute(builder: (context) => gameScreenInstance),
                 );
               },
-              child: const Text("ПОГНАЛИ!", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+              child: Text(AppStrings.get('btn_lets_go'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
               ),
             ),
           ],
@@ -2050,8 +2047,7 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
         child: Column(
           children: [
             const SizedBox(height: 12),
-            const Text(
-              "ГЛАВА VI: ЛОГОВО ДОНА МОЛЛЮСКА",
+            Text(AppStrings.get('c6_title'),
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w900,
@@ -2118,10 +2114,9 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
               top: 25, left: 6, right: 6,
               child: CustomPaint(
                 painter: SpeechBubblePainter(tailXFactor: 0.25, tailGoesUp: false),
-                child: const Padding(
+                child: Padding(
                   padding: EdgeInsets.all(8.0),
-                  child: Text(
-                    "Дон Молюск! Все твои свиньи убиты! Где же ты спрятался, выйди ко мне.",
+                  child: Text(AppStrings.get('c6_f1_vanya'),
                     style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
                     textAlign: TextAlign.center,
                   ),
@@ -2157,7 +2152,7 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                 decoration: BoxDecoration(color: Colors.black87, border: Border.all(color: Colors.red.shade900, width: 0.8)),
-                child: const Text("ШАГИ ИЗ ТЕМHОТЫ...", style: TextStyle(color: Colors.redAccent, fontSize: 8, fontWeight: FontWeight.bold, letterSpacing: 1.1), textAlign: TextAlign.center),
+                child: Text(AppStrings.get('c6_f2_steps'), style: TextStyle(color: Colors.redAccent, fontSize: 8, fontWeight: FontWeight.bold, letterSpacing: 1.1), textAlign: TextAlign.center),
               ),
             ),
           ],
@@ -2184,9 +2179,9 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
                 top: 15, left: 4, right: 4,
                 child: Column(
                   children: [
-                    _buildChoiceBox("Вот ты где! Сдавайся чудовище! Твоё время пришло!", 1),
+                    _buildChoiceBox(AppStrings.get('c6_choice_1'), 1),
                     const SizedBox(height: 6),
-                    _buildChoiceBox("Давай по-хорошему. отдай Древний Тотем Гнева, оставь склады с таблетками в покое и уйди слуга птиц навсегда.", 2),
+                    _buildChoiceBox(AppStrings.get('c6_choice_2'), 2),
                   ],
                 ),
               ),
@@ -2197,10 +2192,9 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
                 top: 25, left: 6, right: 6,
                 child: CustomPaint(
                   painter: SpeechBubblePainter(tailXFactor: 0.8, tailGoesUp: false),
-                  child: const Padding(
+                  child: Padding(
                     padding: EdgeInsets.all(8.0),
-                    child: Text(
-                      "Хрю-ха-ха! Сдаться тебе? Жалкая птица! Не на того напал!",
+                    child: Text(AppStrings.get('c6_don_reply_1'),
                       style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
                       textAlign: TextAlign.center,
                     ),
@@ -2215,8 +2209,7 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
                   painter: SpeechBubblePainter(tailXFactor: 0.8, tailGoesUp: false),
                   child: const Padding(
                     padding: EdgeInsets.all(7.0),
-                    child: Text(
-                      "По-хорошему? Ты слишком вежлив для птицы, потерявшей способность летать. Этим предметом мы лишили ваш род неба! И ты думаешь, я отдам его просто так?",
+                    child: Text(AppStrings.get('c6_don_reply_2'),
                       style: TextStyle(fontSize: 8.0, fontWeight: FontWeight.bold, color: Colors.black, height: 1.12),
                       textAlign: TextAlign.center,
                     ),
@@ -2376,8 +2369,7 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
     return const SizedBox(
       height: 46, 
       child: Center(
-        child: Text(
-          "ВЫБЕРИТЕ ОТВЕТ ШЕРИФА ДЛЯ ПРОДОЛЖЕHИЯ СЮЖЕTA", 
+        child: Text(AppStrings.get('c6_select_prompt'), 
           style: TextStyle(color: Colors.redAccent, fontSize: 9.5, fontWeight: FontWeight.bold, letterSpacing: 1.1),
         ),
       ),
@@ -2418,7 +2410,7 @@ class _Level6ComicScreenState extends State<Level6ComicScreen> {
       child: const Row(
         mainAxisAlignment: MainAxisAlignment.center, 
         children: [
-          Text("ДАЛЬШЕ", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)), 
+          Text(AppStrings.get('btn_next'), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)), 
           SizedBox(width: 8), 
           Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.white),
         ],
