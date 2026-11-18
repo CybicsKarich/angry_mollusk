@@ -287,5 +287,44 @@ class AppStrings {
       'ru': 'Настало время последнего боя!',
       'en': 'It\'s time for the final battle!',
     },
+        // =========================================================================
+    // ПЛОХАЯ ЛИНИЯ 6 УРОВНЯ И КОНЦОВКА «ДЕЛО №06» (LEVEL 6 BAD ROUTE)
+    // =========================================================================
+    'c6_bad_f1_vanya': {
+      'ru': 'Все свиньи разбиты, ты остался один! Тебе не скрыться за стенами замка, чудовище!',
+      'en': 'All your pigs are crushed, you\'re on your own! You can\'t hide behind these castle walls, monster!',
+    },
+    'c6_bad_f1_don': {
+      'ru': 'Скрыться? Хрю-ха-ха! Глупая птица, я сам привёл тебя сюда. Я наблюдал за тобой каждую секунду! Я видел, как ты сидел в кабинете, как ты стрелял из рогатки, как ты общался со Свиноматкиным! Эх, славный был воин... Теперь ты понял, что я ждал тебя здесь и вот ты пришёл!',
+      'en': 'Hide? Oink-ha-ha! Foolish bird, I led you here myself. I watched your every move! I saw you in your office, firing that slingshot, talking to Svinomatkin! Ah, what a fine warrior he was... Now you see I was waiting for you all along!',
+    },
+    'c6_bad_f2_vanya': {
+      'ru': 'Вот это у тебя план! Ничего сейчас он будет разрушен, как и твой замок и тотем гнева вместе с лугом придёт обратно птицам!',
+      'en': 'What a grand plan! Too bad it\'s about to crumble along with your castle, and the Totem of Wrath and the meadow will return to the birds!',
+    },
+    'c6_bad_f2_don': {
+      'ru': 'Разрушишь замок? Маленькая птица разгневалась. Как и твой дед сорок лет назад!',
+      'en': 'Destroy my castle? The little bird is angry. Just like your grandfather forty years ago!',
+    },
+    'c6_bad_f3_don': {
+      'ru': 'Хрю-ха-ха! Я так и думал! Жалкая птица!',
+      'en': 'Oink-ha-ha! Just as I thought! Pathetic bird!',
+    },
+    'btn_end': {
+      'ru': 'КОНЕЦ',
+      'en': 'THE END',
+    },
+    'bad_end_game_over': {
+      'ru': 'КОНЕЦ ИГРЫ',
+      'en': 'GAME OVER',
+    },
+    'bad_end_case_06': {
+      'ru': 'Дело №06: Шериф объявлен пропавшим без вести на лугу свиней. Расследование прекращено.',
+      'en': 'Case #06: The Sheriff has been declared missing in the pigs\' meadow. Investigation closed.',
+    },
+    'btn_levels_menu': {
+      'ru': 'В МЕНЮ УРОВНЕЙ',
+      'en': 'LEVEL SELECT',
+    },
   };
 }
