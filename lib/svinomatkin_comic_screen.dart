@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'game_screen.dart';
 import 'audio_manager.dart';
 import 'main.dart';
+import 'app_strings.dart';
 
 // =========================================================================
 // НАЧАЛЬНЫЙ КОМИКС 5 УРОВНЯ: ГЕНЕРАЛ СВИНOМАТКИН И ГРОЗОВАЯ ЦИТАДЕЛЬ
@@ -65,7 +66,7 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
           children: [
             const SizedBox(height: 16),
             Text(
-              _currentPage == 0 ? "ГЛАВА V: ПОДСТУПЫ К ЦИТАДЕЛИ" : "ГЛАВА V: ПОСЛЕДНИЙ РУБЕЖ",
+              _currentPage == 0 ? AppStrings.get('c5_title_p1') : AppStrings.get('c5_title_p2'),
               style: const TextStyle(
                 fontSize: 20, 
                 fontWeight: FontWeight.w900, 
@@ -98,7 +99,7 @@ class _SvinomatkinComicScreenState extends State<SvinomatkinComicScreen> with Si
                       elevation: 6,
                     ),
                     onPressed: () => setState(() => _currentPage = 1), // Вперёд на Стр 2
-                    icon: const Text("ВПЕРЁД", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                    icon: Text(AppStrings.get('btn_forward'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
                     label: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 24),
                   )
                 : // ПОЛНОСТЬЮ ЗАМЕНИТЬ КНОПКУ "В БОЙ!" ВНИЗУ SvinomatkinComicScreen НА ЭТУ:
@@ -122,7 +123,7 @@ ElevatedButton(
       MaterialPageRoute(builder: (context) => gameScreenInstance),
     );
   },
-  child: const Text("В БОЙ!", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.2)),
+  child: Text(AppStrings.get('btn_to_battle'), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.2)),
 ),
             ),
           ],
@@ -148,9 +149,9 @@ ElevatedButton(
               top: 25, left: 8, right: 8,
               child: CustomPaint(
                 painter: ComicBubblePainter(tailX: 0.25),
-                child: const Padding(
+                child: Padding(
                   padding: EdgeInsets.all(8.0),
-                  child: Text("Вот я и дошёл до замка Дона Молюска!", style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
+                  child: Text(AppStrings.get('c5_p1_f1'), style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
                 ),
               ),
             ),
@@ -175,7 +176,7 @@ ElevatedButton(
               top: 10, left: 4, width: 105,
               child: CustomPaint(
                 painter: ComicBubblePainter(tailX: 0.2),
-                child: const Padding(padding: EdgeInsets.all(5.0), child: Text("Все твои братья разбиты! Ты остался один! Уйди с дороги, я иду к твоему боссу!", style: TextStyle(fontSize: 7.8, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center)),
+                child: Padding(padding: EdgeInsets.all(5.0), child: Text(AppStrings.get('c5_p1_f2_vanya'), style: TextStyle(fontSize: 7.8, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center)),
               ),
             ),
             // ЗАМЕНИТЬ ТОЛЬКО ОБЛАКО ГЕНЕРАЛА ВНУТРИ _buildFrame2:
@@ -183,10 +184,9 @@ Positioned(
   top: 56, right: 48, width: 100, // Опустили пониже и сдвинули левее к центру
   child: CustomPaint(
     painter: ComicBubblePainter(tailX: 0.25), // Хвостик чётко бьёт в Генерала
-    child: const Padding(
+    child: Padding(
       padding: EdgeInsets.all(6.0),
-      child: Text(
-        "Хрю-ха-ха! Шериф-младший, ты слишком далеко зашёл, но здесь твой путь закончится! Дон Молюск доверил мне охранять подступы к его замку, и я не сделаю ни шагу назад!", 
+      child: Text(AppStrings.get('c5_p1_f2_gen'), 
         style: TextStyle(fontSize: 6.8, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15), 
         textAlign: TextAlign.center,
       ),
@@ -212,9 +212,9 @@ Positioned(
               top: 10, left: 4, right: 4,
               child: CustomPaint(
                 painter: ComicBubblePainter(tailX: 0.2),
-                child: const Padding(
+                child: Padding(
                   padding: EdgeInsets.all(6.0),
-                  child: Text("Стоп, шериф-младший? Погоди-ка, кого-то ты мне напоминаешь... Ах, это ты Генерал Свиноматкин! Это ты, сорок лет назад обманул моего деда - великого шерифа-старшего! Ты ослепил его дымовой завесой и выкрал Древний Тотем Гнева, как же я мог забыть про это, ну ничего я сегодня заберу тотем у свиней и освобожу луг птиц!", style: TextStyle(fontSize: 6.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.1), textAlign: TextAlign.center),
+                  child: Text(AppStrings.get('c5_p1_f3_vanya'), style: TextStyle(fontSize: 6.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.1), textAlign: TextAlign.center),
                 ),
               ),
             ),
@@ -223,10 +223,9 @@ Positioned(
   bottom: 54, left: 10, right: 10,
   child: CustomPaint(
     painter: ComicBubblePainter(tailX: 0.45), // ИСПРАВЛЕНО: Убран лишний параметр!
-    child: const Padding(
+    child: Padding(
       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      child: Text(
-        "О да, я помню твоего деда! Он был силён, но слишком доверчив! Без Тотема Гнева ваш род навсегда потерял способность парить в небесах. Вы упали на землю и стали бессильными! А наш босс забрал тотем себе!", 
+      child: Text(AppStrings.get('c5_p1_f3_gen'), 
         style: TextStyle(fontSize: 6.2, fontWeight: FontWeight.bold, color: Colors.red, height: 1.1), 
         textAlign: TextAlign.center,
       ),
@@ -255,7 +254,7 @@ Positioned(
               top: 15, left: 6, width: 110,
               child: CustomPaint(
                 painter: ComicBubblePainter(tailX: 0.25),
-                child: const Padding(padding: EdgeInsets.all(5.0), child: Text("Сегодня тотем вернётся обратно к птицам, и все свиньи в страхе сбегут с луга птиц!", style: TextStyle(fontSize: 7.8, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center)),
+                child: Padding(padding: EdgeInsets.all(5.0), child: Text(AppStrings.get('c5_p2_f1_vanya'), style: TextStyle(fontSize: 7.8, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center)),
               ),
             ),
             // ЗАМЕНИТЬ ТОЛЬКО ОБЛАКО ГЕНЕРАЛА ВНУТРИ _buildPage2Frame1:
@@ -263,10 +262,9 @@ Positioned(
   top: 48, right: 48, width: 100, // Опустили и сдвинули левее вглубь кадра
   child: CustomPaint(
     painter: ComicBubblePainter(tailX: 0.3), 
-    child: const Padding(
+    child: Padding(
       padding: EdgeInsets.all(6.0), 
-      child: Text(
-        "Вот это у тебя фантазии, постоянно повторяешь про луг и тотем! Что осталась детская травма? Хрю-ха-ха!", 
+      child: Text(AppStrings.get('c5_p2_f1_gen'), 
         style: TextStyle(fontSize: 7.5, fontWeight: FontWeight.bold, color: Colors.black), 
         textAlign: TextAlign.center,
       ),
@@ -302,7 +300,7 @@ Positioned(
               top: 15, left: 4, width: 115,
               child: CustomPaint(
                 painter: ComicBubblePainter(tailX: 0.2),
-                child: const Padding(padding: EdgeInsets.all(4.0), child: Text("Свиноматкин, ты уже прожил своё, я сейчас разнесу твою крепость в щепки, и про травмы ты будешь говорить служа птицам!", style: TextStyle(fontSize: 7.0, fontWeight: FontWeight.bold, color: Colors.red), textAlign: TextAlign.center)),
+                child: Padding(padding: EdgeInsets.all(4.0), child: Text(AppStrings.get('c5_p2_f2_vanya'), style: TextStyle(fontSize: 7.0, fontWeight: FontWeight.bold, color: Colors.red), textAlign: TextAlign.center)),
               ),
             ),
             // ЗАМЕНИТЬ ТОЛЬКО ОБЛАКО ГЕНЕРАЛА ВНУТРИ _buildPage2Frame2:
@@ -310,10 +308,9 @@ Positioned(
   top: 48, right: 26, width: 105, // Опустили и приблизили к свинье
   child: CustomPaint(
     painter: ComicBubblePainter(tailX: 0.2), 
-    child: const Padding(
+    child: Padding(
       padding: EdgeInsets.all(6.0), 
-      child: Text(
-        "Я построил крепость из двойного камня, ты ни за что её не сломаешь!", 
+      child: Text(AppStrings.get('c5_p2_f2_gen'), 
         style: TextStyle(fontSize: 7.6, fontWeight: FontWeight.bold, color: Colors.black), 
         textAlign: TextAlign.center,
       ),
@@ -359,7 +356,7 @@ Positioned(bottom: 58, left: 45, child: Transform.rotate(angle: 0.26, child: Con
               top: 20, left: 10, right: 10,
               child: CustomPaint(
                 painter: ComicBubblePainter(tailX: 0.25),
-                child: const Padding(padding: EdgeInsets.all(8.0), child: Text("Настало время последнего боя!", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center)),
+                child: Padding(padding: EdgeInsets.all(8.0), child: Text(AppStrings.get('c5_p2_f3'), style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center)),
               ),
             ),
           ],
