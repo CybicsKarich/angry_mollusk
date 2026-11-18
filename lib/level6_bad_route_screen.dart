@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'audio_manager.dart';
 import 'main.dart';
 import 'package:flutter/scheduler.dart';
+import 'app_strings.dart';
 
 class Level6BadRouteScreen extends StatefulWidget {
   const Level6BadRouteScreen({super.key});
@@ -104,10 +105,10 @@ class _Level6BadRouteScreenState extends State<Level6BadRouteScreen> with Ticker
         child: Column(
           children: [
             const SizedBox(height: 4), // Уменьшили отступ сверху с 12 до 4
-            const Text(
-              "ГЛАВА VI: ЛОГОВО ДОНА МОЛЛЮСКА",
-              style: TextStyle(
-                fontSize: 18, // Уменьшили шрифт с 22 до 18 для экономии места
+             Text(
+              AppStrings.get('c6_title'),
+              style: const TextStyle(
+                fontSize: 18,
                 fontWeight: FontWeight.w900,
                 color: Color(0xFF455A64),
                 letterSpacing: 2.0,
@@ -162,10 +163,9 @@ class _Level6BadRouteScreenState extends State<Level6BadRouteScreen> with Ticker
               top: 18, left: 6, width: 105,
               child: CustomPaint(
                 painter: SpeechBubblePainter(tailXFactor: 0.25),
-                child: const Padding(
+                child: Padding(
                   padding: EdgeInsets.all(5.0),
-                  child: Text(
-                    "Все свиньи разбиты, ты остался один! Тебе не скрыться за стенами замка, чудовище!",
+                  child: Text(AppStrings.get('c6_bad_f1_vanya'),
                     style: TextStyle(fontSize: 7.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
                     textAlign: TextAlign.center,
                   ),
@@ -178,10 +178,9 @@ class _Level6BadRouteScreenState extends State<Level6BadRouteScreen> with Ticker
               top: 70, right: 6, width: 110,
               child: CustomPaint(
                 painter: SpeechBubblePainter(tailXFactor: 0.8),
-                child: const Padding(
+                child: Padding(
                   padding: EdgeInsets.all(5.0),
-                  child: Text(
-                    "Скрыться? Хрю-ха-ха! Глупая птица, я сам привёл тебя сюда. Я наблюдал за тобой каждую секунду! Я видел, как ты сидел в кабинете, как ты стрелял из рогатки, как ты общался со Свиноматкиным! Эх, славный был воин... Теперь ты понял, что я ждал тебя здесь и вот ты пришёл!",
+                  child: Text(AppStrings.get('c6_bad_f1_don'),
                     style: TextStyle(fontSize: 6.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.1),
                     textAlign: TextAlign.center,
                   ),
@@ -241,10 +240,9 @@ class _Level6BadRouteScreenState extends State<Level6BadRouteScreen> with Ticker
             top: 15, left: 4, width: 110,
             child: CustomPaint(
               painter: SpeechBubblePainter(tailXFactor: 0.35),
-              child: const Padding(
+              child: Padding(
                 padding: EdgeInsets.all(5.0),
-                child: Text(
-                  "Вот это у тебя план! Ничего сейчас он будет разрушен, как и твой замок и тотем гнева вместе с лугом придёт обратно птицам!",
+                child: Text(AppStrings.get('c6_bad_f2_vanya'),
                   style: TextStyle(fontSize: 7.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
                   textAlign: TextAlign.center,
                 ),
@@ -255,10 +253,9 @@ class _Level6BadRouteScreenState extends State<Level6BadRouteScreen> with Ticker
             top: 75, right: 4, width: 110,
             child: CustomPaint(
               painter: SpeechBubblePainter(tailXFactor: 0.75),
-              child: const Padding(
+              child: Padding(
                 padding: EdgeInsets.all(5.0),
-                child: Text(
-                  "Разрушишь замок? Маленькая птица разгневалась. Как и твой дед сорок лет назад!",
+                child: Text(AppStrings.get('c6_bad_f2_don'),
                   style: TextStyle(fontSize: 7.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.1),
                   textAlign: TextAlign.center,
                 ),
@@ -318,10 +315,9 @@ class _Level6BadRouteScreenState extends State<Level6BadRouteScreen> with Ticker
             top: 25, left: 6, right: 6,
             child: CustomPaint(
               painter: SpeechBubblePainter(tailXFactor: 0.75), 
-              child: const Padding(
+              child: Padding(
                 padding: EdgeInsets.all(8.0),
-                child: Text(
-                  "Хрю-ха-ха! Я так и думал! Жалкая птица!",
+                child: Text(AppStrings.get('c6_bad_f3_don'),
                   style: TextStyle(fontSize: 9.0, fontWeight: FontWeight.bold, color: Colors.red, height: 1.15),
                   textAlign: TextAlign.center,
                 ),
@@ -373,11 +369,10 @@ class _Level6BadRouteScreenState extends State<Level6BadRouteScreen> with Ticker
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center, 
           children: [
-            Text(
-              // ИСПРАВЛЕНО ТОЧЕЧНО: Текст "ЗАБЛОКИРОВАНО" полностью удален с кнопки!
-              _currentFrame == 3 ? "КОНЕЦ" : "ДАЛЬШЕ", 
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)
-            ), 
+             Text(
+              _currentFrame == 3 ? AppStrings.get('btn_end') : AppStrings.get('btn_next'), 
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
             const SizedBox(width: 8), 
             Icon(_currentFrame == 3 ? Icons.disabled_by_default_rounded : Icons.arrow_forward_ios_rounded, size: 16, color: Colors.white)
           ]
@@ -632,19 +627,19 @@ Widget _buildAdvanced3DFrame({required Widget child, required bool hasHole}) {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  "КОНЕЦ ИГРЫ",
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Color(0xFFB71C1C), letterSpacing: 3.0),
-                ),
+                Text(
+  AppStrings.get('bad_end_game_over'),
+  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Color(0xFFB71C1C), letterSpacing: 3.0),
+),
                 const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.white10, width: 0.8)),
-                  child: const Text(
-                    "Дело №06: Шериф объявлен пропавшим без вести на лугу свиней. Расследование прекращено.",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontFamily: 'serif', fontSize: 11.0, fontWeight: FontWeight.bold, color: Colors.white70, height: 1.35),
-                  ),
+                  child: Text(
+  AppStrings.get('bad_end_case_06'),
+  textAlign: TextAlign.center,
+  style: const TextStyle(fontFamily: 'serif', fontSize: 11.0, fontWeight: FontWeight.bold, color: Colors.white70, height: 1.35),
+),
                 ),
               ],
             ),
@@ -667,7 +662,7 @@ Widget _buildAdvanced3DFrame({required Widget child, required bool hasHole}) {
                   Navigator.pop(context); 
                 },
                 icon: const Icon(Icons.home_rounded, color: Colors.white, size: 16),
-                label: const Text("В МЕНЮ УРОВНЕЙ", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
+                label: label: Text(AppStrings.get('btn_levels_menu'), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
               ),
             ),
           ),
