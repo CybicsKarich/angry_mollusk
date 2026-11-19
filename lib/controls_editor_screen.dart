@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'app_strings.dart';
 
 class ControlsEditorScreen extends StatefulWidget {
   const ControlsEditorScreen({super.key});
@@ -116,10 +117,10 @@ class _ControlsEditorScreenState extends State<ControlsEditorScreen> {
             child: Container(
               color: const Color(0xFF1E1E24),
               alignment: Alignment.center,
-              child: const Text(
-                "ПЕРЕТАСКИВАЙТЕ КНОПКИ ПАЛЬЦЕМ ПО ЭКРАНУ",
-                style: TextStyle(color: Colors.white30, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2),
-              ),
+              child: Text(
+  AppStrings.get('ctrl_hint'),
+  style: const TextStyle(color: Colors.white30, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+),
             ),
           ),
 
@@ -141,7 +142,7 @@ class _ControlsEditorScreenState extends State<ControlsEditorScreen> {
                   ElevatedButton.icon(
                     onPressed: _resetToDefault,
                     icon: const Icon(Icons.refresh_rounded, size: 18, color: Colors.white),
-                    label: const Text("ОТКЛОНИТЬ", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white)),
+                    label: Text(AppStrings.get('ctrl_reset'), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.redAccent,
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -157,9 +158,9 @@ class _ControlsEditorScreenState extends State<ControlsEditorScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          "РАЗМЕР КНОПОК: ${(_scale * 100).round()}%",
-                          style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
-                        ),
+  "${AppStrings.get('ctrl_size')}: ${(_scale * 100).round()}%",
+  style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+),
                         SizedBox(
                           height: 28,
                           child: Slider(
@@ -182,7 +183,7 @@ class _ControlsEditorScreenState extends State<ControlsEditorScreen> {
                   ElevatedButton.icon(
                     onPressed: _applyAndExit,
                     icon: const Icon(Icons.check_rounded, size: 18, color: Colors.white),
-                    label: const Text("ПРИМЕНИТЬ", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white)),
+                    label: Text(AppStrings.get('ctrl_apply'), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF4CAF50),
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -201,7 +202,7 @@ class _ControlsEditorScreenState extends State<ControlsEditorScreen> {
             normX: _leftX,
             normY: _leftY,
             icon: Icons.arrow_back_rounded,
-            label: "ВЛЕВО",
+            label: AppStrings.get('ctrl_left'),
             onDrag: (newX, newY) => setState(() {
               _leftX = newX;
               _leftY = newY;
@@ -215,7 +216,7 @@ class _ControlsEditorScreenState extends State<ControlsEditorScreen> {
             normX: _rightX,
             normY: _rightY,
             icon: Icons.arrow_forward_rounded,
-            label: "ВПРАВО",
+            label: AppStrings.get('ctrl_right'),
             onDrag: (newX, newY) => setState(() {
               _rightX = newX;
               _rightY = newY;
@@ -229,7 +230,7 @@ class _ControlsEditorScreenState extends State<ControlsEditorScreen> {
             normX: _jumpX,
             normY: _jumpY,
             icon: Icons.arrow_upward_rounded,
-            label: "ПРЫЖОК",
+            label: AppStrings.get('ctrl_jump'),
             color: Colors.orange,
             onDrag: (newX, newY) => setState(() {
               _jumpX = newX;
