@@ -4,6 +4,7 @@ import 'audio_manager.dart';
 import 'main.dart'; // Для доступа к HomeScreen / Трамплину титров, если понадобится
 import 'good_ending_screen.dart';
 import 'true_ending_screen.dart';
+import 'app_strings.dart';
 
 
 class Level6VictoryComicScreen extends StatefulWidget {
@@ -47,11 +48,10 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
         child: Column(
           children: [
             const SizedBox(height: 12),
-            // Показываем заголовок ТОЛЬКО в 1-й части комикса (кадры 1-3)
-            if (_currentFrame <= 3) ...[
-              const Text(
-                "ФИНАЛ: ТРИУМФ ШЕРИФА",
-                style: TextStyle(
+              if (_currentFrame <= 3) ...[
+              Text(
+                AppStrings.get('c6_vic_title'),
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w900,
                   color: Color(0xFFFF9800),
@@ -148,14 +148,14 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
               top: 25, left: 6, right: 6,
               child: CustomPaint(
                 painter: SpeechBubblePainter(tailXFactor: 0.25),
-                child: const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text(
-                    "Всё кончено, Моллюск. Тотем наш. Наш род возвращается в небо!",
-                    style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+                child: Padding(
+  padding: const EdgeInsets.all(8.0),
+  child: Text(
+    AppStrings.get('c6_vic_f1'),
+    style: const TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
+    textAlign: TextAlign.center,
+  ),
+),
               ),
             ),
           ],
@@ -185,14 +185,14 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
               top: 25, left: 6, right: 6,
               child: CustomPaint(
                 painter: SpeechBubblePainter(tailXFactor: 0.25),
-                child: const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text(
-                    "Я смог сделать это, я победил Его! Наконец-то на лугу птицам можно вдохнуть полной грудью!",
-                    style: TextStyle(fontSize: 8.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+                child: Padding(
+  padding: const EdgeInsets.all(8.0),
+  child: Text(
+    AppStrings.get('c6_vic_f2'),
+    style: const TextStyle(fontSize: 8.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
+    textAlign: TextAlign.center,
+  ),
+),
               ),
             ),
           ],
@@ -249,14 +249,14 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
               top: 20, left: 6, right: 6,
               child: CustomPaint(
                 painter: SpeechBubblePainter(tailXFactor: 0.5),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-                  child: Text(
-                    "Спустя столько лет птицы снова в небе! Полечу-ка я в свой любимый кабинет!",
-                    style: TextStyle(fontSize: 7.8, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+                child: Padding(
+  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+  child: Text(
+    AppStrings.get('c6_vic_f3'),
+    style: const TextStyle(fontSize: 7.8, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15),
+    textAlign: TextAlign.center,
+  ),
+),
               ),
             ),
           ],
@@ -295,10 +295,10 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
               top: 25, left: 10, right: 10,
               child: CustomPaint(
                 painter: ComicBubblePainter(tailX: 0.45),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 12),
-                  child: Text("Обычное мирное дежурство в округе... Кофе отличный.", style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
-                ),
+                child: Padding(
+  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
+  child: Text(AppStrings.get('c1_p1_f1'), style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center),
+),
               ),
             ),
           ],
@@ -338,10 +338,10 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
               top: 15, left: 4, right: 4,
               child: CustomPaint(
                 painter: SpeechBubblePainter(tailXFactor: 0.8),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-                  child: Text("Шериф, беда! На лугах птиц завелись зелёные свиньи под предводительством Дона Молюска! Они грабят наши склады с виагрой!", style: TextStyle(fontSize: 8.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15), textAlign: TextAlign.center),
-                ),
+                child: Padding(
+  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+  child: Text(AppStrings.get('c1_p1_f2'), style: const TextStyle(fontSize: 8.2, fontWeight: FontWeight.bold, color: Colors.black, height: 1.15), textAlign: TextAlign.center),
+),
               ),
             ),
           ],
@@ -456,14 +456,14 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
                                       top: 6, left: 4, right: 4,
                                       child: CustomPaint(
                                         painter: ComicBubblePainter(tailX: 0.35),
-                                        child: const Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                                          child: Text(
-                                            "Пора расхлебать это дерьмо и... что-то мне это напоминает",
-                                            style: TextStyle(fontSize: 7.2, fontWeight: FontWeight.w900, color: Colors.red, height: 1.1),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ),
+                                        child: Padding(
+  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+  child: Text(
+    AppStrings.get('c6_vic_f6_tv'),
+    style: const TextStyle(fontSize: 7.2, fontWeight: FontWeight.w900, color: Colors.red, height: 1.1),
+    textAlign: TextAlign.center,
+  ),
+),
                                       ),
                                     ),
 
@@ -586,8 +586,8 @@ class _Level6VictoryComicScreenState extends State<Level6VictoryComicScreen> wit
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              isTrueEndingFinal ? "КОНЕЦ ИГРЫ" : "ДАЛЬШЕ",
+              Text(
+              isTrueEndingFinal ? AppStrings.get('bad_end_game_over') : AppStrings.get('btn_next'),
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
             ),
           ],
