@@ -419,5 +419,36 @@ class AppStrings {
       'ru': 'В ГЛАВНОЕ МЕНЮ',
       'en': 'TO MAIN MENU',
     },
+        // =========================================================================
+    // РЕДАКТОР УПРАВЛЕНИЯ (CONTROLS EDITOR SCREEN)
+    // =========================================================================
+    'ctrl_hint': {
+      'ru': 'ПЕРЕТАСКИВАЙТЕ КНОПКИ ПАЛЬЦЕМ ПО ЭКРАНУ',
+      'en': 'DRAG BUTTONS ACROSS THE SCREEN WITH YOUR FINGER',
+    },
+    'ctrl_reset': {
+      'ru': 'ОТКЛОНИТЬ',
+      'en': 'RESET',
+    },
+    'ctrl_size': {
+      'ru': 'РАЗМЕР КНОПОК',
+      'en': 'BUTTON SIZE',
+    },
+    'ctrl_apply': {
+      'ru': 'ПРИМЕНИТЬ',
+      'en': 'APPLY',
+    },
+    'ctrl_left': {
+      'ru': 'ВЛЕВО',
+      'en': 'LEFT',
+    },
+    'ctrl_right': {
+      'ru': 'ВПРАВО',
+      'en': 'RIGHT',
+    },
+    'ctrl_jump': {
+      'ru': 'ПРЫЖОК',
+      'en': 'JUMP',
+    },
   };
 }
