@@ -345,8 +345,9 @@ static Future<void> playPaperRustle() async {
   }
 
 
-      static Future<void> startLevel6BattleMusic() async {
+    static Future<void> startLevel6BattleMusic() async {
     try {
+      await _rainPlayer.stop(); // Глушим капли комикса, чтобы не было двойного звука
       if (_level6MusicPlayer.state == PlayerState.playing) return;
       await _level6MusicPlayer.setVolume(masterVolume);
       await _level6MusicPlayer.setReleaseMode(ReleaseMode.loop);
@@ -355,6 +356,7 @@ static Future<void> playPaperRustle() async {
       print("Ошибка старта музыки Фазы 1: $e");
     }
   }
+
 
 
   // Переключение на боевой рок Фазы 2 (однократный чистый переход)
