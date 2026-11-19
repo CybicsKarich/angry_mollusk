@@ -365,5 +365,28 @@ class AppStrings {
       'ru': 'У вас закончились жизни...',
       'en': 'You ran out of lives...',
     },
+        // =========================================================================
+    // ФИНАЛЬНЫЙ КОМИКС (LEVEL 6 VICTORY COMIC SCREEN)
+    // =========================================================================
+    'c6_vic_title': {
+      'ru': 'ФИНАЛ: ТРИУМФ ШЕРИФА',
+      'en': 'FINALE: SHERIFF\'S TRIUMPH',
+    },
+    'c6_vic_f1': {
+      'ru': 'Всё кончено, Моллюск. Тотем наш. Наш род возвращается в небо!',
+      'en': 'It\'s over, Mollusk. The totem is ours. Our kind returns to the skies!',
+    },
+    'c6_vic_f2': {
+      'ru': 'Я смог сделать это, я победил Его! Наконец-то на лугу птицам можно вдохнуть полной грудью!',
+      'en': 'I did it, I defeated Him! Finally, the birds in the meadow can breathe freely again!',
+    },
+    'c6_vic_f3': {
+      'ru': 'Спустя столько лет птицы снова в небе! Полечу-ка я в свой любимый кабинет!',
+      'en': 'After all these years, the birds are back in the sky! Time to fly back to my favorite office!',
+    },
+    'c6_vic_f6_tv': {
+      'ru': 'Пора расхлебать это дерьмо и... что-то мне это напоминает',
+      'en': 'Time to clean up this mess and... why does this feel so familiar?',
+    },
   };
 }
