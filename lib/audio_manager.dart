@@ -65,25 +65,9 @@ class AudioManager {
   static bool hasPigHitToken = true;
   static bool hasMissToken = true;
 
-        static Future<void> init() async {
+    static Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
     masterVolume = prefs.getDouble('game_master_volume') ?? 0.5;
-    
-    // Отключаем перехват аудиофокуса ТОЛЬКО для музыки боссфайта 6 уровня
-    await _level6MusicPlayer.setAudioContext(
-      AudioContext(
-        android: const AudioContextAndroid(
-          isSpeakerphoneOn: true,
-          stayAwake: true,
-          contentType: AndroidContentType.music,
-          usageType: AndroidUsageType.game,
-          audioFocus: AndroidAudioFocus.none,
-        ),
-        iOS: AudioContextIOS(
-          category: AVAudioSessionCategory.ambient,
-        ),
-      ),
-    );
 
     _stretchPlayer.setReleaseMode(ReleaseMode.loop);
     _finalMenuPlayer.setReleaseMode(ReleaseMode.release);
