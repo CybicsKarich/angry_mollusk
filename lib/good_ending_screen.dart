@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'audio_manager.dart'; // Для полной очистки аудиосистем при выходе
+import 'app_strings.dart';
 
 class GoodEndingScreen extends StatefulWidget {
   const GoodEndingScreen({super.key});
@@ -142,14 +143,14 @@ class _GoodEndingScreenState extends State<GoodEndingScreen> with SingleTickerPr
                           ),
                         ),
                         const SizedBox(height: 10),
-                        const Text(
-                          "Спасибо за прохождение игры!\nНадеюсь, увидимся снова!",
+                         Text(
+                          AppStrings.get('end_thanks'),
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontFamily: 'Georgia',
                             fontSize: 14,
                             fontStyle: FontStyle.italic,
-                            color: Colors.white70, // Исправленный константный цвет
+                            color: Colors.white70,
                             height: 1.3,
                           ),
                         ),
@@ -158,30 +159,29 @@ class _GoodEndingScreenState extends State<GoodEndingScreen> with SingleTickerPr
                         const SizedBox(height: 16),
                         
                         // БЛОК ИНФОГРАФИКИ НАКОПЛЕННЫХ ДАННЫХ
-                        _buildStatRow("Запущено птиц из рогатки:", stats['birds']!),
+                        _buildStatRow(AppStrings.get('stat_birds'), stats['birds']!),
                         const SizedBox(height: 8),
-                        // Считываем правильный синхронизированный ключ таблеток
-                        _buildStatRow("Потрачено капсул Виагры:", stats['pills']!),
+                        _buildStatRow(AppStrings.get('stat_pills'), stats['pills']!),
                         const SizedBox(height: 8),
-                        _buildStatRow("Убито зелёных свиней:", stats['pigs']!),
+                        _buildStatRow(AppStrings.get('stat_pigs'), stats['pigs']!),
                         
                         const SizedBox(height: 28),
                         
                         // СОМНЕВАЮЩИЙСЯ ЖЁЛТЫЙ ЗНАК ФИНАЛА ПО ТЗ
-                        const Text(
-                          "КОНЕЦ?",
-                          style: TextStyle(
+                        Text(
+                          AppStrings.get('good_end_mark'),
+                          style: const TextStyle(
                             fontFamily: 'Georgia',
                             fontSize: 32,
                             fontWeight: FontWeight.w900,
-                            color: Color(0xFFFFD54F), // Сочно-жёлтый цвет интриги
+                            color: Color(0xFFFFD54F),
                             letterSpacing: 4.0,
                             shadows: [Shadow(color: Colors.black87, blurRadius: 4, offset: Offset(2, 2))],
                           ),
                         ),
                         const SizedBox(height: 20),
 
-                        // КНОПКА ВОЗВРАЩЕНИЯ В ГЛАВНОЕ МЕНЮ (СТРОГО В ОДИН РЯД)
+                        // КНОПКА ВОЗВРАЩЕНИЯ В ГЛАВНОЕ МЕНЮ
                         SizedBox(
                           width: 200, height: 40,
                           child: ElevatedButton(
@@ -198,12 +198,14 @@ class _GoodEndingScreenState extends State<GoodEndingScreen> with SingleTickerPr
                               AudioManager.resetTokensForNextBird();
                               AudioManager.stopFinalComicAudio();
                               AudioManager.stopLevelAudioAndPlayMenu();
-                              Navigator.of(context).popUntil((route) => route.isFirst); // Мгновенный сброс стейтов и вылет на Главный Экран
+                              Navigator.of(context).popUntil((route) => route.isFirst);
                             },
-                            child: const Text(
-                              "В ГЛАВНОЕ МЕНЮ", 
-                              style: TextStyle(fontFamily: 'Georgia', fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                            child: Text(
+                              AppStrings.get('btn_to_main_menu'), 
+                              style: const TextStyle(fontFamily: 'Georgia', fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
                             ),
+                          ),
+                        ),
                           ),
                         ),
                       ],
