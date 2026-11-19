@@ -388,5 +388,36 @@ class AppStrings {
       'ru': 'Пора расхлебать это дерьмо и... что-то мне это напоминает',
       'en': 'Time to clean up this mess and... why does this feel so familiar?',
     },
+        // =========================================================================
+    // ТИТРЫ И КОНЦОВКИ (GOOD & TRUE ENDING SCREENS)
+    // =========================================================================
+    'end_thanks': {
+      'ru': 'Спасибо за прохождение игры!\nНадеюсь, увидимся снова!',
+      'en': 'Thanks for playing the game!\nHope to see you again!',
+    },
+    'stat_birds': {
+      'ru': 'Запущено птиц из рогатки:',
+      'en': 'Birds launched from slingshot:',
+    },
+    'stat_pills': {
+      'ru': 'Потрачено капсул Виагры:',
+      'en': 'Viagra capsules consumed:',
+    },
+    'stat_pigs': {
+      'ru': 'Убито зелёных свиней:',
+      'en': 'Green pigs defeated:',
+    },
+    'good_end_mark': {
+      'ru': 'КОНЕЦ?',
+      'en': 'THE END?',
+    },
+    'true_end_mark': {
+      'ru': 'КОНЕЦ.',
+      'en': 'THE END.',
+    },
+    'btn_to_main_menu': {
+      'ru': 'В ГЛАВНОЕ МЕНЮ',
+      'en': 'TO MAIN MENU',
+    },
   };
 }
