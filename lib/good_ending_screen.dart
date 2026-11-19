@@ -181,7 +181,7 @@ class _GoodEndingScreenState extends State<GoodEndingScreen> with SingleTickerPr
                         ),
                         const SizedBox(height: 20),
 
-                        // КНОПКА ВОЗВРАЩЕНИЯ В ГЛАВНОЕ МЕНЮ
+                                                // КНОПКА ВОЗВРАЩЕНИЯ В ГЛАВНОЕ МЕНЮ
                         SizedBox(
                           width: 200, height: 40,
                           child: ElevatedButton(
@@ -204,8 +204,6 @@ class _GoodEndingScreenState extends State<GoodEndingScreen> with SingleTickerPr
                               AppStrings.get('btn_to_main_menu'), 
                               style: const TextStyle(fontFamily: 'Georgia', fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
                             ),
-                          ),
-                        ),
                           ),
                         ),
                       ],
