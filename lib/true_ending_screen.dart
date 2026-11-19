@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'audio_manager.dart'; // Для очистки вечных плееров Моллюска при выходе
+import 'app_strings.dart';
 
 class TrueEndingScreen extends StatefulWidget {
   const TrueEndingScreen({super.key});
@@ -169,14 +170,14 @@ class _TrueEndingScreenState extends State<TrueEndingScreen> with TickerProvider
                             ),
                             const SizedBox(height: 14),
                             
-                            const Text(
-                              "Спасибо за прохождение игры!\nНадеюсь, увидимся снова!",
+                                                        Text(
+                              AppStrings.get('end_thanks'),
                               textAlign: TextAlign.center,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontFamily: 'Courier New',
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFFB9F6CA), // Смягчённый зелёный растр
+                                color: Color(0xFFB9F6CA),
                                 height: 1.3,
                               ),
                             ),
@@ -184,23 +185,22 @@ class _TrueEndingScreenState extends State<TrueEndingScreen> with TickerProvider
                             Container(width: 120, height: 1.0, color: const Color(0xFF00FF66).withOpacity(0.25)),
                             const SizedBox(height: 16),
 
-                            // СТАТИСТИКА ИГРЫ СТРОГО ПО ТВОЕМУ ТОЧНОМУ ШАБЛОНУ
-                            _buildCRTStatLine("• Запущено птиц из рогатки:", stats['birds']!),
+                            // СТАТИСТИКА ИГРЫ
+                            _buildCRTStatLine("• ${AppStrings.get('stat_birds')}", stats['birds']!),
                             const SizedBox(height: 8),
-                            _buildCRTStatLine("• Потрачено капсул Виагры:", stats['pills']!),
+                            _buildCRTStatLine("• ${AppStrings.get('stat_pills')}", stats['pills']!),
                             const SizedBox(height: 8),
-                            _buildCRTStatLine("• Убито зелёных свиней:", stats['pigs']!),
+                            _buildCRTStatLine("• ${AppStrings.get('stat_pigs')}", stats['pigs']!),
 
                             const SizedBox(height: 32),
 
-                            
-                            const Text(
-                              "КОНЕЦ.",
-                              style: TextStyle(
+                            Text(
+                              AppStrings.get('true_end_mark'),
+                              style: const TextStyle(
                                 fontFamily: 'Courier New',
                                 fontSize: 34,
-                                fontWeight: FontWeight.w900, // ИСПРАВЛЕНО: w900 вместо несуществующего black
-                                color: Color(0xFFFF1744), // Кроваво-красный неон смерти цикла
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFFFF1744),
                                 letterSpacing: 5.0,
                                 shadows: [Shadow(color: Color(0xFFD50000), blurRadius: 10)],
                               ),
@@ -208,7 +208,7 @@ class _TrueEndingScreenState extends State<TrueEndingScreen> with TickerProvider
 
                             const SizedBox(height: 24),
 
-                            // КНОПКА СБРОСА И ПЕРЕЗАГРУЗКИ МАТРИЦЫ КИНЕСКОПА
+                            // КНОПКА ВОЗВРАТА В ГЛАВНОЕ МЕНЮ
                             SizedBox(
                               width: 220,
                               height: 38,
@@ -225,9 +225,9 @@ class _TrueEndingScreenState extends State<TrueEndingScreen> with TickerProvider
                                   AudioManager.stopLevelAudioAndPlayMenu();
                                   Navigator.of(context).popUntil((route) => route.isFirst); 
                                 },
-                                child: const Text(
-                                  "В главное меню",
-                                  style: TextStyle(
+                                child: Text(
+                                  AppStrings.get('btn_to_main_menu'),
+                                  style: const TextStyle(
                                     fontFamily: 'Courier New',
                                     fontSize: 11,
                                     fontWeight: FontWeight.bold,
