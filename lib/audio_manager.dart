@@ -65,14 +65,30 @@ class AudioManager {
   static bool hasPigHitToken = true;
   static bool hasMissToken = true;
 
-    static Future<void> init() async {
+     static Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
     masterVolume = prefs.getDouble('game_master_volume') ?? 0.5;
+
+    // Чистый игровой контекст для эффектов и 6 уровня: звуки смешиваются и не выбивают друг друга
+    final gameMixContext = AudioContext(
+      android: const AudioContextAndroid(
+        contentType: AndroidContentType.sonification,
+        usageType: AndroidUsageType.game,
+        audioFocus: AndroidAudioFocus.none,
+      ),
+      iOS: AudioContextIOS(
+        category: AVAudioSessionCategory.ambient,
+      ),
+    );
+
+    await _level6MusicPlayer.setAudioContext(gameMixContext);
+    await _fxPlayer.setAudioContext(gameMixContext);
 
     _stretchPlayer.setReleaseMode(ReleaseMode.loop);
     _finalMenuPlayer.setReleaseMode(ReleaseMode.release);
     resetTokensForNextBird();
   }
+
 
 
 
@@ -106,8 +122,7 @@ class AudioManager {
       await _fxPlayer.stop();
       await _fxPlayer.setVolume(0.85 * masterVolume);
       
-      // ИСПРАВЛЕНО: Твой оригинальный файл ярости из папки audio/
-      await _fxPlayer.play(AssetSource('audio/bunnyhop_rage.mp3'));
+      _fxPlayer.play(AssetSource('audio/bunnyhop_rage.mp3'), mode: PlayerMode.lowLatency);
       print("Эффект ярости Шерифа 'bunnyhop_rage' запущен вторым потоком.");
     } catch (e) {
       print("Ошибка воспроизведения эффекта ярости: $e");
@@ -124,27 +139,21 @@ class AudioManager {
   }
 
 
-      // ТОЧЕЧНО ДОБАВИТЬ В КЛАСС К ОСТАЛЬНЫМ ЭФФЕКТАМ ДЛЯ 6 УРОВНЯ:
-
-  // Звук 1: Бешеное кручение/замах щупальца или клешни босса в воздухе (700-800мс)
-  static Future<void> playBossWhip() async {
+    static Future<void> playBossWhip() async {
     try {
-      await _fxPlayer.stop(); // Глушим прошлый эффект, чтобы не было каши
+      await _fxPlayer.stop();
       await _fxPlayer.setVolume(0.75 * masterVolume);
-      await _fxPlayer.play(AssetSource('audio/boss_whip.mp3'));
-      print("Эффект замаха босса запущен успешно.");
+      await _fxPlayer.play(AssetSource('audio/boss_whip.mp3'), mode: PlayerMode.lowLatency);
     } catch (e) {
       print("Ошибка воспроизведения звука замаха босса: $e");
     }
   }
 
-  // Звук 2: Сокрушительный удар щупальца по полу или клешни по верху (1 сек)
   static Future<void> playBossStrike() async {
     try {
-      await _fxPlayer.stop(); // Мгновенно сбрасываем канал под удар
+      await _fxPlayer.stop();
       await _fxPlayer.setVolume(1.0 * masterVolume);
-      await _fxPlayer.play(AssetSource('audio/boss_strike.mp3'));
-      print("Эффект удара босса запущен успешно.");
+      await _fxPlayer.play(AssetSource('audio/boss_strike.mp3'), mode: PlayerMode.lowLatency);
     } catch (e) {
       print("Ошибка воспроизведения звука удара босса: $e");
     }
@@ -336,7 +345,7 @@ static Future<void> playPaperRustle() async {
   }
 
 
-    static Future<void> startLevel6BattleMusic() async {
+      static Future<void> startLevel6BattleMusic() async {
     try {
       if (_level6MusicPlayer.state == PlayerState.playing) return;
       await _level6MusicPlayer.setVolume(masterVolume);
@@ -346,6 +355,7 @@ static Future<void> playPaperRustle() async {
       print("Ошибка старта музыки Фазы 1: $e");
     }
   }
+
 
   // Переключение на боевой рок Фазы 2 (однократный чистый переход)
   static Future<void> switchToBossPhase2Music() async {
@@ -438,11 +448,9 @@ static Future<void> playPaperRustle() async {
     _playSingleEffect('audio/sling_launch$num.mp3'); 
   }
 
-   static void playPigHit() async {
+     static void playPigHit() async {
     if (_isRageSoundPlaying) return;
 
-    // ИСПРАВЛЕНО ТОЧЕЧНО: Если это НЕ 6 уровень, то проверяем и сжигаем жетон рогатки. 
-    // На 6 уровне (isLevel6ArenaActive == true) этот блок просто пропускается!
     if (!isLevel6ArenaActive) {
       if (!hasPigHitToken) return; 
       hasPigHitToken = false; 
@@ -450,8 +458,19 @@ static Future<void> playPaperRustle() async {
 
     int num = _random.nextInt(3) + 1;
     try {
-      // Чистый параллельный поток низкого приоритета задержки, чтобы звук гремел при каждом таране
       final AudioPlayer hitPlayer = AudioPlayer();
+      await hitPlayer.setAudioContext(
+        AudioContext(
+          android: const AudioContextAndroid(
+            contentType: AndroidContentType.sonification,
+            usageType: AndroidUsageType.game,
+            audioFocus: AndroidAudioFocus.none,
+          ),
+          iOS: AudioContextIOS(
+            category: AVAudioSessionCategory.ambient,
+          ),
+        ),
+      );
       await hitPlayer.setReleaseMode(ReleaseMode.release);
       await hitPlayer.setVolume(1.0 * masterVolume);
       await hitPlayer.play(AssetSource('audio/pig_hit$num.MP3'), mode: PlayerMode.lowLatency);
@@ -461,6 +480,7 @@ static Future<void> playPaperRustle() async {
       print("Ошибка внеочередного звука удара: $e");
     }
   }
+
 
   static void playMiss() {
     if (_isRageSoundPlaying) return;
