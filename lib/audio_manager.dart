@@ -448,9 +448,11 @@ static Future<void> playPaperRustle() async {
     _playSingleEffect('audio/sling_launch$num.mp3'); 
   }
 
-     static void playPigHit() async {
+    static void playPigHit() async {
     if (_isRageSoundPlaying) return;
 
+    // ИСПРАВЛЕНО ТОЧЕЧНО: Если это НЕ 6 уровень, то проверяем и сжигаем жетон рогатки. 
+    // На 6 уровне (isLevel6ArenaActive == true) этот блок просто пропускается!
     if (!isLevel6ArenaActive) {
       if (!hasPigHitToken) return; 
       hasPigHitToken = false; 
@@ -458,19 +460,8 @@ static Future<void> playPaperRustle() async {
 
     int num = _random.nextInt(3) + 1;
     try {
+      // Чистый параллельный поток низкого приоритета задержки, чтобы звук гремел при каждом таране
       final AudioPlayer hitPlayer = AudioPlayer();
-      await hitPlayer.setAudioContext(
-        AudioContext(
-          android: const AudioContextAndroid(
-            contentType: AndroidContentType.sonification,
-            usageType: AndroidUsageType.game,
-            audioFocus: AndroidAudioFocus.none,
-          ),
-          iOS: AudioContextIOS(
-            category: AVAudioSessionCategory.ambient,
-          ),
-        ),
-      );
       await hitPlayer.setReleaseMode(ReleaseMode.release);
       await hitPlayer.setVolume(1.0 * masterVolume);
       await hitPlayer.play(AssetSource('audio/pig_hit$num.MP3'), mode: PlayerMode.lowLatency);
@@ -480,6 +471,7 @@ static Future<void> playPaperRustle() async {
       print("Ошибка внеочередного звука удара: $e");
     }
   }
+
 
 
   static void playMiss() {
