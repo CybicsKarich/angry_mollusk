@@ -1939,34 +1939,71 @@ function processPromoLogic(p) {
             document.getElementById('up-circle').style.background = `conic-gradient(var(--green) 0deg ${upChance * 3.6}deg, var(--arcane) ${upChance * 3.6}deg 360deg)`;
         }
 
-        function doUpgrade(fast) {
+                function doUpgrade(fast) {
             if (upActive || upLeftIdx === -1 || !upRightSkin || upChance === 0) return;
-            upActive = true; document.getElementById('up-btn').disabled = document.getElementById('up-fast-btn').disabled = true;
+            
+            // 1. ЖЁСТКО ЗАПОМИНАЕМ САМ ПРЕДМЕТ (НАЗВАНИЕ И ЦЕНУ), А НЕ ТОЛЬКО ЕГО НОМЕР ЯЧЕЙКИ
+            const sourceItem = inv[upLeftIdx];
+            if (!sourceItem) return;
+            const lockedName = sourceItem.n;
+            const lockedPrice = sourceItem.p;
+            const lockedRarity = sourceItem.c;
+
+            upActive = true;
+            document.getElementById('up-btn').disabled = document.getElementById('up-fast-btn').disabled = true;
             const isSuccess = (Math.random() * 100) <= upChance;
             const arrow = document.getElementById('up-arrow');
             let stopAngle = isSuccess ? (Math.random() * (upChance * 3.6)) : (upChance * 3.6 + Math.random() * (360 - upChance * 3.6));
+            
             const finish = () => {
-                if (isSuccess) {
-                    if (upChance < 9.0) upgradeMedalUnlocked = true;
-                    inv.push({...upRightSkin, scp: upRightSkin.p / 2}); addToHistory(upRightSkin.n);
-                    if(upRightSkin.p > bestUp) bestUp = upRightSkin.p;
-                    playSnd(880, 'sine', 0.5, 0.1); alert("УСПЕХ!");
-                } else { playSnd(150, 'sawtooth', 0.5, 0.1); alert("ПРОВАЛ!"); }
-                inv.splice(upLeftIdx, 1); upLeftIdx = -1; upRightSkin = null; upActive = false;
-                arrow.style.transition = 'none'; arrow.style.transform = 'rotate(0deg)';
+                // 2. ИЩЕМ В ИНВЕНТАРЕ ИМЕННО ЭТОТ КОНКРЕТНЫЙ СКИН ПО НАЗВАНИЮ, ЦЕНЕ И РЕДКОСТИ
+                const actualIdx = inv.findIndex(item => !item.isMedal && item.n === lockedName && item.p === lockedPrice && item.c === lockedRarity);
+
+                if (actualIdx === -1) {
+                    // Если игрок успел продать или скрафтить скин во время анимации — отменяем апгрейд!
+                    playSnd(150, 'sawtooth', 0.5, 0.1);
+                    alert("ОШИБКА: Предмет для апгрейда исчез из инвентаря!");
+                } else {
+                    // Удаляем именно тот самый скин, который был выбран для апгрейда
+                    inv.splice(actualIdx, 1);
+
+                    if (isSuccess) {
+                        if (upChance < 9.0) upgradeMedalUnlocked = true;
+                        inv.push({...upRightSkin, scp: upRightSkin.p / 2});
+                        addToHistory(upRightSkin.n);
+                        if (upRightSkin.p > bestUp) bestUp = upRightSkin.p;
+                        playSnd(880, 'sine', 0.5, 0.1);
+                        alert("УСПЕХ!");
+                    } else {
+                        playSnd(150, 'sawtooth', 0.5, 0.1);
+                        alert("ПРОВАЛ!");
+                    }
+                }
+
+                upLeftIdx = -1;
+                upRightSkin = null;
+                upActive = false;
+                arrow.style.transition = 'none';
+                arrow.style.transform = 'rotate(0deg)';
                 setTimeout(() => arrow.style.transition = 'transform 3s cubic-bezier(0.1, 0, 0.1, 1)', 50);
-                document.getElementById('up-left-item').innerHTML = "ВЫБЕРИТЕ"; document.getElementById('up-left-item').className = "inv-card";
-                document.getElementById('up-right-item').innerHTML = "ВЫБЕРИТЕ"; document.getElementById('up-right-item').className = "inv-card";
-                document.getElementById('up-chance-display').innerText = '0%'; document.getElementById('up-circle').style.background = '#333';
-                renderUpgrade(); updateUI();
+                document.getElementById('up-left-item').innerHTML = "ВЫБЕРИТЕ";
+                document.getElementById('up-left-item').className = "inv-card";
+                document.getElementById('up-right-item').innerHTML = "ВЫБЕРИТЕ";
+                document.getElementById('up-right-item').className = "inv-card";
+                document.getElementById('up-chance-display').innerText = '0%';
+                document.getElementById('up-circle').style.background = '#333';
+                renderUpgrade();
+                updateUI();
             };
+
             if (fast) finish();
             else {
                 arrow.style.transform = `rotate(${1800 + stopAngle}deg)`;
-                for(let i=0; i<30; i++) setTimeout(() => { if(upActive) playSnd(300 + i*15, 'sine', 0.05, 0.02); }, i * 100);
+                for (let i = 0; i < 30; i++) setTimeout(() => { if (upActive) playSnd(300 + i * 15, 'sine', 0.05, 0.02); }, i * 100);
                 setTimeout(finish, 3100);
             }
         }
+
  
                 function resetUpgradeUI() {
             if (upActive) return; // Не сбрасываем, если рулетка прямо сейчас крутится
