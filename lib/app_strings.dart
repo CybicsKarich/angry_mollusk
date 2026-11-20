@@ -450,5 +450,9 @@ class AppStrings {
       'ru': 'ПРЫЖОК',
       'en': 'JUMP',
     },
+    'menu_epigraph': {
+      'ru': '«Не всякая победа дарит свободу»',
+      'en': '"Not every victory brings freedom"',
+    },
   };
 }
