@@ -255,32 +255,54 @@ class _MainMenuScreenState extends State<MainMenuScreen> with WidgetsBindingObse
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                // Левая часть: Логотип и Подзаголовок
+                                // Левая часть: Логотип ANGRY MOLLUSK и философский эпиграф
                 Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        'ANGRY MOLLUSK',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 42,
-                          fontWeight: FontWeight.w900,
-                          color: Color(0xFFD32F2F),
-                          letterSpacing: 2,
-                          shadows: [
-                            Shadow(
-                              offset: Offset(3.0, 3.0),
-                              blurRadius: 3.0,
-                              color: Color(0xFF000000),
-                            ),
-                          ],
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'ANGRY MOLLUSK',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 42,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFFD32F2F),
+                            letterSpacing: 2,
+                            shadows: [
+                              Shadow(
+                                offset: Offset(3.0, 3.0),
+                                blurRadius: 3.0,
+                                color: Color(0xFF000000),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 12),
+                        Text(
+                          AppStrings.get('menu_epigraph'),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontFamily: 'Georgia',
+                            fontSize: 15,
+                            fontStyle: FontStyle.italic,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            letterSpacing: 0.6,
+                            shadows: [
+                              Shadow(
+                                offset: Offset(1.5, 1.5),
+                                blurRadius: 4.0,
+                                color: Colors.black87,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-
                 // Правая часть: Наш переставленный список кнопок
                 Expanded(
                   child: Padding(
