@@ -673,7 +673,7 @@
                     <button id="up-fast-btn" class="btn" style="width:120px; padding:15px; background:#e74c3c;" disabled onclick="doUpgrade(true)">БЫСТРО</button>
                 </div>
                 <div class="upgrade-footer"><div class="upgrade-list" id="up-list-inv"></div><div class="upgrade-list" id="up-list-all"></div></div>
-                <button class="btn" style="background:#444; margin-top:10px;" onclick="switchGame('menu')">НАЗАД</button>
+                <button class="btn" style="background:#444; margin-top:10px;" onclick="resetUpgradeUI(); renderUpgrade(); switchGame('menu')">НАЗАД</button>
             </div>
         </div>
     </div>
@@ -1616,7 +1616,7 @@ function onDailyCaseResult(success, remainingSeconds) {
             } else { btn.disabled = false; timerEl.innerText = `Доступно: ${(clickLimit - clickEarnedThisHour).toFixed(2)}$`; }
         }
 
-                function switchGame(mode) {
+               function switchGame(mode) {
             document.querySelectorAll('#games-modal .modal-content > div').forEach(d => d.style.display = 'none');
             document.getElementById('games-menu').style.display = mode === 'menu' ? 'block' : 'none';
             document.getElementById('clicker-game').style.display = mode === 'clicker' ? 'block' : 'none';
@@ -1628,9 +1628,10 @@ function onDailyCaseResult(success, remainingSeconds) {
             if(mode === 'clicker') checkClickLimit(); 
             if(mode === 'mines') resetMinesUI(); 
             if(mode === 'crash') resetCrashUI(); 
-            if(mode === 'upgrade') renderUpgrade();
+            if(mode === 'upgrade') { resetUpgradeUI(); renderUpgrade(); }
             if(mode === 'tower') resetTowerUI(); // Сброс башни при входе
         }
+
 
         function setMines(n, b) { if(mineActive) return; mineCount = n; document.querySelectorAll('#mines-game .btn-select').forEach(x => x.classList.remove('active')); b.classList.add('active'); }
         function resetMinesUI() { 
@@ -1967,7 +1968,40 @@ function processPromoLogic(p) {
             }
         }
  
-           const bgStore = [
+                function resetUpgradeUI() {
+            if (upActive) return; // Не сбрасываем, если рулетка прямо сейчас крутится
+            upLeftIdx = -1;
+            upRightSkin = null;
+            upChance = 0;
+
+            const leftEl = document.getElementById('up-left-item');
+            const rightEl = document.getElementById('up-right-item');
+            const chanceEl = document.getElementById('up-chance-display');
+            const circleEl = document.getElementById('up-circle');
+            const arrowEl = document.getElementById('up-arrow');
+
+            if (leftEl) {
+                leftEl.innerHTML = "ВЫБЕРИТЕ";
+                leftEl.className = "inv-card";
+            }
+            if (rightEl) {
+                rightEl.innerHTML = "ВЫБЕРИТЕ";
+                rightEl.className = "inv-card";
+            }
+            if (chanceEl) chanceEl.innerText = '0%';
+            if (circleEl) circleEl.style.background = '#333';
+            if (arrowEl) {
+                arrowEl.style.transition = 'none';
+                arrowEl.style.transform = 'rotate(0deg)';
+            }
+
+            const btn = document.getElementById('up-btn');
+            const fastBtn = document.getElementById('up-fast-btn');
+            if (btn) btn.disabled = true;
+            if (fastBtn) fastBtn.disabled = true;
+        }
+
+         const bgStore = [
             { id: 'default', name: 'Стандартный фон', price: 0, cssClass: 'bg-default' },
             { id: 'yellow', name: 'Жёлтый фон', price: 500, cssClass: 'bg-yellow' },
             { id: 'pink', name: 'Розовый фон', price: 1500, cssClass: 'bg-pink' },
