@@ -1906,34 +1906,58 @@ function processPromoLogic(p) {
             }, 1200);
 
             setTimeout(() => {
-                box.style.animation = "none"; box.style.transform = "scale(1.2)"; box.style.background = "var(--gold)"; slotsCont.style.opacity = '0';
-                const f = document.createElement('div'); f.className = 'flash-layer'; f.style.animation = 'flash-white 0.5s forwards'; box.appendChild(f);
-                spawnCraftParticles(box.getBoundingClientRect());
+                try {
+                    box.style.animation = "none";
+                    box.style.transform = "scale(1.2)";
+                    box.style.background = "var(--gold)";
+                    if (slotsCont) slotsCont.style.opacity = '0';
 
-                let allS = []; Object.values(config).forEach(c => allS.push(...c.skins.filter(s => !s.isMedal)));
-                let pot = allS.filter(s => s.p >= cost * 0.1 && s.p <= cost * 10);
-                let res = pot.length ? pot[Math.floor(Math.random()*pot.length)] : allS[Math.floor(Math.random()*allS.length)];
-                if (res.p > bestCraft) bestCraft = res.p;
-                if (isRisky) riskyMedalUnlocked = true;
+                    const f = document.createElement('div');
+                    f.className = 'flash-layer';
+                    f.style.animation = 'flash-white 0.5s forwards';
+                    box.appendChild(f);
+                    setTimeout(() => f.remove(), 550); // Удаляем вспышку, чтобы она не перекрывала скин
 
-                document.getElementById('box-status').innerHTML = `<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; margin-top:35px;"><div style="font-size: 10px; color: white; line-height:1.1;" class="${getNameStyle(res.n)}">${res.n}</div><div style="font-size: 8px; color: #000; font-weight: 900; margin-top:5px; background:rgba(255,255,255,0.6); padding:1px 4px; border-radius:3px;">${res.p.toFixed(2)}$</div></div>`;
-                playSnd(880, 'sine', 0.8, 0.2);
-
-                setTimeout(() => {
-                    alert(`КРАФТ ЗАВЕРШЕН: ${res.n}` + (isRisky ? "\nОТКРЫТО ДОСТИЖЕНИЕ: RISKY GUY!" : ""));
-                    inv.push({...res, scp: cost / 10}); 
-                    addToHistory(res.n);
-                    
-                    // 4. СНИМАЕМ БЛОКИРОВКУ ПОСЛЕ ЗАВЕРШЕНИЯ АНИМАЦИИ
-                    isCrafting = false;
-                    if (craftModal) {
-                        craftModal.querySelectorAll('button').forEach(b => b.disabled = false);
+                    if (typeof spawnCraftParticles === 'function') {
+                        spawnCraftParticles(box.getBoundingClientRect());
                     }
-                    box.style.transform = "scale(1)"; box.style.background = "#333"; slotsCont.style.opacity = '1';
-                    document.getElementById('box-status').innerHTML = '<div style="margin-top:20px">📦</div>';
-                    renderCraft(); 
-                    updateUI();
-                }, 2500);
+
+                    let allS = [];
+                    Object.values(config).forEach(c => allS.push(...c.skins.filter(s => !s.isMedal)));
+                    let pot = allS.filter(s => s.p >= cost * 0.1 && s.p <= cost * 10);
+                    let res = pot.length ? pot[Math.floor(Math.random() * pot.length)] : allS[Math.floor(Math.random() * allS.length)];
+                    
+                    if (res.p > bestCraft) bestCraft = res.p;
+                    if (isRisky) riskyMedalUnlocked = true;
+
+                    const boxStatus = document.getElementById('box-status');
+                    if (boxStatus) {
+                        boxStatus.innerHTML = `<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; margin-top:35px; position:relative; z-index:5;"><div style="font-size: 10px; color: white; line-height:1.1;" class="${getNameStyle(res.n)}">${res.n}</div><div style="font-size: 8px; color: #000; font-weight: 900; margin-top:5px; background:rgba(255,255,255,0.6); padding:1px 4px; border-radius:3px;">${res.p.toFixed(2)}$</div></div>`;
+                    }
+                    playSnd(880, 'sine', 0.8, 0.2);
+
+                    setTimeout(() => {
+                        alert(`КРАФТ ЗАВЕРШЕН: ${res.n}` + (isRisky ? "\nОТКРЫТО ДОСТИЖЕНИЕ: RISKY GUY!" : ""));
+                        inv.push({...res, scp: cost / 10});
+                        addToHistory(res.n);
+
+                        isCrafting = false;
+                        if (craftModal) {
+                            craftModal.querySelectorAll('button').forEach(b => b.disabled = false);
+                        }
+                        box.style.transform = "scale(1)";
+                        box.style.background = "#333";
+                        if (slotsCont) slotsCont.style.opacity = '1';
+                        if (boxStatus) boxStatus.innerHTML = '<div style="margin-top:20px">📦</div>';
+                        renderCraft();
+                        updateUI();
+                    }, 2500);
+                } catch (err) {
+                    console.error("Ошибка крафта:", err);
+                    isCrafting = false;
+                    if (craftModal) craftModal.querySelectorAll('button').forEach(b => b.disabled = false);
+                    renderCraft();
+                }
             }, 4000);
         }
 
@@ -2067,6 +2091,9 @@ function processPromoLogic(p) {
             if (arrowEl) {
                 arrowEl.style.transition = 'none';
                 arrowEl.style.transform = 'rotate(0deg)';
+                setTimeout(() => {
+                    arrowEl.style.transition = 'transform 3s cubic-bezier(0.1, 0, 0.1, 1)';
+                }, 50);
             }
 
             const btn = document.getElementById('up-btn');
