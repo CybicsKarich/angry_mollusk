@@ -1806,58 +1806,82 @@ function processPromoLogic(p) {
             renderInv(); updateUI();
         }
 
-        function renderCraft() {
+                let isCrafting = false; // Флаг полной блокировки цеха крафта на время анимации
+
+                function renderCraft() {
             let g = document.getElementById('contract-grid');
             let slots = document.querySelectorAll('.m-slot');
-            g.innerHTML = inv.map((s, i) => s.isMedal ? '' : `<div class="inv-card rarity-${s.c} ${getGlowClass(s.n, s.p, s.scp)}" onclick="toggleS(${i})" style="${sel.includes(i) ? 'opacity:0.2' : ''}">${s.n}<br>${s.p}$</div>`).join('');
-            slots.forEach(s => { s.innerHTML = ""; s.style.background = "#222"; });
-            sel.forEach((idx, i) => { slots[i].style.background = `var(--${inv[idx].c})`; slots[i].innerHTML = `<div style="font-size:7px; color:white;">${inv[idx].n}</div>`; });
-            document.getElementById('contract-btn').disabled = sel.length !== 10;
-            document.getElementById('contract-btn').innerText = sel.length === 10 ? `КРАФТ ЗА ${sel.reduce((a,b)=>a+inv[b].p,0).toFixed(2)}$` : `ВЫБРАНО ${sel.length}/10`;
+            g.innerHTML = inv.map((s, i) => s.isMedal ? '' : `<div class="inv-card rarity-${s.c} ${getGlowClass(s.n, s.p, s.scp)}" onclick="toggleS(${i})" style="${sel.includes(i) ? 'opacity:0.2' : ''}; ${isCrafting ? 'pointer-events:none; opacity:0.5;' : ''}">${s.n}<br>${s.p}$</div>`).join('');
+            
+            if (!isCrafting) {
+                slots.forEach(s => { s.innerHTML = ""; s.style.background = "#222"; });
+                sel.forEach((idx, i) => { 
+                    if (inv[idx]) {
+                        slots[i].style.background = `var(--${inv[idx].c})`; 
+                        slots[i].innerHTML = `<div style="font-size:7px; color:white;">${inv[idx].n}</div>`; 
+                    }
+                });
+            }
+
+            const cBtn = document.getElementById('contract-btn');
+            if (cBtn) {
+                cBtn.disabled = isCrafting || sel.length !== 10;
+                cBtn.innerText = isCrafting 
+                    ? 'КРАФТ В ПРОЦЕССЕ...' 
+                    : (sel.length === 10 ? `КРАФТ ЗА ${sel.reduce((a,b)=>a+inv[b].p,0).toFixed(2)}$` : `ВЫБРАНО ${sel.length}/10`);
+            }
         }
 
-        function toggleS(i) { if(inv[i].isMedal) return; if(sel.includes(i)) sel = sel.filter(x => x !== i); else if(sel.length < 10) sel.push(i); renderCraft(); }
 
-                // ФУНКЦИЯ АВТОЗАПОЛНЕНИЯ 10 САМЫХ ДЕШЕВЫХ ПРЕДМЕТОВ
+        function toggleS(i) { 
+            if (isCrafting || !inv[i] || inv[i].isMedal) return; 
+            if (sel.includes(i)) sel = sel.filter(x => x !== i); 
+            else if (sel.length < 10) sel.push(i); 
+            renderCraft(); 
+        }
+
+        // ФУНКЦИЯ АВТОЗАПОЛНЕНИЯ 10 САМЫХ ДЕШЕВЫХ ПРЕДМЕТОВ
         function autoFillCraft() {
-            // Очищаем текущий выбор перед автозаполнением
+            if (isCrafting) return; // Жёсткая блокировка во время анимации
             sel = [];
 
-            // Создаем массив объектов, содержащих исходный индекс в инвентаре и цену скина.
-            // Исключаем медали, так как их нельзя крафтить.
             let validItems = inv
                 .map((item, index) => ({ item, index }))
                 .filter(x => !x.item.isMedal);
 
-            // Сортируем предметы по цене: от самых дешевых к дорогим
             validItems.sort((a, b) => (a.item.p || 0) - (b.item.p || 0));
-
-            // Берем первые 10 самых дешевых предметов (или сколько есть, если меньше 10)
             let itemsToSelect = validItems.slice(0, 10);
-
-            // Записываем их исходные индексы в массив выбранных
             itemsToSelect.forEach(x => sel.push(x.index));
 
-            // Обновляем визуальный интерфейс цеха крафта
             renderCraft();
-            
-            // Воспроизводим тихий технологичный звук успешного клика
             playSnd(500, 'sine', 0.08, 0.05);
         }
 
-         function spawnCraftParticles(rect) {
-            for(let i=0; i<15; i++) {
-                const p = document.createElement('div'); p.className = 'particle';
-                p.style.left = (rect.left + rect.width/2) + 'px'; p.style.top = (rect.top + rect.height/2) + 'px';
-                p.style.setProperty('--dx', (Math.random()-0.5)*200+'px'); p.style.setProperty('--dy', (Math.random()-0.5)*200+'px');
-                document.body.appendChild(p); setTimeout(() => p.remove(), 800);
-            }
-        }
-
         function startCraftAnimation() {
-            if (sel.length !== 10) return;
-            const btn = document.getElementById('contract-btn'), box = document.getElementById('craft-box'), slotsCont = document.getElementById('machine-slots-container');
-            btn.disabled = true; const isRisky = sel.every(idx => inv[idx].n === "FN FAL Leather");
+            if (isCrafting || sel.length !== 10) return;
+
+            // 1. ВКЛЮЧАЕМ БЛОКИРОВКУ И ФИКСИРУЕМ ДАННЫЕ ДО УДАЛЕНИЯ ПРЕДМЕТОВ
+            isCrafting = true;
+            const btn = document.getElementById('contract-btn');
+            const box = document.getElementById('craft-box');
+            const slotsCont = document.getElementById('machine-slots-container');
+            
+            // Блокируем все кнопки внутри модального окна крафта (включая автозаполнение и закрытие)
+            const craftModal = document.getElementById('craft-modal');
+            if (craftModal) {
+                craftModal.querySelectorAll('button').forEach(b => b.disabled = true);
+            }
+
+            const isRisky = sel.every(idx => inv[idx] && inv[idx].n === "FN FAL Leather");
+            const cost = sel.reduce((a, b) => a + (inv[b] ? inv[b].p : 0), 0);
+
+            // 2. МГНОВЕННО УДАЛЯЕМ 10 СКИНОВ ИЗ ИНВЕНТАРЯ И СБРАСЫВАЕМ ВЫБОР
+            sel.sort((a, b) => b - a).forEach(idx => inv.splice(idx, 1));
+            sel = [];
+            renderCraft();
+            updateUI();
+
+            // 3. ЗАПУСКАЕМ АНИМАЦИЮ ПОЛЁТА КЛОНОВ В КОРОБКУ
             const slots = document.querySelectorAll('.m-slot');
             slots.forEach((slot, i) => {
                 setTimeout(() => {
@@ -1871,35 +1895,48 @@ function processPromoLogic(p) {
                         clone.style.width = '10px'; clone.style.height = '10px'; clone.style.opacity = '0';
                         playSnd(300 + (i * 60), 'sine', 0.1, 0.05);
                     }, 50);
-                    setTimeout(() => clone.remove(), 850); slot.style.background = "#111"; slot.innerHTML = "";
+                    setTimeout(() => clone.remove(), 850); 
+                    slot.style.background = "#111"; slot.innerHTML = "";
                 }, i * 100);
             });
+
             setTimeout(() => {
                 box.style.animation = "boxShake 0.2s infinite";
                 for(let i=0; i<15; i++) setTimeout(() => playSnd(150 + i*50, 'sawtooth', 0.2, 0.03), i*150);
             }, 1200);
+
             setTimeout(() => {
                 box.style.animation = "none"; box.style.transform = "scale(1.2)"; box.style.background = "var(--gold)"; slotsCont.style.opacity = '0';
                 const f = document.createElement('div'); f.className = 'flash-layer'; f.style.animation = 'flash-white 0.5s forwards'; box.appendChild(f);
                 spawnCraftParticles(box.getBoundingClientRect());
-                let cost = sel.reduce((a, b) => a + inv[b].p, 0);
+
                 let allS = []; Object.values(config).forEach(c => allS.push(...c.skins.filter(s => !s.isMedal)));
                 let pot = allS.filter(s => s.p >= cost * 0.1 && s.p <= cost * 10);
                 let res = pot.length ? pot[Math.floor(Math.random()*pot.length)] : allS[Math.floor(Math.random()*allS.length)];
-                if(res.p > bestCraft) bestCraft = res.p;
-                if(isRisky) riskyMedalUnlocked = true;
+                if (res.p > bestCraft) bestCraft = res.p;
+                if (isRisky) riskyMedalUnlocked = true;
+
                 document.getElementById('box-status').innerHTML = `<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; margin-top:35px;"><div style="font-size: 10px; color: white; line-height:1.1;" class="${getNameStyle(res.n)}">${res.n}</div><div style="font-size: 8px; color: #000; font-weight: 900; margin-top:5px; background:rgba(255,255,255,0.6); padding:1px 4px; border-radius:3px;">${res.p.toFixed(2)}$</div></div>`;
                 playSnd(880, 'sine', 0.8, 0.2);
+
                 setTimeout(() => {
                     alert(`КРАФТ ЗАВЕРШЕН: ${res.n}` + (isRisky ? "\nОТКРЫТО ДОСТИЖЕНИЕ: RISKY GUY!" : ""));
-                    sel.sort((a,b) => b-a).forEach(idx => inv.splice(idx, 1));
-                    inv.push({...res, scp: cost/10}); addToHistory(res.n);
+                    inv.push({...res, scp: cost / 10}); 
+                    addToHistory(res.n);
+                    
+                    // 4. СНИМАЕМ БЛОКИРОВКУ ПОСЛЕ ЗАВЕРШЕНИЯ АНИМАЦИИ
+                    isCrafting = false;
+                    if (craftModal) {
+                        craftModal.querySelectorAll('button').forEach(b => b.disabled = false);
+                    }
                     box.style.transform = "scale(1)"; box.style.background = "#333"; slotsCont.style.opacity = '1';
                     document.getElementById('box-status').innerHTML = '<div style="margin-top:20px">📦</div>';
-                    sel = []; renderCraft(); updateUI();
+                    renderCraft(); 
+                    updateUI();
                 }, 2500);
             }, 4000);
         }
+
 
         function renderUpgrade() {
             const invList = document.getElementById('up-list-inv'), allList = document.getElementById('up-list-all');
