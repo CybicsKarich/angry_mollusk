@@ -309,15 +309,46 @@
         .modal { background: rgba(0, 0, 0, 0.98) !important; backdrop-filter: none !important; }
         .modal-content { background: transparent; padding: 20px; width: 100%; color: white !important; }
 
-                /* Подсветка названий кейсов работает НА ВСЕХ фонах, кроме стандартного */
+                /* Подсветка названий кейсов и заголовков коллекций на цветных фонах */
         body.bg-yellow #cases-grid h3,
         body.bg-pink #cases-grid h3,
         body.bg-blue #cases-grid h3,
         body.bg-white #cases-grid h3,
         body.bg-matrix67 #cases-grid h3,
-        body.bg-goldbars #cases-grid h3 {
+        body.bg-goldbars #cases-grid h3,
+        body.bg-yellow .collection-title,
+        body.bg-pink .collection-title,
+        body.bg-blue .collection-title,
+        body.bg-white .collection-title,
+        body.bg-matrix67 .collection-title,
+        body.bg-goldbars .collection-title {
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.5) !important;
         }
+
+        .collection-row-wrap {
+            width: 100%;
+            margin-bottom: 24px;
+        }
+        .collection-title {
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin: 0 0 12px 0;
+            background: rgba(0, 0, 0, 0.65);
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 140, 0, 0.4);
+        }
+        .collection-cards {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
 
         /* Защита текста внутри экранов главного меню и кейсов от слияния с ярким фоном */
         #main-menu h1, #case-screen h2 {
@@ -554,22 +585,57 @@
 
         <div id="main-menu" style="text-align:center; margin-top: 50px; position: relative;">
         <h1>IvanDrop</h1>
-             <div id="cases-grid" style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap; margin-top:30px; padding: 0 20px; max-width: 1000px; margin-left:auto; margin-right:auto; position: relative; z-index: 10;">
-            <div style="background:#2c3e50; padding:15px; border:2px solid #fff; border-radius:15px; width:130px;"><h3 style="color:#fff">DAILY</h3><p>FREE</p><button class="btn" onclick="selectCase('daily')">ВЫБРАТЬ</button></div>
-            <div style="background:#1a1a1a; padding:15px; border:2px solid #2ecc71; border-radius:15px; width:130px;"><h3 style="color:#2ecc71">NEW</h3><p>65$</p><button class="btn" onclick="selectCase('new')">ВЫБРАТЬ</button></div>
-            <div style="background:#1a1a1a; padding:15px; border:2px solid #5dade2; border-radius:15px; width:130px;"><h3 style="color:#5dade2">NOOB</h3><p>30$</p><button class="btn" onclick="selectCase('noob')">ВЫБРАТЬ</button></div>
-            <div style="background:#1a1a1a; padding:15px; border:2px solid var(--gold); border-radius:15px; width:130px;"><h3 style="color:var(--gold)">LUCKY</h3><p>10$</p><button class="btn" onclick="selectCase('lucky')">ВЫБРАТЬ</button></div>
-            <div style="background:#4b0082; padding:15px; border:2px solid #f1c40f; border-radius:15px; width:130px;"><h3 style="color:#f1c40f">FORTUNA</h3><p>3000$</p><button class="btn" onclick="selectCase('fortuna')">ВЫБРАТЬ</button></div>
-            <div style="background:#1a1a1a; padding:15px; border:2px solid #34495e; border-radius:15px; width:130px;"><h3 style="color:#7f8c8d">TRAKTOR</h3><p>300$</p><button class="btn" onclick="selectCase('trakt')">ВЫБРАТЬ</button></div>
-            <div style="background:#1a1a1a; padding:15px; border:2px solid #4b69ff; border-radius:15px; width:130px;"><h3 style="color:#4b69ff">SNIPER</h3><p>450$</p><button class="btn" onclick="selectCase('sniper')">ВЫБРАТЬ</button></div>
-            <div style="background:#1a1a1a; padding:15px; border:2px solid #f1c40f; border-radius:15px; width:130px;"><h3 style="color:#f1c40f">PRO</h3><p>100$</p><button class="btn" onclick="selectCase('pro')">ВЫБРАТЬ</button></div>
-            <div style="background:#1a1a1a; padding:15px; border:2px solid var(--arcane); border-radius:15px; width:130px;"><h3 style="color:var(--arcane)">KNIFE</h3><p>1200$</p><button class="btn" onclick="selectCase('knife')">ВЫБРАТЬ</button></div>
-            <div style="background:#1a1a1a; padding:15px; border:2px solid #2ecc71; border-radius:15px; width:130px;"><h3 style="color:#2ecc71">HACKER</h3><p>555$</p><button class="btn" onclick="selectCase('hacker')">ВЫБРАТЬ</button></div>
-            <div style="background:#1a1a1a; padding:15px; border:2px solid #8e44ad; border-radius:15px; width:130px;"><h3 style="color:#8e44ad">ELITE</h3><p>5555$</p><button class="btn" onclick="selectCase('elite')">ВЫБРАТЬ</button></div>
-            <div style="background:#1a1a1a; padding:15px; border:2px solid #ff00ff; border-radius:15px; width:130px;"><h3 style="color:#ff00ff">ULTRA</h3><p>1000$</p><button class="btn" onclick="selectCase('ultra')">ВЫБРАТЬ</button></div>
-            <div id="medal-case-ui" style="background:#1a1a1a; padding:15px; border:4px solid #fff; border-radius:15px; width:130px;"><h3 style="color:#fff">MEDALS</h3><p>10000$</p><button class="btn" onclick="selectCase('medal')">ВЫБРАТЬ</button></div>
-        </div>
-    </div>
+                 <div id="cases-grid" style="display:flex; flex-direction:column; align-items:center; margin-top:25px; padding: 0 20px; max-width: 1000px; margin-left:auto; margin-right:auto; position: relative; z-index: 10;">
+            
+            <!-- 1. КОЛЛЕКЦИЯ: СКИЛЛ -->
+            <div class="collection-row-wrap">
+                <div class="collection-title">⚔️ СКИЛЛ</div>
+                <div class="collection-cards">
+                    <div style="background:#1a1a1a; padding:15px; border:2px solid #5dade2; border-radius:15px; width:130px;"><h3 style="color:#5dade2">NOOB</h3><p>30$</p><button class="btn" onclick="selectCase('noob')">ВЫБРАТЬ</button></div>
+                    <div style="background:#1a1a1a; padding:15px; border:2px solid #f1c40f; border-radius:15px; width:130px;"><h3 style="color:#f1c40f">PRO</h3><p>100$</p><button class="btn" onclick="selectCase('pro')">ВЫБРАТЬ</button></div>
+                    <div style="background:#1a1a1a; padding:15px; border:2px solid #2ecc71; border-radius:15px; width:130px;"><h3 style="color:#2ecc71">HACKER</h3><p>555$</p><button class="btn" onclick="selectCase('hacker')">ВЫБРАТЬ</button></div>
+                    <div style="background:#1a1a1a; padding:15px; border:2px solid #8e44ad; border-radius:15px; width:130px;"><h3 style="color:#8e44ad">ELITE</h3><p>5555$</p><button class="btn" onclick="selectCase('elite')">ВЫБРАТЬ</button></div>
+                </div>
+            </div>
+
+            <!-- 2. КОЛЛЕКЦИЯ: ПОЛОСА УДАЧИ -->
+            <div class="collection-row-wrap">
+                <div class="collection-title">🍀 ПОЛОСА УДАЧИ</div>
+                <div class="collection-cards">
+                    <div style="background:#1a1a1a; padding:15px; border:2px solid var(--gold); border-radius:15px; width:130px;"><h3 style="color:var(--gold)">LUCKY</h3><p>10$</p><button class="btn" onclick="selectCase('lucky')">ВЫБРАТЬ</button></div>
+                    <div style="background:#1a1a1a; padding:15px; border:2px solid #ff00ff; border-radius:15px; width:130px;"><h3 style="color:#ff00ff">ULTRA</h3><p>1000$</p><button class="btn" onclick="selectCase('ultra')">ВЫБРАТЬ</button></div>
+                    <div style="background:#4b0082; padding:15px; border:2px solid #f1c40f; border-radius:15px; width:130px;"><h3 style="color:#f1c40f">FORTUNA</h3><p>3000$</p><button class="btn" onclick="selectCase('fortuna')">ВЫБРАТЬ</button></div>
+                </div>
+            </div>
+
+            <!-- 3. КОЛЛЕКЦИЯ: АЗАРТНАЯ СЕРИЯ -->
+            <div class="collection-row-wrap">
+                <div class="collection-title">🎲 АЗАРТНАЯ СЕРИЯ</div>
+                <div class="collection-cards">
+                    <div style="background:#1a1a1a; padding:15px; border:2px solid #2ecc71; border-radius:15px; width:130px;"><h3 style="color:#2ecc71">NEW</h3><p>65$</p><button class="btn" onclick="selectCase('new')">ВЫБРАТЬ</button></div>
+                    <div style="background:#1a1a1a; padding:15px; border:2px solid #34495e; border-radius:15px; width:130px;"><h3 style="color:#7f8c8d">TRAKTOR</h3><p>300$</p><button class="btn" onclick="selectCase('trakt')">ВЫБРАТЬ</button></div>
+                    <div style="background:#1a1a1a; padding:15px; border:2px solid #4b69ff; border-radius:15px; width:130px;"><h3 style="color:#4b69ff">SNIPER</h3><p>450$</p><button class="btn" onclick="selectCase('sniper')">ВЫБРАТЬ</button></div>
+                </div>
+            </div>
+
+            <!-- 4. КОЛЛЕКЦИЯ: ФИРМЕННЫЕ КЕЙСЫ -->
+            <div class="collection-row-wrap">
+                <div class="collection-title">🗡️ ФИРМЕННЫЕ КЕЙСЫ</div>
+                <div class="collection-cards">
+                    <div style="background:#1a1a1a; padding:15px; border:2px solid var(--arcane); border-radius:15px; width:130px;"><h3 style="color:var(--arcane)">KNIFE</h3><p>1200$</p><button class="btn" onclick="selectCase('knife')">ВЫБРАТЬ</button></div>
+                </div>
+            </div>
+
+            <!-- 5. КОЛЛЕКЦИЯ: ДРУГИЕ КЕЙСЫ -->
+            <div class="collection-row-wrap" style="margin-bottom: 40px;">
+                <div class="collection-title">📦 ДРУГИЕ КЕЙСЫ</div>
+                <div class="collection-cards">
+                    <div style="background:#2c3e50; padding:15px; border:2px solid #fff; border-radius:15px; width:130px;"><h3 style="color:#fff">DAILY</h3><p>FREE</p><button class="btn" onclick="selectCase('daily')">ВЫБРАТЬ</button></div>
+                    <div id="medal-case-ui" style="background:#1a1a1a; padding:15px; border:4px solid #fff; border-radius:15px; width:130px;"><h3 style="color:#fff">MEDALS</h3><p>10000$</p><button class="btn" onclick="selectCase('medal')">ВЫБРАТЬ</button></div>
+                </div>
+            </div>
+        </div>    
+     </div>
 
         <div id="case-screen" style="display:none; text-align:center; width:100%; position: relative; min-height: 80vh;">
         <h2 id="case-title">Кейс</h2>
