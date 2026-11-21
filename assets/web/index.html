@@ -1407,15 +1407,24 @@ function onDailyCaseResult(success, remainingSeconds) {
 
 
 
-        function selectCase(k) {
+                function selectCase(k) {
             curCase = k;
-            document.getElementById('case-title').innerText = (k === 'medal' ? "MEDALS OUTPUT" : k.toUpperCase() + " CASE");
+            const titleEl = document.getElementById('case-title');
+            if (k === 'medal') {
+                titleEl.innerText = "MEDALS";
+            } else if (k === 'daily') {
+                titleEl.innerHTML = `DAILY CASE <span style="font-size: 13px; color: #aaa; font-weight: normal; margin-left: 8px;">(раз в 10 часов)</span>`;
+            } else {
+                titleEl.innerText = k.toUpperCase() + " CASE";
+            }
+
             const ch = config[k].skins.map(s => `<span style="color:var(--${s.c})">${s.n} (${s.w}%)</span>`).join(' | ');
             document.getElementById('chance-info').innerHTML = "<b>ШАНСЫ:</b><br>" + ch;
             document.getElementById('qty-selector').style.display = (k === 'daily' || k === 'medal') ? 'none' : 'block';
             if (k === 'daily' || k === 'medal') qty = 1;
             showScreen('case-screen');
         }
+
 
         function showScreen(id) {
             if(document.getElementById('result-summary').style.display === 'flex') resetUI();
