@@ -557,6 +557,15 @@
             100% { transform: translateY(85px) rotate(360deg); opacity: 0; }
         }
 
+       .skin-thumb {
+            width: 54px;
+            height: 54px;
+            object-fit: contain;
+            margin-bottom: 3px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.85));
+            pointer-events: none;
+        }
+
 </style>
 </head>
 <body>
@@ -975,7 +984,7 @@
             new: { price: 65, skins: [ {n: "Sticker AWM Master", p: 10, c: "rare", w: 3.8}, {n: "Charm Fireborn Silver", p: 13, c: "rare", w: 5.9}, {n: "Sticker Fingerprint", p: 20, c: "epic", w: 7}, {n: "Sticker Wyrm", p: 25, c: "rare", w: 9}, {n: "M40 Arctic", p: 38, c: "rare", w: 10}, {n: "MP7 Palace StatTrack", p: 46, c: "epic", w: 10}, {n: "MP5 Project Z9", p: 60, c: "rare", w: 10.2}, {n: "Usp Corrode StatTrack", p: 68, c: "rare", w: 9}, {n: "M16 4 Years", p: 78, c: "legendary", w: 7.5}, {n: "Charm Long Run Gold", p: 95, c: "arcane", w: 7.2}, {n: "M16 Sea Glint", p: 121, c: "arcane", w: 7}, {n: "AKR12 Ice Storm StatTrack", p: 138, c: "epic", w: 6.5}, {n: "M16 Dust Devil StatTrack", p: 185, c: "legendary", w: 4.5}, {n: "S2 Mallard Ink Wash", p: 210, c: "legendary", w: 1}, {n: "Charm Drift King", p: 350, c: "arcane", w: 0.9}, {n: "Sticker Time is Over Color", p: 450, c: "arcane", w: 0.4}, {n: "Kunai Diffusion", p: 723, c: "arcane", w: 0.1} ]},
             noob: { price: 30, skins: [{n: "Sticker Lucky Star", p: 10, c: "rare", w: 11},{n: "Chibi War", p: 17, c: "epic", w: 12},{n: "Charm Chill Chilli", p: 25, c: "rare", w: 16},{n: "P350 Gearshift", p: 30, c: "legendary", w: 22},{n: "Sticker 8 years", p: 35, c: "epic", w: 19},{n: "M16 Retro Arcade", p: 40, c: "epic", w: 9},{n: "Charm Hot Ice Ballon", p: 48, c: "legendary", w: 6},{n: "Charm Sigil", p: 103, c: "arcane", w: 4.5},{n: "Sticker Fire Color", p: 390, c: "legendary", w: 0.5}] },
             lucky: { price: 10, skins: [{n: "Sticker Ramen", p: 5, c: "rare", w: 20.95},{n: "M40 Pro", p: 8, c: "uncommon", w: 21.5},{n: "AKR Tiger", p: 10, c: "uncommon", w: 20},{n: "Sticker Backfire", p: 13, c: "legendary", w: 18},{n: "M4 Pro", p: 17, c: "rare", w: 11},{n: "Sticker Be Cool", p: 30, c: "rare", w: 7},{n: "M4 Samurai", p: 85, c: "arcane", w: 1.5},{n: "AKR Treasure Hunter", p: 8500, c: "hunter", w: 0.05}]},
-            fortuna: { price: 3000, skins: [{n: "Sticker Snow King", p: 2000, c: "rare", w: 13}, {n: "Sticker Biohazard", p: 2750, c: "epic", w: 15.51}, {n: "Sticker Anticamper", p: 13390, c: "epic", w: 1}, {n: "Sticker Feed", p: 18279, c: "epic", w: 0.5}, {n: "Mp5 Reactor StatTrack", p: 3333, c: "legendary", w: 11}, {n: "Sticker Iron Ox Color", p: 3830, c: "legendary", w: 9}, {n: "Usp Horror", p: 4444, c: "legendary", w: 8}, {n: "Sticker Sweet Ammo", p: 8200, c: "legendary", w: 2}, {n: "Charm Hannya", p: 444, c: "arcane", w: 5.49}, {n: "Kukri Antique Silver", p: 756, c: "arcane", w: 6.5}, {n: "M4 Sunset", p: 1000, c: "arcane", w: 9}, {n: "AKR12 Riot StatTrack", p: 6200, c: "arcane", w: 3}, {n: "G22 Frozen", p: 23489, c: "arcane", w: 0.48}, {n: "Sticker Gold Skull", p: 440000, c: "arcane", w: 0.02}, {n: "Winter Tale Knife Case", p: 1550, c: "hunter", w: 8}, {n: "Halloween 2020 Charm pack", p: 5100, c: "hunter", w: 5.5}, {n: "Charm V2", p: 10698, c: "hunter", w: 2}]},
+            fortuna: { price: 3000, skins: [{n: "Sticker Snow King", p: 2000, c: "rare", w: 13}, {n: "Sticker Biohazard", p: 2750, c: "epic", w: 15.51}, {n: "Sticker Anticamper", p: 13390, c: "epic", w: 1}, {n: "Sticker Feed", p: 18279, c: "epic", w: 0.5}, {n: "Mp5 Reactor StatTrack", p: 3333, c: "legendary", w: 11}, {n: "Sticker Iron Ox Color", p: 3830, c: "legendary", w: 9}, {n: "Usp Horror", p: 4444, c: "legendary", w: 8}, {n: "Sticker Sweet Ammo", p: 8200, c: "legendary", w: 2}, {n: "Charm Hannya", p: 444, c: "arcane", w: 5.49}, {n: "Kukri Antique Silver", p: 756, c: "arcane", w: 6.5}, {n: "M4 Sunset", p: 1000, c: "arcane", w: 9}, {n: "AKR12 Riot StatTrack", p: 6200, c: "arcane", w: 3}, {n: "G22 Frozen", p: 23489, c: "arcane", w: 0.48}, {n: "Sticker Gold Skull", p: 440000, c: "arcane", w: 0.02, img: "skins/goldskull.png"}, {n: "Winter Tale Knife Case", p: 1550, c: "hunter", w: 8}, {n: "Halloween 2020 Charm pack", p: 5100, c: "hunter", w: 5.5}, {n: "Charm V2", p: 10698, c: "hunter", w: 2}]},
             trakt: { price: 300, skins: [{n: "P350 4 years", p: 40, c: "epic", w: 6.4},{n: "Charm 8 years", p: 70, c: "arcane", w: 9},{n: "Desert Eagle Morgan", p: 167, c: "rare", w: 10.1},{n: "Sticker Grapes", p: 250, c: "epic", w: 12},{n: "Charm Oni", p: 280, c: "arcane", w: 16.9},{n: "Charm Thunderbolt", p: 340, c: "legendary", w: 13},{n: "AWM Spectral", p: 390, c: "arcane", w: 12},{n: "Sticker Zone Spatter Reflex", p: 435, c: "arcane", w: 7.5},{n: "Charm Inugari", p: 540, c: "arcane", w: 6},{n: "Usp 2 Years", p: 600, c: "rare", w: 3.5},{n: "Gloves Dread", p: 800, c: "arcane", w: 2.5},{n: "Fang Flare", p: 1150, c: "arcane", w: 1},{n: "Sticker Sandstone Gold", p: 2500, c: "arcane", w: 0.19}]},
             sniper: { 
                 price: 450, 
@@ -1075,7 +1084,9 @@
 
         function spawnCoin(x, y) { const el = document.createElement('div'); el.className = 'coin-fx'; el.innerText = '+0.02$'; el.style.left = x + 'px'; el.style.top = y + 'px'; document.body.appendChild(el); setTimeout(() => el.remove(), 800);}
         function getSTBadge(name) { return (name.includes("StatTrack") || name.includes(" ST")) ? `<div class="st-badge">ST</div>` : ""; }
+        function getSkinImgHTML(img) { return img ? `<img src="${img}" class="skin-thumb" onerror="this.style.display='none'">` : ""; }
 
+        
         function getGlowClass(name, price, sourceCasePrice) {
             if(sourceCasePrice && price < (sourceCasePrice * 2)) return "";
             if(name === "BOSS OF IVANDROP") return "glow-blood";
@@ -1399,7 +1410,7 @@ function loadGame() {
                     const isObtained = historyObtained.includes(s.n);
                     const card = document.createElement('div');
                     card.className = `coll-card ${isObtained ? 'obtained rarity-'+s.c : ''} ${isObtained ? getGlowClass(s.n, s.p, c.price) : ''}`;
-                    card.innerHTML = `<b>${s.n}</b><br>${s.p}$`;
+                    card.innerHTML = `${getSkinImgHTML(s.img)}<b>${s.n}</b><br>${s.p}$`;
                     cardsGrid.appendChild(card);
                 });
                 section.appendChild(cardsGrid);
@@ -1635,7 +1646,7 @@ function onDailyCaseResult(success, remainingSeconds) {
                 const tape = document.getElementById(`t-${i}`);
                 for(let j=0; j<40; j++) {
                     const s = config[curCase].skins[Math.floor(Math.random()*config[curCase].skins.length)];
-                    tape.innerHTML += `<div class="item rarity-${s.c} ${getGlowClass(s.n, s.p, config[curCase].price)} ${getNameStyle(s.n)}">${s.n}${getSTBadge(s.n)}</div>`;
+                    tape.innerHTML += `<div class="item rarity-${s.c} ${getGlowClass(s.n, s.p, config[curCase].price)} ${getNameStyle(s.n)}" style="flex-direction:column;">${getSkinImgHTML(s.img)}<div>${s.n}</div>${getSTBadge(s.n)}</div>`;
                 }
             }
         }
@@ -1673,7 +1684,7 @@ function onDailyCaseResult(success, remainingSeconds) {
                     if(!sk) sk = c.skins[c.skins.length - 1];
                     let finalSkin = {...sk, scp: c.price};
                     pool.push(finalSkin);
-                    tape.innerHTML += `<div class="item rarity-${finalSkin.c} ${getGlowClass(finalSkin.n, finalSkin.p, finalSkin.scp)} ${getNameStyle(finalSkin.n)}">${finalSkin.n}${getSTBadge(finalSkin.n)}</div>`;
+                    tape.innerHTML += `<div class="item rarity-${finalSkin.c} ${getGlowClass(finalSkin.n, finalSkin.p, finalSkin.scp)} ${getNameStyle(finalSkin.n)}" style="flex-direction:column;">${getSkinImgHTML(finalSkin.img)}<div>${finalSkin.n}</div>${getSTBadge(finalSkin.n)}</div>`;
                 }
                 const winS = pool[55]; wins.push(winS); inv.push({...winS}); addToHistory(winS.n);
                 if(winS.p > bestDrop.p) bestDrop = {n: winS.n, p: winS.p};
@@ -1714,7 +1725,7 @@ function onDailyCaseResult(success, remainingSeconds) {
                 document.getElementById('sell-all-btn').style.display = containsMedals ? 'none' : 'block';
                 
                 wins.forEach(s => {
-                    area.innerHTML += `<div class="win-card rarity-${s.c} ${getGlowClass(s.n, s.p, s.scp)} ${getNameStyle(s.n)}">${s.n}${getSTBadge(s.n)}<br>${s.p > 0 ? s.p+'$' : ''}</div>`;
+                    area.innerHTML += `<div class="win-card rarity-${s.c} ${getGlowClass(s.n, s.p, s.scp)} ${getNameStyle(s.n)}">${getSkinImgHTML(s.img)}<div>${s.n}</div>${getSTBadge(s.n)}<br>${s.p > 0 ? s.p+'$' : ''}</div>`;
                     t += (s.p || 0);
                 });
 
@@ -1966,7 +1977,7 @@ function processPromoLogic(p) {
 
         function renderInv() {
             let g = document.getElementById('inv-grid');
-            g.innerHTML = inv.map((s, i) => `<div class="inv-card rarity-${s.c} ${getGlowClass(s.n, s.p, s.scp)}" onclick="sellOne(${i})"><b>${s.n}</b><br>${s.isMedal ? '' : s.p+'$'}</div>`).join('');
+            g.innerHTML = inv.map((s, i) => `<div class="inv-card rarity-${s.c} ${getGlowClass(s.n, s.p, s.scp)}" onclick="sellOne(${i})">${getSkinImgHTML(s.img)}<b>${s.n}</b><br>${s.isMedal ? '' : s.p+'$'}</div>`).join('');
         }
 
         function sellOne(i) {
@@ -2148,7 +2159,7 @@ function processPromoLogic(p) {
             allSkins.sort((a, b) => a.p - b.p);
             let uniqueSkins = []; let seen = new Set();
             allSkins.forEach(s => { if(!seen.has(s.n)){ uniqueSkins.push(s); seen.add(s.n); } });
-            allList.innerHTML = uniqueSkins.map(s => `<div class="up-item rarity-${s.c} ${upRightSkin && upRightSkin.n === s.n ? 'active' : ''}" onclick="selectUpRight('${s.n}', ${s.p}, '${s.c}')"><span>${s.n}</span><b>${s.p}$</b></div>`).join('');
+            allList.innerHTML = uniqueSkins.map(s => `<div class="up-item rarity-${s.c} ${upRightSkin && upRightSkin.n === s.n ? 'active' : ''}" onclick="selectUpRight('${s.n}', ${s.p}, '${s.c}', '${s.img || ''}')"><span>${s.n}</span><b>${s.p}$</b></div>`).join('');
         }
 
         function selectUpLeft(i) {
@@ -2158,12 +2169,12 @@ function processPromoLogic(p) {
             calcUpChance(); renderUpgrade();
         }
 
-        function selectUpRight(n, p, c) {
-            upRightSkin = {n, p, c};
-            document.getElementById('up-right-item').innerHTML = `<b class="${getNameStyle(n)}">${n}</b><br>${p}$`;
-            document.getElementById('up-right-item').className = `inv-card rarity-${c} ${getGlowClass(n, p, p/2)}`;
-            calcUpChance(); renderUpgrade();
-        }
+        function selectUpRight(n, p, c, img = '') {
+    upRightSkin = {n, p, c, img};
+    document.getElementById('up-right-item').innerHTML = `${getSkinImgHTML(img)}<b class="${getNameStyle(n)}">${n}</b><br>${p}$`;
+    document.getElementById('up-right-item').className = `inv-card rarity-${c} ${getGlowClass(n, p, p/2)}`;
+    calcUpChance(); renderUpgrade();
+    }
 
         function calcUpChance() {
             if (upLeftIdx === -1 || !upRightSkin) return;
@@ -2800,6 +2811,7 @@ function processPromoLogic(p) {
     </script>
 </body>
 </html>
+
 
 
 
