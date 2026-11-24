@@ -557,11 +557,12 @@
             100% { transform: translateY(85px) rotate(360deg); opacity: 0; }
         }
 
-       .skin-thumb {
+        .skin-thumb {
+            display: block;
             width: 54px;
             height: 54px;
             object-fit: contain;
-            margin-bottom: 3px;
+            margin: 0 auto 4px auto;
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.85));
             pointer-events: none;
         }
@@ -1101,22 +1102,17 @@
             return glows[name] || "";
         }
 
-        function getNameStyle(name) {
-            const expensive = [
-                "Karambit Gold", 
-                "Sticker Gold Skull", 
-                "Kunai Diffusion", 
-                "Sticker Time is Over Color", 
-                "Dual Daggers Harmony",
-                "BOSS OF IVANDROP", 
-                "COLLECTOR MEDAL", 
-                "RISKY GUY", 
-                "BOSS OF CRASH", 
-                "BOSS OF MINES", 
-                "BOSS OF CASE-BATTLES", 
+           function getNameStyle(name) {
+            const medals = [
+                "BOSS OF IVANDROP",
+                "COLLECTOR MEDAL",
+                "RISKY GUY",
+                "BOSS OF CRASH",
+                "BOSS OF MINES",
+                "BOSS OF CASE-BATTLES",
                 "BOSS OF UPGRADE"
             ];
-            return expensive.includes(name) ? "expensive-text" : "";
+            return medals.includes(name) ? "expensive-text" : "";
         }
 
 
@@ -2162,12 +2158,15 @@ function processPromoLogic(p) {
             allList.innerHTML = uniqueSkins.map(s => `<div class="up-item rarity-${s.c} ${upRightSkin && upRightSkin.n === s.n ? 'active' : ''}" onclick="selectUpRight('${s.n}', ${s.p}, '${s.c}', '${s.img || ''}')"><span>${s.n}</span><b>${s.p}$</b></div>`).join('');
         }
 
-        function selectUpLeft(i) {
-            upLeftIdx = i; const item = inv[i];
-            document.getElementById('up-left-item').innerHTML = `<b class="${getNameStyle(item.n)}">${item.n}</b><br>${item.p}$`;
+       function selectUpLeft(i) {
+            upLeftIdx = i; 
+            const item = inv[i];
+            document.getElementById('up-left-item').innerHTML = `${getSkinImgHTML(item.img)}<b class="${getNameStyle(item.n)}">${item.n}</b><br>${item.p}$`;
             document.getElementById('up-left-item').className = `inv-card rarity-${item.c} ${getGlowClass(item.n, item.p, item.scp)}`;
-            calcUpChance(); renderUpgrade();
+            calcUpChance(); 
+            renderUpgrade();
         }
+
 
         function selectUpRight(n, p, c, img = '') {
     upRightSkin = {n, p, c, img};
